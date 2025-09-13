@@ -7,18 +7,18 @@ import { format } from "date-fns";
 import { DollarSign, Package, Users, ArrowUp, BarChart, TrendingUp, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
+import useBrandStore from "@/stores/brand-store";
 
 function AdminDashboardPage() {
   const { user } = useAuth();
+  const { selectedBrand } = useBrandStore();
   const [currentDate, setCurrentDate] = useState("");
 
   useEffect(() => {
     setCurrentDate(format(new Date(), "EEEE, MMMM dd, yyyy"));
   }, []);
-
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -28,14 +28,11 @@ function AdminDashboardPage() {
                 Hey, {user?.name || 'Admin'}!
             </h2>
             <p className="text-muted-foreground">
-                {currentDate}
+                Here's the latest for {selectedBrand}.
             </p>
         </div>
         <div className="hidden md:flex items-center space-x-2">
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Start searching here" className="pl-10" />
-            </div>
+            <p className="text-sm text-muted-foreground">{currentDate}</p>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -3,17 +3,16 @@
 
 import Link from "next/link";
 import {
-  ChevronDown,
   LayoutDashboard,
   Package,
   Users,
   GitCommitHorizontal,
-  Globe
+  Warehouse,
+  ChevronDown,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -29,16 +28,19 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import useBrandStore from "@/stores/brand-store";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/users", icon: Users, label: "Users" },
-  { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns / Exchanges" },
+  { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
+  { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { selectedBrand, availableBrands, setSelectedBrand } = useBrandStore();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -50,18 +52,22 @@ export function AdminSidebar() {
           <Logo className="h-5 w-5 transition-all group-hover:scale-110" />
           <span className="sr-only">Reeva</span>
         </Link>
-         <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2 rounded-full h-8 w-8 p-0 border-dashed">
-                     <Globe className="h-4 w-4" />
-                     <span className="sr-only">Select Project</span>
-                </Button>
+        
+        <DropdownMenu>
+            <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 focus:outline-none">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-bold">
+                    {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 2).toUpperCase()}
+                </div>
+                <span className="sr-only">Select Brand</span>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-                <DropdownMenuLabel>Servappetit</DropdownMenuLabel>
+            <DropdownMenuContent side="right" align="start">
+                <DropdownMenuLabel>Select a Brand</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Project 2</DropdownMenuItem>
-                <DropdownMenuItem>Project 3</DropdownMenuItem>
+                {availableBrands.map((brand) => (
+                     <DropdownMenuItem key={brand} onSelect={() => setSelectedBrand(brand)}>
+                        {brand}
+                    </DropdownMenuItem>
+                ))}
             </DropdownMenuContent>
         </DropdownMenu>
 
@@ -73,7 +79,7 @@ export function AdminSidebar() {
                   href={href}
                   className={cn(
                     "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
-                    pathname === href && "bg-accent text-accent-foreground"
+                    pathname.startsWith(href) && "bg-accent text-accent-foreground"
                   )}
                 >
                   <Icon className="h-5 w-5" />

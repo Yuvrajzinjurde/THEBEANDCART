@@ -9,6 +9,7 @@ export interface IProduct extends Document {
   images: string[];
   stock: number;
   rating: number;
+  brand: string;
 }
 
 const ProductSchema: Schema<IProduct> = new Schema({
@@ -19,6 +20,7 @@ const ProductSchema: Schema<IProduct> = new Schema({
   images: [{ type: String, required: true }],
   stock: { type: Number, required: true, min: 0, default: 0 },
   rating: { type: Number, min: 0, max: 5, default: 0 },
+  brand: { type: String, required: true, index: true },
 }, { timestamps: true });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
