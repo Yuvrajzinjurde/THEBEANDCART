@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product-card';
 import type { IProduct } from '@/models/product.model';
 import { ProductFilters } from '@/components/product-filters';
+import Image from 'next/image';
 
 export default function Home() {
   const { loading: authLoading } = useAuth();
@@ -108,14 +109,22 @@ export default function Home() {
   // If not logged in, show the product landing page.
   return (
     <main className="flex-1">
-      <section className="bg-secondary text-foreground py-20 text-center">
-        <div className="container">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
-            Discover Your Next Favorite Thing
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Browse our curated collection of high-quality products.
-          </p>
+      <section className="relative w-full h-[400px] bg-secondary text-foreground">
+        <Image 
+            src="https://picsum.photos/seed/hero/1600/400"
+            alt="Hero Banner"
+            fill
+            className="object-cover"
+            data-ai-hint="shopping banner"
+        />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
+            <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
+                Discover Your Next Favorite Thing
+            </h1>
+            <p className="mt-4 text-lg max-w-2xl">
+                Browse our curated collection of high-quality products. (Banner: 1600x400)
+            </p>
         </div>
       </section>
 
