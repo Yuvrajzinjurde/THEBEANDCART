@@ -101,57 +101,54 @@ export function ForgotPasswordForm() {
   return (
     <Card className="w-full max-w-md">
       {step === "email" ? (
-        <>
-          <CardHeader className="items-center text-center">
-            <Logo />
-            <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
-            <CardDescription>
-              No worries, we&apos;ll help you reset it.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...emailForm}>
-              <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
-                <FormField
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="name@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Continue
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="justify-center">
-            <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
-              <Link href="/login" className="font-medium text-primary hover:underline">
-                Back to Log in
-              </Link>
-            </Button>
-          </CardFooter>
-        </>
+        <Form {...emailForm}>
+          <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} noValidate>
+            <CardHeader className="items-center text-center">
+              <Logo />
+              <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
+              <CardDescription>
+                No worries, we&apos;ll help you reset it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={emailForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="name@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continue
+              </Button>
+            </CardContent>
+            <CardFooter className="justify-center">
+              <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
+                <Link href="/login" className="font-medium text-primary hover:underline">
+                  Back to Log in
+                </Link>
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       ) : (
-        <>
-          <CardHeader className="items-center text-center">
-            <Logo />
-            <CardTitle className="text-2xl font-bold">Reset Your Password</CardTitle>
-            <CardDescription>
-              Enter the OTP (use 123456) and set a new password.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...resetForm}>
-              <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
+        <Form {...resetForm}>
+          <form onSubmit={resetForm.handleSubmit(onResetSubmit)} noValidate>
+            <CardHeader className="items-center text-center">
+              <Logo />
+              <CardTitle className="text-2xl font-bold">Reset Your Password</CardTitle>
+              <CardDescription>
+                Enter the OTP (use 123456) and set a new password.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
                 <FormField
                   control={resetForm.control}
                   name="otp"
@@ -205,17 +202,16 @@ export function ForgotPasswordForm() {
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Reset Password
                 </Button>
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="justify-center">
-            <Button variant="link" asChild className="p-0 text-sm text-muted-foreground" onClick={() => setStep('email')}>
-              <Link href="#" className="font-medium text-primary hover:underline">
-                Back to email entry
-              </Link>
-            </Button>
-          </CardFooter>
-        </>
+            </CardContent>
+            <CardFooter className="justify-center">
+              <Button variant="link" asChild className="p-0 text-sm text-muted-foreground" onClick={() => setStep('email')}>
+                <Link href="#" className="font-medium text-primary hover:underline">
+                  Back to email entry
+                </Link>
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       )}
     </Card>
   );
