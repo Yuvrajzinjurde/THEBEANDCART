@@ -3,7 +3,7 @@ import Role from '@/models/role.model';
 import User from '@/models/user.model';
 import bcrypt from 'bcryptjs';
 
-const seedDatabase = async () => {
+export const seedDatabase = async () => {
   await dbConnect();
 
   try {
@@ -44,26 +44,9 @@ const seedDatabase = async () => {
     await adminUser.save();
 
     console.log('Created admin user.');
-    console.log('Database seeded successfully!');
-  } catch (error) {
+    return { success: true, message: 'Database seeded successfully!' };
+  } catch (error: any) {
     console.error('Error seeding database:', error);
+    throw new Error('Error seeding database: ' + error.message);
   }
 };
-
-// You can run this function from a script or an API route
-// For example, create a file `scripts/seed.js` and run it with `node scripts/seed.js`
-// Make sure to configure your environment to run this script.
-// For now, we will assume it's run manually when needed.
-seedDatabase().then(() => {
-    // Disconnect if running as a standalone script
-    if (require.main === module) {
-      const mongoose = require('mongoose');
-      mongoose.disconnect();
-    }
-}).catch(err => {
-    console.error(err);
-    if (require.main === module) {
-      const mongoose = require('mongoose');
-      mongoose.disconnect();
-    }
-});
