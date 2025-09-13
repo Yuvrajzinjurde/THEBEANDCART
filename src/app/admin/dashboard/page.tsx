@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { DollarSign, Package, Users, ArrowUp, BarChart, TrendingUp, Search } from "lucide-react";
@@ -12,7 +13,12 @@ import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 
 function AdminDashboardPage() {
   const { user } = useAuth();
-  const today = new Date();
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    setCurrentDate(format(new Date(), "EEEE, MMMM dd, yyyy"));
+  }, []);
+
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -22,7 +28,7 @@ function AdminDashboardPage() {
                 Hey, {user?.name || 'Admin'}!
             </h2>
             <p className="text-muted-foreground">
-                {format(today, "EEEE, MMMM dd, yyyy")}
+                {currentDate}
             </p>
         </div>
         <div className="hidden md:flex items-center space-x-2">
