@@ -15,12 +15,12 @@ export interface DashboardStats {
   salesByCategoryData: { name: string; value: number }[];
 }
 
-// Helper to generate some fake but realistic looking chart data
+// Helper to generate revenue data. Since we have no orders, it will be all zeros.
 const generateRevenueData = () => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     return months.map(month => ({
         month,
-        revenue: Math.floor(Math.random() * (50000 - 10000 + 1) + 10000)
+        revenue: 0
     }));
 };
 
@@ -63,7 +63,10 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         
         const productStats = productAggregation[0] || { totalValue: 0, totalCount: 0 };
         const revenueChartData = generateRevenueData();
-        const totalRevenue = revenueChartData.reduce((acc, current) => acc + current.revenue, 0);
+        
+        // Since there are no orders, revenue and loss are 0.
+        const totalRevenue = 0;
+        const totalLoss = 0;
 
 
         return {
@@ -71,7 +74,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
             totalProducts: productStats.totalCount,
             totalUsers: totalUsers,
             totalRevenue: totalRevenue,
-            totalLoss: Math.floor(Math.random() * (5000 - 1000 + 1) + 1000),
+            totalLoss: totalLoss,
             revenueChartData: revenueChartData,
             salesByCategoryData: categoryAggregation,
         };
