@@ -45,7 +45,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
             {
                 $group: {
                     _id: "$category",
-                    value: { $sum: 1 }
+                    value: { $sum: 1 } // Counting products per category
                 }
             },
             { $sort: { value: -1 } },
