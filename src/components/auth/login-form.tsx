@@ -6,10 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
-import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,14 +46,32 @@ export function LoginForm() {
   async function onSubmit(data: LoginInput) {
     setIsSubmitting(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "An error occurred during login.");
+      }
+      
+      // TODO: Store the JWT (e.g., in an HttpOnly cookie or localStorage)
+      console.log("Login successful, JWT:", result.token);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+
       router.push("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login Error:", error);
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        description: error.message || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

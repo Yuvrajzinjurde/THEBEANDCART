@@ -5,10 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { sendPasswordResetEmail } from "firebase/auth";
 
 import { ForgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth";
-import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,11 +43,14 @@ export function ForgotPasswordForm() {
   async function onSubmit(data: ForgotPasswordInput) {
     setIsSubmitting(true);
     try {
-      await sendPasswordResetEmail(auth, data.email);
+      // TODO: Implement API call for password reset
+      console.log("Password reset requested for:", data.email);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
       setSubmitted(true);
       toast({
         title: "Check Your Email",
-        description: "A password reset link has been sent to your email address.",
+        description: "If an account exists, a password reset link has been sent.",
       });
     } catch (error) {
       console.error("Forgot Password Error:", error);

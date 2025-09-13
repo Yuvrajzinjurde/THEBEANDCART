@@ -16,7 +16,11 @@ export const SignUpSchema = z.object({
     password: z.string().min(8, {
       message: "Password must be at least 8 characters long.",
     }),
-    confirmPassword: z.string()
+    confirmPassword: z.string(),
+    // These fields are not on the form, but are part of the user model.
+    // They are optional here and will be handled by the API.
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
     path: ["confirmPassword"],

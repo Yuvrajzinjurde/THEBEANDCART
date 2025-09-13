@@ -6,10 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 
 import { SignUpSchema, type SignUpInput } from "@/lib/auth";
-import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +51,18 @@ export function SignUpForm() {
   async function onSubmit(data: SignUpInput) {
     setIsSubmitting(true);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "An error occurred during sign up.");
+      }
+
       toast({
         title: "Account Created",
         description: "Your account has been created successfully. Please log in.",
@@ -61,14 +70,10 @@ export function SignUpForm() {
       router.push("/login");
     } catch (error: any) {
       console.error("Sign Up Error:", error);
-      let description = "An unexpected error occurred. Please try again.";
-      if (error.code === 'auth/email-already-in-use') {
-        description = "This email address is already in use.";
-      }
       toast({
         variant: "destructive",
         title: "Sign Up Failed",
-        description,
+        description: error.message || "An unexpected error occurred. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
