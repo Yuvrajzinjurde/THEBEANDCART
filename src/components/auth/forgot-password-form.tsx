@@ -70,7 +70,7 @@ export function ForgotPasswordForm() {
         const response = await fetch('/api/auth/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: userEmail, ...data }),
+            body: JSON.stringify({ email: userEmail, otp: data.otp, newPassword: data.newPassword }),
         });
 
         const result = await response.json();
