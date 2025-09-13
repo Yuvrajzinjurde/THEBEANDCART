@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import { SignUpSchema, type SignUpInput } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,7 +33,6 @@ import { PasswordStrength } from "./password-strength";
 
 export function SignUpForm() {
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -66,18 +65,11 @@ export function SignUpForm() {
         throw new Error(result.message || "An error occurred during sign up.");
       }
 
-      toast({
-        title: "Account Created",
-        description: "Your account has been created successfully. Please log in.",
-      });
+      toast.success("Account created successfully. Please log in.");
       router.push("/login");
     } catch (error: any) {
       console.error("Sign Up Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Sign Up Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
-      });
+      toast.error(error.message || "An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -226,4 +218,3 @@ export function SignUpForm() {
     </Card>
   );
 }
-

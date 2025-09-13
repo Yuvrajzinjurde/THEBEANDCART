@@ -8,9 +8,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,7 +37,6 @@ interface DecodedToken {
 
 export function LoginForm() {
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -66,10 +65,7 @@ export function LoginForm() {
       
       localStorage.setItem('token', result.token);
 
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${result.name}!`,
-      });
+      toast.success(`Welcome back, ${result.name}!`);
 
       // Decode token to get roles and redirect
       const decoded = jwtDecode<DecodedToken>(result.token);
@@ -81,11 +77,7 @@ export function LoginForm() {
 
     } catch (error: any) {
       console.error("Login Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "Invalid email or password. Please try again.",
-      });
+      toast.error(error.message || "Invalid email or password. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

@@ -2,7 +2,8 @@
 "use client";
 
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/header';
 import { usePathname } from 'next/navigation';
@@ -28,7 +29,18 @@ export default function RootLayout({
           {isNonAdminRoute && <Header />}
           {children}
         </AuthProvider>
-        <Toaster />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </body>
     </html>
   );

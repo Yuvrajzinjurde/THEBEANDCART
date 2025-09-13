@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 import { ForgotPasswordSchema, ResetPasswordSchema, type ForgotPasswordInput, type ResetPasswordInput } from "@/lib/auth";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,7 +35,6 @@ type CombinedFormData = ForgotPasswordInput & ResetPasswordInput;
 
 export function ForgotPasswordForm() {
   const router = useRouter();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<FormStep>("email");
   const [showPassword, setShowPassword] = useState(false);
@@ -69,10 +68,7 @@ export function ForgotPasswordForm() {
     // We keep the email in the form state, but move to the next step
     setStep("reset");
     setIsSubmitting(false);
-    toast({
-      title: "Enter OTP",
-      description: "Please enter the OTP and your new password.",
-    });
+    toast.info("Please enter the OTP and your new password.");
   }
   
   async function onResetSubmit(data: ResetPasswordInput) {
@@ -90,19 +86,12 @@ export function ForgotPasswordForm() {
             throw new Error(result.message || 'An error occurred');
         }
 
-        toast({
-            title: "Password Reset Successful",
-            description: "You can now log in with your new password.",
-        });
+        toast.success("Password has been reset successfully. You can now log in.");
         router.push('/login');
 
     } catch (error: any) {
       console.error("Password Reset Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to reset password. Please try again.",
-      });
+      toast.error(error.message || "Failed to reset password. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
