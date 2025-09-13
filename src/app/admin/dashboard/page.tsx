@@ -1,26 +1,106 @@
 
 "use client";
 
-import withAuth from "@/components/auth/with-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
+import { format } from "date-fns";
+import { DollarSign, Package, Users, ArrowUp, BarChart, TrendingUp, Search } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { SalesByCategory } from "@/components/admin/sales-by-category";
+import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 
 function AdminDashboardPage() {
   const { user } = useAuth();
+  const today = new Date();
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <Card className="w-full max-w-md mt-10">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">Admin Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-center">
-          <p>Welcome, {user?.name || 'Admin'}!</p>
-          <p>This is the protected admin area.</p>
-        </CardContent>
-      </Card>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+       <div className="flex items-center justify-between space-y-2">
+         <div>
+            <h2 className="text-3xl font-bold tracking-tight">
+                Hey, {user?.name || 'Admin'}!
+            </h2>
+            <p className="text-muted-foreground">
+                {format(today, "EEEE, MMMM dd, yyyy")}
+            </p>
+        </div>
+        <div className="hidden md:flex items-center space-x-2">
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Start searching here" className="pl-10" />
+            </div>
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="bg-primary text-primary-foreground">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Revenue
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-primary-foreground/70" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold">₹542,980.00</div>
+            <p className="text-xs text-primary-foreground/80 flex items-center">
+              <ArrowUp className="h-3 w-3 mr-1"/>
+              26% Than last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Orders</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold">8,589</div>
+            <p className="text-xs text-muted-foreground flex items-center">
+               <ArrowUp className="h-3 w-3 mr-1 text-green-500"/>
+              11% Than last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold">16,284</div>
+            <p className="text-xs text-muted-foreground flex items-center">
+               <ArrowUp className="h-3 w-3 mr-1 text-green-500"/>
+              18% Increase this month
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-1 lg:col-span-3">
+            <CardHeader>
+                <CardTitle className="flex items-center">
+                   <BarChart className="h-4 w-4 mr-2 text-muted-foreground" />
+                    Sales by category
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+               <SalesByCategory />
+            </CardContent>
+        </Card>
+        <Card className="col-span-1 lg:col-span-4">
+             <CardHeader>
+                <CardTitle className="flex items-center">
+                    <TrendingUp className="h-4 w-4 mr-2 text-muted-foreground" />
+                    Revenue statistics
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <RevenueStatistics />
+            </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
 
-export default withAuth(AdminDashboardPage, ['admin']);
+export default AdminDashboardPage;

@@ -29,7 +29,7 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-9 w-9">
             {/* You can add a profile picture URL here if available */}
             {/* <AvatarImage src={user.profilePicUrl} alt={user.name} /> */}
             <AvatarFallback>{userInitial}</AvatarFallback>
@@ -45,12 +45,21 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard">
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </Link>
-          </DropdownMenuItem>
+           {user.roles.includes('admin') ? (
+               <DropdownMenuItem asChild>
+                    <Link href="/admin/dashboard">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                    </Link>
+                </DropdownMenuItem>
+           ) : (
+                <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                    </Link>
+                </DropdownMenuItem>
+           )}
            <DropdownMenuItem asChild>
             <Link href="/dashboard/orders">
               <CreditCard className="mr-2 h-4 w-4" />
