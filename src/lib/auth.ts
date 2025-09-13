@@ -32,6 +32,19 @@ export const ForgotPasswordSchema = z.object({
   }),
 });
 
+export const ResetPasswordSchema = z.object({
+  otp: z.string().min(6, { message: "OTP must be 6 characters." }),
+  newPassword: z.string().min(8, {
+    message: "Password must be at least 8 characters long.",
+  }),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});
+
+
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type SignUpInput = z.infer<typeof SignUpSchema>;
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
