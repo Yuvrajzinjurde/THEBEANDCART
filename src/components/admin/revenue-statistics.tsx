@@ -1,50 +1,30 @@
 
 "use client"
 
-import { TrendingUp } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-  { month: "July", desktop: 250 },
-  { month: "August", desktop: 290 },
-  { month: "September", desktop: 220 },
-  { month: "October", desktop: 300 },
-  { month: "November", desktop: 350 },
-  { month: "December", desktop: 380 },
-]
-
 const chartConfig = {
-  desktop: {
+  revenue: {
     label: "Revenue",
     color: "hsl(var(--primary))",
   },
 }
 
-export function RevenueStatistics() {
+type RevenueStatisticsProps = {
+  data: { month: string; revenue: number }[];
+};
+
+export function RevenueStatistics({ data }: RevenueStatisticsProps) {
   return (
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <AreaChart
           accessibilityLayer
-          data={chartData}
+          data={data}
           margin={{
             left: -20,
             right: 12,
@@ -58,7 +38,7 @@ export function RevenueStatistics() {
             axisLine={false}
             tickMargin={8}
             tickCount={5}
-            tickFormatter={(value) => `${value}`}
+            tickFormatter={(value) => `₹${Number(value) / 1000}k`}
           />
           <XAxis
             dataKey="month"
@@ -67,13 +47,19 @@ export function RevenueStatistics() {
             tickMargin={8}
             tickFormatter={(value) => value.slice(0, 3)}
           />
-          <Tooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+          <Tooltip 
+            cursor={false} 
+            content={<ChartTooltipContent 
+                formatter={(value) => `₹${Number(value).toLocaleString('en-IN')}`}
+                hideLabel 
+            />} 
+          />
           <Area
-            dataKey="desktop"
+            dataKey="revenue"
             type="natural"
-            fill="var(--color-desktop)"
+            fill="var(--color-revenue)"
             fillOpacity={0.4}
-            stroke="var(--color-desktop)"
+            stroke="var(--color-revenue)"
             stackId="a"
           />
         </AreaChart>
