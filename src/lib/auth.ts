@@ -10,6 +10,8 @@ export const LoginSchema = z.object({
 });
 
 export const SignUpSchema = z.object({
+    firstName: z.string().min(1, { message: "First name is required." }),
+    lastName: z.string().min(1, { message: "Last name is required." }),
     email: z.string().email({
       message: "Please enter a valid email address.",
     }),
@@ -17,10 +19,6 @@ export const SignUpSchema = z.object({
       message: "Password must be at least 8 characters long.",
     }),
     confirmPassword: z.string(),
-    // These fields are not on the form, but are part of the user model.
-    // They are optional here and will be handled by the API.
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
     path: ["confirmPassword"],
@@ -33,6 +31,7 @@ export const ForgotPasswordSchema = z.object({
 });
 
 export const ResetPasswordSchema = z.object({
+  email: z.string().email().optional(), // It's in the form state but not shown in this step
   otp: z.string().min(6, { message: "OTP must be 6 characters." }),
   newPassword: z.string().min(8, {
     message: "Password must be at least 8 characters long.",

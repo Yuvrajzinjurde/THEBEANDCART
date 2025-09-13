@@ -31,32 +31,42 @@ import {
 import { Logo } from "@/components/logo";
 
 type FormStep = "email" | "reset";
+type CombinedFormData = ForgotPasswordInput & ResetPasswordInput;
 
 export function ForgotPasswordForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<FormStep>("email");
-  const [userEmail, setUserEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const emailForm = useForm<ForgotPasswordInput>({
-    resolver: zodResolver(ForgotPasswordSchema),
-    defaultValues: { email: "" },
+  const currentSchema = step === 'email' ? ForgotPasswordSchema : ResetPasswordSchema;
+
+  const form = useForm<CombinedFormData>({
+    resolver: zodResolver(currentSchema),
+    defaultValues: { 
+      email: "",
+      otp: "", 
+      newPassword: "", 
+      confirmPassword: "" 
+    },
   });
 
-  const resetForm = useForm<ResetPasswordInput>({
-    resolver: zodResolver(ResetPasswordSchema),
-    defaultValues: { otp: "", newPassword: "", confirmPassword: "" },
-  });
+  async function onSubmit(data: CombinedFormData) {
+    if (step === 'email') {
+      await onEmailSubmit(data);
+    } else {
+      await onResetSubmit(data);
+    }
+  }
 
   async function onEmailSubmit(data: ForgotPasswordInput) {
     setIsSubmitting(true);
-    // In a real app, you'd call an API to check if the user exists
-    // and send an OTP. For now, we just move to the next step.
+    // In a real app, you'd call an API. Here we just move to the next step.
     await new Promise(resolve => setTimeout(resolve, 1000));
-    setUserEmail(data.email);
+    
+    // We keep the email in the form state, but move to the next step
     setStep("reset");
     setIsSubmitting(false);
     toast({
@@ -71,7 +81,7 @@ export function ForgotPasswordForm() {
         const response = await fetch('/api/auth/reset-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: userEmail, otp: data.otp, newPassword: data.newPassword }),
+            body: JSON.stringify({ email: form.getValues('email'), otp: data.otp, newPassword: data.newPassword }),
         });
 
         const result = await response.json();
@@ -100,119 +110,113 @@ export function ForgotPasswordForm() {
 
   return (
     <Card className="w-full max-w-md">
-      {step === "email" ? (
-        <Form {...emailForm}>
-          <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} noValidate>
+       <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
             <CardHeader className="items-center text-center">
               <Logo />
-              <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
+              <CardTitle className="text-2xl font-bold">
+                {step === 'email' ? 'Forgot Password?' : 'Reset Your Password'}
+              </CardTitle>
               <CardDescription>
-                No worries, we&apos;ll help you reset it.
+                 {step === 'email' 
+                    ? "No worries, we'll help you reset it."
+                    : "Enter the OTP (use 123456) and set a new password."
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
-                control={emailForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="name@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {step === "email" ? (
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="name@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              ) : (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>One-Time Password (OTP)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter OTP" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                          </FormControl>
+                          <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(p => !p)}>
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                          </FormControl>
+                          <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground" onClick={() => setShowConfirmPassword(p => !p)}>
+                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Continue
+                {step === 'email' ? 'Continue' : 'Reset Password'}
               </Button>
             </CardContent>
-            <CardFooter className="justify-center">
-              <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
-                <Link href="/login" className="font-medium text-primary hover:underline">
-                  Back to Log in
-                </Link>
-              </Button>
+             <CardFooter className="justify-center">
+                {step === 'email' ? (
+                     <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
+                        <Link href="/login" className="font-medium text-primary hover:underline">
+                        Back to Log in
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button variant="link" asChild className="p-0 text-sm text-muted-foreground" onClick={() => {
+                        setStep('email');
+                        form.reset(); // Reset form state when going back
+                    }}>
+                        <Link href="#" className="font-medium text-primary hover:underline">
+                        Back to email entry
+                        </Link>
+                    </Button>
+                )}
             </CardFooter>
           </form>
         </Form>
-      ) : (
-        <Form {...resetForm}>
-          <form onSubmit={resetForm.handleSubmit(onResetSubmit)} noValidate>
-            <CardHeader className="items-center text-center">
-              <Logo />
-              <CardTitle className="text-2xl font-bold">Reset Your Password</CardTitle>
-              <CardDescription>
-                Enter the OTP (use 123456) and set a new password.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <FormField
-                  control={resetForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>One-Time Password (OTP)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter OTP" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={resetForm.control}
-                  name="newPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(p => !p)}>
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={resetForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground" onClick={() => setShowConfirmPassword(p => !p)}>
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Reset Password
-                </Button>
-            </CardContent>
-            <CardFooter className="justify-center">
-              <Button variant="link" asChild className="p-0 text-sm text-muted-foreground" onClick={() => setStep('email')}>
-                <Link href="#" className="font-medium text-primary hover:underline">
-                  Back to email entry
-                </Link>
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      )}
     </Card>
   );
 }
