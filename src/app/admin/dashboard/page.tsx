@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { DollarSign, Package, Users, ArrowUpRight, Loader2 } from "lucide-react";
+import { DollarSign, Package, Users, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
@@ -63,53 +63,81 @@ function AdminDashboardPage() {
         </div>
       </div>
       
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <div className="flex flex-col p-4 rounded-lg">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span className="text-sm font-medium text-muted-foreground">Total Inventory Value</span>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div>
-                <div className="text-2xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <span className="text-green-600 flex items-center font-semibold">
-                        <ArrowUpRight className="h-3 w-3 mr-1"/> 2.5%
-                    </span>
-                    vs. last month
-                </p>
-            </div>
-        </div>
-        <div className="flex flex-col p-4 rounded-lg">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span className="text-sm font-medium text-muted-foreground">Total Products</span>
-                <Package className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div>
-                <div className="text-2xl font-bold">{stats.totalProducts}</div>
-                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    in stock
-                </p>
-            </div>
-        </div>
-        <div className="flex flex-col p-4 rounded-lg">
-            <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <span className="text-sm font-medium text-muted-foreground">Total Users</span>
-                <Users className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div>
-                <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <span className="text-green-600 flex items-center font-semibold">
-                        <ArrowUpRight className="h-3 w-3 mr-1"/> 18%
-                    </span>
-                    this month
-                </p>
-            </div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-green-600 flex items-center font-semibold">
+                <ArrowUpRight className="h-3 w-3 mr-1"/> 12.1%
+              </span>
+              &nbsp;vs. last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-red-600 flex items-center font-semibold">
+                <ArrowDownRight className="h-3 w-3 mr-1"/> 3.2%
+              </span>
+              &nbsp;vs. last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-green-600 flex items-center font-semibold">
+                <ArrowUpRight className="h-3 w-3 mr-1"/> 2.5%
+              </span>
+              &nbsp;vs. last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalProducts}</div>
+            <p className="text-xs text-muted-foreground">in stock</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span className="text-green-600 flex items-center font-semibold">
+                <ArrowUpRight className="h-3 w-3 mr-1"/> 18%
+              </span>
+              &nbsp;this month
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="space-y-8">
-        <Card className="col-span-12">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+        <Card className="col-span-1">
              <CardHeader>
                 <CardTitle>Revenue Statistics</CardTitle>
             </CardHeader>
@@ -117,7 +145,7 @@ function AdminDashboardPage() {
                 <RevenueStatistics data={stats.revenueChartData} />
             </CardContent>
         </Card>
-         <Card className="col-span-12">
+         <Card className="col-span-1">
             <CardHeader>
                 <CardTitle>Sales by Category</CardTitle>
             </CardHeader>

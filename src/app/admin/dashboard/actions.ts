@@ -9,6 +9,8 @@ export interface DashboardStats {
   totalInventoryValue: number;
   totalProducts: number;
   totalUsers: number;
+  totalRevenue: number;
+  totalLoss: number;
   revenueChartData: { month: string; revenue: number }[];
   salesByCategoryData: { name: string; value: number }[];
 }
@@ -60,12 +62,17 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const totalUsers = await User.countDocuments({});
         
         const productStats = productAggregation[0] || { totalValue: 0, totalCount: 0 };
+        const revenueChartData = generateRevenueData();
+        const totalRevenue = revenueChartData.reduce((acc, current) => acc + current.revenue, 0);
+
 
         return {
             totalInventoryValue: productStats.totalValue,
             totalProducts: productStats.totalCount,
             totalUsers: totalUsers,
-            revenueChartData: generateRevenueData(),
+            totalRevenue: totalRevenue,
+            totalLoss: Math.floor(Math.random() * (5000 - 1000 + 1) + 1000),
+            revenueChartData: revenueChartData,
             salesByCategoryData: categoryAggregation,
         };
 
