@@ -4,9 +4,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
-import { DollarSign, Package, Users, ArrowUp, BarChart, TrendingUp, Search } from "lucide-react";
+import { DollarSign, Package, Users, ArrowUp, BarChart, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 import useBrandStore from "@/stores/brand-store";

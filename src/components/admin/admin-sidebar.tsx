@@ -8,9 +8,9 @@ import {
   Users,
   GitCommitHorizontal,
   Warehouse,
-  ChevronDown,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -41,17 +41,34 @@ const navItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const { selectedBrand, availableBrands, setSelectedBrand } = useBrandStore();
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+
+  const handleLinkClick = () => {
+    if (isCollapsed) {
+        setIsCollapsed(false);
+    }
+  }
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-10 hidden flex-col border-r bg-background transition-[width] duration-300 sm:flex",
+        isCollapsed ? "w-14" : "w-56"
+      )}
+    >
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-        <Link
-          href="#"
+        <button
+          onClick={toggleCollapse}
           className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
         >
           <Logo className="h-5 w-5 transition-all group-hover:scale-110" />
           <span className="sr-only">Reeva</span>
-        </Link>
+        </button>
         
         <DropdownMenu>
             <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 focus:outline-none">
@@ -70,27 +87,34 @@ export function AdminSidebar() {
                 ))}
             </DropdownMenuContent>
         </DropdownMenu>
-
-        <TooltipProvider>
-          {navItems.map(({ href, icon: Icon, label }) => (
-            <Tooltip key={label}>
-              <TooltipTrigger asChild>
-                <Link
-                  href={href}
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
-                    pathname.startsWith(href) && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="sr-only">{label}</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">{label}</TooltipContent>
-            </Tooltip>
-          ))}
-        </TooltipProvider>
-      </nav>
-    </aside>
+        </nav>
+        <div className="flex-1 overflow-y-auto">
+        <nav className="grid items-start px-4 text-sm font-medium">
+          <TooltipProvider>
+            {navItems.map(({ href, icon: Icon, label }) => (
+                <Tooltip key={label}>
+                <TooltipTrigger asChild>
+                    <Link
+                    href={href}
+                    onClick={handleLinkClick}
+                    className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                        pathname.startsWith(href) && "text-primary bg-muted"
+                    )}
+                    >
+                    <Icon className="h-4 w-4" />
+                    {!isCollapsed && <span>{label}</span>}
+                     <span className={cn("sr-only", !isCollapsed && "hidden")}>{label}</span>
+                    </Link>
+                </TooltipTrigger>
+                {isCollapsed && (
+                    <TooltipContent side="right">{label}</TooltipContent>
+                )}
+                </Tooltip>
+            ))}
+          </TooltipProvider>
+        </nav>
+        </div>
+    </div>
   );
 }
