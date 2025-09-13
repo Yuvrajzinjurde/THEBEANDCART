@@ -9,7 +9,7 @@ export default function Home() {
         <Logo />
         <div className="space-y-2">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl font-headline">
-            Welcome to AuthFlow
+            Welcome to Reeva
           </h1>
           <p className="max-w-[600px] text-muted-foreground md:text-xl">
             Seamlessly secure your application with our modern authentication solution, featuring AI-powered password analysis.

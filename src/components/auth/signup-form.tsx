@@ -81,7 +81,7 @@ export function SignUpForm() {
         <Logo />
         <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
         <CardDescription>
-          Get started with AuthFlow and secure your account.
+          Get started with Reeva and secure your account.
         </CardDescription>
       </CardHeader>
       <CardContent>

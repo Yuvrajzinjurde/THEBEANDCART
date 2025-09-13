@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'AuthFlow',
+  title: 'Reeva',
   description: 'Modern authentication with AI-powered password strength analysis.',
 };
 
