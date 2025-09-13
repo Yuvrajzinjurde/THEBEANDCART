@@ -1,38 +1,46 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const { toast } = useToast();
-  const [isSeeding, setIsSeeding] = useState(false);
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-  const handleSeed = async () => {
-    setIsSeeding(true);
-    try {
-      const response = await fetch('/api/seed', { method: 'POST' });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
+  useEffect(() => {
+    if (!loading && user) {
+      const isAdmin = user.roles.includes('admin');
+      if (isAdmin) {
+        router.replace('/admin/dashboard');
+      } else {
+        router.replace('/dashboard');
       }
-      toast({
-        title: "Success",
-        description: "Database seeded successfully!",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to seed database.",
-      });
-    } finally {
-      setIsSeeding(false);
+    }
+  }, [user, loading, router]);
+  
+  // This is a temporary solution to allow seeding the database.
+  const handleSeed = async () => {
+    try {
+      await fetch('/api/seed', { method: 'POST' });
+      alert('Database seeded!');
+    } catch (error) {
+      alert('Failed to seed database.');
     }
   };
+
+  if (loading || user) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin" />
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
@@ -55,8 +63,7 @@ export default function Home() {
           </Button>
         </div>
          <div className="absolute bottom-4 right-4">
-          <Button onClick={handleSeed} disabled={isSeeding} variant="outline">
-            {isSeeding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleSeed} variant="outline">
             Seed Database
           </Button>
         </div>

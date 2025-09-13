@@ -1,6 +1,8 @@
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
+import Role from '@/models/role.model';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { LoginSchema } from '@/lib/auth';
@@ -24,7 +26,10 @@ export async function POST(req: Request) {
 
     const { email, password } = validation.data;
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password').populate({
+        path: 'roles',
+        model: Role
+    });
 
     if (!user || !user.password) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
@@ -35,14 +40,21 @@ export async function POST(req: Request) {
     if (!isPasswordMatch) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
+    
+    const userRoles = user.roles.map((role: any) => role.name);
 
     const token = jwt.sign(
-      { userId: user._id, roles: user.roles },
+      { userId: user._id, roles: userRoles, name: user.firstName },
       JWT_SECRET,
       { expiresIn: '1d' } // Token expires in 1 day
     );
 
-    return NextResponse.json({ message: 'Login successful', token }, { status: 200 });
+    return NextResponse.json({ 
+        message: 'Login successful', 
+        token,
+        name: user.firstName,
+        roles: userRoles
+    }, { status: 200 });
 
   } catch (error) {
     console.error('Login Error:', error);

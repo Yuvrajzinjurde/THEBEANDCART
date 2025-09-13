@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +30,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Logo } from "@/components/logo";
+
+interface DecodedToken {
+  roles: string[];
+}
 
 export function LoginForm() {
   const router = useRouter();
@@ -58,14 +64,21 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      // TODO: Store the JWT (e.g., in an HttpOnly cookie or localStorage)
-      console.log("Login successful, JWT:", result.token);
+      localStorage.setItem('token', result.token);
+
       toast({
         title: "Login Successful",
-        description: "Welcome back!",
+        description: `Welcome back, ${result.name}!`,
       });
 
-      router.push("/");
+      // Decode token to get roles and redirect
+      const decoded = jwtDecode<DecodedToken>(result.token);
+      if (decoded.roles.includes('admin')) {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+
     } catch (error: any) {
       console.error("Login Error:", error);
       toast({
