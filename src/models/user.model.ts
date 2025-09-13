@@ -14,9 +14,6 @@ export interface IUser extends Document {
   };
   profilePicUrl?: string;
   roles: Types.ObjectId[];
-  // Example e-commerce fields
-  orders: Types.ObjectId[];
-  wishlist: Types.ObjectId[];
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -33,8 +30,6 @@ const UserSchema: Schema<IUser> = new Schema({
   },
   profilePicUrl: { type: String },
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
-  orders: [{ type: Schema.Types.ObjectId, ref: 'Order' }],
-  wishlist: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
