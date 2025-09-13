@@ -1,19 +1,20 @@
 
-import type { Metadata } from 'next';
+"use client";
+
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/use-auth';
-
-export const metadata: Metadata = {
-  title: 'Reeva',
-  description: 'Modern authentication with AI-powered password strength analysis.',
-};
+import Header from '@/components/header';
+import { usePathname } from 'next/navigation';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const showHeader = !pathname.startsWith('/admin');
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -21,8 +22,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased">
+      <body className="flex min-h-screen flex-col font-body antialiased">
         <AuthProvider>
+          {showHeader && <Header />}
           {children}
         </AuthProvider>
         <Toaster />
