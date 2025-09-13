@@ -76,7 +76,7 @@ export function LoginForm() {
       if (decoded.roles.includes('admin')) {
         router.push("/admin/dashboard");
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
 
     } catch (error: any) {
