@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
@@ -24,19 +24,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setUser(null);
-    router.push('/login');
-  }, [router]);
+    if (pathname !== '/login') {
+      router.push('/login');
+    }
+  }, [router, pathname]);
 
   useEffect(() => {
+    setLoading(true);
     const token = localStorage.getItem('token');
     if (token) {
       try {
         const decoded = jwtDecode<User>(token);
-        // Check if token is expired
         if (decoded.exp * 1000 < Date.now()) {
           logout();
         } else {
@@ -46,9 +49,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Invalid token:", error);
         logout();
       }
+    } else {
+        setUser(null);
     }
     setLoading(false);
-  }, [logout]);
+  }, [logout, pathname]); // Rerun on path change
   
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>

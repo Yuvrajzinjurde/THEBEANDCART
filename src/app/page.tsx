@@ -14,7 +14,9 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user) {
+    if (loading) return; // Wait until authentication state is loaded
+
+    if (user) {
       const isAdmin = user.roles.includes('admin');
       if (isAdmin) {
         router.replace('/admin/dashboard');
@@ -34,6 +36,7 @@ export default function Home() {
     }
   };
 
+  // While checking auth or redirecting, show a loader.
   if (loading || user) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center">
@@ -42,6 +45,7 @@ export default function Home() {
     );
   }
 
+  // If not logged in, show the landing page.
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="flex flex-col items-center space-y-6 text-center">

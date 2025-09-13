@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
@@ -13,38 +13,52 @@ const withAuth = <P extends object>(
   const Wrapper = (props: P) => {
     const router = useRouter();
     const { user, loading } = useAuth();
-    const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
-      if (!loading) {
-        if (!user) {
-          router.replace('/login');
+      if (loading) {
+        return; // Wait for the auth state to be determined
+      }
+
+      if (!user) {
+        // If not logged in, redirect to login page
+        router.replace('/login');
+        return;
+      }
+
+      const userRoles = user.roles || [];
+      const isAuthorized = allowedRoles.some(role => userRoles.includes(role));
+
+      if (!isAuthorized) {
+        // If user is logged in but doesn't have the right role, redirect them
+        if (userRoles.includes('admin')) {
+          router.replace('/admin/dashboard');
         } else {
-          const userRoles = user.roles || [];
-          const hasRequiredRole = allowedRoles.some(role => userRoles.includes(role));
-          if (!hasRequiredRole) {
-            // Redirect to a more appropriate page based on role
-             if (userRoles.includes('admin')) {
-              router.replace('/admin/dashboard');
-            } else {
-              router.replace('/dashboard');
-            }
-          } else {
-            setIsAuthorized(true);
-          }
+          router.replace('/dashboard');
         }
       }
-    }, [user, loading, router, allowedRoles]);
+    }, [user, loading, router]);
 
-    if (loading || !isAuthorized) {
+    // While loading or if user is not yet determined, show a loader
+    if (loading || !user) {
        return (
         <div className="flex min-h-screen items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       );
     }
+    
+    // If authorized, render the component
+    const isAuthorized = allowedRoles.some(role => user.roles.includes(role));
+    if (isAuthorized) {
+      return <WrappedComponent {...props} />;
+    }
 
-    return <WrappedComponent {...props} />;
+    // If not authorized, show a loader while redirecting
+    return (
+        <div className="flex min-h-screen items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
   };
 
   Wrapper.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
