@@ -3,24 +3,48 @@
 
 import Link from "next/link";
 import { Heart, ShoppingCart, Truck } from "lucide-react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
 import { useParams } from "next/navigation";
+import type { IBrand } from "@/models/brand.model";
 
 export default function Header() {
   const { user, loading } = useAuth();
   const params = useParams();
-  const brand = params.brand || 'reeva';
+  const brandName = (params.brand as string) || 'reeva';
+  const [brand, setBrand] = useState<IBrand | null>(null);
+
+  useEffect(() => {
+    async function fetchBrandLogo() {
+      if (!brandName) return;
+      try {
+        const res = await fetch(`/api/brands/${brandName}`);
+        if (res.ok) {
+          const { brand: brandData } = await res.json();
+          setBrand(brandData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch brand data for header", error);
+      }
+    }
+    fetchBrandLogo();
+  }, [brandName]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href={`/${brand}/home`} className="mr-6 flex items-center space-x-2">
-          <Logo className="h-8 w-8" />
-          <span className="hidden font-bold sm:inline-block capitalize">{brand}</span>
+        <Link href={`/${brandName}/home`} className="mr-6 flex items-center space-x-2">
+          {brand?.logoUrl ? (
+            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8" />
+          ) : (
+            <Logo className="h-8 w-8" />
+          )}
+          <span className="hidden font-bold sm:inline-block capitalize">{brandName}</span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
