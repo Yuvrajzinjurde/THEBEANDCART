@@ -3,13 +3,14 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, Search, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
+import * as XLSX from "xlsx";
 
 import type { UserDetails } from './actions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader } from '@/components/ui/loader';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +50,33 @@ export default function UserDetailsPage() {
         fetchDetails();
     }, [userId]);
     
+    const handleDownload = () => {
+        if (!details || !details.orders || details.orders.length === 0) {
+            toast.warn("No orders to export for this user.");
+            return;
+        }
+
+        toast.info("Generating order report...");
+
+        const flattenedData = filteredOrders.map((order: any) => ({
+            'Order ID': order._id,
+            'Total Amount': order.totalAmount,
+            'Status': order.status,
+            'Brand': order.brand,
+            'Order Date': format(new Date(order.createdAt), 'PPpp'),
+            'Product Count': order.products.length,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+        
+        const fileName = `user_${userId}_orders.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+        toast.success("Report downloaded successfully!");
+    };
+
+
     if (loading) {
         return (
             <div className="flex h-full flex-1 items-center justify-center">
@@ -132,7 +160,7 @@ export default function UserDetailsPage() {
                 
                  <Card>
                     <CardHeader><CardTitle>Delivery Address</CardTitle></CardHeader>
-                    <CardContent className="pt-2">
+                    <CardContent>
                         {user.address && user.address.street ? (
                              <address className="text-sm not-italic text-muted-foreground">
                                 {user.address.street}, {user.address.city}<br/>
@@ -147,11 +175,17 @@ export default function UserDetailsPage() {
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>All Orders</CardTitle>
+                <CardHeader className="flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>All Orders</CardTitle>
+                    </div>
+                     <Button variant="outline" size="sm" onClick={handleDownload}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Report
+                    </Button>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between gap-4">
+                <CardContent>
+                    <div className="flex items-center justify-between gap-4 mb-4">
                         <div className="relative w-full max-w-sm">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input 
@@ -175,7 +209,7 @@ export default function UserDetailsPage() {
                         </Select>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto border rounded-md">
                         <Table>
                             <TableHeader>
                                 <TableRow>
