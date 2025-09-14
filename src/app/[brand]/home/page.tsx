@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product-card';
 import type { IProduct } from '@/models/product.model';
+import type { IBrand } from '@/models/brand.model';
 import { ProductFilters } from '@/components/product-filters';
 import Image from 'next/image';
 import {
@@ -18,36 +19,17 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Loader } from '@/components/ui/loader';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-const banners = [
-    {
-      title: "Discover Your Next Favorite Thing",
-      description: "Browse our curated collection of high-quality products.",
-      imageUrl: "https://picsum.photos/seed/hero-1/1600/400",
-      imageHint: "shopping banner",
-    },
-    {
-      title: "New Summer Collection Arrives",
-      description: "Fresh styles just in time for the season. Don't miss out!",
-      imageUrl: "https://picsum.photos/seed/hero-2/1600/400",
-      imageHint: "summer fashion",
-    },
-    {
-      title: "Exclusive Online-Only Deals",
-      description: "Save up to 40% on select items this week.",
-      imageUrl: "https://picsum.photos/seed/hero-3/1600/400",
-      imageHint: "sale event",
-    },
-];
 
 export default function BrandHomePage() {
   const { user, loading: authLoading } = useAuth();
   const params = useParams();
-  const brand = params.brand as string;
+  const brandName = params.brand as string;
 
+  const [brand, setBrand] = useState<IBrand | null>(null);
   const [products, setProducts] = useState<IProduct[]>([]);
-  const [productsLoading, setProductsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -58,38 +40,46 @@ export default function BrandHomePage() {
   );
 
   useEffect(() => {
-    async function fetchProducts() {
-      if (!brand) return;
-      try {
-        const response = await fetch(`/api/products?brand=${brand}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
+    async function fetchBrandData() {
+        if (!brandName) return;
+        setLoading(true);
+        try {
+            // Fetch brand details
+            const brandResponse = await fetch(`/api/brands/${brandName}`);
+            if (!brandResponse.ok) throw new Error('Brand not found');
+            const brandData = await brandResponse.json();
+            setBrand(brandData.brand);
+
+            // Fetch products for the brand
+            const productResponse = await fetch(`/api/products?brand=${brandName}`);
+            if (!productResponse.ok) throw new Error('Failed to fetch products');
+            const productData = await productResponse.json();
+            setProducts(productData.products);
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
-        const data = await response.json();
-        setProducts(data.products);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setProductsLoading(false);
-      }
     }
 
-    fetchProducts();
-  }, [brand]);
+    fetchBrandData();
+  }, [brandName]);
+
 
   const handleSeed = async () => {
     try {
       await fetch('/api/seed', { method: 'POST' });
       alert('Database seeded! Refresh the page to see new products.');
       // Optionally re-fetch products
-      setProductsLoading(true);
-       const response = await fetch(`/api/products?brand=${brand}`);
+      setLoading(true);
+       const response = await fetch(`/api/products?brand=${brandName}`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
         setProducts(data.products);
-        setProductsLoading(false);
+        setLoading(false);
 
     } catch (error) {
       alert('Failed to seed database.');
@@ -135,12 +125,21 @@ export default function BrandHomePage() {
 
 
   // While checking auth or loading products, show a loader.
-  if (authLoading || productsLoading) {
+  if (authLoading || loading) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center">
         <Loader className="h-12 w-12" />
       </main>
     );
+  }
+  
+  if (!brand) {
+      return (
+          <main className="flex min-h-screen flex-col items-center justify-center">
+              <h1 className="text-2xl font-bold">Brand not found</h1>
+              <p className="text-muted-foreground">The requested brand does not exist.</p>
+          </main>
+      )
   }
 
   // If not logged in, show the product landing page.
@@ -154,7 +153,7 @@ export default function BrandHomePage() {
                 onMouseLeave={() => plugin.current.reset()}
             >
                 <CarouselContent>
-                {banners.map((banner, index) => (
+                {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
                         <div className="relative w-full h-[400px] bg-secondary text-foreground">
                             <Image
@@ -206,3 +205,6 @@ export default function BrandHomePage() {
     </main>
   );
 }
+
+
+    

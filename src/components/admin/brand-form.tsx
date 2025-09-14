@@ -9,13 +9,24 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Trash } from 'lucide-react';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Trash, Upload } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const bannerSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -24,16 +35,25 @@ const bannerSchema = z.object({
   imageHint: z.string().min(1, "Image hint is required"),
 });
 
+const themeColors = [
+    { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
+    { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
+    { name: 'Orange', primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
+    { name: 'Purple', primary: '262.1 83.3% 57.8%', background: '0 0% 100%', accent: '260 100% 96.7%' },
+    { name: 'Teal', primary: '175 75% 40%', background: '0 0% 100%', accent: '175 50% 95%' },
+    { name: 'Rose', primary: '346.8 77.2% 49.8%', background: '0 0% 100%', accent: '350 100% 96.9%' },
+    { name: 'Yellow', primary: '47.9 95.8% 53.1%', background: '0 0% 100%', accent: '50 100% 96.1%' },
+    { name: 'Slate (Dark)', primary: '215.2 79.8% 52%', background: '222.2 84% 4.9%', accent: '217.2 32.6% 17.5%' },
+    { name: 'Red', primary: '0 72.2% 50.6%', background: '0 0% 100%', accent: '0 85.7% 95.9%' },
+    { name: 'Magenta', primary: '310 75% 50%', background: '0 0% 100%', accent: '310 50% 95%' },
+] as const;
+
 export const BrandFormSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
   permanentName: z.string().min(1, "Permanent name is required").regex(/^[a-z0-9-]+$/, "Permanent name can only contain lowercase letters, numbers, and hyphens."),
   logoUrl: z.string().url("Must be a valid URL"),
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
-  theme: z.object({
-    primary: z.string().regex(/^([0-9]{1,3}(\.[0-9]+)?\s){2}[0-9]{1,3}(\.[0-9]+)?%$/, "Invalid HSL format. Example: 217.2 91.2% 59.8%"),
-    background: z.string().regex(/^([0-9]{1,3}(\.[0-9]+)?\s){2}[0-9]{1,3}(\.[0-9]+)?%$/, "Invalid HSL format. Example: 0 0% 100%"),
-    accent: z.string().regex(/^([0-9]{1,3}(\.[0-9]+)?\s){2}[0-9]{1,3}(\.[0-9]+)?%$/, "Invalid HSL format. Example: 210 40% 96.1%"),
-  }),
+  themeName: z.string({ required_error: "Please select a theme." }),
 });
 
 type BrandFormValues = z.infer<typeof BrandFormSchema>;
@@ -52,17 +72,13 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     permanentName: existingBrand.permanentName,
     logoUrl: existingBrand.logoUrl,
     banners: existingBrand.banners,
-    theme: {
-        primary: existingBrand.theme.primary,
-        background: existingBrand.theme.background,
-        accent: existingBrand.theme.accent,
-    },
+    themeName: existingBrand.themeName,
   } : {
     displayName: '',
     permanentName: '',
     logoUrl: '',
     banners: [{ title: '', description: '', imageUrl: '', imageHint: '' }],
-    theme: { primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
+    themeName: 'Blue',
   };
 
   const form = useForm<BrandFormValues>({
@@ -109,7 +125,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <Card>
           <CardHeader><CardTitle>Brand Identity</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
              <FormField
                 control={form.control}
                 name="displayName"
@@ -128,18 +144,32 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     <FormItem>
                     <FormLabel>Permanent Name</FormLabel>
                     <FormControl><Input placeholder="reeva" {...field} disabled={mode === 'edit'} /></FormControl>
+                    <FormDescription>
+                        This is the unique ID for the brand and will be used in the URL. It cannot be changed once set.
+                    </FormDescription>
                     <FormMessage />
                     </FormItem>
                 )}
             />
-            <FormField
+             <FormField
                 control={form.control}
                 name="logoUrl"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Logo URL</FormLabel>
-                    <FormControl><Input placeholder="https://example.com/logo.png" {...field} /></FormControl>
-                    <FormMessage />
+                        <FormLabel>Logo</FormLabel>
+                        <FormControl>
+                             <div className="flex items-center gap-4">
+                                <div className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                                    <span className="truncate">{field.value || 'https://example.com/logo.png'}</span>
+                                    <Upload className="h-4 w-4 text-muted-foreground"/>
+                                </div>
+                                <Input type="hidden" {...field} />
+                            </div>
+                        </FormControl>
+                         <FormDescription>
+                            Provide a URL for the logo. Recommended: 200x200px PNG or JPG.
+                        </FormDescription>
+                        <FormMessage />
                     </FormItem>
                 )}
             />
@@ -147,7 +177,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         </Card>
         
         <Card>
-            <CardHeader><CardTitle>Banners</CardTitle></CardHeader>
+            <CardHeader>
+                <CardTitle>Banners</CardTitle>
+                <CardDescription>Add at least one banner for the homepage. Recommended size: 1600x400px.</CardDescription>
+            </CardHeader>
             <CardContent className="space-y-4">
                  {fields.map((field, index) => (
                     <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
@@ -168,8 +201,20 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                          <FormField
                             control={form.control}
                             name={`banners.${index}.imageUrl`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Image URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            render={({ field: imageField }) => (
+                                <FormItem>
+                                    <FormLabel>Image</FormLabel>
+                                    <FormControl>
+                                        <div className="flex items-center gap-4">
+                                             <div className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                                                <span className="truncate">{imageField.value || 'https://example.com/banner.jpg'}</span>
+                                                <Upload className="h-4 w-4 text-muted-foreground"/>
+                                            </div>
+                                            <Input type="hidden" {...imageField} />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
                         />
                          <FormField
@@ -189,49 +234,73 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Theme</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-                control={form.control}
-                name="theme.primary"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Primary Color (HSL)</FormLabel>
-                    <FormControl><Input placeholder="217.2 91.2% 59.8%" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="theme.background"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Background Color (HSL)</FormLabel>
-                    <FormControl><Input placeholder="0 0% 100%" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-             <FormField
-                control={form.control}
-                name="theme.accent"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Accent Color (HSL)</FormLabel>
-                    <FormControl><Input placeholder="210 40% 96.1%" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-          </CardContent>
+            <CardHeader><CardTitle>Theme</CardTitle><CardDescription>Select a color scheme for the brand's storefront.</CardDescription></CardHeader>
+            <CardContent>
+                <FormField
+                    control={form.control}
+                    name="themeName"
+                    render={({ field }) => (
+                        <FormItem className="space-y-3">
+                            <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                                >
+                                    {themeColors.map((theme) => (
+                                         <FormItem key={theme.name} className="flex-1">
+                                             <FormControl>
+                                                <RadioGroupItem value={theme.name} className="sr-only" id={theme.name} />
+                                             </FormControl>
+                                             <FormLabel htmlFor={theme.name} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                                <div className="flex items-center gap-2">
+                                                    <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
+                                                    <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
+                                                    <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
+                                                </div>
+                                                <span className="mt-2 text-sm font-medium">{theme.name}</span>
+                                            </FormLabel>
+                                         </FormItem>
+                                    ))}
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </CardContent>
         </Card>
+        
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button type="button" disabled={isSubmitting}>
+                    {mode === 'create' ? 'Create Brand' : 'Save Changes'}
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {mode === 'create' 
+                            ? `You are about to create a new brand named "${form.getValues('displayName')}" with the permanent ID "${form.getValues('permanentName')}". This permanent ID cannot be changed.`
+                            : `You are about to save changes for the brand "${existingBrand?.displayName}".`
+                        }
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onSubmit(form.getValues())} disabled={isSubmitting}>
+                        {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                        Continue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-          {mode === 'create' ? 'Create Brand' : 'Save Changes'}
-        </Button>
       </form>
     </Form>
   );
 }
+
+
+    
