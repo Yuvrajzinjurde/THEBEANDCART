@@ -31,8 +31,16 @@ export async function POST(req: Request) {
         model: Role
     });
     
-    // Security: Check if user exists and if the user's brand matches the request brand
-    if (!user || user.brand !== brand) {
+    // If user does not exist, fail authentication.
+    if (!user) {
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    const userRoles = user.roles.map((role: any) => role.name);
+    const isAdmin = userRoles.includes('admin');
+
+    // Security: If the user is NOT an admin, check if their brand matches the request brand.
+    if (!isAdmin && user.brand !== brand) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
@@ -46,8 +54,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
     
-    const userRoles = user.roles.map((role: any) => role.name);
-
     const token = jwt.sign(
       { userId: user._id, roles: userRoles, name: user.firstName, brand: user.brand },
       JWT_SECRET,
