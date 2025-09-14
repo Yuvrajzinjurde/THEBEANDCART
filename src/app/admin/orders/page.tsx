@@ -234,7 +234,7 @@ export default function OrdersPage() {
                         <Select defaultValue="sku-id">
                             <SelectTrigger className="absolute right-1 top-1/2 -translate-y-1/2 w-auto h-8 bg-muted border-l rounded-l-none">
                                 <SelectValue />
-                            </Trigger>
+                            </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="sku-id">SKU ID</SelectItem>
                                 <SelectItem value="order-id">Order ID</SelectItem>
@@ -256,4 +256,5 @@ export default function OrdersPage() {
 
     </div>
   );
-}
+
+    
