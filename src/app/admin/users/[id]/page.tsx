@@ -148,7 +148,7 @@ export default function UserDetailsPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-orange-100 text-orange-800">
+                <Card className="bg-blue-100 text-blue-800">
                     <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
                         <UserIcon className="h-6 w-6"/>
                         <CardTitle>Contact Details</CardTitle>
@@ -163,7 +163,7 @@ export default function UserDetailsPage() {
                             <div>{user.phone || 'N/A'}</div>
                          </div>
                          <div className="flex items-center gap-4">
-                            <p className="text-xs font-mono bg-orange-200/80 rounded px-2 py-1">
+                            <p className="text-xs font-mono bg-blue-200/80 rounded px-2 py-1">
                                 Joined on {format(new Date(user.createdAt as string), 'dd MMM, yyyy')}
                             </p>
                          </div>
@@ -257,4 +257,5 @@ export default function UserDetailsPage() {
     
 
     
+
 
