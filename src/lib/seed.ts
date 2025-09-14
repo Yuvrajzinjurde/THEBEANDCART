@@ -3,6 +3,7 @@ import dbConnect from './mongodb';
 import Role from '@/models/role.model';
 import User from '@/models/user.model';
 import Product from '@/models/product.model';
+import Brand from '@/models/brand.model';
 import bcrypt from 'bcryptjs';
 
 const CATEGORIES = ['Electronics', 'Apparel', 'Books', 'Home Goods', 'Health'];
@@ -54,6 +55,34 @@ export const seedDatabase = async () => {
       console.log('Created admin user.');
     }
     
+    // --- Create Default Brand if it doesn't exist ---
+    const reevaBrandExists = await Brand.findOne({ permanentName: 'reeva' });
+    if (!reevaBrandExists) {
+      const reevaBrand = new Brand({
+        displayName: 'Reeva',
+        permanentName: 'reeva',
+        logoUrl: 'https://picsum.photos/seed/reevalogo/200/200',
+        banners: [
+          {
+            title: 'Welcome to Reeva',
+            description: 'Your one-stop shop for everything you need.',
+            imageUrl: 'https://picsum.photos/seed/reevabanner1/1600/400',
+            imageHint: 'modern storefront',
+          },
+          {
+            title: 'Summer Sale!',
+            description: 'Up to 50% off on selected items. Dont miss out!',
+            imageUrl: 'https://picsum.photos/seed/reevabanner2/1600/400',
+            imageHint: 'shopping sale',
+          }
+        ],
+        themeName: 'Blue',
+      });
+      await reevaBrand.save();
+      console.log('Created default "reeva" brand.');
+    }
+
+
     // --- Create Products ---
     const products = [];
     for (let i = 1; i <= 50; i++) {
