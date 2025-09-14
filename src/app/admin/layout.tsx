@@ -29,10 +29,10 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-2 md:px-4">
+      <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background pl-2 pr-4 md:px-4">
         <div className="flex items-center gap-2 font-semibold">
            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("h-5 w-5 transition-transform", isSidebarCollapsed && "rotate-180")}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("h-5 w-5 transition-transform", isSidebarCollapsed && "rotate-180")}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
           <Link href="/admin/dashboard">
