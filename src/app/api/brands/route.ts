@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Brand from '@/models/brand.model';
-import { BrandFormSchema } from '@/components/admin/brand-form';
+import { BrandFormSchema } from '@/lib/brand-schema';
 
 export async function GET() {
   try {
@@ -50,5 +50,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: error.message || 'An internal server error occurred' }, { status: 500 });
   }
 }
-
-    

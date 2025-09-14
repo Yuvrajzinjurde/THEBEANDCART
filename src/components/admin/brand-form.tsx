@@ -4,7 +4,6 @@
 import React from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -28,36 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
-const bannerSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
-  imageHint: z.string().min(1, "Image hint is required"),
-});
-
-const themeColors = [
-    { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
-    { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
-    { name: 'Orange', primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
-    { name: 'Purple', primary: '262.1 83.3% 57.8%', background: '0 0% 100%', accent: '260 100% 96.7%' },
-    { name: 'Teal', primary: '175 75% 40%', background: '0 0% 100%', accent: '175 50% 95%' },
-    { name: 'Rose', primary: '346.8 77.2% 49.8%', background: '0 0% 100%', accent: '350 100% 96.9%' },
-    { name: 'Yellow', primary: '47.9 95.8% 53.1%', background: '0 0% 100%', accent: '50 100% 96.1%' },
-    { name: 'Slate (Dark)', primary: '215.2 79.8% 52%', background: '222.2 84% 4.9%', accent: '217.2 32.6% 17.5%' },
-    { name: 'Red', primary: '0 72.2% 50.6%', background: '0 0% 100%', accent: '0 85.7% 95.9%' },
-    { name: 'Magenta', primary: '310 75% 50%', background: '0 0% 100%', accent: '310 50% 95%' },
-] as const;
-
-export const BrandFormSchema = z.object({
-  displayName: z.string().min(1, "Display name is required"),
-  permanentName: z.string().min(1, "Permanent name is required").regex(/^[a-z0-9-]+$/, "Permanent name can only contain lowercase letters, numbers, and hyphens."),
-  logoUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Logo is required"),
-  banners: z.array(bannerSchema).min(1, "At least one banner is required"),
-  themeName: z.string({ required_error: "Please select a theme." }),
-});
-
-type BrandFormValues = z.infer<typeof BrandFormSchema>;
+import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
 
 interface BrandFormProps {
   mode: 'create' | 'edit';
@@ -119,7 +89,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        // Use the specific error from the API
         throw new Error(result.message || `Failed to ${mode} brand.`);
       }
 
@@ -128,9 +97,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       router.refresh();
 
     } catch (error: any) {
-      // Log the full error to the console for debugging
       console.error("Submission Error:", error);
-      // Show the specific error message in the toast
       toast.error(error.message);
     } finally {
       setIsSubmitting(false);
@@ -317,24 +284,24 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     name="themeName"
                     render={({ field }) => (
                         <FormItem className="space-y-3">
-                            <FormControl>
+                             <FormControl>
                                 <RadioGroup
                                     onValueChange={field.onChange}
                                     value={field.value}
                                     className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
                                 >
                                     {themeColors.map((theme) => (
-                                        <FormItem key={theme.name}>
+                                    <FormItem key={theme.name}>
+                                        <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
                                             <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                            <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
-                                                <div className="flex items-center gap-2">
-                                                    <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
-                                                    <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
-                                                    <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
-                                                </div>
-                                                <span className="mt-2 text-sm font-medium">{theme.name}</span>
-                                            </FormLabel>
-                                        </FormItem>
+                                            <div className="flex items-center gap-2">
+                                                <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
+                                                <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
+                                                <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
+                                            </div>
+                                            <span className="mt-2 text-sm font-medium">{theme.name}</span>
+                                        </FormLabel>
+                                    </FormItem>
                                     ))}
                                 </RadioGroup>
                             </FormControl>
@@ -348,7 +315,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <AlertDialog>
           <AlertDialogTrigger asChild>
               <Button type="button" disabled={!form.formState.isValid || isSubmitting}>
-                 {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
                  {mode === 'create' ? 'Create Brand' : 'Save Changes'}
               </Button>
           </AlertDialogTrigger>
@@ -373,5 +339,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
-
-    
