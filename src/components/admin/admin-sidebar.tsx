@@ -170,28 +170,30 @@ export function AdminSidebar() {
              </div>
 
              {/* Sidebar Footer */}
-             <div className="mt-auto border-t p-2">
-                 <TooltipProvider delayDuration={0}>
-                    <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
-                       {!isCollapsed && <span className="text-xs text-muted-foreground p-2">Help & Settings</span>}
-                       <div className="flex items-center gap-1">
-                           <Tooltip>
-                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button></TooltipTrigger>
-                               <TooltipContent side={isCollapsed ? "right" : "top"}>Theme</TooltipContent>
-                           </Tooltip>
-                           <Tooltip>
-                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button></TooltipTrigger>
-                               <TooltipContent side={isCollapsed ? "right" : "top"}>Help</TooltipContent>
-                           </Tooltip>
-                           <Tooltip>
-                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button></TooltipTrigger>
-                               <TooltipContent side={isCollapsed ? "right" : "top"}>Settings</TooltipContent>
-                           </Tooltip>
-                       </div>
-                    </div>
-                </TooltipProvider>
-                <Separator className="my-2" />
-                <div className={cn("p-2", isCollapsed && "p-0")}>
+             <div className="mt-auto border-t">
+                 <div className={cn(!isCollapsed && "p-2")}>
+                    <TooltipProvider delayDuration={0}>
+                        <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2 py-2")}>
+                        {!isCollapsed && <span className="text-xs text-muted-foreground p-2">Help & Settings</span>}
+                        <div className="flex items-center gap-1">
+                            <Tooltip>
+                                <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button></TooltipTrigger>
+                                <TooltipContent side={isCollapsed ? "right" : "top"}>Theme</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button></TooltipTrigger>
+                                <TooltipContent side={isCollapsed ? "right" : "top"}>Help</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button></TooltipTrigger>
+                                <TooltipContent side={isCollapsed ? "right" : "top"}>Settings</TooltipContent>
+                            </Tooltip>
+                        </div>
+                        </div>
+                    </TooltipProvider>
+                 </div>
+                <Separator className="my-0" />
+                <div className={cn("p-2", isCollapsed && "py-2")}>
                     <UserNav isCollapsed={isCollapsed} />
                 </div>
             </div>
