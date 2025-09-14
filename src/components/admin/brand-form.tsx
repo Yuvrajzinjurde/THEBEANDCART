@@ -180,7 +180,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 />
                                 {field.value ? (
                                     <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
-                                        <Image src={field.value} alt="Logo preview" layout="fill" objectFit="contain" />
+                                        <Image src={field.value} alt="Logo preview" fill objectFit="contain" />
                                         <Button
                                             type="button"
                                             variant="destructive"
@@ -248,7 +248,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                             />
                                             {imageField.value ? (
                                                 <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
-                                                    <Image src={imageField.value} alt="Banner preview" layout="fill" objectFit="cover" />
+                                                    <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                     <Button
                                                         type="button"
                                                         variant="destructive"
@@ -281,9 +281,23 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
-                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2" onClick={() => remove(index)}>
-                            <Trash className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2">
+                                    <Trash className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will permanently remove this banner. This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => remove(index)}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => append({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
@@ -307,9 +321,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     {themeColors.map((theme) => (
                                          <FormItem key={theme.name} className="flex-1">
                                              <FormControl>
-                                                <RadioGroupItem value={theme.name} className="sr-only" id={theme.name} />
+                                                <RadioGroupItem value={theme.name} className="sr-only" id={`theme-${theme.name}`} />
                                              </FormControl>
-                                             <FormLabel htmlFor={theme.name} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer">
                                                 <div className="flex items-center gap-2">
                                                     <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
                                                     <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
@@ -365,5 +379,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
-
-    
