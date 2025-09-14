@@ -32,7 +32,7 @@ export default function AdminLayout({
       <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2 font-semibold">
            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
-             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 4h-5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5"/><path d="M10 4v16"/><path d="M4 12h6"/></svg>
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("h-5 w-5 transition-transform", isSidebarCollapsed && "rotate-180")}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
           <Link href="/admin/dashboard">
