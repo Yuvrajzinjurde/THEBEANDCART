@@ -321,9 +321,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 >
                                     {themeColors.map((theme) => (
                                         <FormItem key={theme.name} className="flex-1">
-                                            <FormControl>
-                                                <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                            </FormControl>
+                                            <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
                                                 <div className="flex items-center gap-2">
                                                     <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
