@@ -4,10 +4,10 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Bell, Search, Settings } from "lucide-react";
+import { Bell, Settings } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
-import { Input } from "@/components/ui/input";
 import useBrandStore from "@/stores/brand-store";
+import Link from "next/link";
 
 export default function AdminLayout({
   children,
@@ -16,6 +16,7 @@ export default function AdminLayout({
 }) {
   const { user } = useAuth();
   const { selectedBrand } = useBrandStore();
+  const canEdit = selectedBrand !== 'All Brands';
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -29,9 +30,10 @@ export default function AdminLayout({
           <div className="flex items-center gap-4 ml-auto">
             <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card">
                 <span className="font-semibold text-sm">{selectedBrand}</span>
-                <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-                    <Settings className="h-4 w-4" />
-                    <span className="sr-only">Brand Settings</span>
+                <Button variant="ghost" size="icon" className="rounded-full h-7 w-7" disabled={!canEdit} asChild>
+                    <Link href={canEdit ? `/admin/brands/edit/${selectedBrand.toLowerCase()}` : '#'}>
+                        <Settings className="h-4 w-4" />
+                    </Link>
                 </Button>
             </div>
             <div className="w-px h-6 bg-border" />

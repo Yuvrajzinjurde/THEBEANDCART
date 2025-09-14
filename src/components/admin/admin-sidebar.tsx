@@ -8,9 +8,10 @@ import {
   Users,
   GitCommitHorizontal,
   Warehouse,
+  PlusCircle
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -40,8 +41,22 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const { selectedBrand, availableBrands, setSelectedBrand } = useBrandStore();
+  const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  useEffect(() => {
+    async function fetchBrands() {
+      try {
+        const response = await fetch('/api/brands');
+        const data = await response.json();
+        const brandNames = data.brands.map((b: any) => b.displayName);
+        setAvailableBrands(['All Brands', ...brandNames]);
+      } catch (error) {
+        console.error("Failed to fetch brands", error);
+      }
+    }
+    fetchBrands();
+  }, [setAvailableBrands]);
 
 
   const handleLinkClick = () => {
@@ -85,6 +100,13 @@ export function AdminSidebar() {
                         {brand}
                     </DropdownMenuItem>
                 ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                    <Link href="/admin/brands/new" className="flex items-center cursor-pointer">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        <span>Add New Brand</span>
+                    </Link>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
         </nav>
