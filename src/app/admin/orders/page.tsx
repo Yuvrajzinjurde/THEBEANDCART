@@ -37,6 +37,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 
 export default function OrdersPage() {
@@ -53,26 +54,54 @@ export default function OrdersPage() {
     </div>
   );
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!date?.from || !date?.to) {
-        alert("Please select a date range first.");
+        toast.error("Please select a date range first.");
         return;
     }
-
-    // Since we don't have real order data, we'll create some dummy data.
-    const dummyOrders = [
-        { id: 'ORD001', date: '2023-10-26', customer: 'John Doe', total: 150.00, status: 'Shipped' },
-        { id: 'ORD002', date: '2023-10-27', customer: 'Jane Smith', total: 200.50, status: 'Pending' },
-        { id: 'ORD003', date: '2023-10-28', customer: 'Peter Jones', total: 75.25, status: 'Delivered' },
-    ];
-
-    const worksheet = XLSX.utils.json_to_sheet(dummyOrders);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
     
-    // Generate a file name with the date range
-    const fileName = `orders_${format(date.from, "yyyy-MM-dd")}_to_${format(date.to, "yyyy-MM-dd")}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+    toast.info("Generating your report...");
+
+    try {
+        const fromDate = format(date.from, 'yyyy-MM-dd');
+        const toDate = format(date.to, 'yyyy-MM-dd');
+        
+        const response = await fetch(`/api/orders?startDate=${fromDate}&endDate=${toDate}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch orders');
+        }
+
+        const { orders } = await response.json();
+
+        if (orders.length === 0) {
+            toast.warn("No orders found in the selected date range.");
+            return;
+        }
+        
+        // Flatten the data for Excel export
+        const flattenedData = orders.map((order: any) => ({
+            'Order ID': order._id,
+            'User ID': order.userId,
+            'Total Amount': order.totalAmount,
+            'Status': order.status,
+            'Brand': order.brand,
+            'Order Date': format(new Date(order.createdAt), 'PPpp'),
+            'Product Count': order.products.length,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+        
+        const fileName = `orders_${format(date.from, "yyyy-MM-dd")}_to_${format(date.to, "yyyy-MM-dd")}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+        toast.success("Report downloaded successfully!");
+
+    } catch (error: any) {
+        console.error("Download Error:", error);
+        toast.error(error.message || "An error occurred while generating the report.");
+    }
   };
 
 
@@ -136,7 +165,7 @@ export default function OrdersPage() {
                                   defaultMonth={date?.from}
                                   selected={date}
                                   onSelect={setDate}
-                                  numberOfMonths={2}
+                                  numberOfMonths={1}
                                 />
                                 <div className="p-4 border-t">
                                     <Button onClick={handleDownload} className="w-full" disabled={!date?.from || !date?.to}>Download</Button>
@@ -205,7 +234,7 @@ export default function OrdersPage() {
                         <Select defaultValue="sku-id">
                             <SelectTrigger className="absolute right-1 top-1/2 -translate-y-1/2 w-auto h-8 bg-muted border-l rounded-l-none">
                                 <SelectValue />
-                            </SelectTrigger>
+                            </Trigger>
                             <SelectContent>
                                 <SelectItem value="sku-id">SKU ID</SelectItem>
                                 <SelectItem value="order-id">Order ID</SelectItem>
