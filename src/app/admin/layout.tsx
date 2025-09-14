@@ -29,9 +29,10 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-hidden">
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background pl-2 pr-4 md:px-4">
+      <header className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b bg-background pl-2 pr-4 md:px-4">
         <div className="flex items-center gap-2 font-semibold">
-           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
+           <AdminSidebar isCollapsed={isSidebarCollapsed} onCollapseChange={setIsSidebarCollapsed} />
+           <Button variant="ghost" size="icon" className="h-8 w-8 hidden md:inline-flex" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
             <svg
                 width="15"
                 height="15"
@@ -55,8 +56,8 @@ export default function AdminLayout({
           </Link>
         </div>
         
-        <div className="flex items-center gap-4 ml-auto">
-          <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card">
+        <div className="flex items-center gap-2 md:gap-4 ml-auto">
+          <div className="hidden md:flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card">
               <span className="font-semibold text-sm">{selectedBrand}</span>
               <Button variant="ghost" size="icon" className="rounded-full h-7 w-7" disabled={!canEdit} asChild>
                   <Link href={canEdit ? `/admin/brands/edit/${selectedBrand.toLowerCase()}` : '#'}>
@@ -64,7 +65,7 @@ export default function AdminLayout({
                   </Link>
               </Button>
           </div>
-          <div className="w-px h-6 bg-border" />
+          <div className="w-px h-6 bg-border hidden md:block" />
           <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
             <Bell className="h-4 w-4" />
             <span className="sr-only">Toggle notifications</span>
@@ -72,12 +73,11 @@ export default function AdminLayout({
           {user && <UserNav />}
         </div>
       </header>
-      <div className="flex flex-1">
-        <AdminSidebar isCollapsed={isSidebarCollapsed} onCollapseChange={setIsSidebarCollapsed} />
+      <div className="flex flex-1 md:pl-14">
         <main 
           className={cn(
-              "flex-1 p-4 sm:px-6 sm:py-4 transition-[margin-left] duration-300 ease-in-out overflow-x-auto",
-              isClient && (isSidebarCollapsed ? "md:ml-14" : "md:ml-60")
+              "flex-1 p-4 sm:px-6 sm:py-4 transition-[margin-left] duration-300 ease-in-out overflow-y-auto",
+               isClient && (isSidebarCollapsed ? "md:ml-0" : "md:ml-48")
           )}
         >
           {children}

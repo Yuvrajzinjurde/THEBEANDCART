@@ -155,20 +155,21 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full h-[400px] bg-secondary text-foreground">
+                        <div className="relative w-full h-[300px] md:h-[400px] bg-secondary text-foreground">
                             <Image
                                 src={banner.imageUrl}
                                 alt={banner.title}
                                 fill
                                 className="object-cover"
                                 data-ai-hint={banner.imageHint}
+                                priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
                             <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
-                                <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
+                                <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight">
                                     {banner.title}
                                 </h1>
-                                <p className="mt-4 text-lg max-w-2xl">
+                                <p className="mt-4 text-base md:text-lg max-w-2xl">
                                     {banner.description}
                                 </p>
                             </div>
@@ -189,14 +190,14 @@ export default function BrandHomePage() {
             onSortChange={setSortOption}
           />
         
-          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:gap-x-8 mt-8">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8 mt-8">
             {filteredAndSortedProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>
       </div>
       {user?.roles.includes('admin') && (
-        <div className="absolute bottom-4 right-4">
+        <div className="fixed bottom-4 right-4 z-50">
             <Button onClick={handleSeed} variant="outline">
             Seed Database
             </Button>

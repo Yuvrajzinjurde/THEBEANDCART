@@ -107,14 +107,14 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Orders</h1>
         <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                   <Button variant="default">
                       <Download className="mr-2 h-4 w-4" />
-                      Download Orders Data
+                      Download Report
                   </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-80 p-4" align="end">
@@ -127,10 +127,10 @@ export default function OrdersPage() {
                       </Alert>
                       
                       <div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                              <div>
                                 <p className="font-semibold">Download Orders Data</p>
-                                <p className="text-xs text-muted-foreground">It might take some time to generate the file</p>
+                                <p className="text-xs text-muted-foreground">Select a date range to export.</p>
                             </div>
                            <Popover>
                               <PopoverTrigger asChild>
@@ -139,7 +139,7 @@ export default function OrdersPage() {
                                   variant={"outline"}
                                   size="sm"
                                   className={cn(
-                                    "w-auto justify-start text-left font-normal",
+                                    "w-full sm:w-auto justify-start text-left font-normal mt-2 sm:mt-0",
                                     !date && "text-muted-foreground"
                                   )}
                                 >
@@ -188,47 +188,51 @@ export default function OrdersPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-muted/50">
-          <TabsTrigger value="on-hold">On Hold</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="ready-to-ship">Ready to Ship</TabsTrigger>
-          <TabsTrigger value="shipped">Shipped</TabsTrigger>
-          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-5 min-w-[600px] bg-muted/50">
+            <TabsTrigger value="on-hold">On Hold</TabsTrigger>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="ready-to-ship">Ready to Ship</TabsTrigger>
+            <TabsTrigger value="shipped">Shipped</TabsTrigger>
+            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            </TabsList>
+        </div>
         
         <Card className="mt-4">
             <CardContent className="p-4 space-y-4">
-                <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium">Filter by:</span>
-                     <Select>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="SLA Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            <SelectItem value="due-today">Due Today</SelectItem>
-                            <SelectItem value="due-tomorrow">Due Tomorrow</SelectItem>
-                        </SelectContent>
-                    </Select>
-                     <Select>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Dispatch Date" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="today">Today</SelectItem>
-                            <SelectItem value="yesterday">Yesterday</SelectItem>
-                        </SelectContent>
-                    </Select>
-                     <Select>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Order Date" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="last-7-days">Last 7 days</SelectItem>
-                             <SelectItem value="last-30-days">Last 30 days</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <div className="relative ml-auto w-[300px]">
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                    <span className="text-sm font-medium shrink-0">Filter by:</span>
+                     <div className="grid grid-cols-1 sm:grid-cols-3 md:flex md:flex-1 gap-4 w-full">
+                         <Select>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="SLA Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All</SelectItem>
+                                <SelectItem value="due-today">Due Today</SelectItem>
+                                <SelectItem value="due-tomorrow">Due Tomorrow</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Dispatch Date" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="today">Today</SelectItem>
+                                <SelectItem value="yesterday">Yesterday</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Order Date" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="last-7-days">Last 7 days</SelectItem>
+                                <SelectItem value="last-30-days">Last 30 days</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="relative w-full md:w-[300px] mt-4 md:mt-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input placeholder="Search..." className="pl-9" />
                         <Select defaultValue="sku-id">

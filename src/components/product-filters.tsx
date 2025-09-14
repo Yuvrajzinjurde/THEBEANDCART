@@ -26,8 +26,8 @@ export function ProductFilters({
 }: ProductFiltersProps) {
   return (
     <div className="mb-8 rounded-lg border bg-card p-4 shadow-sm">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div className="relative sm:col-span-2 md:col-span-1 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="relative sm:col-span-2 md:col-span-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search products..."
