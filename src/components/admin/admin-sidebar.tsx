@@ -85,10 +85,10 @@ export function AdminSidebar() {
 
   return (
     <aside className={cn(
-        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out",
+        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background",
         isCollapsed ? "w-16" : "w-64",
     )}>
-        <div className="flex h-full max-h-screen flex-col border-r bg-background">
+        <div className="flex h-full max-h-screen flex-col border-r">
             {/* Sidebar Header */}
             <div className={cn(
                 "flex items-center h-16 border-b px-4",
@@ -171,11 +171,11 @@ export function AdminSidebar() {
 
              {/* Sidebar Footer */}
              <div className="mt-auto border-t">
-                 <div className={cn(!isCollapsed && "p-2")}>
+                 <div className={cn(isCollapsed ? "py-2" : "p-2")}>
                     <TooltipProvider delayDuration={0}>
-                        <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2 py-2")}>
-                        {!isCollapsed && <span className="text-xs text-muted-foreground p-2">Help & Settings</span>}
-                        <div className="flex items-center gap-1">
+                        <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
+                        {!isCollapsed && <span className="text-xs text-muted-foreground p-2">Help &amp; Settings</span>}
+                        <div className={cn("flex items-center gap-1", isCollapsed && "flex-col")}>
                             <Tooltip>
                                 <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button></TooltipTrigger>
                                 <TooltipContent side={isCollapsed ? "right" : "top"}>Theme</TooltipContent>
@@ -193,7 +193,7 @@ export function AdminSidebar() {
                     </TooltipProvider>
                  </div>
                 <Separator className="my-0" />
-                <div className={cn("p-2", isCollapsed && "py-2")}>
+                <div className={cn(isCollapsed && "py-2")}>
                     <UserNav isCollapsed={isCollapsed} />
                 </div>
             </div>
