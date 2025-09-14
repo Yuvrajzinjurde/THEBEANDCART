@@ -83,13 +83,15 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
     return (
          <div className="flex flex-col h-full">
             <div className={cn("flex h-16 items-center border-b px-4", isCollapsed && "px-2 justify-center")}>
-                 <Button variant="ghost" onClick={() => onCollapseChange?.(!isCollapsed)} className="w-full justify-start gap-2 px-2">
+                 <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold" onClick={onLinkClick}>
                     <Store className="h-6 w-6" />
                     {!isCollapsed && <span className="font-semibold">Admin Panel</span>}
-                     {isCollapsed && onCollapseChange && (
-                        <PanelLeft className="h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2" />
-                    )}
-                </Button>
+                </Link>
+                 {isCollapsed && onCollapseChange && (
+                    <Button variant="ghost" onClick={() => onCollapseChange(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0">
+                        <PanelLeft className="h-5 w-5" />
+                    </Button>
+                )}
             </div>
             <div className={cn("p-4", isCollapsed && "p-2")}>
                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
@@ -160,8 +162,8 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
             </TooltipProvider>
             </nav>
             <div className="mt-auto border-t p-4">
-               {onCollapseChange && (
-                 <Button size="icon" variant="ghost" onClick={() => onCollapseChange(!isCollapsed)}>
+               {onCollapseChange && !isCollapsed && (
+                 <Button size="icon" variant="ghost" onClick={() => onCollapseChange(true)}>
                     <PanelLeft className="h-5 w-5" />
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
