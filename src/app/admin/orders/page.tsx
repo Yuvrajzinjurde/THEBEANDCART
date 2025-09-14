@@ -9,6 +9,10 @@ import {
   Info,
   Calendar as CalendarIcon,
 } from "lucide-react";
+import { format } from "date-fns";
+import type { DateRange } from "react-day-picker";
+import * as XLSX from "xlsx";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,10 +34,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState("pending");
+  const [date, setDate] = useState<DateRange | undefined>();
 
   const renderEmptyState = () => (
     <div className="flex flex-col items-center justify-center text-center py-16">
@@ -44,6 +52,29 @@ export default function OrdersPage() {
       </p>
     </div>
   );
+
+  const handleDownload = () => {
+    if (!date?.from || !date?.to) {
+        alert("Please select a date range first.");
+        return;
+    }
+
+    // Since we don't have real order data, we'll create some dummy data.
+    const dummyOrders = [
+        { id: 'ORD001', date: '2023-10-26', customer: 'John Doe', total: 150.00, status: 'Shipped' },
+        { id: 'ORD002', date: '2023-10-27', customer: 'Jane Smith', total: 200.50, status: 'Pending' },
+        { id: 'ORD003', date: '2023-10-28', customer: 'Peter Jones', total: 75.25, status: 'Delivered' },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(dummyOrders);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+    
+    // Generate a file name with the date range
+    const fileName = `orders_${format(date.from, "yyyy-MM-dd")}_to_${format(date.to, "yyyy-MM-dd")}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
 
   return (
     <div className="space-y-6">
@@ -72,10 +103,46 @@ export default function OrdersPage() {
                                 <p className="font-semibold">Download Orders Data</p>
                                 <p className="text-xs text-muted-foreground">It might take some time to generate the file</p>
                             </div>
-                            <Button variant="outline" size="sm">
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                Select Date Range
-                            </Button>
+                           <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="date"
+                                  variant={"outline"}
+                                  size="sm"
+                                  className={cn(
+                                    "w-auto justify-start text-left font-normal",
+                                    !date && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {date?.from ? (
+                                    date.to ? (
+                                      <>
+                                        {format(date.from, "LLL dd, y")} -{" "}
+                                        {format(date.to, "LLL dd, y")}
+                                      </>
+                                    ) : (
+                                      format(date.from, "LLL dd, y")
+                                    )
+                                  ) : (
+                                    <span>Select Date Range</span>
+                                  )}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="end">
+                                <Calendar
+                                  initialFocus
+                                  mode="range"
+                                  defaultMonth={date?.from}
+                                  selected={date}
+                                  onSelect={setDate}
+                                  numberOfMonths={2}
+                                />
+                                <div className="p-4 border-t">
+                                    <Button onClick={handleDownload} className="w-full" disabled={!date?.from || !date?.to}>Download</Button>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                         </div>
                       </div>
 
