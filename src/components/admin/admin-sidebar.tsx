@@ -55,7 +55,7 @@ interface AdminSidebarProps {
 }
 
 
-const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean, onLinkClick?: () => void }) => {
+const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isCollapsed?: boolean, onLinkClick?: () => void, onCollapseChange?: (isCollapsed: boolean) => void; }) => {
     const pathname = usePathname();
     const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
     const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
@@ -130,7 +130,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                 </Collapsible>
             </div>
     
-            <nav className={cn("grid gap-1 items-start px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
+            <nav className={cn("grid items-start px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
             <TooltipProvider delayDuration={0}>
                 {navItems.map(({ href, icon: Icon, label }) => (
                     <Tooltip key={label}>
@@ -157,10 +157,12 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
             </TooltipProvider>
             </nav>
             <div className="mt-auto border-t p-4">
-                <Button size="icon" variant="ghost" onClick={() => onCollapseChange(!isCollapsed)}>
+               {onCollapseChange && (
+                 <Button size="icon" variant="ghost" onClick={() => onCollapseChange(!isCollapsed)}>
                     <PanelLeft className="h-5 w-5" />
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
+               )}
             </div>
         </div>
     )
