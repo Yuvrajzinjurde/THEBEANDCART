@@ -55,6 +55,11 @@ export async function PUT(
 
   } catch (error) {
     console.error('Failed to update brand:', error);
+    if ((error as any).code === 11000) {
+        return NextResponse.json({ message: 'Another brand with this name might already exist.' }, { status: 409 });
+    }
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
+
+    

@@ -42,9 +42,12 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Failed to create brand:', error);
+    // Be more specific about the error if it's a duplicate key error
+    if ((error as any).code === 11000) {
+        return NextResponse.json({ message: 'A brand with this permanent name already exists.' }, { status: 409 });
+    }
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
-
 
     

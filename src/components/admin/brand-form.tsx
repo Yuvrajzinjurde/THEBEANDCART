@@ -85,6 +85,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(BrandFormSchema),
     defaultValues,
+    mode: 'onChange', // Validate on change to update button state
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -196,7 +197,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                             <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                            <p className="text-xs text-muted-foreground">PNG or JPG (200x200px)</p>
+                                            <p className="text-xs text-muted-foreground">PNG or JPG (200x200px recommended)</p>
                                         </div>
                                     </label>
                                 )}
@@ -281,7 +282,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">PNG or JPG (1600x400px)</p>
+                                                        <p className="text-xs text-muted-foreground">PNG or JPG (1600x400px recommended)</p>
                                                     </div>
                                                 </label>
                                             )}
@@ -312,27 +313,27 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     name="themeName"
                     render={({ field }) => (
                         <FormItem className="space-y-3">
-                            <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-                                >
-                                    {themeColors.map((theme) => (
-                                        <div key={theme.name}>
-                                            <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                            <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
-                                                <div className="flex items-center gap-2">
-                                                    <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
-                                                    <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
-                                                    <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
-                                                </div>
-                                                <span className="mt-2 text-sm font-medium">{theme.name}</span>
-                                            </FormLabel>
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                            </FormControl>
+                             <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                            >
+                                {themeColors.map((theme) => (
+                                    <FormItem key={theme.name} className="flex-1">
+                                        <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
+                                            <FormControl>
+                                                <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
+                                            </FormControl>
+                                            <div className="flex items-center gap-2">
+                                                <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
+                                                <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
+                                                <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
+                                            </div>
+                                            <span className="mt-2 text-sm font-medium">{theme.name}</span>
+                                        </FormLabel>
+                                    </FormItem>
+                                ))}
+                            </RadioGroup>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -342,15 +343,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-              <Button type="button" disabled={isSubmitting}>
-                {isSubmitting ? (
-                    <>
-                        <Loader className="mr-2 h-4 w-4" />
-                        {mode === 'create' ? 'Creating...' : 'Saving...'}
-                    </>
-                ) : (
-                    mode === 'create' ? 'Create Brand' : 'Save Changes'
-                )}
+              <Button type="button" disabled={!form.formState.isValid || isSubmitting}>
+                 {mode === 'create' ? 'Create Brand' : 'Save Changes'}
               </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -364,6 +358,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
               <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                      {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
                       Continue
                   </AlertDialogAction>
               </AlertDialogFooter>
@@ -372,7 +367,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       </form>
     </Form>
   );
-
 }
 
     
