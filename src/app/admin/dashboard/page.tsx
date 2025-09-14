@@ -124,10 +124,10 @@ function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
+            <div className="text-2xl font-bold block break-words">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground flex items-center flex-wrap">
                 <StatChange value={stats.percentageChanges.inventory} />
-                &nbsp;vs. last month
+                <span className="ml-1">vs. last month</span>
             </p>
           </CardContent>
         </Card>
