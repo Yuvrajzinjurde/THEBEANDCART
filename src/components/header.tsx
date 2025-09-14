@@ -40,11 +40,11 @@ export default function Header() {
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={`/${brandName}/home`} className="mr-6 flex items-center space-x-2">
           {brand?.logoUrl ? (
-            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8" />
+            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={40} height={40} className="h-10 w-10 object-contain" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
-          <span className="hidden font-bold sm:inline-block capitalize">{brandName}</span>
+          <span className="hidden font-bold sm:inline-block capitalize">{brand?.displayName || brandName}</span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
@@ -69,7 +69,7 @@ export default function Header() {
                     <Link href="/login">Log In</Link>
                 </Button>
                 <Button asChild variant="secondary" size="sm">
-                    <Link href="/signup">Sign Up</Link>
+                    <Link href={`/${brandName}/signup`}>Sign Up</Link>
                 </Button>
               </div>
             )}
