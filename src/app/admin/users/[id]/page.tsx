@@ -116,7 +116,7 @@ export default function UserDetailsPage() {
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2">
                 <Card className="bg-purple-100 text-purple-800">
                     <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
                          <Avatar className="h-14 w-14 text-2xl border-2 border-purple-200">
@@ -167,24 +167,6 @@ export default function UserDetailsPage() {
                                 Joined on {format(new Date(user.createdAt as string), 'dd MMM, yyyy')}
                             </p>
                          </div>
-                    </CardContent>
-                </Card>
-                
-                 <Card className="bg-green-100 text-green-800">
-                    <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
-                        <Home className="h-6 w-6" />
-                        <CardTitle>Delivery Address</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {user.address && user.address.street ? (
-                             <address className="text-sm not-italic text-green-700">
-                                {user.address.street}, {user.address.city}<br/>
-                                {user.address.state} - {user.address.zip}<br/>
-                                {user.address.country}
-                            </address>
-                        ): (
-                            <p className="text-sm text-green-700">No delivery address added</p>
-                        )}
                     </CardContent>
                 </Card>
             </div>
@@ -275,3 +257,4 @@ export default function UserDetailsPage() {
     
 
     
+
