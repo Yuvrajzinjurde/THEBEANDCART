@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Search, Download } from 'lucide-react';
+import { ArrowLeft, Search, FileSpreadsheet } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import * as XLSX from "xlsx";
@@ -202,8 +202,13 @@ export default function UserDetailsPage() {
                                     <SelectItem value="cancelled">Cancelled</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <Button variant="outline" size="sm" onClick={handleDownload}>
-                                <Download className="mr-2 h-4 w-4" />
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleDownload}
+                                className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700"
+                            >
+                                <FileSpreadsheet className="mr-2 h-4 w-4" />
                                 Download Report
                             </Button>
                         </div>
@@ -251,4 +256,5 @@ export default function UserDetailsPage() {
             </Card>
         </div>
     );
-}
+
+    
