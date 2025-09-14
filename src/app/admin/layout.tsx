@@ -8,7 +8,7 @@ import { Bell, Settings } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import useBrandStore from "@/stores/brand-store";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export default function AdminLayout({
@@ -22,6 +22,11 @@ export default function AdminLayout({
 
   // We need to know the state of the sidebar to adjust the main content
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -29,7 +34,7 @@ export default function AdminLayout({
       <div 
         className={cn(
             "flex flex-col sm:gap-4 sm:py-4 transition-[margin-left] duration-300 ease-in-out",
-            isSidebarCollapsed ? "sm:pl-14" : "sm:pl-60"
+            isClient && (isSidebarCollapsed ? "sm:pl-14" : "sm:pl-60")
         )}
       >
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
