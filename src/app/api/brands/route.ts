@@ -29,7 +29,8 @@ export async function POST(req: Request) {
     
     const { permanentName } = validation.data;
 
-    const existingBrand = await Brand.findOne({ permanentName });
+    // Use a case-insensitive regex for the check
+    const existingBrand = await Brand.findOne({ permanentName: { $regex: new RegExp(`^${permanentName}$`, 'i') } });
     if (existingBrand) {
       return NextResponse.json({ message: `A brand with permanent name '${permanentName}' already exists.` }, { status: 409 });
     }
