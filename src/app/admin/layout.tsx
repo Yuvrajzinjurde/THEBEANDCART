@@ -4,13 +4,12 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Bell, Menu, Settings } from "lucide-react";
+import { Bell, Settings } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import useBrandStore from "@/stores/brand-store";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Logo } from "@/components/logo";
 
 export default function AdminLayout({
   children,
@@ -32,9 +31,15 @@ export default function AdminLayout({
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2 font-semibold">
-           <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-            <Logo className="h-6 w-6" />
-            <span className="">Admin Panel</span>
+           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 6.343a4.5 4.5 0 0 1 0 6.364L10.05 17.657a4.5 4.5 0 1 1-6.364-6.364L8.636 6.343a4.5 4.5 0 0 1 6.364 0Z"/>
+                <path d="M9 17.657a4.5 4.5 0 0 1 0-6.364L13.95 6.343a4.5 4.5 0 1 1 6.364 6.364L15.364 17.657a4.5 4.5 0 0 1-6.364 0Z"/>
+            </svg>
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+          <Link href="/admin/dashboard">
+            <span className="font-bold">Admin Panel</span>
           </Link>
         </div>
         
