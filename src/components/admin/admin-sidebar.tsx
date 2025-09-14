@@ -52,7 +52,7 @@ export function AdminSidebar() {
             const data = await response.json();
             const brandNames = data.brands.map((b: any) => b.displayName);
             setAvailableBrands(['All Brands', ...brandNames]);
-        } catch (error) => {
+        } catch (error) {
             console.error("Failed to fetch brands", error);
         }
         }
