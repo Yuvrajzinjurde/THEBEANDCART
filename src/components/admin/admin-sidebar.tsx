@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -12,6 +13,9 @@ import {
   ChevronDown,
   Check,
   Store,
+  Sun,
+  HelpCircle,
+  Settings,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -164,17 +168,22 @@ export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProp
             </div>
         </div>
 
-         <div className="mt-auto flex h-16 items-center border-t px-4">
-             <Button
-                onClick={toggleCollapse}
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")}><path d="M15 4h-5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5"/><path d="M10 4v16"/><path d="M4 12h6"/></svg>
-                <span className="sr-only">Toggle sidebar</span>
-            </Button>
-         </div>
+        <div className="mt-auto border-t">
+          <div className={cn("flex items-center justify-between p-4", isCollapsed && "justify-center")}>
+              {!isCollapsed && <span className="text-sm text-muted-foreground">Help & Settings</span>}
+              <div className="flex gap-2">
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <Sun className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <HelpCircle className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <Settings className="h-4 w-4" />
+                  </Button>
+              </div>
+          </div>
+        </div>
     </div>
   );
 }
