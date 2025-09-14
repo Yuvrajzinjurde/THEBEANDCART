@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, Upload } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -156,15 +156,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 name="logoUrl"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Logo</FormLabel>
+                        <FormLabel>Logo URL</FormLabel>
                         <FormControl>
-                             <div className="flex items-center gap-4">
-                                <div className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                                    <span className="truncate">{field.value || 'https://example.com/logo.png'}</span>
-                                    <Upload className="h-4 w-4 text-muted-foreground"/>
-                                </div>
-                                <Input type="hidden" {...field} />
-                            </div>
+                           <Input placeholder="https://example.com/logo.png" {...field} />
                         </FormControl>
                          <FormDescription>
                             Provide a URL for the logo. Recommended: 200x200px PNG or JPG.
@@ -203,15 +197,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             name={`banners.${index}.imageUrl`}
                             render={({ field: imageField }) => (
                                 <FormItem>
-                                    <FormLabel>Image</FormLabel>
+                                    <FormLabel>Image URL</FormLabel>
                                     <FormControl>
-                                        <div className="flex items-center gap-4">
-                                             <div className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                                                <span className="truncate">{imageField.value || 'https://example.com/banner.jpg'}</span>
-                                                <Upload className="h-4 w-4 text-muted-foreground"/>
-                                            </div>
-                                            <Input type="hidden" {...imageField} />
-                                        </div>
+                                        <Input placeholder="https://example.com/banner.jpg" {...imageField} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -301,6 +289,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
-
-
-    
