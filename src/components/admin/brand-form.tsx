@@ -31,7 +31,7 @@ import {
 const bannerSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  imageUrl: z.string().url("Must be a valid URL"),
+  imageUrl: z.string().min(1, "Image is required"),
   imageHint: z.string().min(1, "Image hint is required"),
 });
 
@@ -51,7 +51,7 @@ const themeColors = [
 export const BrandFormSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
   permanentName: z.string().min(1, "Permanent name is required").regex(/^[a-z0-9-]+$/, "Permanent name can only contain lowercase letters, numbers, and hyphens."),
-  logoUrl: z.string().url("Must be a valid URL"),
+  logoUrl: z.string().min(1, "Logo is required"),
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
   themeName: z.string({ required_error: "Please select a theme." }),
 });
@@ -90,6 +90,17 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     control: form.control,
     name: 'banners',
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        field.onChange(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   async function onSubmit(data: BrandFormValues) {
     setIsSubmitting(true);
@@ -156,12 +167,16 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 name="logoUrl"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Logo URL</FormLabel>
+                        <FormLabel>Logo</FormLabel>
                         <FormControl>
-                           <Input placeholder="https://example.com/logo.png" {...field} />
+                           <Input 
+                            type="file" 
+                            accept="image/png, image/jpeg"
+                            onChange={(e) => handleFileChange(e, field)} 
+                           />
                         </FormControl>
                          <FormDescription>
-                            Provide a URL for the logo. Recommended: 200x200px PNG or JPG.
+                            Upload the brand logo. Recommended: 200x200px PNG or JPG.
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
@@ -197,9 +212,13 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             name={`banners.${index}.imageUrl`}
                             render={({ field: imageField }) => (
                                 <FormItem>
-                                    <FormLabel>Image URL</FormLabel>
+                                    <FormLabel>Banner Image</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://example.com/banner.jpg" {...imageField} />
+                                        <Input 
+                                          type="file" 
+                                          accept="image/png, image/jpeg"
+                                          onChange={(e) => handleFileChange(e, imageField)}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -277,7 +296,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onSubmit(form.getValues())} disabled={isSubmitting}>
+                    <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
                         {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
                         Continue
                     </AlertDialogAction>
@@ -289,3 +308,5 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
+
+    
