@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { DollarSign, Package, Users, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { Package, Users, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
@@ -91,69 +91,71 @@ function AdminDashboardPage() {
         </div>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
-                <StatChange value={stats.percentageChanges.revenue} />
-                &nbsp;vs. last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
-             <p className="text-xs text-muted-foreground flex items-center">
-                <StatChange value={stats.percentageChanges.loss} />
-                &nbsp;vs. last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold block break-words">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center flex-wrap">
-                <StatChange value={stats.percentageChanges.inventory} />
-                <span className="ml-1">vs. last month</span>
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">in stock for this brand</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
-                <StatChange value={stats.percentageChanges.users} />
-                &nbsp;this month
-            </p>
-          </CardContent>
-        </Card>
+      <div className="w-full overflow-x-auto pb-4">
+        <div className="flex space-x-4">
+            <Card className="min-w-[250px] flex-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <span className="text-muted-foreground font-bold">₹</span>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
+                <p className="text-xs text-muted-foreground flex items-center">
+                    <StatChange value={stats.percentageChanges.revenue} />
+                    &nbsp;vs. last month
+                </p>
+            </CardContent>
+            </Card>
+            <Card className="min-w-[250px] flex-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
+                <span className="text-muted-foreground font-bold">₹</span>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
+                <p className="text-xs text-muted-foreground flex items-center">
+                    <StatChange value={stats.percentageChanges.loss} />
+                    &nbsp;vs. last month
+                </p>
+            </CardContent>
+            </Card>
+            <Card className="min-w-[250px] flex-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
+                <span className="text-muted-foreground font-bold">₹</span>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
+                <p className="text-xs text-muted-foreground flex items-center flex-wrap">
+                    <StatChange value={stats.percentageChanges.inventory} />
+                    <span className="ml-1">vs. last month</span>
+                </p>
+            </CardContent>
+            </Card>
+            <Card className="min-w-[250px] flex-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+                <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                <p className="text-xs text-muted-foreground">in stock for this brand</p>
+            </CardContent>
+            </Card>
+            <Card className="min-w-[250px] flex-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                <p className="text-xs text-muted-foreground flex items-center">
+                    <StatChange value={stats.percentageChanges.users} />
+                    &nbsp;this month
+                </p>
+            </CardContent>
+            </Card>
+        </div>
       </div>
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
@@ -179,3 +181,5 @@ function AdminDashboardPage() {
 }
 
 export default AdminDashboardPage;
+
+    
