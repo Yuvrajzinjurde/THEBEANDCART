@@ -3,10 +3,11 @@
 
 import { useState } from "react";
 import {
-  ChevronDown,
   Download,
   Search,
   PackageOpen,
+  Info,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,14 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState("pending");
@@ -41,11 +50,44 @@ export default function OrdersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Orders</h1>
         <div className="flex items-center gap-4">
-          <Button variant="default">
-            <Download className="mr-2 h-4 w-4" />
-            Download Orders Data
-            <ChevronDown className="ml-2 h-4 w-4" />
-          </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <Button variant="default">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Orders Data
+                  </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-80 p-4" align="end">
+                  <div className="space-y-4">
+                      <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-800 [&>svg]:text-blue-800">
+                          <Info className="h-4 w-4" />
+                          <AlertDescription className="text-xs">
+                                Download Orders data here. For tax invoice, please use the Downloads option in Payments tab
+                          </AlertDescription>
+                      </Alert>
+                      
+                      <div>
+                        <div className="flex items-center justify-between">
+                             <div>
+                                <p className="font-semibold">Download Orders Data</p>
+                                <p className="text-xs text-muted-foreground">It might take some time to generate the file</p>
+                            </div>
+                            <Button variant="outline" size="sm">
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                Select Date Range
+                            </Button>
+                        </div>
+                      </div>
+
+                      <DropdownMenuSeparator />
+
+                      <div>
+                          <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">Exported Files</p>
+                          <p className="text-sm text-center text-muted-foreground py-4">No file yet.</p>
+                      </div>
+                  </div>
+              </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
