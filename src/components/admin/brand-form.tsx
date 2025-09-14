@@ -11,11 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash } from 'lucide-react';
+import { Trash, UploadCloud, X } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import Image from 'next/image';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,12 +92,12 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     name: 'banners',
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        field.onChange(reader.result as string);
+        onChange(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -169,15 +170,38 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     <FormItem>
                         <FormLabel>Logo</FormLabel>
                         <FormControl>
-                           <Input 
-                            type="file" 
-                            accept="image/png, image/jpeg"
-                            onChange={(e) => handleFileChange(e, field)} 
-                           />
+                            <div className="w-full">
+                                <Input 
+                                    id="logo-upload"
+                                    type="file" 
+                                    accept="image/png, image/jpeg"
+                                    className="hidden"
+                                    onChange={(e) => handleFileChange(e, field.onChange)} 
+                                />
+                                {field.value ? (
+                                    <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                        <Image src={field.value} alt="Logo preview" layout="fill" objectFit="contain" />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-1 right-1 h-6 w-6"
+                                            onClick={() => field.onChange('')}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <label htmlFor="logo-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p className="text-xs text-muted-foreground">PNG or JPG (200x200px)</p>
+                                        </div>
+                                    </label>
+                                )}
+                            </div>
                         </FormControl>
-                         <FormDescription>
-                            Upload the brand logo. Recommended: 200x200px PNG or JPG.
-                        </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}
@@ -214,11 +238,37 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 <FormItem>
                                     <FormLabel>Banner Image</FormLabel>
                                     <FormControl>
-                                        <Input 
-                                          type="file" 
-                                          accept="image/png, image/jpeg"
-                                          onChange={(e) => handleFileChange(e, imageField)}
-                                        />
+                                       <div className="w-full">
+                                            <Input
+                                                id={`banner-upload-${index}`}
+                                                type="file"
+                                                accept="image/png, image/jpeg"
+                                                className="hidden"
+                                                onChange={(e) => handleFileChange(e, imageField.onChange)}
+                                            />
+                                            {imageField.value ? (
+                                                <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
+                                                    <Image src={imageField.value} alt="Banner preview" layout="fill" objectFit="cover" />
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        className="absolute top-2 right-2 h-6 w-6"
+                                                        onClick={() => imageField.onChange('')}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <label htmlFor={`banner-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                        <p className="text-xs text-muted-foreground">PNG or JPG (1600x400px)</p>
+                                                    </div>
+                                                </label>
+                                            )}
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -228,7 +278,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             control={form.control}
                             name={`banners.${index}.imageHint`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2" onClick={() => remove(index)}>
@@ -281,7 +331,14 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 <Button type="button" disabled={isSubmitting}>
-                    {mode === 'create' ? 'Create Brand' : 'Save Changes'}
+                    {isSubmitting ? (
+                        <>
+                            <Loader className="mr-2 h-4 w-4" />
+                            {mode === 'create' ? 'Creating...' : 'Saving...'}
+                        </>
+                    ) : (
+                        mode === 'create' ? 'Create Brand' : 'Save Changes'
+                    )}
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
