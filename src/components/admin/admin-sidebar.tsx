@@ -14,6 +14,7 @@ import {
   Check,
   Store,
   Menu,
+  PanelLeft,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -34,7 +35,7 @@ import useBrandStore from "@/stores/brand-store";
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../ui/sheet";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -77,7 +78,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
     }
 
     return (
-         <div className="flex flex-col h-full pt-16">
+         <div className="flex flex-col h-full">
             <div className={cn("p-4", isCollapsed && "p-2")}>
                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
                     <CollapsibleTrigger asChild>
@@ -113,7 +114,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                                 <Link href="/admin/brands/new">
                                     <PlusCircle className="mr-2 h-4 w-4" />
                                     Add New Brand
-                                </Link>
+                                 </Link>
                             </Button>
                         </CollapsibleContent>
                     )}
@@ -146,8 +147,11 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                 ))}
             </TooltipProvider>
             </nav>
-            <div className="mt-auto border-t p-4">
-               {/* This space can be used for a footer element if needed later */}
+            <div className="mt-auto border-t p-4 flex justify-center">
+               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onCollapseChange(!isCollapsed)}>
+                    <PanelLeft className="h-5 w-5 transform transition-transform duration-300" style={{ transform: isCollapsed ? 'rotate(180deg)' : 'none' }}/>
+                    <span className="sr-only">Toggle Sidebar</span>
+                </Button>
             </div>
         </div>
     )
@@ -179,6 +183,7 @@ export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProp
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-60">
+                 <SheetTitle className="sr-only">Admin Menu</SheetTitle>
                  <SidebarNavContent isCollapsed={false} onLinkClick={() => handleMobileToggle(false)} />
             </SheetContent>
         </Sheet>
@@ -191,7 +196,7 @@ export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProp
           isCollapsed ? "w-14" : "w-60"
         )}
       >
-        <SidebarNavContent isCollapsed={isCollapsed} />
+        <SidebarNavContent isCollapsed={isCollapsed} onCollapseChange={onCollapseChange} />
       </aside>
     </>
   );
