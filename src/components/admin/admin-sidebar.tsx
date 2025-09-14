@@ -10,10 +10,15 @@ import {
   Warehouse,
   Store,
   Check,
-  ChevronDown
+  ChevronDown,
+  PanelLeft,
+  Settings,
+  HelpCircle,
+  Sun,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useWindowWidth } from "@react-hook/window-size";
 
 import { cn } from "@/lib/utils";
 import {
@@ -30,6 +35,7 @@ import {
 import useBrandStore from "@/stores/brand-store";
 import { Button } from "../ui/button";
 import { UserNav } from "../user-nav";
+import { Separator } from "../ui/separator";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -44,6 +50,19 @@ export function AdminSidebar() {
     const pathname = usePathname();
     const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
     const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
+    
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const onlyWidth = useWindowWidth();
+    const mobileWidth = onlyWidth < 768;
+
+    useEffect(() => {
+        if (mobileWidth) {
+            setIsCollapsed(true);
+        } else {
+            setIsCollapsed(false);
+        }
+    }, [mobileWidth]);
+
 
     useEffect(() => {
         async function fetchBrands() {
@@ -63,25 +82,56 @@ export function AdminSidebar() {
         setSelectedBrand(brand);
         setIsBrandSelectorOpen(false);
     }
+    
+    const toggleSidebar = () => {
+        setIsCollapsed(!isCollapsed);
+    }
 
   return (
-    <aside className="hidden border-r bg-background md:flex md:flex-col">
-        <div className="flex h-full max-h-screen flex-col gap-2">
+    <aside className={cn(
+        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-16" : "w-64",
+    )}>
+        <div className="flex h-full max-h-screen flex-col border-r bg-background">
+            {/* Sidebar Header */}
+            <div className={cn(
+                "flex items-center h-16 border-b px-4",
+                isCollapsed ? "justify-center" : "justify-between",
+            )}>
+                <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
+                    <Store className="h-6 w-6" />
+                    <span>Admin Panel</span>
+                </Link>
+                <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                </Button>
+            </div>
+
+            {/* Main Content */}
              <div className="flex-1 overflow-auto py-2">
-                <div className="p-2">
+                <div className={cn("p-2", isCollapsed && "px-1")}>
                     <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
-                        <CollapsibleTrigger asChild>
-                            <Button variant="outline" className="w-full justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-xs font-bold shrink-0">
-                                        {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 3)}
-                                    </div>
-                                    <span className="truncate">{selectedBrand}</span>
-                                </div>
-                                <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform", isBrandSelectorOpen && "rotate-180")} />
-                            </Button>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-2 space-y-1">
+                        <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <CollapsibleTrigger asChild>
+                                        <Button variant="outline" className={cn("w-full justify-start", isCollapsed && "w-12 h-12 justify-center p-0")}>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-xs font-bold shrink-0">
+                                                    {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 3)}
+                                                </div>
+                                                <span className={cn("truncate", isCollapsed && "hidden")}>{selectedBrand}</span>
+                                            </div>
+                                             <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform ml-auto", isBrandSelectorOpen && "rotate-180", isCollapsed && "hidden")} />
+                                        </Button>
+                                    </CollapsibleTrigger>
+                                </TooltipTrigger>
+                                {isCollapsed && <TooltipContent side="right">{selectedBrand}</TooltipContent>}
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <CollapsibleContent className={cn("mt-2 space-y-1", isCollapsed && "hidden")}>
                             {availableBrands.map((brand) => (
                                 <Button
                                     key={brand}
@@ -98,30 +148,56 @@ export function AdminSidebar() {
                         </CollapsibleContent>
                     </Collapsible>
                 </div>
+
                 <TooltipProvider delayDuration={0}>
-                    <nav className="grid items-start px-4 text-sm font-medium">
+                    <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
                     {navItems.map(({ href, icon: Icon, label }) => (
-                        <Tooltip key={label}>
+                         <Tooltip key={label}>
                              <TooltipTrigger asChild>
                                  <Link
                                     href={href}
                                     className={cn(
-                                        "flex items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-primary h-10 w-10",
-                                        pathname.startsWith(href) && "bg-muted text-primary"
+                                        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                                        pathname.startsWith(href) && "bg-muted text-primary",
+                                        isCollapsed && "justify-center"
                                     )}
                                 >
-                                    <Icon className="h-5 w-5" />
-                                    <span className="sr-only">{label}</span>
+                                    <Icon className="h-4 w-4" />
+                                    <span className={cn(isCollapsed && "hidden")}>{label}</span>
                                 </Link>
                              </TooltipTrigger>
-                             <TooltipContent side="right">{label}</TooltipContent>
+                            {isCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
                         </Tooltip>
                     ))}
                     </nav>
                 </TooltipProvider>
              </div>
-             <div className="mt-auto p-4">
-                <UserNav />
+
+             {/* Sidebar Footer */}
+             <div className="mt-auto border-t p-2">
+                 <TooltipProvider delayDuration={0}>
+                    <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
+                       {!isCollapsed && <span className="text-xs text-muted-foreground p-2">Help & Settings</span>}
+                       <div className="flex items-center gap-1">
+                           <Tooltip>
+                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button></TooltipTrigger>
+                               <TooltipContent side={isCollapsed ? "right" : "top"}>Theme</TooltipContent>
+                           </Tooltip>
+                           <Tooltip>
+                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button></TooltipTrigger>
+                               <TooltipContent side={isCollapsed ? "right" : "top"}>Help</TooltipContent>
+                           </Tooltip>
+                           <Tooltip>
+                               <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button></TooltipTrigger>
+                               <TooltipContent side={isCollapsed ? "right" : "top"}>Settings</TooltipContent>
+                           </Tooltip>
+                       </div>
+                    </div>
+                </TooltipProvider>
+                <Separator className="my-2" />
+                <div className={cn("p-2", isCollapsed && "p-0")}>
+                    <UserNav isCollapsed={isCollapsed} />
+                </div>
             </div>
         </div>
     </aside>
