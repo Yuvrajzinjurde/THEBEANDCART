@@ -3,26 +3,51 @@
 
 import type { IUser } from '@/models/user.model';
 import type { IOrder } from '@/models/order.model';
+import dbConnect from '@/lib/mongodb';
+import User from '@/models/user.model';
+import Order from '@/models/order.model';
+import { Types } from 'mongoose';
+
 
 export interface UserDetails {
     user: IUser;
     orders: IOrder[];
+    stats: {
+        totalSpend: number;
+        totalOrders: number;
+        cancelledOrders: number;
+    }
 }
 
 export async function getUserDetails(userId: string): Promise<UserDetails> {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-        const url = new URL(`/api/users/${userId}/details`, baseUrl);
-        
-        const response = await fetch(url.toString());
+        await dbConnect();
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to fetch user details');
+        if (!Types.ObjectId.isValid(userId)) {
+            throw new Error('Invalid User ID');
         }
-        
-        const data = await response.json();
-        return JSON.parse(JSON.stringify(data));
+
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const orders = await Order.find({ userId: userId }).sort({ createdAt: -1 });
+
+        const stats = orders.reduce((acc, order) => {
+            if (order.status === 'cancelled') {
+                acc.cancelledOrders += 1;
+            } else {
+                acc.totalOrders += 1;
+                acc.totalSpend += order.totalAmount;
+            }
+            return acc;
+        }, { totalSpend: 0, totalOrders: 0, cancelledOrders: 0 });
+
+        const userObject = JSON.parse(JSON.stringify(user));
+        const ordersObject = JSON.parse(JSON.stringify(orders));
+
+        return { user: userObject, orders: ordersObject, stats };
 
     } catch (error) {
         console.error('Failed to fetch user details:', error);

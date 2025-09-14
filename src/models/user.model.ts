@@ -6,6 +6,7 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   password?: string; // Password is not always sent back
+  phone?: string;
   address: {
     street: string;
     city: string;
@@ -26,6 +27,7 @@ const UserSchema: Schema<IUser> = new Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false },
+  phone: { type: String },
   address: {
     street: { type: String },
     city: { type: String },
