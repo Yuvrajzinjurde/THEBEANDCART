@@ -13,7 +13,8 @@ export async function GET(
     await dbConnect();
     const { name } = params;
 
-    const brand = await Brand.findOne({ permanentName: name });
+    // Use a case-insensitive regex for the search
+    const brand = await Brand.findOne({ permanentName: { $regex: new RegExp(`^${name}$`, 'i') } });
 
     if (!brand) {
       return NextResponse.json({ message: 'Brand not found' }, { status: 404 });
@@ -43,7 +44,8 @@ export async function PUT(
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const brand = await Brand.findOneAndUpdate({ permanentName: name }, validation.data, { new: true });
+    // Use a case-insensitive regex for the search
+    const brand = await Brand.findOneAndUpdate({ permanentName: { $regex: new RegExp(`^${name}$`, 'i') } }, validation.data, { new: true });
 
     if (!brand) {
       return NextResponse.json({ message: 'Brand not found' }, { status: 404 });
@@ -56,6 +58,3 @@ export async function PUT(
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
-
-
-    
