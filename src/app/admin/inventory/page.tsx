@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { Loader } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import { cn } from '@/lib/utils';
 
 export default function InventoryPage() {
     const { selectedBrand } = useBrandStore();
@@ -104,7 +105,10 @@ export default function InventoryPage() {
                                     </TableCell>
                                     <TableCell className="font-medium">{product.name}</TableCell>
                                     <TableCell>
-                                        <Badge variant={product.stock > 0 ? "default" : "destructive"} className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                         <Badge 
+                                            variant={product.stock > 0 ? "default" : "destructive"}
+                                            className={cn(product.stock > 0 && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300")}
+                                        >
                                             {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
                                         </Badge>
                                     </TableCell>
