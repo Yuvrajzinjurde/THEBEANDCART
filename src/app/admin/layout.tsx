@@ -28,7 +28,7 @@ export default function AdminLayout({
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-hidden">
        <AdminSidebar isCollapsed={isSidebarCollapsed} onCollapseChange={setIsSidebarCollapsed} />
       <div className={cn(
           "flex flex-col transition-[margin-left] duration-300 ease-in-out",
@@ -58,7 +58,7 @@ export default function AdminLayout({
             {user && <UserNav />}
           </div>
         </header>
-        <main className="flex-1 p-4 sm:px-6 sm:py-4 overflow-y-auto">
+        <main className="flex-1 p-4 sm:px-6 sm:py-4 overflow-y-auto overflow-x-auto">
           {children}
         </main>
       </div>

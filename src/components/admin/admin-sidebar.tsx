@@ -130,7 +130,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                 </Collapsible>
             </div>
     
-            <nav className={cn("grid items-start px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
+            <nav className={cn("grid gap-1 items-start px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
             <TooltipProvider delayDuration={0}>
                 {navItems.map(({ href, icon: Icon, label }) => (
                     <Tooltip key={label}>
@@ -157,7 +157,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
             </TooltipProvider>
             </nav>
             <div className="mt-auto border-t p-4">
-                <Button size="icon" variant="ghost" onClick={() => onLinkClick?.()}>
+                <Button size="icon" variant="ghost" onClick={() => onCollapseChange(!isCollapsed)}>
                     <PanelLeft className="h-5 w-5" />
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
@@ -168,10 +168,6 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
 
 export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProps) {
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
-
-  const handleToggle = () => {
-    onCollapseChange(!isCollapsed);
-  }
 
   return (
     <>
@@ -185,22 +181,20 @@ export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProp
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-60">
-                 <SidebarNavContent onLinkClick={() => setIsMobileSheetOpen(false)} />
+                 <SidebarNavContent isCollapsed={false} onLinkClick={() => setIsMobileSheetOpen(false)} />
             </SheetContent>
         </Sheet>
       </div>
 
       {/* Desktop Sidebar */}
-      <div
+      <aside
         className={cn(
           "fixed inset-y-0 left-0 z-30 hidden flex-col border-r bg-background transition-[width] duration-300 md:flex",
           isCollapsed ? "w-14" : "w-60"
         )}
       >
-          <div className="flex-1 overflow-y-auto">
-              <SidebarNavContent isCollapsed={isCollapsed} onLinkClick={handleToggle} />
-          </div>
-      </div>
+        <SidebarNavContent isCollapsed={isCollapsed} onCollapseChange={onCollapseChange} />
+      </aside>
     </>
   );
 }
