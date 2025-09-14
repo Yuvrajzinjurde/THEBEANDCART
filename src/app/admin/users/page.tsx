@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import useBrandStore from '@/stores/brand-store';
 import { getUsers, updateUserStatus } from './actions';
+import { cn } from '@/lib/utils';
 
 export default function UsersPage() {
   const { selectedBrand } = useBrandStore();
@@ -116,7 +117,10 @@ export default function UsersPage() {
                     <Badge variant="secondary">{user.brand}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.status === 'active' ? 'default' : 'destructive'} className={user.status === 'active' ? 'bg-green-100 text-green-800' : ''}>
+                     <Badge 
+                        variant={user.status === 'active' ? 'default' : 'destructive'} 
+                        className={cn(user.status === 'active' && 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300')}
+                    >
                       {user.status}
                     </Badge>
                   </TableCell>
