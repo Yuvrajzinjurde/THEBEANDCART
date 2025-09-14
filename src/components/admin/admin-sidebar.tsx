@@ -130,7 +130,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
                 </Collapsible>
             </div>
     
-            <nav className={cn("grid items-start px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
+            <nav className={cn("flex flex-col gap-1 items-start px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
             <TooltipProvider delayDuration={0}>
                 {navItems.map(({ href, icon: Icon, label }) => (
                     <Tooltip key={label}>
