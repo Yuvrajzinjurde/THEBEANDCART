@@ -80,10 +80,17 @@ export function AdminSidebar() {
       )}
     >
         <div className="flex h-16 items-center border-b px-4 lg:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-                <Logo className="h-6 w-6" />
-                {!isCollapsed && <span className="">Admin Panel</span>}
-            </Link>
+             <div className="flex items-center gap-2 font-semibold">
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={toggleCollapse}>
+                    <Logo className="h-6 w-6" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                </Button>
+                {!isCollapsed && (
+                    <Link href="/admin/dashboard" className="text-lg font-bold">
+                        Admin Panel
+                    </Link>
+                )}
+            </div>
         </div>
       
         <div className="flex flex-1 flex-col gap-4 py-4">
