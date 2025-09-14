@@ -36,6 +36,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
+    // Check if the user is blocked
+    if (user.status === 'blocked') {
+        return NextResponse.json({ message: 'Your account has been blocked. Please contact support.' }, { status: 403 });
+    }
+
     const userRoles = user.roles.map((role: any) => role.name);
     const isAdmin = userRoles.includes('admin');
 

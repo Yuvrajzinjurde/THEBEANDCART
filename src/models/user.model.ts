@@ -16,6 +16,7 @@ export interface IUser extends Document {
   profilePicUrl?: string;
   roles: Types.ObjectId[];
   brand: string; // The permanent name of the brand the user belongs to
+  status: 'active' | 'blocked';
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -33,6 +34,7 @@ const UserSchema: Schema<IUser> = new Schema({
   profilePicUrl: { type: String },
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
   brand: { type: String, index: true, required: true },
+  status: { type: String, enum: ['active', 'blocked'], default: 'active', index: true },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
