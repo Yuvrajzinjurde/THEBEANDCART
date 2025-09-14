@@ -43,7 +43,9 @@ const calculatePercentageChange = (current: number, previous: number): number =>
 export async function getDashboardStats(brand: string): Promise<DashboardStats> {
     await dbConnect();
     try {
-        const brandQuery = brand === 'All Brands' ? {} : { brand };
+        // Use a case-insensitive regex for the brand name
+        const brandQuery = brand === 'All Brands' ? {} : { brand: { $regex: new RegExp(`^${brand}$`, 'i') } };
+        
         const now = new Date();
         const lastMonth = subMonths(now, 1);
         
