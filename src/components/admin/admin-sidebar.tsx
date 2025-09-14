@@ -11,6 +11,7 @@ import {
   PlusCircle,
   ChevronDown,
   Check,
+  Store,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -38,6 +39,7 @@ const navItems = [
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
+  { href: "/admin/brands", icon: Store, label: "Manage Brands" },
 ];
 
 export function AdminSidebar() {

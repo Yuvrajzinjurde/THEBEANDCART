@@ -61,3 +61,30 @@ export async function PUT(
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
+
+// DELETE a specific brand
+export async function DELETE(
+  req: Request,
+  { params }: { params: { name: string } }
+) {
+    try {
+        await dbConnect();
+        const { name } = params;
+        
+        // Use a case-insensitive regex for the search
+        const brand = await Brand.findOneAndDelete({ permanentName: { $regex: new RegExp(`^${name}$`, 'i') } });
+
+        if (!brand) {
+            return NextResponse.json({ message: 'Brand not found' }, { status: 404 });
+        }
+
+        // TODO: Decide what to do with products associated with the deleted brand.
+        // For now, we are just deleting the brand.
+
+        return NextResponse.json({ message: 'Brand deleted successfully' }, { status: 200 });
+
+    } catch (error) {
+        console.error('Failed to delete brand:', error);
+        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    }
+}
