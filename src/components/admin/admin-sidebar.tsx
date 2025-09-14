@@ -80,8 +80,8 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
     }
 
     return (
-         <div className="flex flex-col gap-4 py-4 h-full">
-            <div className={cn("px-4", isCollapsed && "px-2")}>
+         <div className="flex flex-col h-full">
+            <div className={cn("px-4 pt-4", isCollapsed && "px-2")}>
                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
                     <CollapsibleTrigger asChild>
                         <Button variant="outline" className={cn("w-full justify-between", isCollapsed && "w-auto justify-center p-2")}>
@@ -123,7 +123,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                 </Collapsible>
             </div>
     
-            <nav className={cn("grid items-start gap-1 px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
+            <nav className={cn("grid items-start gap-1 px-4 text-sm font-medium flex-1 mt-4", isCollapsed && "px-2")}>
             <TooltipProvider delayDuration={0}>
                 {navItems.map(({ href, icon: Icon, label }) => (
                     <Tooltip key={label}>

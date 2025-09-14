@@ -122,7 +122,7 @@ export default function Header() {
                             </div>
                             
                             <div className="flex-1 flex flex-col justify-between">
-                                <div className="space-y-4">
+                                <div>
                                      <NavLinks className="flex-col items-start space-y-2"/>
                                 </div>
                                 <div className="py-4 border-t">
