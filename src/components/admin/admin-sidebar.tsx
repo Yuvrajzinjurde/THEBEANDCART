@@ -42,7 +42,11 @@ const navItems = [
   { href: "/admin/brands", icon: Store, label: "Manage Brands" },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+    onCollapseChange: (isCollapsed: boolean) => void;
+}
+
+export function AdminSidebar({ onCollapseChange }: AdminSidebarProps) {
   const pathname = usePathname();
   const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -72,7 +76,9 @@ export function AdminSidebar() {
   }
 
   const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
+    const newCollapseState = !isCollapsed;
+    setIsCollapsed(newCollapseState);
+    onCollapseChange(newCollapseState);
   }
   
   const handleBrandSelect = (brand: string) => {
@@ -84,7 +90,7 @@ export function AdminSidebar() {
     <div
       className={cn(
         "fixed inset-y-0 left-0 z-40 hidden flex-col border-r bg-background transition-[width] duration-300 sm:flex",
-        isCollapsed ? "w-16" : "w-60"
+        isCollapsed ? "w-14" : "w-60"
       )}
     >
         <div className="flex h-16 items-center border-b px-4 lg:px-6">
