@@ -1,6 +1,7 @@
 
 "use client";
 
+import React from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,9 +30,9 @@ export const BrandFormSchema = z.object({
   logoUrl: z.string().url("Must be a valid URL"),
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
   theme: z.object({
-    primary: z.string().regex(/^([0-9]{1,3}\s){2}[0-9]{1,3}%$/, "Invalid HSL format. Example: 217.2 91.2% 59.8%"),
-    background: z.string().regex(/^([0-9]{1,3}\s){2}[0-9]{1,3}%$/, "Invalid HSL format. Example: 0 0% 100%"),
-    accent: z.string().regex(/^([0-9]{1,3}\s){2}[0-9]{1,3}%$/, "Invalid HSL format. Example: 210 40% 96.1%"),
+    primary: z.string().regex(/^([0-9]{1,3}(\.[0-9]+)?\s){2}[0-9]{1,3}(\.[0-9]+)?%$/, "Invalid HSL format. Example: 217.2 91.2% 59.8%"),
+    background: z.string().regex(/^([0-9]{1,3}(\.[0-9]+)?\s){2}[0-9]{1,3}(\.[0-9]+)?%$/, "Invalid HSL format. Example: 0 0% 100%"),
+    accent: z.string().regex(/^([0-9]{1,3}(\.[0-9]+)?\s){2}[0-9]{1,3}(\.[0-9]+)?%$/, "Invalid HSL format. Example: 210 40% 96.1%"),
   }),
 });
 
