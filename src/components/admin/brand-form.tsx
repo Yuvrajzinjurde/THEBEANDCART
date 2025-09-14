@@ -134,7 +134,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <Card>
           <CardHeader><CardTitle>Brand Identity</CardTitle></CardHeader>
           <CardContent className="space-y-6">
