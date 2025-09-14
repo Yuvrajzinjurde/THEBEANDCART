@@ -6,7 +6,6 @@ import {
   getPasswordStrengthFeedback,
   type PasswordStrengthFeedbackOutput,
 } from "@/ai/flows/password-strength-feedback";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Loader } from "../ui/loader";
 
@@ -46,18 +45,18 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
   }, [password]);
 
   const strengthDetails = useMemo(() => {
-    if (!feedback) {
-      return { value: 0, color: "", label: "" };
+    if (!feedback?.strength) {
+      return { level: 0, color: "bg-muted", label: "" };
     }
     switch (feedback.strength.toLowerCase()) {
       case "weak":
-        return { value: 33, color: "bg-destructive", label: "Weak" };
+        return { level: 1, color: "bg-destructive", label: "Weak" };
       case "moderate":
-        return { value: 66, color: "bg-yellow-500", label: "Moderate" };
+        return { level: 2, color: "bg-yellow-500", label: "Moderate" };
       case "strong":
-        return { value: 100, color: "bg-green-500", label: "Strong" };
+        return { level: 3, color: "bg-green-500", label: "Strong" };
       default:
-        return { value: 0, color: "", label: "" };
+        return { level: 0, color: "bg-muted", label: "" };
     }
   }, [feedback]);
 
@@ -67,9 +66,13 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 text-sm">
-        <Progress value={strengthDetails.value} className="h-2 w-full [&>div]:transition-all [&>div]:duration-500" indicatorClassName={strengthDetails.color} />
-        <span className="w-20 shrink-0 text-right font-medium">
+      <div className="flex items-center gap-2">
+        <div className="grid grid-cols-3 gap-1.5 w-full">
+            <div className={cn("h-2 rounded-full transition-colors", strengthDetails.level >= 1 ? strengthDetails.color : "bg-muted")} />
+            <div className={cn("h-2 rounded-full transition-colors", strengthDetails.level >= 2 ? strengthDetails.color : "bg-muted")} />
+            <div className={cn("h-2 rounded-full transition-colors", strengthDetails.level >= 3 ? strengthDetails.color : "bg-muted")} />
+        </div>
+        <span className="w-20 shrink-0 text-right font-medium text-sm">
           {loading ? <Loader className="ml-auto h-4 w-4" /> : strengthDetails.label}
         </span>
       </div>
@@ -78,11 +81,4 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
       )}
     </div>
   );
-}
-
-// Add indicatorClassName to Progress component props to allow custom color styling
-declare module "react" {
-  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
-    indicatorClassName?: string;
-  }
 }
