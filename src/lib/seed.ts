@@ -6,7 +6,6 @@ import Product from '@/models/product.model';
 import bcrypt from 'bcryptjs';
 
 const CATEGORIES = ['Electronics', 'Apparel', 'Books', 'Home Goods', 'Health'];
-const BRANDS = ['Reeva', 'BrandCo', 'Shopify'];
 
 export const seedDatabase = async () => {
   await dbConnect();
@@ -36,6 +35,7 @@ export const seedDatabase = async () => {
       email: 'admin@reeva.com',
       password: hashedPassword,
       roles: [adminRole._id],
+      brand: 'reeva',
       address: {
         street: '123 Admin St',
         city: 'Adminville',
@@ -51,13 +51,12 @@ export const seedDatabase = async () => {
     const products = [];
     for (let i = 1; i <= 50; i++) {
       const category = CATEGORIES[i % CATEGORIES.length];
-      const brand = BRANDS[i % BRANDS.length];
       products.push({
         name: `${category} Product ${i}`,
         description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
         price: parseFloat((Math.random() * 100 + 10).toFixed(2)),
         category: category,
-        brand: brand,
+        brand: 'reeva', // Set all products to the 'reeva' brand
         images: [
           `https://picsum.photos/seed/${i}/600/600`,
           `https://picsum.photos/seed/${i}_2/600/600`,
