@@ -48,8 +48,9 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
-      brand: brand || "",
+      brand: brand || "reeva", // Default to reeva if no brand in URL
     },
+    mode: 'onChange',
   });
 
   const password = form.watch("password");
