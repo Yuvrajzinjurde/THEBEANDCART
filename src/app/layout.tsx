@@ -8,59 +8,62 @@ import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/header';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import type { IBrand } from '@/models/brand.model';
+import { themeColors } from '@/lib/brand-schema';
 
-const themeColors: Record<string, { primary: string; background: string; accent: string; }> = {
-    'Blue': { primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
-    'Green': { primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
-    'Orange': { primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
-    'Purple': { primary: '262.1 83.3% 57.8%', background: '0 0% 100%', accent: '260 100% 96.7%' },
-    'Teal': { primary: '175 75% 40%', background: '0 0% 100%', accent: '175 50% 95%' },
-    'Rose': { primary: '346.8 77.2% 49.8%', background: '0 0% 100%', accent: '350 100% 96.9%' },
-    'Yellow': { primary: '47.9 95.8% 53.1%', background: '0 0% 100%', accent: '50 100% 96.1%' },
-    'Slate (Dark)': { primary: '215.2 79.8% 52%', background: '222.2 84% 4.9%', accent: '217.2 32.6% 17.5%' },
-    'Red': { primary: '0 72.2% 50.6%', background: '0 0% 100%', accent: '0 85.7% 95.9%' },
-    'Magenta': { primary: '310 75% 50%', background: '0 0% 100%', accent: '310 50% 95%' },
-     // Default theme
-    'Default': { primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
-};
+type Theme = (typeof themeColors)[number];
 
 
 function ThemeInjector({ brandName }: { brandName: string | null }) {
-    const [theme, setTheme] = useState(themeColors.Default);
+    const [theme, setTheme] = useState<(typeof themeColors)[number] | undefined>(
+        themeColors.find(t => t.name === 'Blue')
+    );
 
     useEffect(() => {
         async function fetchBrandTheme() {
             if (!brandName || brandName === 'admin') {
-                 setTheme(themeColors.Default);
-                 return;
+                const defaultTheme = themeColors.find(t => t.name === 'Blue');
+                setTheme(defaultTheme);
+                return;
             }
+
             try {
                 const res = await fetch(`/api/brands/${brandName}`);
                 if (res.ok) {
-                    const { brand } = await res.json();
-                    const selectedTheme = themeColors[brand.themeName as keyof typeof themeColors] || themeColors.Default;
+                    const { brand }: { brand: IBrand } = await res.json();
+                    const selectedTheme = themeColors.find(t => t.name === brand.themeName) || themeColors.find(t => t.name === 'Blue');
                     setTheme(selectedTheme);
+                } else {
+                     const defaultTheme = themeColors.find(t => t.name === 'Blue');
+                     setTheme(defaultTheme);
                 }
             } catch (error) {
                 console.error("Failed to fetch brand theme", error);
-                setTheme(themeColors.Default);
+                const defaultTheme = themeColors.find(t => t.name === 'Blue');
+                setTheme(defaultTheme);
             }
         }
         fetchBrandTheme();
     }, [brandName]);
+    
+    useEffect(() => {
+        if (theme) {
+            const root = document.documentElement;
+            root.style.setProperty('--primary', theme.primary);
+            root.style.setProperty('--background', theme.background);
+            root.style.setProperty('--accent', theme.accent);
+            
+            // Logic to handle dark mode if the theme is dark
+            if (theme.name.includes('(Dark)')) {
+                root.classList.add('dark');
+            } else {
+                root.classList.remove('dark');
+            }
+        }
+    }, [theme]);
 
-    const cssVariables = `
-    :root {
-      --primary: ${theme.primary};
-      --background: ${theme.background};
-      --accent: ${theme.accent};
-    }
-  `;
 
-  // For dark mode, you might want a different logic or fixed dark theme
-  // This example just uses the same colors for simplicity.
-
-  return <style>{cssVariables}</style>;
+  return null; // This component only injects styles
 }
 
 
