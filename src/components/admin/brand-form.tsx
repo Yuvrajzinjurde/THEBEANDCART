@@ -32,7 +32,7 @@ import {
 const bannerSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  imageUrl: z.string().min(1, "Image is required"),
+  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
   imageHint: z.string().min(1, "Image hint is required"),
 });
 
@@ -52,7 +52,7 @@ const themeColors = [
 export const BrandFormSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
   permanentName: z.string().min(1, "Permanent name is required").regex(/^[a-z0-9-]+$/, "Permanent name can only contain lowercase letters, numbers, and hyphens."),
-  logoUrl: z.string().min(1, "Logo is required"),
+  logoUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Logo is required"),
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
   themeName: z.string({ required_error: "Please select a theme." }),
 });
@@ -79,13 +79,13 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     permanentName: '',
     logoUrl: '',
     banners: [{ title: '', description: '', imageUrl: '', imageHint: '' }],
-    themeName: 'Blue',
+    themeName: undefined, // Default to no theme selected
   };
 
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(BrandFormSchema),
     defaultValues,
-    mode: 'onChange',
+    mode: 'onChange', // Validate on change
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -119,6 +119,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
+        // Use the specific error from the API
         throw new Error(result.message || `Failed to ${mode} brand.`);
       }
 
@@ -127,6 +128,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       router.refresh();
 
     } catch (error: any) {
+      // Log the full error to the console for debugging
+      console.error("Submission Error:", error);
+      // Show the specific error message in the toast
       toast.error(error.message);
     } finally {
       setIsSubmitting(false);
@@ -321,9 +325,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 >
                                     {themeColors.map((theme) => (
                                         <FormItem key={theme.name}>
-                                            <FormControl>
-                                                <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                            </FormControl>
+                                            <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
                                                 <div className="flex items-center gap-2">
                                                     <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
@@ -343,9 +345,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardContent>
         </Card>
         
-         <AlertDialog>
+        <AlertDialog>
           <AlertDialogTrigger asChild>
               <Button type="button" disabled={!form.formState.isValid || isSubmitting}>
+                 {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
                  {mode === 'create' ? 'Create Brand' : 'Save Changes'}
               </Button>
           </AlertDialogTrigger>
