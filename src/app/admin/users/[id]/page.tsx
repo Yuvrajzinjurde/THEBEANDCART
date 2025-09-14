@@ -89,48 +89,50 @@ export default function UserDetailsPage() {
 
             <div className="grid gap-6 md:grid-cols-3">
                 <Card>
-                    <CardContent className="flex items-center gap-4 pt-6">
-                        <Avatar className="h-16 w-16 text-2xl">
-                            <AvatarFallback>{userInitial}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Name</p>
-                            <p className="text-lg font-bold">{user.firstName} {user.lastName}</p>
+                    <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                            <Avatar className="h-16 w-16 text-2xl">
+                                <AvatarFallback>{userInitial}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Name</p>
+                                <p className="text-lg font-bold">{user.firstName} {user.lastName}</p>
+                            </div>
                         </div>
-                    </CardContent>
-                    <CardContent className="grid grid-cols-3 text-center">
-                         <div>
-                            <p className="text-sm text-muted-foreground">Total spend</p>
-                            <p className="text-lg font-bold">₹{stats.totalSpend.toFixed(2)}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Total orders</p>
-                            <p className="text-lg font-bold">{stats.totalOrders}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Cancelled orders</p>
-                            <p className="text-lg font-bold">{stats.cancelledOrders}</p>
+                        <div className="grid grid-cols-3 text-center mt-4">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total spend</p>
+                                <p className="text-lg font-bold">₹{stats.totalSpend.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Total orders</p>
+                                <p className="text-lg font-bold">{stats.totalOrders}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Cancelled orders</p>
+                                <p className="text-lg font-bold">{stats.cancelledOrders}</p>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader><CardTitle>Details</CardTitle></CardHeader>
-                    <CardContent className="grid grid-cols-3 gap-y-4 text-sm">
-                         <div className="col-span-1 text-muted-foreground">Registered On</div>
-                         <div className="col-span-2">{format(new Date(user.createdAt as string), 'dd/MM/yyyy')}</div>
+                    <CardContent className="grid grid-cols-2 gap-y-4 text-sm">
+                         <div className="text-muted-foreground">Registered On</div>
+                         <div>{format(new Date(user.createdAt as string), 'dd/MM/yyyy')}</div>
                          
-                         <div className="col-span-1 text-muted-foreground">Email</div>
-                         <div className="col-span-2 truncate">{user.email}</div>
+                         <div className="text-muted-foreground">Email</div>
+                         <div className="truncate">{user.email}</div>
 
-                         <div className="col-span-1 text-muted-foreground">Phone</div>
-                         <div className="col-span-2">{user.phone || 'N/A'}</div>
+                         <div className="text-muted-foreground">Phone</div>
+                         <div>{user.phone || 'N/A'}</div>
                     </CardContent>
                 </Card>
                 
                  <Card>
                     <CardHeader><CardTitle>Delivery Address</CardTitle></CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-2">
                         {user.address && user.address.street ? (
                              <address className="text-sm not-italic text-muted-foreground">
                                 {user.address.street}, {user.address.city}<br/>
@@ -148,8 +150,8 @@ export default function UserDetailsPage() {
                 <CardHeader>
                     <CardTitle>All Orders</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-between gap-4 mb-4">
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between gap-4">
                         <div className="relative w-full max-w-sm">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input 
@@ -173,42 +175,44 @@ export default function UserDetailsPage() {
                         </Select>
                     </div>
 
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Order ID</TableHead>
-                                <TableHead>Date & Time</TableHead>
-                                <TableHead>Cart</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredOrders.length > 0 ? (
-                                filteredOrders.map((order) => (
-                                    <TableRow key={order._id as string}>
-                                        <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
-                                        <TableCell>{format(new Date(order.createdAt as string), 'dd MMM yyyy, hh:mm a')}</TableCell>
-                                        <TableCell>{order.products.length} items</TableCell>
-                                        <TableCell>₹{order.totalAmount.toFixed(2)}</TableCell>
-                                        <TableCell>
-                                            <Badge variant="secondary">{order.status}</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button variant="outline" size="sm">View</Button>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Order ID</TableHead>
+                                    <TableHead>Date & Time</TableHead>
+                                    <TableHead>Cart</TableHead>
+                                    <TableHead>Total</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredOrders.length > 0 ? (
+                                    filteredOrders.map((order) => (
+                                        <TableRow key={order._id as string}>
+                                            <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
+                                            <TableCell>{format(new Date(order.createdAt as string), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                                            <TableCell>{order.products.length} items</TableCell>
+                                            <TableCell>₹{order.totalAmount.toFixed(2)}</TableCell>
+                                            <TableCell>
+                                                <Badge variant="secondary">{order.status}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button variant="outline" size="sm">View</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="h-24 text-center">
+                                            No Orders Available
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
-                                        No Orders Available
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>
