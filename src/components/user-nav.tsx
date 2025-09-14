@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
-import { CreditCard, LogOut, User as UserIcon } from "lucide-react";
+import { CreditCard, LogOut, User as UserIcon, Settings } from "lucide-react";
 
 export function UserNav() {
   const { user, logout } = useAuth();
@@ -29,8 +29,8 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Avatar className="h-10 w-10">
             {/* You can add a profile picture URL here if available */}
             {/* <AvatarImage src={user.profilePicUrl} alt={user.name} /> */}
             <AvatarFallback>{userInitial}</AvatarFallback>
@@ -62,9 +62,15 @@ export function UserNav() {
                 </DropdownMenuItem>
            )}
            <DropdownMenuItem asChild>
-            <Link href="/dashboard/orders">
+            <Link href="#">
               <CreditCard className="mr-2 h-4 w-4" />
-              <span>Orders</span>
+              <span>Billing</span>
+            </Link>
+          </DropdownMenuItem>
+           <DropdownMenuItem asChild>
+            <Link href="#">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
