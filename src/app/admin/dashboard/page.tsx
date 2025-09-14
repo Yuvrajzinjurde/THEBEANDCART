@@ -85,7 +85,7 @@ function AdminDashboardPage() {
       </div>
       
        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <Card className="bg-blue-100 border-blue-200 text-blue-800">
+        <Card className="bg-blue-100 text-blue-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <IndianRupee className="h-4 w-4" />
@@ -95,7 +95,7 @@ function AdminDashboardPage() {
             <PercentageChange value={stats.percentageChanges.revenue} />
           </CardContent>
         </Card>
-        <Card className="bg-red-100 border-red-200 text-red-800">
+        <Card className="bg-red-100 text-red-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
             <AlertCircle className="h-4 w-4" />
@@ -105,7 +105,7 @@ function AdminDashboardPage() {
             <PercentageChange value={stats.percentageChanges.loss} />
           </CardContent>
         </Card>
-        <Card className="bg-green-100 border-green-200 text-green-800">
+        <Card className="bg-green-100 text-green-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
             <ShoppingCart className="h-4 w-4" />
@@ -115,7 +115,7 @@ function AdminDashboardPage() {
             <PercentageChange value={stats.percentageChanges.inventory} />
           </CardContent>
         </Card>
-        <Card className="bg-orange-100 border-orange-200 text-orange-800">
+        <Card className="bg-orange-100 text-orange-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
             <Package className="h-4 w-4" />
@@ -125,7 +125,7 @@ function AdminDashboardPage() {
              <p className="text-xs text-muted-foreground">Count of all listed products</p>
           </CardContent>
         </Card>
-        <Card className="bg-purple-100 border-purple-200 text-purple-800">
+        <Card className="bg-purple-100 text-purple-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4" />
