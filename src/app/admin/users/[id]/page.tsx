@@ -175,14 +175,8 @@ export default function UserDetailsPage() {
             </div>
 
             <Card>
-                <CardHeader className="flex-row items-center justify-between">
-                    <div>
-                        <CardTitle>All Orders</CardTitle>
-                    </div>
-                     <Button variant="outline" size="sm" onClick={handleDownload}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Report
-                    </Button>
+                <CardHeader>
+                    <CardTitle>All Orders</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center justify-between gap-4 mb-4">
@@ -195,18 +189,24 @@ export default function UserDetailsPage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <div className="flex items-center gap-2">
+                             <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Statuses</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="shipped">Shipped</SelectItem>
+                                    <SelectItem value="delivered">Delivered</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button variant="outline" size="sm" onClick={handleDownload}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download Report
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="overflow-x-auto border rounded-md">
@@ -252,3 +252,5 @@ export default function UserDetailsPage() {
         </div>
     );
 }
+
+    
