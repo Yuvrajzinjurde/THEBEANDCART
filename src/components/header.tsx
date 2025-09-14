@@ -8,16 +8,19 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
+import { useParams } from "next/navigation";
 
 export default function Header() {
   const { user, loading } = useAuth();
+  const params = useParams();
+  const brand = params.brand || 'reeva';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
+        <Link href={`/${brand}/home`} className="mr-6 flex items-center space-x-2">
           <Logo className="h-8 w-8" />
-          <span className="hidden font-bold sm:inline-block">Reeva</span>
+          <span className="hidden font-bold sm:inline-block capitalize">{brand}</span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end space-x-4">

@@ -10,6 +10,7 @@ interface User {
   roles: string[];
   name: string;
   exp: number;
+  brand?: string; // Add brand to user type
 }
 
 interface AuthContextType {

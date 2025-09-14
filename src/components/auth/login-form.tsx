@@ -34,6 +34,7 @@ import { Loader } from "../ui/loader";
 
 interface DecodedToken {
   roles: string[];
+  brand?: string;
 }
 
 export function LoginForm() {
@@ -73,7 +74,8 @@ export function LoginForm() {
       if (decoded.roles.includes('admin')) {
         router.push("/admin/dashboard");
       } else {
-        router.push("/");
+        const userBrand = decoded.brand || 'reeva'; // Default to reeva if no brand
+        router.push(`/${userBrand}/home`);
       }
 
     } catch (error: any) {

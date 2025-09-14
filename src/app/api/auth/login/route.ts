@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     const userRoles = user.roles.map((role: any) => role.name);
 
     const token = jwt.sign(
-      { userId: user._id, roles: userRoles, name: user.firstName },
+      { userId: user._id, roles: userRoles, name: user.firstName, brand: user.brand },
       JWT_SECRET,
       { expiresIn: '1d' } // Token expires in 1 day
     );
@@ -53,7 +53,8 @@ export async function POST(req: Request) {
         message: 'Login successful', 
         token,
         name: user.firstName,
-        roles: userRoles
+        roles: userRoles,
+        brand: user.brand
     }, { status: 200 });
 
   } catch (error) {

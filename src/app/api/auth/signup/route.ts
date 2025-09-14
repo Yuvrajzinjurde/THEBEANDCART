@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { email, password, firstName, lastName } = validation.data;
+    const { email, password, firstName, lastName, brand } = validation.data;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       firstName: firstName || 'New',
       lastName: lastName || 'User',
       roles: [userRole._id],
+      brand: brand, // Save the brand permanent name
       // Add default empty values for other required fields
       address: {
         street: '',

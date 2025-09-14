@@ -14,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  // We will handle the layout for admin routes separately.
   const isNonAdminRoute = !pathname.startsWith('/admin');
+  const isAuthRoute = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
   
   return (
     <html lang="en" suppressHydrationWarning>
@@ -26,7 +26,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-screen flex-col font-body antialiased">
         <AuthProvider>
-          {isNonAdminRoute && <Header />}
+          {isNonAdminRoute && !isAuthRoute && <Header />}
           {children}
         </AuthProvider>
         <ToastContainer

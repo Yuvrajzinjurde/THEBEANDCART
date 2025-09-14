@@ -24,6 +24,7 @@ export function UserNav() {
   }
 
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "U";
+  const userBrand = user.brand || 'reeva';
 
   return (
     <DropdownMenu>
@@ -54,7 +55,7 @@ export function UserNav() {
                 </DropdownMenuItem>
            ) : (
                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
+                    <Link href={`/${userBrand}/home`}>
                         <UserIcon className="mr-2 h-4 w-4" />
                         <span>Profile</span>
                     </Link>

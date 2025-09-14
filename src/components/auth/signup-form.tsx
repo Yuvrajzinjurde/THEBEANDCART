@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -34,6 +34,8 @@ import { Loader } from "../ui/loader";
 
 export function SignUpForm() {
   const router = useRouter();
+  const params = useParams();
+  const brand = params.brand as string;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -46,6 +48,7 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      brand: brand || "",
     },
   });
 
@@ -88,6 +91,19 @@ export function SignUpForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+             <FormField
+                control={form.control}
+                name="brand"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormLabel>Brand</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <div className="grid grid-cols-2 gap-4">
                <FormField
                   control={form.control}

@@ -6,10 +6,15 @@ import Product from '@/models/product.model';
 export async function GET(req: Request) {
   try {
     await dbConnect();
+    
+    const { searchParams } = new URL(req.url);
+    const brand = searchParams.get('brand');
 
-    const products = await Product.find({})
+    const query = brand ? { brand } : {};
+
+    const products = await Product.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first
-      .limit(50); // Limit to 50 products for the main page
+      .limit(50); // Limit to 50 products
 
     return NextResponse.json({ products }, { status: 200 });
   } catch (error) {
