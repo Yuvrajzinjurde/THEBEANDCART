@@ -3,12 +3,13 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { DollarSign, Package, Users, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react";
+import { DollarSign, Package, Users, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
+import { Loader } from "@/components/ui/loader";
 
 function AdminDashboardPage() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ function AdminDashboardPage() {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader className="h-8 w-8" />
       </div>
     );
   }

@@ -1,13 +1,14 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2 } from "lucide-react";
 import {
   getPasswordStrengthFeedback,
   type PasswordStrengthFeedbackOutput,
 } from "@/ai/flows/password-strength-feedback";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { Loader } from "../ui/loader";
 
 type PasswordStrengthProps = {
   password?: string;
@@ -69,7 +70,7 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
       <div className="flex items-center gap-2 text-sm">
         <Progress value={strengthDetails.value} className="h-2 w-full [&>div]:transition-all [&>div]:duration-500" indicatorClassName={strengthDetails.color} />
         <span className="w-20 shrink-0 text-right font-medium">
-          {loading ? <Loader2 className="ml-auto h-4 w-4 animate-spin" /> : strengthDetails.label}
+          {loading ? <Loader className="ml-auto h-4 w-4" /> : strengthDetails.label}
         </span>
       </div>
       {feedback && !loading && (

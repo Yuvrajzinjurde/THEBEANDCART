@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { SignUpSchema, type SignUpInput } from "@/lib/auth";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/form";
 import { Logo } from "@/components/logo";
 import { PasswordStrength } from "./password-strength";
+import { Loader } from "../ui/loader";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -197,7 +198,7 @@ export function SignUpForm() {
             />
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader className="mr-2 h-4 w-4" />
               )}
               Create Account
             </Button>

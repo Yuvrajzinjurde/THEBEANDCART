@@ -3,9 +3,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import ProductDetails from '@/components/product-details';
+import { Loader } from '@/components/ui/loader';
 
 export default function ProductPage() {
   const params = useParams();
@@ -38,7 +38,7 @@ export default function ProductPage() {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader className="h-8 w-8 text-primary" />
       </div>
     );
   }

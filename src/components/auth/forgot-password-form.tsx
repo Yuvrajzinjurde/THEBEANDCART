@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Logo } from "@/components/logo";
+import { Loader } from "../ui/loader";
 
 type FormStep = "email" | "reset";
 type CombinedFormData = ForgotPasswordInput & ResetPasswordInput;
@@ -182,7 +183,7 @@ export function ForgotPasswordForm() {
                 </>
               )}
                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
                 {step === 'email' ? 'Continue' : 'Reset Password'}
               </Button>
             </CardContent>

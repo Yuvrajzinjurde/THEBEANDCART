@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Loader2 } from 'lucide-react';
+import { Loader } from '../ui/loader';
 
 const withAuth = <P extends object>(
   WrappedComponent: React.ComponentType<P>,
@@ -42,7 +42,7 @@ const withAuth = <P extends object>(
     if (loading || !user) {
        return (
         <div className="flex min-h-screen items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Loader className="h-8 w-8" />
         </div>
       );
     }
@@ -56,7 +56,7 @@ const withAuth = <P extends object>(
     // If not authorized, show a loader while redirecting
     return (
         <div className="flex min-h-screen items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <Loader className="h-8 w-8" />
         </div>
     );
   };

@@ -4,7 +4,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product-card';
 import type { IProduct } from '@/models/product.model';
@@ -18,6 +17,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { Loader } from '@/components/ui/loader';
 
 
 const banners = [
@@ -134,7 +134,7 @@ export default function Home() {
   if (authLoading || productsLoading) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin" />
+        <Loader className="h-12 w-12" />
       </main>
     );
   }

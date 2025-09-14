@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { Loader2 } from 'lucide-react';
+import { Loader } from '@/components/ui/loader';
 
 export default function InventoryPage() {
     const { selectedBrand } = useBrandStore();
@@ -45,7 +45,7 @@ export default function InventoryPage() {
             <CardContent>
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <Loader className="h-8 w-8 text-primary" />
                     </div>
                 ) : error ? (
                     <div className="text-center text-destructive">
