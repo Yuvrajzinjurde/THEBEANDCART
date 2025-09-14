@@ -308,7 +308,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader><CardTitle>Theme</CardTitle><CardDescription>Select a color scheme for the brand's storefront.</CardDescription></CardHeader>
             <CardContent>
-                <FormField
+                 <FormField
                     control={form.control}
                     name="themeName"
                     render={({ field }) => (
@@ -320,8 +320,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
                                 >
                                     {themeColors.map((theme) => (
-                                        <FormItem key={theme.name} className="flex-1">
-                                            <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
+                                        <FormItem key={theme.name}>
+                                            <FormControl>
+                                                <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
+                                            </FormControl>
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
                                                 <div className="flex items-center gap-2">
                                                     <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
@@ -341,7 +343,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardContent>
         </Card>
         
-        <AlertDialog>
+         <AlertDialog>
           <AlertDialogTrigger asChild>
               <Button type="button" disabled={!form.formState.isValid || isSubmitting}>
                  {mode === 'create' ? 'Create Brand' : 'Save Changes'}
