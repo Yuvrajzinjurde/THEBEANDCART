@@ -217,6 +217,23 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             <CardContent className="space-y-4">
                  {fields.map((field, index) => (
                     <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2">
+                                    <Trash className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will permanently remove this banner. This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => remove(index)}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                         <FormField
                             control={form.control}
                             name={`banners.${index}.title`}
@@ -281,23 +298,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2">
-                                    <Trash className="h-4 w-4" />
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will permanently remove this banner. This action cannot be undone.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => remove(index)}>Continue</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => append({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
@@ -320,10 +320,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 >
                                     {themeColors.map((theme) => (
                                         <FormItem key={theme.name}>
+                                          <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
-                                                <FormControl>
-                                                    <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                                </FormControl>
                                                 <div className="flex items-center gap-2">
                                                     <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
                                                     <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
@@ -342,38 +340,16 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardContent>
         </Card>
         
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                 <Button type="button" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                        <>
-                            <Loader className="mr-2 h-4 w-4" />
-                            {mode === 'create' ? 'Creating...' : 'Saving...'}
-                        </>
-                    ) : (
-                        mode === 'create' ? 'Create Brand' : 'Save Changes'
-                    )}
-                </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        {mode === 'create' 
-                            ? `You are about to create a new brand named "${form.getValues('displayName')}" with the permanent ID "${form.getValues('permanentName')}". This permanent ID cannot be changed.`
-                            : `You are about to save changes for the brand "${existingBrand?.displayName}".`
-                        }
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-                        {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                        Continue
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+              <>
+                  <Loader className="mr-2 h-4 w-4" />
+                  {mode === 'create' ? 'Creating...' : 'Saving...'}
+              </>
+          ) : (
+              mode === 'create' ? 'Create Brand' : 'Save Changes'
+          )}
+        </Button>
 
       </form>
     </Form>
