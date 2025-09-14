@@ -20,6 +20,8 @@ export interface IOrder extends Document {
     zip: string;
     country: string;
   };
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 const OrderProductSchema: Schema<IOrderProduct> = new Schema({

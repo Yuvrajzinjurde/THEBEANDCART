@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'react-toastify';
-import { MoreHorizontal, UserX, UserCheck, ShieldOff } from 'lucide-react';
+import { MoreHorizontal, UserX, UserCheck, Eye } from 'lucide-react';
 import type { IUser } from '@/models/user.model';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,6 +31,7 @@ import {
 import useBrandStore from '@/stores/brand-store';
 import { getUsers, updateUserStatus } from './actions';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function UsersPage() {
   const { selectedBrand } = useBrandStore();
@@ -135,6 +136,12 @@ export default function UsersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                             <DropdownMenuItem asChild>
+                                <Link href={`/admin/users/${user._id}`}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    <span>View Details</span>
+                                </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                              {user.status === 'active' ? (
                                 <DropdownMenuItem onClick={() => openConfirmationDialog(user, 'blocked')}>
@@ -147,10 +154,6 @@ export default function UsersPage() {
                                     Unblock User
                                 </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem disabled>
-                                <ShieldOff className="mr-2 h-4 w-4" />
-                                 <span>View Details (soon)</span>
-                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

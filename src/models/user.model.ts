@@ -17,6 +17,8 @@ export interface IUser extends Document {
   roles: Types.ObjectId[];
   brand: string; // The permanent name of the brand the user belongs to
   status: 'active' | 'blocked';
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 const UserSchema: Schema<IUser> = new Schema({
