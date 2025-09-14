@@ -9,7 +9,8 @@ import {
   GitCommitHorizontal,
   Warehouse,
   PlusCircle,
-  ChevronDown
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -23,15 +24,13 @@ import {
 } from "@/components/ui/tooltip";
 import { Logo } from "@/components/logo";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import useBrandStore from "@/stores/brand-store";
 import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -45,6 +44,8 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
+
 
   useEffect(() => {
     async function fetchBrands() {
@@ -71,6 +72,11 @@ export function AdminSidebar() {
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
   }
+  
+  const handleBrandSelect = (brand: string) => {
+    setSelectedBrand(brand);
+    setIsBrandSelectorOpen(false);
+  }
 
   return (
     <div
@@ -95,8 +101,8 @@ export function AdminSidebar() {
       
         <div className="flex flex-1 flex-col gap-4 py-4">
             <div className={cn("px-4", isCollapsed && "px-2")}>
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
+                    <CollapsibleTrigger asChild>
                          <Button variant="outline" className={cn("w-full justify-between", isCollapsed && "w-auto justify-center p-2")}>
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs font-bold shrink-0">
@@ -104,26 +110,37 @@ export function AdminSidebar() {
                                 </div>
                                 {!isCollapsed && <span className="truncate">{selectedBrand}</span>}
                             </div>
-                            {!isCollapsed && <ChevronDown className="h-4 w-4 opacity-50" />}
+                            {!isCollapsed && <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform", isBrandSelectorOpen && "rotate-180")} />}
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right" align="start" className="w-56">
-                        <DropdownMenuLabel>Select a Brand</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {availableBrands.map((brand) => (
-                            <DropdownMenuItem key={brand} onSelect={() => setSelectedBrand(brand)}>
-                                {brand}
-                            </DropdownMenuItem>
-                        ))}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href="/admin/brands/new" className="flex items-center cursor-pointer">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                <span>Add New Brand</span>
-                            </Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    </CollapsibleTrigger>
+                    {!isCollapsed && (
+                        <CollapsibleContent className="mt-2 space-y-1">
+                            <ScrollArea className="h-auto max-h-40">
+                                {availableBrands.map((brand) => (
+                                    <Button
+                                        key={brand}
+                                        variant="ghost"
+                                        className="w-full justify-start gap-2"
+                                        onClick={() => handleBrandSelect(brand)}
+                                    >
+                                        <div className="flex items-center justify-center h-5 w-5">
+                                          {selectedBrand === brand && <Check className="h-4 w-4" />}
+                                        </div>
+                                        {brand}
+                                    </Button>
+                                ))}
+                            </ScrollArea>
+                            <div className="mt-1 border-t pt-1">
+                                <Button asChild variant="ghost" className="w-full justify-start gap-2">
+                                    <Link href="/admin/brands/new">
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add New Brand
+                                    </Link>
+                                </Button>
+                            </div>
+                        </CollapsibleContent>
+                    )}
+                </Collapsible>
             </div>
       
             <nav className={cn("grid items-start gap-1 px-4 text-sm font-medium", isCollapsed && "px-2")}>
@@ -168,5 +185,3 @@ export function AdminSidebar() {
     </div>
   );
 }
-
-    
