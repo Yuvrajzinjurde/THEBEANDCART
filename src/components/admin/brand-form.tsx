@@ -344,9 +344,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <AlertDialog>
           <AlertDialogTrigger asChild>
               <Button type="button" disabled={!form.formState.isValid || isSubmitting}>
-                 {isSubmitting ? (
-                    <Loader className="mr-2 h-4 w-4" />
-                 ) : null}
                  {mode === 'create' ? 'Create Brand' : 'Save Changes'}
               </Button>
           </AlertDialogTrigger>

@@ -43,8 +43,8 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Failed to create brand:', error);
     // Be more specific about the error if it's a duplicate key error
-    if (error.code === 11000 && error.keyPattern && error.keyPattern.permanentName) {
-        return NextResponse.json({ message: 'A brand with this permanent name already exists.' }, { status: 409 });
+    if (error.code === 11000) {
+        return NextResponse.json({ message: 'A brand with this name or another conflicting unique field already exists.' }, { status: 409 });
     }
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
