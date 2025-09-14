@@ -8,7 +8,8 @@ import {
   Users,
   GitCommitHorizontal,
   Warehouse,
-  PlusCircle
+  PlusCircle,
+  ChevronDown
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -30,19 +31,20 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import useBrandStore from "@/stores/brand-store";
+import { Button } from "../ui/button";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/users", icon: Users, label: "Users" },
-  { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     async function fetchBrands() {
@@ -61,7 +63,8 @@ export function AdminSidebar() {
 
   const handleLinkClick = () => {
     if (isCollapsed) {
-        setIsCollapsed(false);
+        // Optional: auto-expand on click when collapsed
+        // setIsCollapsed(false);
     }
   }
 
@@ -72,71 +75,91 @@ export function AdminSidebar() {
   return (
     <div
       className={cn(
-        "fixed inset-y-0 left-0 z-10 hidden flex-col border-r bg-background transition-[width] duration-300 sm:flex",
-        isCollapsed ? "w-14" : "w-56"
+        "fixed inset-y-0 left-0 z-40 hidden flex-col border-r bg-background transition-[width] duration-300 sm:flex",
+        isCollapsed ? "w-16" : "w-60"
       )}
     >
-      <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-        <button
-          onClick={toggleCollapse}
-          className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-        >
-          <Logo className="h-5 w-5 transition-all group-hover:scale-110" />
-          <span className="sr-only">Reeva</span>
-        </button>
-        
-        <DropdownMenu>
-            <DropdownMenuTrigger className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8 focus:outline-none">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-bold">
-                    {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 2).toUpperCase()}
-                </div>
-                <span className="sr-only">Select Brand</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="right" align="start">
-                <DropdownMenuLabel>Select a Brand</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {availableBrands.map((brand) => (
-                     <DropdownMenuItem key={brand} onSelect={() => setSelectedBrand(brand)}>
-                        {brand}
-                    </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                    <Link href="/admin/brands/new" className="flex items-center cursor-pointer">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        <span>Add New Brand</span>
-                    </Link>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-        </nav>
-        <div className="flex-1 overflow-y-auto">
-        <nav className="grid items-start px-4 text-sm font-medium">
-          <TooltipProvider>
-            {navItems.map(({ href, icon: Icon, label }) => (
-                <Tooltip key={label}>
-                <TooltipTrigger asChild>
-                    <Link
-                    href={href}
-                    onClick={handleLinkClick}
-                    className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                        pathname.startsWith(href) && "text-primary bg-muted"
-                    )}
-                    >
-                    <Icon className="h-4 w-4" />
-                    {!isCollapsed && <span>{label}</span>}
-                     <span className={cn("sr-only", !isCollapsed && "hidden")}>{label}</span>
-                    </Link>
-                </TooltipTrigger>
-                {isCollapsed && (
-                    <TooltipContent side="right">{label}</TooltipContent>
-                )}
-                </Tooltip>
-            ))}
-          </TooltipProvider>
-        </nav>
+        <div className="flex h-16 items-center border-b px-4 lg:px-6">
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+                <Logo className="h-6 w-6" />
+                {!isCollapsed && <span className="">Admin Panel</span>}
+            </Link>
         </div>
+      
+        <div className="flex flex-1 flex-col gap-4 py-4">
+            <div className={cn("px-4", isCollapsed && "px-2")}>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                         <Button variant="outline" className={cn("w-full justify-between", isCollapsed && "w-auto justify-center p-2")}>
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs font-bold shrink-0">
+                                    {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 2).toUpperCase()}
+                                </div>
+                                {!isCollapsed && <span className="truncate">{selectedBrand}</span>}
+                            </div>
+                            {!isCollapsed && <ChevronDown className="h-4 w-4 opacity-50" />}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start" className="w-56">
+                        <DropdownMenuLabel>Select a Brand</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {availableBrands.map((brand) => (
+                            <DropdownMenuItem key={brand} onSelect={() => setSelectedBrand(brand)}>
+                                {brand}
+                            </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/admin/brands/new" className="flex items-center cursor-pointer">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                <span>Add New Brand</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+      
+            <nav className={cn("grid items-start gap-1 px-4 text-sm font-medium", isCollapsed && "px-2")}>
+            <TooltipProvider delayDuration={0}>
+                {navItems.map(({ href, icon: Icon, label }) => (
+                    <Tooltip key={label}>
+                        <TooltipTrigger asChild>
+                            <Link
+                                href={href}
+                                onClick={handleLinkClick}
+                                className={cn(
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary",
+                                    pathname.startsWith(href) && "bg-muted text-primary",
+                                    isCollapsed && "justify-center"
+                                )}
+                            >
+                                <Icon className="h-4 w-4" />
+                                {!isCollapsed && <span>{label}</span>}
+                                <span className={cn("sr-only", !isCollapsed && "hidden")}>{label}</span>
+                            </Link>
+                        </TooltipTrigger>
+                        {isCollapsed && (
+                            <TooltipContent side="right">{label}</TooltipContent>
+                        )}
+                    </Tooltip>
+                ))}
+            </TooltipProvider>
+            </nav>
+        </div>
+
+         <div className="mt-auto flex h-16 items-center border-t px-4">
+             <Button
+                onClick={toggleCollapse}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")}><path d="M15 4h-5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5"/><path d="M10 4v16"/><path d="M4 12h6"/></svg>
+                <span className="sr-only">Toggle sidebar</span>
+            </Button>
+         </div>
     </div>
   );
 }
+
+    
