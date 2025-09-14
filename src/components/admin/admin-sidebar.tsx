@@ -83,10 +83,13 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
     return (
          <div className="flex flex-col h-full">
             <div className={cn("flex h-16 items-center border-b px-4", isCollapsed && "px-2 justify-center")}>
-                 <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-semibold", isCollapsed && "hidden")}>
+                 <Button variant="ghost" onClick={() => onCollapseChange?.(!isCollapsed)} className="w-full justify-start gap-2 px-2">
                     <Store className="h-6 w-6" />
-                    <span>Admin Panel</span>
-                </Link>
+                    {!isCollapsed && <span className="font-semibold">Admin Panel</span>}
+                     {isCollapsed && onCollapseChange && (
+                        <PanelLeft className="h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2" />
+                    )}
+                </Button>
             </div>
             <div className={cn("p-4", isCollapsed && "p-2")}>
                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
@@ -139,7 +142,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
                                 href={href}
                                 onClick={onLinkClick}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary",
+                                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary w-full",
                                     pathname.startsWith(href) && "bg-muted text-primary",
                                     isCollapsed && "justify-center"
                                 )}
