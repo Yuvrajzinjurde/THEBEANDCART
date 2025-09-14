@@ -3,13 +3,14 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Package, Users, IndianRupee, ShoppingCart, AlertCircle } from "lucide-react";
+import { Package, Users, IndianRupee, ShoppingCart, AlertCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
 import { Loader } from "@/components/ui/loader";
+import { cn } from "@/lib/utils";
 
 
 function AdminDashboardPage() {
@@ -35,6 +36,24 @@ function AdminDashboardPage() {
 
     fetchStats();
   }, [selectedBrand]);
+  
+  const PercentageChange = ({ value }: { value: number }) => {
+    const isPositive = value >= 0;
+    return (
+      <p className="text-xs text-muted-foreground flex items-center">
+        {isPositive ? (
+          <ArrowUp className="h-4 w-4 text-green-500" />
+        ) : (
+          <ArrowDown className="h-4 w-4 text-red-500" />
+        )}
+        <span className={cn("font-semibold", isPositive ? "text-green-600" : "text-red-600")}>
+          {value.toFixed(1)}%
+        </span>
+        &nbsp;from last month
+      </p>
+    );
+  };
+
 
   if (loading) {
     return (
@@ -73,6 +92,7 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
+            <PercentageChange value={stats.percentageChanges.revenue} />
           </CardContent>
         </Card>
         <Card className="bg-red-100 border-red-200 text-red-800">
@@ -82,6 +102,7 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
+            <PercentageChange value={stats.percentageChanges.loss} />
           </CardContent>
         </Card>
         <Card className="bg-green-100 border-green-200 text-green-800">
@@ -91,6 +112,7 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
+            <PercentageChange value={stats.percentageChanges.inventory} />
           </CardContent>
         </Card>
         <Card className="bg-orange-100 border-orange-200 text-orange-800">
@@ -100,6 +122,7 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.totalProducts}</div>
+             <p className="text-xs text-muted-foreground">Count of all listed products</p>
           </CardContent>
         </Card>
         <Card className="bg-purple-100 border-purple-200 text-purple-800">
@@ -109,6 +132,7 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.totalUsers}</div>
+            <PercentageChange value={stats.percentageChanges.users} />
           </CardContent>
         </Card>
       </div>
