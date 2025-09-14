@@ -10,37 +10,62 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Loader } from '@/components/ui/loader';
+import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
 
 export default function InventoryPage() {
     const { selectedBrand } = useBrandStore();
     const [products, setProducts] = useState<IProduct[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isSeeding, setIsSeeding] = useState(false);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const fetchedProducts = await getProductsByBrand(selectedBrand);
+            setProducts(fetchedProducts);
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch products');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const fetchedProducts = await getProductsByBrand(selectedBrand);
-                setProducts(fetchedProducts);
-            } catch (err: any) {
-                setError(err.message || 'Failed to fetch products');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProducts();
     }, [selectedBrand]);
 
+    const handleSeed = async () => {
+        setIsSeeding(true);
+        toast.info("Seeding database... This might take a moment.");
+        try {
+          await fetch('/api/seed', { method: 'POST' });
+          toast.success('Database seeded successfully!');
+          // Refresh products
+          await fetchProducts();
+        } catch (error) {
+          toast.error('Failed to seed database.');
+          console.error(error);
+        } finally {
+          setIsSeeding(false);
+        }
+    };
+
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>Inventory</CardTitle>
-                <CardDescription>
-                    Showing products for: <strong>{selectedBrand}</strong>
-                </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Inventory</CardTitle>
+                    <CardDescription>
+                        Showing products for: <strong>{selectedBrand}</strong>
+                    </CardDescription>
+                </div>
+                <Button onClick={handleSeed} disabled={isSeeding}>
+                    {isSeeding && <Loader className="mr-2 h-4 w-4" />}
+                    Seed Products
+                </Button>
             </CardHeader>
             <CardContent>
                 {loading ? (

@@ -11,41 +11,48 @@ export const seedDatabase = async () => {
   await dbConnect();
 
   try {
-    // Clear existing data
-    await Role.deleteMany({});
-    await User.deleteMany({});
+    // Only clear products
     await Product.deleteMany({});
+    console.log('Cleared existing products.');
 
-    console.log('Cleared existing data.');
+    // --- Check for Roles and Admin User, create if they don't exist ---
+    let userRole = await Role.findOne({ name: 'user' });
+    let adminRole = await Role.findOne({ name: 'admin' });
 
-    // --- Create Roles ---
-    const userRole = new Role({ name: 'user' });
-    const adminRole = new Role({ name: 'admin' });
-    await userRole.save();
-    await adminRole.save();
-    console.log('Created roles.');
+    if (!userRole) {
+      userRole = new Role({ name: 'user' });
+      await userRole.save();
+      console.log('Created user role.');
+    }
+    if (!adminRole) {
+      adminRole = new Role({ name: 'admin' });
+      await adminRole.save();
+      console.log('Created admin role.');
+    }
 
-    // --- Create Admin User ---
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('password', salt);
+    const adminUserExists = await User.findOne({ email: 'admin@reeva.com' });
+    if (!adminUserExists) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('password', salt);
 
-    const adminUser = new User({
-      firstName: 'Admin',
-      lastName: 'User',
-      email: 'admin@reeva.com',
-      password: hashedPassword,
-      roles: [adminRole._id],
-      brand: 'reeva',
-      address: {
-        street: '123 Admin St',
-        city: 'Adminville',
-        state: 'AS',
-        zip: '12345',
-        country: 'USA'
-      }
-    });
-    await adminUser.save();
-    console.log('Created admin user.');
+      const adminUser = new User({
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@reeva.com',
+        password: hashedPassword,
+        roles: [adminRole._id],
+        brand: 'reeva',
+        address: {
+          street: '123 Admin St',
+          city: 'Adminville',
+          state: 'AS',
+          zip: '12345',
+          country: 'USA'
+        }
+      });
+      await adminUser.save();
+      console.log('Created admin user.');
+    }
     
     // --- Create Products ---
     const products = [];
