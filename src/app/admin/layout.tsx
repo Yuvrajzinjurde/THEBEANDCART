@@ -27,9 +27,9 @@ export default function AdminLayout({
           </div>
           
           <div className="flex items-center gap-4 ml-auto">
-            <div className="flex items-center gap-2">
-                <span className="font-semibold">{selectedBrand}</span>
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+            <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card">
+                <span className="font-semibold text-sm">{selectedBrand}</span>
+                <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
                     <Settings className="h-4 w-4" />
                     <span className="sr-only">Brand Settings</span>
                 </Button>

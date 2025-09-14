@@ -1,3 +1,4 @@
+
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 export interface IUser extends Document {
@@ -14,6 +15,7 @@ export interface IUser extends Document {
   };
   profilePicUrl?: string;
   roles: Types.ObjectId[];
+  brand?: string; // The permanent name of the brand the user belongs to
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -30,6 +32,7 @@ const UserSchema: Schema<IUser> = new Schema({
   },
   profilePicUrl: { type: String },
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
+  brand: { type: String, index: true },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
