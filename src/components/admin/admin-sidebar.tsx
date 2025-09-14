@@ -13,11 +13,7 @@ import {
   ChevronDown,
   Check,
   Store,
-  Sun,
-  HelpCircle,
-  Settings,
   Menu,
-  PanelLeft
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -55,7 +51,7 @@ interface AdminSidebarProps {
 }
 
 
-const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isCollapsed?: boolean, onLinkClick?: () => void, onCollapseChange?: (isCollapsed: boolean) => void; }) => {
+const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean, onLinkClick?: () => void }) => {
     const pathname = usePathname();
     const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
     const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
@@ -81,18 +77,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
     }
 
     return (
-         <div className="flex flex-col h-full">
-            <div className={cn("flex h-16 items-center border-b px-4", isCollapsed && "px-2 justify-center")}>
-                 <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold" onClick={onLinkClick}>
-                    <Store className="h-6 w-6" />
-                    {!isCollapsed && <span className="font-semibold">Admin Panel</span>}
-                </Link>
-                 {isCollapsed && onCollapseChange && (
-                    <Button variant="ghost" onClick={() => onCollapseChange(false)} className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0">
-                        <PanelLeft className="h-5 w-5" />
-                    </Button>
-                )}
-            </div>
+         <div className="flex flex-col h-full pt-16">
             <div className={cn("p-4", isCollapsed && "p-2")}>
                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
                     <CollapsibleTrigger asChild>
@@ -162,12 +147,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
             </TooltipProvider>
             </nav>
             <div className="mt-auto border-t p-4">
-               {onCollapseChange && !isCollapsed && (
-                 <Button size="icon" variant="ghost" onClick={() => onCollapseChange(true)}>
-                    <PanelLeft className="h-5 w-5" />
-                    <span className="sr-only">Toggle Sidebar</span>
-                </Button>
-               )}
+               {/* This space can be used for a footer element if needed later */}
             </div>
         </div>
     )
@@ -176,19 +156,30 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick, onCollapseChange }: { isC
 export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProps) {
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
+  useEffect(() => {
+    // If the sidebar is controlled for desktop, reflect the state in mobile sheet as well.
+    // This handles the case where the toggle is in the header.
+    setIsMobileSheetOpen(!isCollapsed);
+  }, [isCollapsed]);
+
+  const handleMobileToggle = (open: boolean) => {
+    setIsMobileSheetOpen(open);
+    onCollapseChange(!open);
+  }
+
   return (
     <>
       {/* Mobile Sidebar */}
       <div className="md:hidden">
-         <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
+         <Sheet open={isMobileSheetOpen} onOpenChange={handleMobileToggle}>
             <SheetTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 fixed top-4 left-4 z-50 bg-background">
+                 <Button variant="ghost" size="icon" className="sr-only">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-60">
-                 <SidebarNavContent isCollapsed={false} onLinkClick={() => setIsMobileSheetOpen(false)} />
+                 <SidebarNavContent isCollapsed={false} onLinkClick={() => handleMobileToggle(false)} />
             </SheetContent>
         </Sheet>
       </div>
@@ -200,7 +191,7 @@ export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProp
           isCollapsed ? "w-14" : "w-60"
         )}
       >
-        <SidebarNavContent isCollapsed={isCollapsed} onCollapseChange={onCollapseChange} />
+        <SidebarNavContent isCollapsed={isCollapsed} />
       </aside>
     </>
   );

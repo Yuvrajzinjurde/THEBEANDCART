@@ -4,12 +4,13 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Bell, Settings } from "lucide-react";
+import { Bell, Settings, Menu } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import useBrandStore from "@/stores/brand-store";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Store } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -27,6 +28,10 @@ export default function AdminLayout({
     setIsClient(true);
   }, []);
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-hidden">
        <AdminSidebar isCollapsed={isSidebarCollapsed} onCollapseChange={setIsSidebarCollapsed} />
@@ -34,12 +39,17 @@ export default function AdminLayout({
           "flex flex-col transition-[margin-left] duration-300 ease-in-out",
           isClient && (isSidebarCollapsed ? "md:ml-14" : "md:ml-60")
       )}>
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b bg-background px-4">
-          <div className="flex items-center gap-2 font-semibold md:hidden">
-            <Link href="/admin/dashboard">
-              <span className="font-bold">Admin Panel</span>
-            </Link>
-          </div>
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4">
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={handleToggleSidebar}>
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                </Button>
+                <Link href="/admin/dashboard" className="hidden items-center gap-2 font-semibold md:flex">
+                    <Store className="h-6 w-6" />
+                    <span className="font-bold">Admin Panel</span>
+                </Link>
+            </div>
           
           <div className="flex items-center gap-2 md:gap-4 ml-auto">
             <div className="hidden md:flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-card">
