@@ -156,24 +156,6 @@ function AdminDashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
-        <Card className="col-span-1">
-             <CardHeader>
-                <CardTitle>Revenue Statistics</CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
-                <RevenueStatistics data={stats.revenueChartData} />
-            </CardContent>
-        </Card>
-         <Card className="col-span-1">
-            <CardHeader>
-                <CardTitle>Sales by Category</CardTitle>
-            </CardHeader>
-            <CardContent>
-               <SalesByCategory data={stats.salesByCategoryData} />
-            </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
