@@ -50,6 +50,7 @@ export function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
+      brand: brand,
     },
   });
 
@@ -122,7 +123,7 @@ export function LoginForm() {
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
                     <Link
-                      href="/forgot-password"
+                      href={`/${brand}/forgot-password`}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Forgot password?
@@ -154,6 +155,19 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
+             <FormField
+                control={form.control}
+                name="brand"
+                render={({ field }) => (
+                  <FormItem className="hidden">
+                    <FormLabel>Brand</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && (
                 <Loader className="mr-2 h-4 w-4" />

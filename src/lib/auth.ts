@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const LoginSchema = z.object({
@@ -7,6 +8,7 @@ export const LoginSchema = z.object({
   password: z.string().min(1, {
     message: "Password is required.",
   }),
+  brand: z.string(), // Add brand to the login schema
 });
 
 export const SignUpSchema = z.object({

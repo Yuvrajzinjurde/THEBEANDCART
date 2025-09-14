@@ -24,14 +24,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { email, password } = validation.data;
+    const { email, password, brand } = validation.data;
 
     const user = await User.findOne({ email }).select('+password').populate({
         path: 'roles',
         model: Role
     });
+    
+    // Security: Check if user exists and if the user's brand matches the request brand
+    if (!user || user.brand !== brand) {
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
 
-    if (!user || !user.password) {
+    if (!user.password) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
