@@ -3,13 +3,40 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { DollarSign, Package, Users, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DollarSign, Package, Users, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SalesByCategory } from "@/components/admin/sales-by-category";
 import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
 import { Loader } from "@/components/ui/loader";
+import { cn } from "@/lib/utils";
+
+
+const StatChange = ({ value }: { value: number }) => {
+    const isPositive = value > 0;
+    const isNegative = value < 0;
+
+    if (value === 0 || !isFinite(value)) {
+        return (
+             <span className="text-muted-foreground flex items-center font-semibold">
+                <Minus className="h-3 w-3 mr-1"/> --
+              </span>
+        );
+    }
+    
+    return (
+        <span className={cn(
+            "flex items-center font-semibold",
+            isPositive ? "text-green-600" : "text-red-600"
+        )}>
+            {isPositive && <ArrowUpRight className="h-3 w-3 mr-1"/>}
+            {isNegative && <ArrowDownRight className="h-3 w-3 mr-1"/>}
+            {Math.abs(value).toFixed(1)}%
+        </span>
+    );
+};
+
 
 function AdminDashboardPage() {
   const { user } = useAuth();
@@ -73,10 +100,8 @@ function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-green-600 flex items-center font-semibold">
-                <ArrowUpRight className="h-3 w-3 mr-1"/> 12.1%
-              </span>
-              &nbsp;vs. last month
+                <StatChange value={stats.percentageChanges.revenue} />
+                &nbsp;vs. last month
             </p>
           </CardContent>
         </Card>
@@ -87,11 +112,9 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-red-600 flex items-center font-semibold">
-                <ArrowDownRight className="h-3 w-3 mr-1"/> 3.2%
-              </span>
-              &nbsp;vs. last month
+             <p className="text-xs text-muted-foreground flex items-center">
+                <StatChange value={stats.percentageChanges.loss} />
+                &nbsp;vs. last month
             </p>
           </CardContent>
         </Card>
@@ -103,10 +126,8 @@ function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-green-600 flex items-center font-semibold">
-                <ArrowUpRight className="h-3 w-3 mr-1"/> 2.5%
-              </span>
-              &nbsp;vs. last month
+                <StatChange value={stats.percentageChanges.inventory} />
+                &nbsp;vs. last month
             </p>
           </CardContent>
         </Card>
@@ -117,7 +138,7 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">in stock</p>
+            <p className="text-xs text-muted-foreground">in stock for this brand</p>
           </CardContent>
         </Card>
         <Card>
@@ -128,10 +149,8 @@ function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <span className="text-green-600 flex items-center font-semibold">
-                <ArrowUpRight className="h-3 w-3 mr-1"/> 18%
-              </span>
-              &nbsp;this month
+                <StatChange value={stats.percentageChanges.users} />
+                &nbsp;this month
             </p>
           </CardContent>
         </Card>
