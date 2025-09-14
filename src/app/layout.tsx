@@ -74,9 +74,11 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const isNonAdminRoute = !pathname.startsWith('/admin');
-  const isAuthRoute = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
   
-  const brandName = isNonAdminRoute && pathname.split('/')[1] ? pathname.split('/')[1] : null;
+  // More specific check for auth routes
+  const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
+  
+  const brandName = isNonAdminRoute && pathname.split('/')[1] ? pathname.split('/[brand]')[0].split('/')[1] : null;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -107,6 +109,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
-    

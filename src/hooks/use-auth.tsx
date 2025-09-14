@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 
 interface User {
@@ -26,14 +26,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
+  const brandName = params.brand as string || 'reeva';
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setUser(null);
-    if (pathname !== '/login') {
-      router.push('/login');
+    const isAuthPage = /login|signup/.test(pathname);
+    if (!isAuthPage) {
+      router.push(`/${brandName}/login`);
     }
-  }, [router, pathname]);
+  }, [router, pathname, brandName]);
 
   useEffect(() => {
     setLoading(true);

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 import { ForgotPasswordSchema, ResetPasswordSchema, type ForgotPasswordInput, type ResetPasswordInput } from "@/lib/auth";
@@ -36,6 +36,8 @@ type CombinedFormData = ForgotPasswordInput & ResetPasswordInput;
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+  const params = useParams();
+  const brand = params.brand as string || 'reeva';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<FormStep>("email");
   const [showPassword, setShowPassword] = useState(false);
@@ -88,7 +90,7 @@ export function ForgotPasswordForm() {
         }
 
         toast.success("Password has been reset successfully. You can now log in.");
-        router.push('/login');
+        router.push(`/${brand}/login`);
 
     } catch (error: any) {
       console.error("Password Reset Error:", error);
@@ -190,7 +192,7 @@ export function ForgotPasswordForm() {
              <CardFooter className="justify-center">
                 {step === 'email' ? (
                      <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
-                        <Link href="/login" className="font-medium text-primary hover:underline">
+                        <Link href={`/${brand}/login`} className="font-medium text-primary hover:underline">
                         Back to Log in
                         </Link>
                     </Button>

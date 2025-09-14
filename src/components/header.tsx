@@ -66,7 +66,7 @@ export default function Header() {
             ) : (
               <div className="flex items-center gap-2">
                 <Button asChild size="sm">
-                    <Link href="/login">Log In</Link>
+                    <Link href={`/${brandName}/login`}>Log In</Link>
                 </Button>
                 <Button asChild variant="secondary" size="sm">
                     <Link href={`/${brandName}/signup`}>Sign Up</Link>

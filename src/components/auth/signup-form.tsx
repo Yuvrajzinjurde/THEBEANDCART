@@ -71,7 +71,7 @@ export function SignUpForm() {
       }
 
       toast.success("Account created successfully. Please log in.");
-      router.push("/login");
+      router.push(`/${brand}/login`);
     } catch (error: any) {
       console.error("Sign Up Error:", error);
       toast.error(error.message || "An unexpected error occurred. Please try again.");
@@ -226,7 +226,7 @@ export function SignUpForm() {
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link
-            href="/login"
+            href={`/${brand}/login`}
             className="font-medium text-primary hover:underline"
           >
             Log in
