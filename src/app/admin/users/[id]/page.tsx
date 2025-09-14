@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Search, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, Home, ShoppingCart, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import * as XLSX from "xlsx";
@@ -18,6 +18,7 @@ import { getUserDetails } from './actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export default function UserDetailsPage() {
     const params = useParams();
@@ -116,59 +117,73 @@ export default function UserDetailsPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="flex items-start gap-4">
-                            <Avatar className="h-16 w-16 text-2xl">
-                                <AvatarFallback>{userInitial}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Name</p>
-                                <p className="text-lg font-bold">{user.firstName} {user.lastName}</p>
-                            </div>
+                <Card className="bg-purple-100 text-purple-800">
+                    <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
+                         <Avatar className="h-14 w-14 text-2xl border-2 border-purple-200">
+                            <AvatarFallback className="bg-purple-200">{userInitial}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                            <CardTitle className="text-lg">{user.firstName} {user.lastName}</CardTitle>
+                            <CardDescription className="text-purple-600">{user.email}</CardDescription>
                         </div>
-                        <div className="grid grid-cols-3 text-center mt-4">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total spend</p>
-                                <p className="text-lg font-bold">₹{stats.totalSpend.toFixed(2)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Total orders</p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-3 text-center mt-2 divide-x divide-purple-200">
+                           <div className="flex flex-col items-center">
+                                <ShoppingCart className="h-5 w-5 mb-1"/>
+                                <p className="text-xs">Total Orders</p>
                                 <p className="text-lg font-bold">{stats.totalOrders}</p>
                             </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Cancelled orders</p>
+                           <div className="flex flex-col items-center">
+                                <XCircle className="h-5 w-5 mb-1"/>
+                                <p className="text-xs">Cancelled</p>
                                 <p className="text-lg font-bold">{stats.cancelledOrders}</p>
+                            </div>
+                           <div className="flex flex-col items-center">
+                                <p className="text-2xl font-bold">₹</p>
+                                <p className="text-xs">Total Spend</p>
+                                <p className="text-lg font-bold">{stats.totalSpend.toFixed(0)}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader><CardTitle>Details</CardTitle></CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-y-4 text-sm">
-                         <div className="text-muted-foreground">Registered On</div>
-                         <div>{format(new Date(user.createdAt as string), 'dd/MM/yyyy')}</div>
-                         
-                         <div className="text-muted-foreground">Email</div>
-                         <div className="truncate">{user.email}</div>
-
-                         <div className="text-muted-foreground">Phone</div>
-                         <div>{user.phone || 'N/A'}</div>
+                <Card className="bg-orange-100 text-orange-800">
+                    <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
+                        <UserIcon className="h-6 w-6"/>
+                        <CardTitle>Contact Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-y-3 text-sm">
+                         <div className="flex items-center gap-4">
+                            <Mail className="h-4 w-4" />
+                            <div className="truncate">{user.email}</div>
+                         </div>
+                          <div className="flex items-center gap-4">
+                            <Phone className="h-4 w-4" />
+                            <div>{user.phone || 'N/A'}</div>
+                         </div>
+                         <div className="flex items-center gap-4">
+                            <p className="text-xs font-mono bg-orange-200/80 rounded px-2 py-1">
+                                Joined on {format(new Date(user.createdAt as string), 'dd MMM, yyyy')}
+                            </p>
+                         </div>
                     </CardContent>
                 </Card>
                 
-                 <Card>
-                    <CardHeader><CardTitle>Delivery Address</CardTitle></CardHeader>
+                 <Card className="bg-green-100 text-green-800">
+                    <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
+                        <Home className="h-6 w-6" />
+                        <CardTitle>Delivery Address</CardTitle>
+                    </CardHeader>
                     <CardContent>
                         {user.address && user.address.street ? (
-                             <address className="text-sm not-italic text-muted-foreground">
+                             <address className="text-sm not-italic text-green-700">
                                 {user.address.street}, {user.address.city}<br/>
                                 {user.address.state} - {user.address.zip}<br/>
                                 {user.address.country}
                             </address>
                         ): (
-                            <p className="text-sm text-muted-foreground">No delivery address added</p>
+                            <p className="text-sm text-green-700">No delivery address added</p>
                         )}
                     </CardContent>
                 </Card>
@@ -258,6 +273,5 @@ export default function UserDetailsPage() {
     );
 
     
-}
 
     
