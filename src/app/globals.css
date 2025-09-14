@@ -84,10 +84,4 @@
     ::-webkit-scrollbar-thumb:hover {
         background: hsl(var(--primary) / 0.8);
     }
-
-    /* For Firefox */
-    * {
-        scrollbar-width: thin;
-        scrollbar-color: hsl(var(--primary) / 0.5) hsl(var(--background));
-    }
 }
