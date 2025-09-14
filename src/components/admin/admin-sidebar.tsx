@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useWindowWidth } from "@react-hook/window-size";
 
 import { cn } from "@/lib/utils";
 import {
@@ -52,16 +51,13 @@ export function AdminSidebar() {
     const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
     
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const onlyWidth = useWindowWidth();
-    const mobileWidth = onlyWidth < 768;
 
     useEffect(() => {
-        if (mobileWidth) {
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
             setIsCollapsed(true);
-        } else {
-            setIsCollapsed(false);
         }
-    }, [mobileWidth]);
+    }, []);
 
 
     useEffect(() => {
@@ -69,7 +65,7 @@ export function AdminSidebar() {
         try {
             const response = await fetch('/api/brands');
             const data = await response.json();
-            const brandNames = data.brands.map((b: any) => b.displayName);
+            const brandNames = data.brands.map((b: any) => b.permanentName);
             setAvailableBrands(['All Brands', ...brandNames]);
         } catch (error) {
             console.error("Failed to fetch brands", error);
@@ -99,7 +95,7 @@ export function AdminSidebar() {
                 isCollapsed ? "justify-center" : "justify-between",
             )}>
                 <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                    <Store className="h-6 w-6" />
+                    <Store className="h-6 w-6 text-primary" />
                     <span>Admin Panel</span>
                 </Link>
                 <Button variant="ghost" size="icon" onClick={toggleSidebar}>
@@ -118,16 +114,16 @@ export function AdminSidebar() {
                                     <CollapsibleTrigger asChild>
                                         <Button variant="outline" className={cn("w-full justify-start", isCollapsed && "w-12 h-12 justify-center p-0")}>
                                             <div className="flex items-center gap-2">
-                                                <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-xs font-bold shrink-0">
+                                                <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-xs font-bold shrink-0 capitalize">
                                                     {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 3)}
                                                 </div>
-                                                <span className={cn("truncate", isCollapsed && "hidden")}>{selectedBrand}</span>
+                                                <span className={cn("truncate capitalize", isCollapsed && "hidden")}>{selectedBrand}</span>
                                             </div>
                                              <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform ml-auto", isBrandSelectorOpen && "rotate-180", isCollapsed && "hidden")} />
                                         </Button>
                                     </CollapsibleTrigger>
                                 </TooltipTrigger>
-                                {isCollapsed && <TooltipContent side="right">{selectedBrand}</TooltipContent>}
+                                {isCollapsed && <TooltipContent side="right" className="capitalize">{selectedBrand}</TooltipContent>}
                             </Tooltip>
                         </TooltipProvider>
 
@@ -136,7 +132,7 @@ export function AdminSidebar() {
                                 <Button
                                     key={brand}
                                     variant="ghost"
-                                    className="w-full justify-start gap-2"
+                                    className="w-full justify-start gap-2 capitalize"
                                     onClick={() => handleBrandSelect(brand)}
                                 >
                                     <div className="flex items-center justify-center h-5 w-5">

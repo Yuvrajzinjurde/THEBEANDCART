@@ -111,7 +111,7 @@ export default function UserDetailsPage() {
                     <span className="sr-only">Back</span>
                 </Button>
                 <div>
-                     <h1 className="text-xl font-semibold">User Details</h1>
+                     <h1 className="text-xl font-bold">User Details</h1>
                 </div>
             </div>
 
@@ -252,5 +252,3 @@ export default function UserDetailsPage() {
         </div>
     );
 }
-
-    

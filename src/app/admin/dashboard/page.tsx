@@ -19,7 +19,7 @@ const StatChange = ({ value }: { value: number }) => {
 
     if (value === 0 || !isFinite(value)) {
         return (
-             <span className="text-muted-foreground flex items-center font-semibold">
+             <span className="text-muted-foreground flex items-center text-xs">
                 <Minus className="h-3 w-3 mr-1"/> --
               </span>
         );
@@ -27,7 +27,7 @@ const StatChange = ({ value }: { value: number }) => {
     
     return (
         <span className={cn(
-            "flex items-center font-semibold",
+            "flex items-center text-xs",
             isPositive ? "text-green-600" : "text-red-600"
         )}>
             {isPositive && <ArrowUpRight className="h-3 w-3 mr-1"/>}
@@ -79,7 +79,7 @@ function AdminDashboardPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 md:space-y-8">
+    <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
@@ -91,7 +91,7 @@ function AdminDashboardPage() {
         </div>
       </div>
       
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -99,10 +99,10 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
+            <div className="flex items-center gap-1">
                 <StatChange value={stats.percentageChanges.revenue} />
-                &nbsp;vs. last month
-            </p>
+                <span className="text-xs text-muted-foreground">vs. last month</span>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -112,10 +112,10 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
+            <div className="flex items-center gap-1">
                 <StatChange value={stats.percentageChanges.loss} />
-                &nbsp;vs. last month
-            </p>
+                 <span className="text-xs text-muted-foreground">vs. last month</span>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -125,10 +125,10 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground flex items-center flex-wrap">
+            <div className="flex items-center gap-1">
                 <StatChange value={stats.percentageChanges.inventory} />
-                <span className="ml-1">vs. last month</span>
-            </p>
+                <span className="text-xs text-muted-foreground">vs. last month</span>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -148,15 +148,15 @@ function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground flex items-center">
+            <div className="flex items-center gap-1">
                 <StatChange value={stats.percentageChanges.users} />
-                &nbsp;this month
-            </p>
+                <span className="text-xs text-muted-foreground">this month</span>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-       <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
+       <div className="grid gap-6 md:grid-cols-2">
             <Card>
                 <CardHeader>
                     <CardTitle>Revenue Statistics</CardTitle>
