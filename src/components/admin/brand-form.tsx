@@ -134,7 +134,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
         <Card>
           <CardHeader><CardTitle>Brand Identity</CardTitle></CardHeader>
           <CardContent className="space-y-6">
@@ -219,7 +219,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2">
+                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6">
                                     <Trash className="h-4 w-4" />
                                 </Button>
                             </AlertDialogTrigger>
@@ -319,8 +319,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
                                 >
                                     {themeColors.map((theme) => (
-                                        <FormItem key={theme.name}>
-                                          <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
+                                        <div key={theme.name}>
+                                            <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
                                                 <div className="flex items-center gap-2">
                                                     <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
@@ -329,7 +329,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                 </div>
                                                 <span className="mt-2 text-sm font-medium">{theme.name}</span>
                                             </FormLabel>
-                                        </FormItem>
+                                        </div>
                                     ))}
                                 </RadioGroup>
                             </FormControl>
@@ -340,17 +340,35 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardContent>
         </Card>
         
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-              <>
-                  <Loader className="mr-2 h-4 w-4" />
-                  {mode === 'create' ? 'Creating...' : 'Saving...'}
-              </>
-          ) : (
-              mode === 'create' ? 'Create Brand' : 'Save Changes'
-          )}
-        </Button>
-
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+              <Button type="button" disabled={isSubmitting}>
+                {isSubmitting ? (
+                    <>
+                        <Loader className="mr-2 h-4 w-4" />
+                        {mode === 'create' ? 'Creating...' : 'Saving...'}
+                    </>
+                ) : (
+                    mode === 'create' ? 'Create Brand' : 'Save Changes'
+                )}
+              </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      This will {mode === 'create' ? 'create a new brand' : 'save the changes'}.
+                      {mode === 'create' && " The permanent name cannot be changed after creation."}
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                      Continue
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </form>
     </Form>
   );
