@@ -38,11 +38,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
             className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
         </div>
-        <div className="absolute left-2 top-2 z-10 flex -translate-x-12 flex-col gap-1 transition-transform duration-300 group-hover:translate-x-0">
+        <div className="absolute bottom-2 right-2 z-10 flex translate-x-12 flex-col gap-1 transition-transform duration-300 group-hover:translate-x-0">
           <Button
             size="icon"
             variant="outline"
-            className="rounded-full bg-background/60 w-8 h-8 backdrop-blur-sm hover:bg-background"
+            className="rounded-full bg-background/60 w-8 h-8 backdrop-blur-sm hover:bg-background hover:text-red-500"
             onClick={handleWishlistClick}
             aria-label="Add to wishlist"
           >
