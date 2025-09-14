@@ -17,6 +17,7 @@ import {
   HelpCircle,
   Settings,
   Menu,
+  PanelLeft
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -81,7 +82,13 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
 
     return (
          <div className="flex flex-col h-full">
-            <div className={cn("px-4 pt-4", isCollapsed && "px-2")}>
+            <div className={cn("flex h-16 items-center border-b px-4", isCollapsed && "px-2 justify-center")}>
+                 <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-semibold", isCollapsed && "hidden")}>
+                    <Store className="h-6 w-6" />
+                    <span>Admin Panel</span>
+                </Link>
+            </div>
+            <div className={cn("p-4", isCollapsed && "p-2")}>
                 <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
                     <CollapsibleTrigger asChild>
                         <Button variant="outline" className={cn("w-full justify-between", isCollapsed && "w-auto justify-center p-2")}>
@@ -123,7 +130,7 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                 </Collapsible>
             </div>
     
-            <nav className={cn("grid items-start gap-1 px-4 text-sm font-medium flex-1 mt-4", isCollapsed && "px-2")}>
+            <nav className={cn("grid items-start gap-1 px-4 text-sm font-medium flex-1", isCollapsed && "px-2")}>
             <TooltipProvider delayDuration={0}>
                 {navItems.map(({ href, icon: Icon, label }) => (
                     <Tooltip key={label}>
@@ -149,21 +156,11 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
                 ))}
             </TooltipProvider>
             </nav>
-            <div className="mt-auto border-t">
-              <div className={cn("flex items-center justify-between p-4", isCollapsed && "justify-center")}>
-                  {!isCollapsed && <span className="text-sm text-muted-foreground">Help & Settings</span>}
-                  <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <Sun className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <HelpCircle className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <Settings className="h-4 w-4" />
-                      </Button>
-                  </div>
-              </div>
+            <div className="mt-auto border-t p-4">
+                <Button size="icon" variant="ghost" onClick={() => onLinkClick?.()}>
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                </Button>
             </div>
         </div>
     )
@@ -172,13 +169,17 @@ const SidebarNavContent = ({ isCollapsed, onLinkClick }: { isCollapsed?: boolean
 export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProps) {
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
+  const handleToggle = () => {
+    onCollapseChange(!isCollapsed);
+  }
+
   return (
     <>
       {/* Mobile Sidebar */}
       <div className="md:hidden">
          <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
             <SheetTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 fixed top-4 left-4 z-50 bg-background">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
@@ -192,12 +193,12 @@ export function AdminSidebar({ isCollapsed, onCollapseChange }: AdminSidebarProp
       {/* Desktop Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-30 hidden flex-col border-r bg-background transition-[width] duration-300 md:flex mt-16",
+          "fixed inset-y-0 left-0 z-30 hidden flex-col border-r bg-background transition-[width] duration-300 md:flex",
           isCollapsed ? "w-14" : "w-60"
         )}
       >
           <div className="flex-1 overflow-y-auto">
-              <SidebarNavContent isCollapsed={isCollapsed} />
+              <SidebarNavContent isCollapsed={isCollapsed} onLinkClick={handleToggle} />
           </div>
       </div>
     </>
