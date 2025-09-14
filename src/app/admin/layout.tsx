@@ -28,7 +28,7 @@ export default function AdminLayout({
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    <div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-hidden">
       <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background pl-2 pr-4 md:px-4">
         <div className="flex items-center gap-2 font-semibold">
            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
@@ -76,7 +76,7 @@ export default function AdminLayout({
         <AdminSidebar isCollapsed={isSidebarCollapsed} onCollapseChange={setIsSidebarCollapsed} />
         <main 
           className={cn(
-              "flex-1 p-4 sm:px-6 sm:py-4 transition-[margin-left] duration-300 ease-in-out",
+              "flex-1 p-4 sm:px-6 sm:py-4 transition-[margin-left] duration-300 ease-in-out overflow-x-auto",
               isClient && (isSidebarCollapsed ? "md:ml-14" : "md:ml-60")
           )}
         >
