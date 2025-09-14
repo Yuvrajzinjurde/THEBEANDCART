@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import {
-  Download,
+  FileSpreadsheet,
   Search,
   PackageOpen,
   Info,
@@ -112,8 +112,8 @@ export default function OrdersPage() {
         <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                  <Button variant="default">
-                      <Download className="mr-2 h-4 w-4" />
+                  <Button variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700">
+                      <FileSpreadsheet className="mr-2 h-4 w-4" />
                       Download Report
                   </Button>
               </DropdownMenuTrigger>
@@ -261,3 +261,5 @@ export default function OrdersPage() {
     </div>
   );
 }
+
+  
