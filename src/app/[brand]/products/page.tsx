@@ -85,7 +85,7 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
             <ProductFilters products={products} />
             <div className="flex-1">
-                 <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-4">
+                 <div className="sticky top-16 z-10 bg-background/95 backdrop-blur-sm pb-4">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
@@ -148,3 +148,4 @@ export default function ProductsPage() {
     </main>
   );
 }
+
