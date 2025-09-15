@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingCart, Truck, Menu, X } from "lucide-react";
+import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home, User, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -18,7 +18,21 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+
+const secondaryNavItems = [
+    { href: "#", icon: Gift, label: "Gifts" },
+    { href: "#", icon: Shirt, label: "Fashion Finds" },
+    { href: "#", icon: Home, label: "Home Favourites" },
+];
+
 
 export default function Header() {
   const { user, loading } = useAuth();
@@ -43,111 +57,109 @@ export default function Header() {
     fetchBrandLogo();
   }, [brandName]);
   
-  const NavLinks = ({ className }: { className?: string}) => (
-    <nav className={cn("flex items-center", className)}>
+  const DesktopNavActions = () => (
+    <div className="flex items-center gap-1">
         <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
             <Link href="#">
                 <Heart className="h-5 w-5" />
             </Link>
         </Button>
+        <Button variant="ghost" size="icon" aria-label="Notifications" asChild>
+            <Link href="#">
+                <Bell className="h-5 w-5" />
+            </Link>
+        </Button>
+        {loading ? null : user ? (
+            <UserNav />
+            ) : (
+             <Button variant="ghost" size="icon" aria-label="Sign In" asChild>
+                <Link href={`/${brandName}/login`}>
+                    <User className="h-5 w-5" />
+                </Link>
+            </Button>
+        )}
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
             <Link href="#">
                 <ShoppingCart className="h-5 w-5" />
             </Link>
         </Button>
-        <Button variant="ghost" size="icon" aria-label="Orders" asChild>
-            <Link href="#">
-                <Truck className="h-5 w-5" />
-            </Link>
-        </Button>
-    </nav>
+    </div>
   );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href={`/${brandName}/home`} className="mr-6 flex items-center space-x-2">
+        <Link href={`/${brandName}/home`} className="mr-4 flex items-center space-x-2">
           {brand?.logoUrl ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 object-contain" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
-          <span className="hidden font-bold sm:inline-block capitalize">{brand?.displayName || brandName}</span>
+          <span className="hidden font-bold text-lg sm:inline-block capitalize">{brand?.displayName || brandName}</span>
         </Link>
 
-        <div className="flex flex-1 items-center justify-end">
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-2">
-                <NavLinks />
-                <div className="w-px h-6 bg-border mx-2" />
-                 {loading ? null : user ? (
-                    <UserNav />
-                    ) : (
-                    <div className="flex items-center gap-2">
-                        <Button asChild size="sm">
-                            <Link href={`/${brandName}/login`}>Log In</Link>
-                        </Button>
-                        <Button asChild variant="secondary" size="sm">
-                            <Link href={`/${brandName}/signup`}>Sign Up</Link>
-                        </Button>
-                    </div>
-                )}
-            </div>
-            
-            {/* Mobile Navigation */}
-            <div className="md:hidden">
-                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <Menu className="h-6 w-6" />
-                            <span className="sr-only">Open menu</span>
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-[300px] sm:w-[340px]">
-                        <div className="flex flex-col h-full">
-                            <div className="flex justify-between items-center mb-6">
-                                <Link href={`/${brandName}/home`} onClick={() => setIsSheetOpen(false)} className="flex items-center space-x-2">
-                                     {brand?.logoUrl ? (
-                                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={24} height={24} className="h-6 w-6 object-contain" />
-                                    ) : (
-                                        <Logo className="h-6 w-6" />
-                                    )}
-                                    <span className="font-bold capitalize">{brand?.displayName || brandName}</span>
-                                </Link>
-                                <SheetClose asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <X className="h-6 w-6" />
-                                    </Button>
-                                </SheetClose>
-                            </div>
-                            
-                            <div className="flex-1 flex flex-col justify-between">
-                                <div>
-                                     <NavLinks className="flex-col items-start space-y-2"/>
-                                </div>
-                                <div className="py-4 border-t">
-                                    {loading ? null : user ? (
-                                        <div className="flex items-center justify-between">
-                                            <span>Welcome, {user.name}</span>
-                                            <UserNav />
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-2">
-                                            <Button asChild className="w-full" onClick={() => setIsSheetOpen(false)}>
-                                                <Link href={`/${brandName}/login`}>Log In</Link>
-                                            </Button>
-                                            <Button asChild variant="secondary" className="w-full" onClick={() => setIsSheetOpen(false)}>
-                                                <Link href={`/${brandName}/signup`}>Sign Up</Link>
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </SheetContent>
-                </Sheet>
+        {/* Categories Dropdown */}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="hidden md:flex items-center gap-2">
+                    <Menu className="h-5 w-5" />
+                    <span className="font-semibold">Categories</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+                <DropdownMenuItem>Electronics</DropdownMenuItem>
+                <DropdownMenuItem>Apparel</DropdownMenuItem>
+                <DropdownMenuItem>Home Goods</DropdownMenuItem>
+                <DropdownMenuItem>Books</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Search Bar */}
+        <div className="flex-1 mx-4">
+            <div className="relative w-full max-w-lg mx-auto">
+                <Input
+                    type="search"
+                    placeholder="Search for anything"
+                    className="h-11 w-full rounded-full pl-5 pr-12 text-base"
+                />
+                 <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
+                    <Search className="h-4 w-4" />
+                </Button>
             </div>
         </div>
+
+        {/* Actions */}
+        <div className="hidden md:flex">
+            <DesktopNavActions />
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="md:hidden">
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <Menu className="h-6 w-6" />
+                        <span className="sr-only">Open menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[340px]">
+                    {/* Sheet Content for mobile */}
+                </SheetContent>
+            </Sheet>
+        </div>
+      </div>
+      
+      {/* Secondary Navigation */}
+      <Separator />
+      <div className="hidden md:flex justify-center">
+         <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
+            {secondaryNavItems.map((item) => (
+                <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                </Link>
+            ))}
+        </nav>
       </div>
     </header>
   );
