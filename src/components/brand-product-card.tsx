@@ -70,11 +70,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       onMouseLeave={() => plugin.current.stop()}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
-         {hasDiscount && (
-            <Badge variant="destructive" className="absolute top-2 left-2 z-10 font-bold">
-                {discountPercentage}% OFF
-            </Badge>
-        )}
         <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden xl:aspect-h-8 xl:aspect-w-7">
            <Carousel
               plugins={[plugin.current]}
@@ -123,9 +118,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 ₹{sellingPrice.toFixed(2)}
             </p>
             {hasDiscount && (
-                <p className="text-sm font-medium text-muted-foreground line-through">
-                    ₹{mrp.toFixed(2)}
-                </p>
+                <>
+                    <p className="text-sm font-medium text-muted-foreground line-through">
+                        ₹{mrp.toFixed(2)}
+                    </p>
+                    <Badge variant="destructive" className="font-bold">
+                        {discountPercentage}% OFF
+                    </Badge>
+                </>
             )}
           </div>
         </div>
