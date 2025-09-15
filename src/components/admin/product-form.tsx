@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle, Sparkles } from 'lucide-react';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -22,11 +22,10 @@ import { cn } from '@/lib/utils';
 import type { IBrand } from '@/models/brand.model';
 import { getSEODescription } from '@/ai/flows/seo-description-flow';
 import { autofillProductDetails } from '@/ai/flows/autofill-product-flow';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-interface ProductFormProps {
-  mode: 'create' | 'edit';
-  existingProduct?: IProduct; // For edit mode
-}
 
 const CATEGORIES = [
     "Men Fashion",
@@ -60,6 +59,41 @@ const CATEGORIES = [
     "Bags, Luggage & Travel Accessories",
     "Mens Personal Care & Grooming"
 ];
+
+
+const SortableImage = ({ id, url, onRemove }: { id: any; url: string; onRemove: () => void }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} className="relative aspect-square group">
+            <div className="relative w-full h-full">
+                {url && <Image src={url} alt={`Preview`} fill className="object-cover rounded-md" />}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={onRemove}
+                >
+                    <X className="h-4 w-4" />
+                </Button>
+                 <button
+                    type="button"
+                    {...attributes}
+                    {...listeners}
+                    className="absolute bottom-1 right-1 h-6 w-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+                >
+                    <GripVertical className="h-4 w-4 text-white" />
+                </button>
+            </div>
+        </div>
+    );
+};
 
 
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
@@ -101,7 +135,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     mode: 'onChange',
   });
 
-  const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
+  const { fields: imageFields, append: appendImage, remove: removeImage, move: moveImage } = useFieldArray({
     control: form.control,
     name: 'images',
   });
@@ -226,6 +260,22 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     }
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+        const oldIndex = imageFields.findIndex(field => field.id === active.id);
+        const newIndex = imageFields.findIndex(field => field.id === over!.id);
+        moveImage(oldIndex, newIndex);
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -288,7 +338,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     <CardContent className="space-y-6">
                          <FormField control={form.control} name="images" render={() => (
                             <FormItem>
-                                <FormLabel>Images</FormLabel>
+                                <div className="flex justify-between items-center">
+                                    <FormLabel>Images</FormLabel>
+                                    <FormDescription>Drag and drop to reorder images.</FormDescription>
+                                </div>
                                 <FormControl>
                                     <div className="w-full">
                                         <Input 
@@ -310,16 +363,15 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 </FormControl>
                                 <FormMessage />
                                 {imageFields.length > 0 && (
-                                    <div className="grid grid-cols-4 gap-4 mt-4">
-                                        {imageFields.map((field, index) => (
-                                            <div key={field.id} className="relative aspect-square">
-                                                {field.value && <Image src={field.value} alt={`Preview ${index}`} fill className="object-cover rounded-md" />}
-                                                <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeImage(index)}>
-                                                    <X className="h-4 w-4" />
-                                                </Button>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                        <SortableContext items={imageFields} strategy={rectSortingStrategy}>
+                                            <div className="grid grid-cols-4 gap-4 mt-4">
+                                                {imageFields.map((field, index) => (
+                                                    <SortableImage key={field.id} id={field.id} url={field.value} onRemove={() => removeImage(index)} />
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
+                                        </SortableContext>
+                                    </DndContext>
                                 )}
                             </FormItem>
                          )} />
