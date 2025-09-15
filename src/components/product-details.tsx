@@ -48,7 +48,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     containScroll: 'keepSnaps',
     dragFree: true,
     align: 'start',
-    axis: 'y',
   });
 
   useEffect(() => {
@@ -77,9 +76,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   
   const scrollPrev = useCallback(() => mainApi?.scrollPrev(), [mainApi]);
   const scrollNext = useCallback(() => mainApi?.scrollNext(), [mainApi]);
-  const thumbScrollPrev = useCallback(() => thumbApi?.scrollPrev(), [thumbApi]);
-  const thumbScrollNext = useCallback(() => thumbApi?.scrollNext(), [thumbApi]);
-
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => Math.max(1, prev + amount));
@@ -98,45 +94,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery */}
-      <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
-        {/* Vertical Thumbnails */}
-        <div className="relative h-full max-h-[500px]">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={thumbScrollPrev}>
-                    <ChevronLeft className="h-4 w-4 rotate-90" />
-                </Button>
-            </div>
-            <div className="overflow-hidden h-full" ref={thumbCarouselRef}>
-                <div className="flex flex-col h-full gap-3">
-                    {mediaItems.map((media, index) => (
-                         <div key={index} className="flex-[0_0_80px] min-h-0">
-                            <ThumbsButton
-                                onClick={() => onThumbClick(index)}
-                                selected={index === selectedIndex}
-                            >
-                                <Image
-                                  src={media.url}
-                                  alt={`${product.name} thumbnail ${index + 1}`}
-                                  fill
-                                  className="object-cover"
-                                />
-                                {media.type === 'video' && (
-                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                        <PlayCircle className="w-8 h-8 text-white" />
-                                    </div>
-                                )}
-                            </ThumbsButton>
-                        </div>
-                    ))}
-                </div>
-            </div>
-             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10">
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={thumbScrollNext}>
-                    <ChevronRight className="h-4 w-4 rotate-90" />
-                </Button>
-            </div>
-        </div>
-        
+      <div className="grid gap-4">
         {/* Main Image Viewer */}
         <div className="relative overflow-hidden rounded-lg aspect-square">
             <div className="overflow-hidden h-full" ref={mainCarouselRef}>
@@ -174,6 +132,55 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
              <Button variant="outline" size="icon" className="absolute top-2 right-2 rounded-full bg-background/60 hover:bg-background hover:text-red-500">
                 <Heart />
             </Button>
+        </div>
+
+        {/* Horizontal Thumbnails */}
+        <div className="overflow-hidden" ref={thumbCarouselRef}>
+            <div className="flex gap-3">
+                {mediaItems.map((media, index) => (
+                    <div key={index} className="flex-[0_0_80px] min-h-0">
+                        <ThumbsButton
+                            onClick={() => onThumbClick(index)}
+                            selected={index === selectedIndex}
+                        >
+                            <Image
+                              src={media.url}
+                              alt={`${product.name} thumbnail ${index + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                            {media.type === 'video' && (
+                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                    <PlayCircle className="w-8 h-8 text-white" />
+                                </div>
+                            )}
+                        </ThumbsButton>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <div className="flex flex-col gap-4 mt-4">
+            <div className="flex items-center gap-4">
+                <h3 className="text-lg font-semibold">Quantity</h3>
+                <div className="flex items-center gap-2 rounded-lg border p-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="w-8 text-center font-semibold">{quantity}</span>
+                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+             <div className="grid sm:grid-cols-2 gap-4">
+                <Button size="lg" >
+                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                </Button>
+                <Button size="lg" variant="outline">
+                    <Heart className="mr-2 h-5 w-5" /> Add to Wishlist
+                </Button>
+            </div>
         </div>
       </div>
 
@@ -240,29 +247,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         </div>
 
         <Separator />
-        
-        <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-                <h3 className="text-lg font-semibold">Quantity</h3>
-                <div className="flex items-center gap-2 rounded-lg border p-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                        <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-8 text-center font-semibold">{quantity}</span>
-                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                        <Plus className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-             <div className="grid sm:grid-cols-2 gap-4">
-                <Button size="lg" >
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                </Button>
-                <Button size="lg" variant="outline">
-                    <Heart className="mr-2 h-5 w-5" /> Add to Wishlist
-                </Button>
-            </div>
-        </div>
       </div>
     </div>
   );
