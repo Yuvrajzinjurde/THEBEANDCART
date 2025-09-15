@@ -27,7 +27,7 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const plugin = useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true, playOnInit: false })
   );
@@ -44,7 +44,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     try {
         const response = await fetch('/api/wishlist', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ productId: product._id }),
         });
         const result = await response.json();
@@ -67,7 +70,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     try {
         const response = await fetch('/api/cart', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ productId: product._id, quantity: 1 }),
         });
         const result = await response.json();
