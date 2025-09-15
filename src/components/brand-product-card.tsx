@@ -17,6 +17,8 @@ import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Separator } from "./ui/separator";
+import { toast } from "react-toastify";
+import { useAuth } from "@/hooks/use-auth";
 
 interface BrandProductCardProps {
   product: IProduct;
@@ -25,22 +27,55 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const plugin = useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true, playOnInit: false })
   );
 
-  const handleWishlistClick = (e: React.MouseEvent) => {
+  const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Added to wishlist:", product.name);
-    // TODO: Implement wishlist logic
+    if (!user) {
+        toast.info("Please log in to add items to your wishlist.");
+        router.push(`/${product.storefront}/login`);
+        return;
+    }
+    toast.info("Adding to wishlist...");
+    try {
+        const response = await fetch('/api/wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product._id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        toast.success(result.message);
+    } catch (error: any) {
+        toast.error(error.message || "Failed to add to wishlist.");
+    }
   };
 
-  const handleCartClick = (e: React.MouseEvent) => {
+  const handleCartClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Added to cart:", product.name);
-    // TODO: Implement cart logic
+     if (!user) {
+        toast.info("Please log in to add items to your cart.");
+        router.push(`/${product.storefront}/login`);
+        return;
+    }
+    toast.info("Adding to cart...");
+    try {
+        const response = await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product._id, quantity: 1 }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        toast.success("Added to cart!");
+    } catch (error: any) {
+        toast.error(error.message || "Failed to add to cart.");
+    }
   };
 
   const handleCardClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {

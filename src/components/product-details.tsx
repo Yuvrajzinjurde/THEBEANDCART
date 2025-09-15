@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/carousel"
 import useEmblaCarousel, { type EmblaCarouselType } from 'embla-carousel-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './ui/breadcrumb';
+import { useAuth } from '@/hooks/use-auth';
+import { toast } from 'react-toastify';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -48,6 +50,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
 
 export default function ProductDetails({ product: initialProduct, variants }: ProductDetailsProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -142,6 +145,49 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
     ...product.images.map(url => ({ type: 'image', url })),
     // ...(product.videos?.map(url => ({ type: 'video', url })) || [])
   ];
+  
+  const handleAddToCart = async () => {
+    if (!user) {
+        toast.info("Please log in to add items to your cart.");
+        router.push(`/${product.storefront}/login`);
+        return;
+    }
+    toast.info("Adding to cart...");
+    try {
+        const response = await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product._id, quantity }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        toast.success("Added to cart!");
+    } catch (error: any) {
+        toast.error(error.message || "Failed to add to cart.");
+    }
+  };
+
+  const handleAddToWishlist = async () => {
+     if (!user) {
+        toast.info("Please log in to add items to your wishlist.");
+        router.push(`/${product.storefront}/login`);
+        return;
+    }
+    toast.info("Adding to wishlist...");
+    try {
+        const response = await fetch('/api/wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: product._id }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        toast.success(result.message);
+    } catch (error: any) {
+        toast.error(error.message || "Failed to add to wishlist.");
+    }
+  };
+
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -150,13 +196,13 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
         <div className="flex flex-col gap-4">
             <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
               {/* Vertical Thumbnails */}
-              <div className="flex flex-col items-center justify-start gap-3">
+              <div className="flex flex-col items-center justify-start">
                   <Button
                       variant="ghost" size="icon"
                       className="h-8 w-8 flex-shrink-0"
                       onClick={thumbScrollPrev}
                   ><ChevronUp className="h-5 w-5" /></Button>
-                  <div className="overflow-hidden w-full max-h-[350px]" ref={thumbRef}>
+                  <div className="overflow-hidden w-full max-h-[350px] my-2" ref={thumbRef}>
                       <div className="flex flex-col gap-3 h-full">
                           {mediaItems.map((media, index) => (
                               <div key={index} className="flex-[0_0_80px] min-w-0">
@@ -224,7 +270,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
                     </CarouselNext>
                 </Carousel>
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500">
+                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}>
                         <Heart />
                     </Button>
                     <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background">
@@ -248,7 +294,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
-                <Button size="lg" className="h-12 text-base">
+                <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
                     <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
                 </Button>
                 <Button size="lg" variant="secondary" className="h-12 text-base">
@@ -382,5 +428,3 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
     </div>
   );
 }
-
-    
