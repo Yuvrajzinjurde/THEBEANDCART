@@ -49,6 +49,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   
   const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
+  const price = typeof product.sellingPrice === 'number' ? product.sellingPrice : 0;
 
   return (
     <Link href={`/products/${product._id}`} onClick={handleCardClick} className={cn("group block", className)}>
@@ -92,7 +93,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <p className="mt-1 text-xs text-muted-foreground">{product.category}</p>
           <div className="mt-2 flex items-baseline gap-2">
             <p className="text-base font-bold text-foreground">
-                ₹{product.sellingPrice.toFixed(2)}
+                ₹{price.toFixed(2)}
             </p>
             {hasDiscount && (
                 <p className="text-sm font-medium text-muted-foreground line-through">
