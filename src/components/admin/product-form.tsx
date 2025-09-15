@@ -268,7 +268,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
                  <Card>
                     <CardHeader><CardTitle>Media</CardTitle></CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-6">
                          <FormField control={form.control} name="images" render={() => (
                             <FormItem>
                                 <FormLabel>Images</FormLabel>
@@ -277,7 +277,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         <Input 
                                             id="image-upload"
                                             type="file" 
-                                            accept="image/png, image/jpeg"
+                                            accept="image/png, image/jpeg, image/webp"
                                             className="hidden"
                                             multiple
                                             onChange={handleFileChange}
@@ -286,7 +286,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                 <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p className="text-xs text-muted-foreground">PNG or JPG</p>
+                                                <p className="text-xs text-muted-foreground">PNG, JPG or WEBP</p>
                                             </div>
                                         </label>
                                     </div>
@@ -306,6 +306,31 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 )}
                             </FormItem>
                          )} />
+
+                        <FormItem>
+                            <FormLabel>Videos</FormLabel>
+                            <FormControl>
+                                <div className="w-full">
+                                    <Input 
+                                        id="video-upload"
+                                        type="file" 
+                                        accept="video/mp4, video/webm, audio/mp3"
+                                        className="hidden"
+                                        multiple
+                                        // onChange={handleVideoFileChange} // You would need a new handler for videos
+                                    />
+                                    <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            <p className="text-xs text-muted-foreground">MP4, WEBM, or MP3</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            {/* You would also need a way to display video previews here */}
+                        </FormItem>
                     </CardContent>
                 </Card>
 
@@ -452,5 +477,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
