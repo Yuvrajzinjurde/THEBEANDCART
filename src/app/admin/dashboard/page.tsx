@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Package, Users, IndianRupee, ShoppingCart, AlertCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Package, Users, IndianRupee, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
@@ -45,7 +45,7 @@ function AdminDashboardPage() {
           <ArrowDown className="h-4 w-4 text-red-500" />
         )}
         <span className={cn("font-semibold", isPositive ? "text-green-600" : "text-red-600")}>
-          {value.toFixed(1)}%
+          {(value || 0).toFixed(1)}%
         </span>
         &nbsp;from last month
       </p>
@@ -82,35 +82,25 @@ function AdminDashboardPage() {
         </div>
       </div>
       
-       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-blue-100 text-blue-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
             <IndianRupee className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</div>
-            <PercentageChange value={stats.percentageChanges.revenue} />
-          </CardContent>
-        </Card>
-        <Card className="bg-red-100 text-red-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
-            <AlertCircle className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">₹{stats.totalLoss.toLocaleString('en-IN')}</div>
-            <PercentageChange value={stats.percentageChanges.loss} />
+            <div className="text-3xl font-bold">₹{(stats.totalRevenue || 0).toLocaleString('en-IN')}</div>
+            <PercentageChange value={stats.percentageChanges.revenue || 0} />
           </CardContent>
         </Card>
         <Card className="bg-green-100 text-green-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
-            <ShoppingCart className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <Package className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">₹{stats.totalInventoryValue.toLocaleString('en-IN')}</div>
-            <PercentageChange value={stats.percentageChanges.inventory} />
+            <div className="text-3xl font-bold">{(stats.totalOrders || 0)}</div>
+             <PercentageChange value={stats.percentageChanges.orders || 0} />
           </CardContent>
         </Card>
         <Card className="bg-orange-100 text-orange-800">
@@ -119,7 +109,7 @@ function AdminDashboardPage() {
             <Package className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.totalProducts}</div>
+            <div className="text-3xl font-bold">{(stats.totalProducts || 0)}</div>
              <p className="text-xs text-muted-foreground">Count of all listed products</p>
           </CardContent>
         </Card>
@@ -129,8 +119,8 @@ function AdminDashboardPage() {
             <Users className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.totalUsers}</div>
-            <PercentageChange value={stats.percentageChanges.users} />
+            <div className="text-3xl font-bold">{(stats.totalUsers || 0)}</div>
+            <PercentageChange value={stats.percentageChanges.users || 0} />
           </CardContent>
         </Card>
       </div>
