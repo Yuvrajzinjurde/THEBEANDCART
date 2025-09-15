@@ -14,7 +14,7 @@ import { Search, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { ChartTooltipContent } from "@/components/ui/chart";
+import { ChartTooltipContent, ChartContainer } from "@/components/ui/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
@@ -60,6 +60,17 @@ function BusinessDashboardPage() {
       orders: Math.floor(d.revenue / 5000) + Math.floor(Math.random() * 5),
       sales: d.revenue,
   })).slice(-7); // Mocking orders from revenue for now
+
+  const chartConfig = {
+    sales: {
+      label: 'Sales',
+      color: 'hsl(var(--primary))',
+    },
+    orders: {
+      label: 'Orders',
+      color: 'hsl(var(--primary))',
+    },
+  };
 
   if (loading) {
     return (
@@ -127,15 +138,25 @@ function BusinessDashboardPage() {
             </div>
 
             <div className="h-[300px] w-full">
-                <ResponsiveContainer>
+               <ChartContainer config={chartConfig} className="h-full w-full">
                     <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} axisLine={false}/>
                         <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Area type="monotone" dataKey={chartView} stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.1)" strokeWidth={2} />
+                        <Tooltip
+                            cursor={false}
+                            content={<ChartTooltipContent indicator="line" />}
+                        />
+                        <Area 
+                            type="monotone" 
+                            dataKey={chartView} 
+                            stroke={`var(--color-${chartView})`}
+                            fill={`var(--color-${chartView})`}
+                            fillOpacity={0.1}
+                            strokeWidth={2}
+                        />
                     </AreaChart>
-                </ResponsiveContainer>
+                </ChartContainer>
             </div>
 
             <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
