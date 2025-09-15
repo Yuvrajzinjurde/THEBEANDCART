@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -114,7 +115,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       for (const file of Array.from(files)) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          appendImage(reader.result as string);
+          appendImage({ value: reader.result as string });
         };
         reader.readAsDataURL(file);
       }
@@ -181,6 +182,13 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   async function onSubmit(data: ProductFormValues) {
     setIsSubmitting(true);
+    // Before submitting, we need to flatten the images array
+    const dataToSubmit = {
+      ...data,
+      images: data.images.map(img => img.value),
+    };
+
+
     const url = mode === 'create' ? '/api/products' : `/api/products/${existingProduct?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -188,7 +196,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSubmit),
       });
 
       const result = await response.json();
@@ -477,3 +485,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    

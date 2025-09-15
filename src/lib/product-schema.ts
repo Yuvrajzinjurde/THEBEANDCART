@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 const CATEGORIES = [
@@ -44,7 +45,14 @@ export const ProductFormSchema = z.object({
 });
 
 
-export type ProductFormValues = z.infer<typeof ProductFormSchema>;
+const ImageValueSchema = z.object({ value: z.string().url() });
+
+export const ProductFormSchemaWithImageObjects = ProductFormSchema.extend({
+  images: z.array(ImageValueSchema).min(1, "At least one image is required"),
+});
+
+export type ProductFormValues = z.infer<typeof ProductFormSchemaWithImageObjects>;
+
 
 // AI Flow Schemas
 export const AutofillProductInputSchema = z.object({
@@ -63,5 +71,7 @@ export const AutofillProductOutputSchema = z.object({
   stock: z.number().describe('A suggested initial stock quantity, between 50 and 200.'),
 });
 export type AutofillProductOutput = z.infer<typeof AutofillProductOutputSchema>;
+
+    
 
     
