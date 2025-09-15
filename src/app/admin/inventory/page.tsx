@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from 'react';
@@ -324,7 +325,9 @@ export default function InventoryPage() {
                                                         {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>₹{product.sellingPrice.toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
+                                                </TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
                                             </TableRow>
@@ -374,7 +377,9 @@ export default function InventoryPage() {
                                                         Out of Stock
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>₹{product.sellingPrice.toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
+                                                </TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
                                             </TableRow>
@@ -424,7 +429,9 @@ export default function InventoryPage() {
                                                         Low Stock
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>₹{product.sellingPrice.toFixed(2)}</TableCell>
+                                                <TableCell>
+                                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
+                                                </TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
                                             </TableRow>
@@ -444,4 +451,5 @@ export default function InventoryPage() {
             </CardContent>
         </Card>
     );
-}
+
+    
