@@ -77,6 +77,7 @@ export default function LandingPage() {
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadingBrand, setLoadingBrand] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBrands() {
@@ -133,8 +134,8 @@ export default function LandingPage() {
                 <div className="w-full max-w-4xl mx-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {brands.map((brand) => (
-                           <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="block group">
-                                <Card className="relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+                           <Card key={brand.permanentName} className="relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
+                                <Link href={`/${brand.permanentName}/home`} className="block" onClick={() => setLoadingBrand(brand.permanentName)}>
                                     <CardContent className="p-0">
                                         <div className="aspect-square relative bg-muted flex items-center justify-center">
                                             <Image
@@ -150,8 +151,13 @@ export default function LandingPage() {
                                             <h2 className="text-center text-lg font-bold text-foreground">{brand.displayName}</h2>
                                         </div>
                                     </CardContent>
-                                </Card>
-                            </Link>
+                                </Link>
+                                {loadingBrand === brand.permanentName && (
+                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
+                                        <Loader className="h-10 w-10" />
+                                    </div>
+                                )}
+                            </Card>
                         ))}
                     </div>
                 </div>
