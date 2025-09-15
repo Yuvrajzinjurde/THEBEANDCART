@@ -2,25 +2,27 @@
 'use server';
 
 import dbConnect from '@/lib/mongodb';
-import Product from '@/models/product.model';
+import Product, { IProduct } from '@/models/product.model';
 import User from '@/models/user.model';
 import Order from '@/models/order.model';
 import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 
 export interface DashboardStats {
-  totalInventoryValue: number;
-  totalProducts: number;
-  totalUsers: number;
   totalRevenue: number;
-  totalLoss: number;
+  totalOrders: number;
+  totalViews: number;
+  totalClicks: number;
+  conversionRate: number;
+  returnPercentage: number;
+  allProducts: IProduct[];
   revenueChartData: { month: string; revenue: number }[];
-  salesByCategoryData: { name: string; value: number }[];
   percentageChanges: {
     revenue: number;
-    loss: number;
-    inventory: number;
-    users: number;
+    orders: number;
+    views: number;
+    clicks: number;
+    conversion: number;
   };
 }
 
@@ -42,82 +44,36 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const now = new Date();
         const lastMonth = subMonths(now, 1);
         
+        const startOfThisMonth = startOfMonth(now);
         const startOfLastMonth = startOfMonth(lastMonth);
         const endOfLastMonth = endOfMonth(lastMonth);
 
-        // === Current Stats ===
-        const productAggregation = await Product.aggregate([
-            { $match: brandQuery },
-            { $group: {
-                _id: null,
-                totalValue: { $sum: { $multiply: ["$price", "$stock"] } },
-                totalCount: { $sum: 1 }
-            }}
-        ]);
+        // === Product Stats (Current & Previous) ===
+        const allProducts = await Product.find(brandQuery).lean();
+        const allProductsObject: IProduct[] = JSON.parse(JSON.stringify(allProducts));
+
+        const productStats = allProductsObject.reduce((acc, p) => {
+            acc.totalViews += p.views || 0;
+            acc.totalClicks += p.clicks || 0;
+            return acc;
+        }, { totalViews: 0, totalClicks: 0 });
+
+        // Dummy previous month data for views/clicks as we don't have historical tracking
+        const prevProductStats = {
+            totalViews: productStats.totalViews / 2,
+            totalClicks: productStats.totalClicks / 2,
+        };
         
-        const totalUsers = await User.countDocuments(brandQuery);
 
-        const orderAggregation = await Order.aggregate([
-            { $match: { ...brandQuery, status: { $ne: 'cancelled' } } },
-            { $group: {
-                _id: null,
-                totalRevenue: { $sum: "$totalAmount" }
-            }}
-        ]);
+        // === Order Stats (Current & Previous) ===
+        const currentOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfThisMonth } });
+        const previousOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth } });
         
-        const cancelledOrderAggregation = await Order.aggregate([
-            { $match: { ...brandQuery, status: 'cancelled' } },
-            { $group: {
-                _id: null,
-                totalLoss: { $sum: "$totalAmount" }
-            }}
-        ]);
+        const totalOrders = currentOrders.length;
+        const prevTotalOrders = previousOrders.length;
 
-        // === Previous Month Stats ===
-        const prevProductAggregation = await Product.aggregate([
-             { $match: { ...brandQuery, createdAt: { $lte: endOfLastMonth } } },
-             { $group: {
-                _id: null,
-                totalValue: { $sum: { $multiply: ["$price", "$stock"] } },
-            }}
-        ]);
-
-        const prevTotalUsers = await User.countDocuments({ ...brandQuery, createdAt: { $lte: endOfLastMonth } });
-        
-        const prevOrderAggregation = await Order.aggregate([
-            { $match: { ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $lte: endOfLastMonth } } },
-            { $group: {
-                _id: null,
-                totalRevenue: { $sum: "$totalAmount" }
-            }}
-        ]);
-        
-        const prevCancelledOrderAggregation = await Order.aggregate([
-            { $match: { ...brandQuery, status: 'cancelled', createdAt: { $lte: endOfLastMonth } } },
-            { $group: {
-                _id: null,
-                totalLoss: { $sum: "$totalAmount" }
-            }}
-        ]);
-
-        // === Process Stats ===
-        const productStats = productAggregation[0] || { totalValue: 0, totalCount: 0 };
-        const orderStats = orderAggregation[0] || { totalRevenue: 0 };
-        const cancelledOrderStats = cancelledOrderAggregation[0] || { totalLoss: 0 };
-
-        const prevProductStats = prevProductAggregation[0] || { totalValue: 0 };
-        const prevOrderStats = prevOrderAggregation[0] || { totalRevenue: 0 };
-        const prevCancelledOrderStats = prevCancelledOrderAggregation[0] || { totalLoss: 0 };
-
-
-        // === Category Stats ===
-        const categoryAggregation = await Product.aggregate([
-            { $match: brandQuery },
-            { $group: { _id: "$category", value: { $sum: 1 } } },
-            { $sort: { value: -1 } },
-            { $limit: 5 },
-            { $project: { _id: 0, name: "$_id", value: 1 } }
-        ]);
+        const totalRevenue = currentOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+        const prevTotalRevenue = previousOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
         // === Chart Data ===
         const monthlyRevenue = await Order.aggregate([
@@ -134,23 +90,28 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
             return { month, revenue: monthData ? monthData.revenue : 0 };
         });
 
-        // === Final Stats & Percentages ===
+        // === Calculations & Percentages ===
+        const conversionRate = productStats.totalClicks > 0 ? (totalOrders / productStats.totalClicks) * 100 : 0;
+        const prevConversionRate = prevProductStats.totalClicks > 0 ? (prevTotalOrders / prevProductStats.totalClicks) * 100 : 0;
+        
         const percentageChanges = {
-            revenue: calculatePercentageChange(orderStats.totalRevenue, prevOrderStats.totalRevenue),
-            loss: calculatePercentageChange(cancelledOrderStats.totalLoss, prevCancelledOrderStats.totalLoss),
-            inventory: calculatePercentageChange(productStats.totalValue, prevProductStats.totalValue),
-            users: calculatePercentageChange(totalUsers, prevTotalUsers),
+            revenue: calculatePercentageChange(totalRevenue, prevTotalRevenue),
+            orders: calculatePercentageChange(totalOrders, prevTotalOrders),
+            views: calculatePercentageChange(productStats.totalViews, prevProductStats.totalViews),
+            clicks: calculatePercentageChange(productStats.totalClicks, prevProductStats.totalClicks),
+            conversion: calculatePercentageChange(conversionRate, prevConversionRate),
         };
 
         return {
-            totalInventoryValue: productStats.totalValue,
-            totalProducts: productStats.totalCount,
-            totalUsers: totalUsers,
-            totalRevenue: orderStats.totalRevenue,
-            totalLoss: cancelledOrderStats.totalLoss,
-            revenueChartData: revenueChartData,
-            salesByCategoryData: categoryAggregation,
-            percentageChanges: percentageChanges,
+            totalRevenue,
+            totalOrders,
+            totalViews: productStats.totalViews,
+            totalClicks: productStats.totalClicks,
+            conversionRate,
+            returnPercentage: 0, // Not tracked yet
+            allProducts: allProductsObject,
+            revenueChartData,
+            percentageChanges,
         };
 
     } catch (error) {

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import useBrandStore from "@/stores/brand-store";
-import { getDashboardStats, type DashboardStats as BusinessDashboardData } from "../dashboard/actions";
+import { getDashboardStats, type DashboardStats } from "../dashboard/actions";
 import { Loader } from "@/components/ui/loader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChartTooltipContent, ChartContainer } from "@/components/ui/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { IProduct } from "@/models/product.model";
 
 
 type Period = '7d' | '30d' | 'yesterday' | 'custom';
@@ -23,7 +24,7 @@ type ChartView = 'orders' | 'sales';
 
 function BusinessDashboardPage() {
   const { selectedBrand } = useBrandStore();
-  const [data, setData] = useState<BusinessDashboardData | null>(null);
+  const [data, setData] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('7d');
@@ -88,10 +89,7 @@ function BusinessDashboardPage() {
     );
   }
 
-  const { totalProducts, totalUsers, totalRevenue, percentageChanges } = data;
-  // NOTE: Clicks and Conversion Rate are currently placeholders as we don't track this data yet.
-  const totalClicks = Math.floor(totalProducts * 1.5); 
-  const conversionRate = totalUsers > 0 ? (totalUsers / totalClicks) * 100 : 0;
+  const { allProducts, totalRevenue, totalOrders, totalViews, totalClicks, conversionRate, percentageChanges } = data;
 
   const StatCard = ({ title, value, change, info }: { title: string, value: string, change?: number, info?: string }) => (
     <div className="p-4 bg-background rounded-lg flex-1 min-w-[150px]">
@@ -111,6 +109,13 @@ function BusinessDashboardPage() {
     </div>
   );
 
+  const getProductConversion = (product: IProduct) => {
+      if (!product.clicks || product.clicks === 0) return 0;
+      // This is a simplified conversion. A real app would track orders per product.
+      // For now, we'll simulate it based on a product's rating.
+      const simulatedOrders = (product.rating / 5) * product.clicks * 0.1; // 10% max conversion based on clicks
+      return (simulatedOrders / product.clicks) * 100;
+  }
 
   return (
     <div className="flex-1 space-y-6">
@@ -162,10 +167,10 @@ function BusinessDashboardPage() {
             </div>
 
             <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
-                <StatCard title="Total Views" value={totalProducts.toLocaleString()} change={percentageChanges.inventory} />
-                <StatCard title="Total Clicks" value={totalClicks.toLocaleString()} change={-43.3} />
-                <StatCard title="Total Orders" value={totalUsers.toLocaleString()} change={percentageChanges.users}/>
-                <StatCard title="Conversion Rate" value={`${conversionRate.toFixed(1)}%`} change={5.1} info="Conversion rate from clicks to orders"/>
+                <StatCard title="Total Views" value={totalViews.toLocaleString()} change={percentageChanges.views} />
+                <StatCard title="Total Clicks" value={totalClicks.toLocaleString()} change={percentageChanges.clicks} />
+                <StatCard title="Total Orders" value={totalOrders.toLocaleString()} change={percentageChanges.orders}/>
+                <StatCard title="Conversion Rate" value={`${conversionRate.toFixed(1)}%`} change={percentageChanges.conversion} info="Conversion rate from clicks to orders"/>
                 <StatCard title="Total Sales" value={`₹${totalRevenue.toLocaleString()}`} change={percentageChanges.revenue} />
                 <StatCard title="Return Percentage" value="0%" />
             </div>
@@ -194,7 +199,7 @@ function BusinessDashboardPage() {
         <CardContent>
             <Tabs defaultValue="all">
                 <TabsList>
-                    <TabsTrigger value="all">All ({totalProducts})</TabsTrigger>
+                    <TabsTrigger value="all">All ({allProducts.length})</TabsTrigger>
                     <TabsTrigger value="low-orders">Low Orders (0)</TabsTrigger>
                     <TabsTrigger value="low-views">Low Views (0)</TabsTrigger>
                     <TabsTrigger value="low-conversion">Low Conversion Rate (0)</TabsTrigger>
@@ -218,20 +223,20 @@ function BusinessDashboardPage() {
                                 </TableRow>
                             </TableHeader>
                              <TableBody>
-                                 {Array.from({ length: 5 }).map((_, index) => (
-                                     <TableRow key={index}>
+                                 {allProducts.map((product) => (
+                                     <TableRow key={product._id as string}>
                                          <TableCell className="font-medium">
                                              <div className="flex items-center gap-3">
-                                                 <Image src={`https://picsum.photos/seed/product${index}/40/40`} alt="Product" width={40} height={40} className="rounded-md"/>
-                                                 <span>Product Name {index + 1}</span>
+                                                 <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md"/>
+                                                 <span>{product.name}</span>
                                              </div>
                                          </TableCell>
-                                         <TableCell>1,234</TableCell>
-                                         <TableCell>567</TableCell>
-                                         <TableCell>89</TableCell>
-                                         <TableCell>7.2%</TableCell>
-                                         <TableCell>₹12,345</TableCell>
-                                         <TableCell>2</TableCell>
+                                         <TableCell>{product.views.toLocaleString()}</TableCell>
+                                         <TableCell>{product.clicks.toLocaleString()}</TableCell>
+                                         <TableCell>N/A</TableCell> {/* Orders per product not tracked yet */}
+                                         <TableCell>{getProductConversion(product).toFixed(1)}%</TableCell>
+                                         <TableCell>N/A</TableCell> {/* Sales per product not tracked yet */}
+                                         <TableCell>0</TableCell>
                                          <TableCell>
                                              <Button variant="outline" size="sm">View</Button>
                                          </TableCell>
@@ -252,5 +257,3 @@ function BusinessDashboardPage() {
 }
 
 export default BusinessDashboardPage;
-
-    

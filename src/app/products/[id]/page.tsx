@@ -17,14 +17,23 @@ export default function ProductPage() {
   useEffect(() => {
     if (!id) return;
 
-    async function fetchProduct() {
+    async function fetchProductAndTrackView() {
       try {
+        // Fetch product data
         const response = await fetch(`/api/products/${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch product');
         }
         const data = await response.json();
         setProduct(data.product);
+
+        // Track the view - fire and forget
+        fetch(`/api/products/${id}/track`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ metric: 'views' }),
+        }).catch(err => console.error("Failed to track view:", err));
+
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -32,7 +41,7 @@ export default function ProductPage() {
       }
     }
 
-    fetchProduct();
+    fetchProductAndTrackView();
   }, [id]);
 
   if (loading) {

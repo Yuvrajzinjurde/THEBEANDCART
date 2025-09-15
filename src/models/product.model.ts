@@ -10,6 +10,8 @@ export interface IProduct extends Document {
   stock: number;
   rating: number;
   brand: string;
+  views: number;
+  clicks: number;
 }
 
 const ProductSchema: Schema<IProduct> = new Schema({
@@ -21,6 +23,8 @@ const ProductSchema: Schema<IProduct> = new Schema({
   stock: { type: Number, required: true, min: 0, default: 0 },
   rating: { type: Number, min: 0, max: 5, default: 0 },
   brand: { type: String, required: true, index: true },
+  views: { type: Number, default: 0 },
+  clicks: { type: Number, default: 0 },
 }, { timestamps: true });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

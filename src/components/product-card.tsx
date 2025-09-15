@@ -7,6 +7,7 @@ import { Heart, ShoppingCart } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: IProduct;
@@ -14,6 +15,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const router = useRouter();
+
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("Added to wishlist:", product.name);
@@ -26,8 +29,25 @@ export function ProductCard({ product, className }: ProductCardProps) {
     // TODO: Implement cart logic
   };
 
+  const handleCardClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    try {
+      // Track the click - fire and forget
+      fetch(`/api/products/${product._id}/track`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ metric: 'clicks' }),
+      });
+    } catch (error) {
+      console.error("Failed to track click:", error);
+    } finally {
+      // Navigate after attempting to track
+      router.push(`/products/${product._id}`);
+    }
+  };
+
   return (
-    <Link href={`/products/${product._id}`} className={cn("group block", className)}>
+    <Link href={`/products/${product._id}`} onClick={handleCardClick} className={cn("group block", className)}>
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-md">
         <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden xl:aspect-h-8 xl:aspect-w-7">
           <Image
