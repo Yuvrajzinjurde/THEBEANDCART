@@ -133,8 +133,8 @@ export default function LandingPage() {
                 <div className="w-full max-w-4xl mx-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {brands.map((brand) => (
-                            <Card key={brand.permanentName} className="group relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <Link href={`/${brand.permanentName}/home`} className="block">
+                           <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="block group">
+                                <Card className="relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                                     <CardContent className="p-0">
                                         <div className="aspect-square relative bg-muted flex items-center justify-center">
                                             <Image
@@ -150,8 +150,8 @@ export default function LandingPage() {
                                             <h2 className="text-center text-lg font-bold text-foreground">{brand.displayName}</h2>
                                         </div>
                                     </CardContent>
-                                </Link>
-                            </Card>
+                                </Card>
+                            </Link>
                         ))}
                     </div>
                 </div>

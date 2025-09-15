@@ -80,9 +80,19 @@ export default function RootLayout({
   
   const showHeader = !isAdminRoute && !isAuthRoute && !isLandingPage;
 
-  const brandNameFromPath = !isAdminRoute && !isLandingPage && pathname.split('/')[1] 
-    ? pathname.split('/[brand]')[0].split('/')[1] 
-    : null;
+  const getBrandNameFromPath = () => {
+    if (isAdminRoute || isLandingPage) {
+      return null;
+    }
+    const pathParts = pathname.split('/');
+    // e.g., /reeva/home -> parts are ['', 'reeva', 'home']
+    if (pathParts.length > 1 && pathParts[1]) {
+      return pathParts[1];
+    }
+    return null;
+  }
+  
+  const brandNameFromPath = getBrandNameFromPath();
 
   return (
     <html lang="en" suppressHydrationWarning>
