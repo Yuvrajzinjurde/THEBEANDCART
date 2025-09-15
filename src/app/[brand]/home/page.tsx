@@ -144,7 +144,7 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full h-[300px] md:h-[400px] bg-secondary text-foreground">
+                        <div className="relative w-full h-[150px] md:h-[200px] bg-secondary text-foreground">
                             <Image
                                 src={banner.imageUrl}
                                 alt={banner.title}
