@@ -15,7 +15,6 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Badge } from './ui/badge';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface ProductDetailsProps {
@@ -43,7 +42,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 src={selectedImage}
                 alt={product.name}
                 fill
-                className="object-cover transition-transform duration-300 hover:scale-105"
+                className="object-cover"
             />
         </div>
         <div className="hidden md:grid grid-cols-4 gap-4">
@@ -67,10 +66,12 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           ))}
         </div>
          <div className="md:hidden">
-            <Carousel>
-                <CarouselContent>
+            <Carousel opts={{
+                align: "start",
+            }}>
+                <CarouselContent className="-ml-2">
                     {product.images.map((img, index) => (
-                        <CarouselItem key={index} className="basis-1/3">
+                        <CarouselItem key={index} className="basis-1/4 pl-2">
                             <button
                                 className={cn(
                                     "overflow-hidden rounded-lg border aspect-square transition w-full",
@@ -89,8 +90,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
             </Carousel>
         </div>
       </div>
