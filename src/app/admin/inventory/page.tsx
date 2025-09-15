@@ -16,9 +16,8 @@ import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Info, FileSpreadsheet, Download, Upload } from 'lucide-react';
+import { Info, Download, Upload } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import * as XLSX from 'xlsx';
 
 
@@ -188,10 +187,30 @@ export default function InventoryPage() {
                         Showing products for: <strong>{selectedBrand}</strong>
                     </CardDescription>
                 </div>
-                <Button onClick={handleSeed} disabled={isSeeding}>
-                    {isSeeding && <Loader className="mr-2 h-4 w-4" />}
-                    Seed Products
-                </Button>
+                <div className="flex items-center gap-2">
+                     <Button variant="outline" onClick={handleDownloadTemplate} disabled={isUpdating || filteredProducts.length === 0}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Template
+                    </Button>
+                    <Button asChild variant="outline" className="relative cursor-pointer">
+                        <div>
+                            <Upload className="mr-2 h-4 w-4" />
+                            <span>{isUpdating ? 'Processing...' : 'Upload File'}</span>
+                            <input 
+                                type="file" 
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                                accept=".xlsx, .xls, .csv"
+                                onChange={handleFileUpload}
+                                ref={fileInputRef}
+                                disabled={isUpdating}
+                            />
+                        </div>
+                    </Button>
+                    <Button onClick={handleSeed} disabled={isSeeding}>
+                        {isSeeding && <Loader className="mr-2 h-4 w-4" />}
+                        Seed Products
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 {loading ? (
@@ -224,43 +243,6 @@ export default function InventoryPage() {
                                     </div>
                                 </TabsTrigger>
                             </TabsList>
-                             <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant="link" className="text-primary">
-                                        <FileSpreadsheet className="mr-2 h-4 w-4"/>
-                                        Bulk Stock Update
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                        <DialogTitle>Bulk Stock Update</DialogTitle>
-                                        <DialogDescription>
-                                            Download the template, update stock levels, and upload the file to apply changes in bulk.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="grid gap-4 py-4">
-                                        <Button variant="outline" onClick={handleDownloadTemplate} disabled={filteredProducts.length === 0}>
-                                            <Download className="mr-2 h-4 w-4" />
-                                            Download Template
-                                        </Button>
-                                        <Button asChild variant="outline" className="relative cursor-pointer">
-                                            <div>
-                                                <Upload className="mr-2 h-4 w-4" />
-                                                <span>{isUpdating ? 'Processing...' : 'Upload File'}</span>
-                                                <input 
-                                                    type="file" 
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                                    accept=".xlsx, .xls, .csv"
-                                                    onChange={handleFileUpload}
-                                                    ref={fileInputRef}
-                                                    disabled={isUpdating}
-                                                />
-                                            </div>
-                                        </Button>
-                                        {isUpdating && <div className="flex items-center justify-center"><Loader /> <span className="ml-2">Updating stock...</span></div>}
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
                         </div>
                         
                         <div className="flex items-center gap-4 py-4 px-1">
