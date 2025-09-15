@@ -79,7 +79,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             >
               <CarouselContent>
                 {product.images.map((img, index) => (
-                  <CarouselItem key={index}>
+                  <CarouselItem key={index} className="relative">
                      <Image
                       src={img}
                       alt={`${product.name} image ${index + 1}`}
