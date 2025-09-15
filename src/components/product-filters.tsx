@@ -12,6 +12,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { IProduct } from "@/models/product.model";
+import { ScrollArea } from "./ui/scroll-area";
 
 type FilterSectionProps = {
   title: string;
@@ -49,59 +50,62 @@ export function ProductFilters({ products }: ProductFiltersProps) {
     });
 
     return {
-      uniqueBrands: Array.from(brands),
-      uniqueCategories: Array.from(categories),
+      uniqueBrands: Array.from(brands).sort(),
+      uniqueCategories: Array.from(categories).sort(),
     };
   }, [products]);
 
   return (
     <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
       <div className="sticky top-24">
-        <div className="flex items-center justify-between mb-4">
+         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">Filters</h2>
           <Button variant="link" className="p-0 h-auto text-primary">CLEAR ALL</Button>
         </div>
-        
-        {uniqueCategories.length > 0 && (
-            <FilterSection title="Categories">
-                {uniqueCategories.map(category => (
-                    <div key={category} className="flex items-center space-x-2">
-                        <Checkbox id={`cat-${category}`} />
-                        <Label htmlFor={`cat-${category}`} className="font-normal capitalize">{category.toLowerCase()}</Label>
-                    </div>
-                ))}
-            </FilterSection>
-        )}
+        <ScrollArea className="h-[calc(100vh-8rem-4rem)]">
+            <div className="pr-4">
+                {uniqueCategories.length > 0 && (
+                    <FilterSection title="Categories">
+                        {uniqueCategories.map(category => (
+                            <div key={category} className="flex items-center space-x-2">
+                                <Checkbox id={`cat-${category}`} />
+                                <Label htmlFor={`cat-${category}`} className="font-normal capitalize">{category.toLowerCase()}</Label>
+                            </div>
+                        ))}
+                    </FilterSection>
+                )}
 
-        {uniqueBrands.length > 0 && (
-            <FilterSection title="Brand">
-                {uniqueBrands.map(brand => (
-                    <div key={brand} className="flex items-center space-x-2">
-                        <Checkbox id={`brand-${brand}`} />
-                        <Label htmlFor={`brand-${brand}`} className="font-normal">{brand}</Label>
-                    </div>
-                ))}
-            </FilterSection>
-        )}
-        
-        <FilterSection title="Gender">
-            {["Men", "Women", "Unisex"].map(gender => (
-                 <div key={gender} className="flex items-center space-x-2">
-                    <Checkbox id={`gender-${gender}`} />
-                    <Label htmlFor={`gender-${gender}`} className="font-normal">{gender}</Label>
-                </div>
-            ))}
-        </FilterSection>
+                {uniqueBrands.length > 0 && (
+                    <FilterSection title="Brand">
+                        {uniqueBrands.map(brand => (
+                            <div key={brand} className="flex items-center space-x-2">
+                                <Checkbox id={`brand-${brand}`} />
+                                <Label htmlFor={`brand-${brand}`} className="font-normal">{brand}</Label>
+                            </div>
+                        ))}
+                    </FilterSection>
+                )}
+                
+                <FilterSection title="Gender">
+                    {["Men", "Women", "Unisex"].map(gender => (
+                        <div key={gender} className="flex items-center space-x-2">
+                            <Checkbox id={`gender-${gender}`} />
+                            <Label htmlFor={`gender-${gender}`} className="font-normal">{gender}</Label>
+                        </div>
+                    ))}
+                </FilterSection>
 
-        <FilterSection title="Color">
-           {["Black", "White", "Blue", "Red", "Green"].map(color => (
-                <div key={color} className="flex items-center space-x-2">
-                    <Checkbox id={color} />
-                    <Label htmlFor={color} className="font-normal">{color}</Label>
-                </div>
-           ))}
-           <Button variant="link" className="p-0 h-auto text-primary">12 MORE</Button>
-        </FilterSection>
+                <FilterSection title="Color">
+                {["Black", "White", "Blue", "Red", "Green"].map(color => (
+                        <div key={color} className="flex items-center space-x-2">
+                            <Checkbox id={color} />
+                            <Label htmlFor={color} className="font-normal">{color}</Label>
+                        </div>
+                ))}
+                <Button variant="link" className="p-0 h-auto text-primary">12 MORE</Button>
+                </FilterSection>
+            </div>
+        </ScrollArea>
       </div>
     </aside>
   );
