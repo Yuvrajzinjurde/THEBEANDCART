@@ -73,12 +73,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isNonAdminRoute = !pathname.startsWith('/admin');
   
-  // More specific check for auth routes
+  const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
+  const isLandingPage = pathname === '/';
   
-  const brandName = isNonAdminRoute && pathname.split('/')[1] ? pathname.split('/[brand]')[0].split('/')[1] : null;
+  const showHeader = !isAdminRoute && !isAuthRoute && !isLandingPage;
+
+  const brandNameFromPath = !isAdminRoute && !isLandingPage && pathname.split('/')[1] 
+    ? pathname.split('/[brand]')[0].split('/')[1] 
+    : null;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -86,11 +90,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <ThemeInjector brandName={brandName} />
+        <ThemeInjector brandName={brandNameFromPath} />
       </head>
       <body className="flex min-h-screen flex-col font-body antialiased">
         <AuthProvider>
-          {isNonAdminRoute && !isAuthRoute && <Header />}
+          {showHeader && <Header />}
           {children}
         </AuthProvider>
         <ToastContainer
