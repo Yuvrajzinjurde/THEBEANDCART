@@ -128,6 +128,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     const errorMessage = error.message || '';
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
       setAiError("⚠️ AI service is overloaded. Please try again later or fill in the form manually.");
+    } else if (errorMessage.includes('429') || errorMessage.includes('Too Many Requests')) {
+      setAiError("⚠️ AI request limit reached. Please try again later or fill in the form manually.");
     } else {
       setAiError("⚠️ AI service is unavailable. Please try again later.");
     }
@@ -450,3 +452,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
