@@ -5,7 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Product, { IProduct } from '@/models/product.model';
 import User from '@/models/user.model';
 import Order from '@/models/order.model';
-import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { subDays, startOfDay, endOfDay, format } from 'date-fns';
 
 
 export interface DashboardStats {
@@ -16,7 +16,7 @@ export interface DashboardStats {
   conversionRate: number;
   returnPercentage: number;
   allProducts: IProduct[];
-  revenueChartData: { month: string; revenue: number }[];
+  chartData: { date: string; sales: number, orders: number }[];
   percentageChanges: {
     revenue: number;
     orders: number;
@@ -25,8 +25,6 @@ export interface DashboardStats {
     conversion: number;
   };
 }
-
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const calculatePercentageChange = (current: number, previous: number): number => {
     if (previous === 0) {
@@ -42,11 +40,8 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const brandQuery = brand === 'All Brands' ? {} : { brand: { $regex: new RegExp(`^${brand}$`, 'i') } };
         
         const now = new Date();
-        const lastMonth = subMonths(now, 1);
-        
-        const startOfThisMonth = startOfMonth(now);
-        const startOfLastMonth = startOfMonth(lastMonth);
-        const endOfLastMonth = endOfMonth(lastMonth);
+        const sevenDaysAgo = startOfDay(subDays(now, 6));
+        const prevSevenDaysAgo = startOfDay(subDays(now, 13));
 
         // === Product Stats (Current & Previous) ===
         const allProducts = await Product.find(brandQuery).lean();
@@ -59,15 +54,16 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         }, { totalViews: 0, totalClicks: 0 });
 
         // Dummy previous month data for views/clicks as we don't have historical tracking
+        // This is a simplification for calculating percentage change
         const prevProductStats = {
-            totalViews: productStats.totalViews / 2,
-            totalClicks: productStats.totalClicks / 2,
+            totalViews: Math.floor(productStats.totalViews / 2),
+            totalClicks: Math.floor(productStats.totalClicks / 2),
         };
         
 
         // === Order Stats (Current & Previous) ===
-        const currentOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfThisMonth } });
-        const previousOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth } });
+        const currentOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } });
+        const previousOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: prevSevenDaysAgo, $lt: sevenDaysAgo } });
         
         const totalOrders = currentOrders.length;
         const prevTotalOrders = previousOrders.length;
@@ -75,19 +71,28 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const totalRevenue = currentOrders.reduce((sum, order) => sum + order.totalAmount, 0);
         const prevTotalRevenue = previousOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-        // === Chart Data ===
-        const monthlyRevenue = await Order.aggregate([
-          { $match: { ...brandQuery, status: { $ne: 'cancelled' } } },
+        // === Chart Data (Last 7 Days) ===
+        const dailyStats = await Order.aggregate([
+          { $match: { ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } } },
           { $group: {
-              _id: { month: { $month: "$createdAt" } },
-              revenue: { $sum: "$totalAmount" }
+              _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+              sales: { $sum: "$totalAmount" },
+              orders: { $sum: 1 }
           }},
-          { $sort: { "_id.month": 1 } }
+          { $sort: { "_id": 1 } }
         ]);
+
+        const statsMap = new Map(dailyStats.map(d => [d._id, { sales: d.sales, orders: d.orders }]));
         
-        const revenueChartData = monthNames.map((month, index) => {
-            const monthData = monthlyRevenue.find(d => d._id.month === index + 1);
-            return { month, revenue: monthData ? monthData.revenue : 0 };
+        const chartData = Array.from({ length: 7 }).map((_, i) => {
+            const date = subDays(now, 6 - i);
+            const dateString = format(date, 'yyyy-MM-dd');
+            const data = statsMap.get(dateString) || { sales: 0, orders: 0 };
+            return {
+                date: format(date, 'EEE'), // Format as 'Mon', 'Tue', etc.
+                sales: data.sales,
+                orders: data.orders,
+            };
         });
 
         // === Calculations & Percentages ===
@@ -110,7 +115,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
             conversionRate,
             returnPercentage: 0, // Not tracked yet
             allProducts: allProductsObject,
-            revenueChartData,
+            chartData,
             percentageChanges,
         };
 

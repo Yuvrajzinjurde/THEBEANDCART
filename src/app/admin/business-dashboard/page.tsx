@@ -56,11 +56,7 @@ function BusinessDashboardPage() {
     fetchData();
   }, [selectedBrand]);
 
-  const chartData = data?.revenueChartData.map(d => ({
-      date: d.month,
-      orders: Math.floor(d.revenue / 5000) + Math.floor(Math.random() * 5),
-      sales: d.revenue,
-  })).slice(-7); // Mocking orders from revenue for now
+  const chartData = data?.chartData;
 
   const chartConfig = {
     sales: {
@@ -247,7 +243,7 @@ function BusinessDashboardPage() {
                                     <TableHead>Recommendations</TableHead>
                                 </TableRow>
                             </TableHeader>
-                            <TableBody>
+                             <TableBody>
                                 {productRows.length > 0 ? (
                                     productRows
                                 ) : (
