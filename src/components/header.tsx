@@ -41,6 +41,13 @@ export default function Header() {
   const brandName = (params.brand as string) || 'reeva';
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
+  const [showSecondaryNav, setShowSecondaryNav] = useState(false);
+
+  useEffect(() => {
+    // This effect runs only on the client, after initial render
+    setShowSecondaryNav(pathname === `/${brandName}/home`);
+  }, [pathname, brandName]);
 
   useEffect(() => {
     async function fetchBrandLogo() {
@@ -70,7 +77,7 @@ export default function Header() {
                 <Bell className="h-5 w-5" />
             </Link>
         </Button>
-        <UserNav user={user} loading={loading} brandName={brandName} />
+        <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
             <Link href="#">
                 <ShoppingCart className="h-5 w-5" />
@@ -78,9 +85,6 @@ export default function Header() {
         </Button>
     </div>
   );
-  
-  const isHomePage = pathname === `/${brandName}/home`;
-
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -146,19 +150,21 @@ export default function Header() {
       </div>
       
       {/* Secondary Navigation */}
-      <div className={cn(!isHomePage && "hidden")}>
-          <Separator />
-          <div className="hidden md:flex justify-center">
-              <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
-                  {secondaryNavItems.map((item) => (
-                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                          <item.icon className="h-4 w-4" />
-                          {item.label}
-                      </Link>
-                  ))}
-              </nav>
+       {showSecondaryNav && (
+          <div>
+              <Separator />
+              <div className="hidden md:flex justify-center">
+                  <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
+                      {secondaryNavItems.map((item) => (
+                          <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                              <item.icon className="h-4 w-4" />
+                              {item.label}
+                          </Link>
+                      ))}
+                  </nav>
+              </div>
           </div>
-      </div>
+       )}
     </header>
   );
 }

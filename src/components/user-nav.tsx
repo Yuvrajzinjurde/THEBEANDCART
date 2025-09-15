@@ -16,16 +16,16 @@ import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
 import { CreditCard, LogOut, User as UserIcon, Settings } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import { useParams } from "next/navigation";
 
 interface UserNavProps {
-    user: User | null;
-    loading: boolean;
-    brandName: string;
     isCollapsed?: boolean;
 }
 
-export function UserNav({ user, loading, brandName, isCollapsed = false }: UserNavProps) {
-  const { logout } = useAuth();
+export function UserNav({ isCollapsed = false }: UserNavProps) {
+  const { user, loading, logout } = useAuth();
+  const params = useParams();
+  const brandName = (params.brand as string) || 'reeva';
 
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
