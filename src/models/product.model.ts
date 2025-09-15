@@ -12,6 +12,10 @@ export interface IProduct extends Document {
   brand: string;
   views: number;
   clicks: number;
+  // New fields for variants
+  styleId?: string; // Groups variants together
+  color?: string;
+  size?: string;
 }
 
 const ProductSchema: Schema<IProduct> = new Schema({
@@ -25,7 +29,13 @@ const ProductSchema: Schema<IProduct> = new Schema({
   brand: { type: String, required: true, index: true },
   views: { type: Number, default: 0 },
   clicks: { type: Number, default: 0 },
+  styleId: { type: String, index: true },
+  color: { type: String },
+  size: { type: String },
 }, { timestamps: true });
+
+// Compound index to quickly find variants of a style
+ProductSchema.index({ styleId: 1, brand: 1 });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 

@@ -16,9 +16,10 @@ import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Info, Download, Upload } from 'lucide-react';
+import { Info, Download, Upload, PlusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as XLSX from 'xlsx';
+import Link from 'next/link';
 
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -188,7 +189,7 @@ export default function InventoryPage() {
                         Showing products for: <strong>{selectedBrand}</strong>
                     </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                 <div className="flex items-center gap-2">
                      <Button
                         variant="outline"
                         onClick={handleDownloadTemplate}
@@ -215,6 +216,12 @@ export default function InventoryPage() {
                     <Button onClick={handleSeed} disabled={isSeeding}>
                         {isSeeding && <Loader className="mr-2 h-4 w-4" />}
                         Seed Products
+                    </Button>
+                     <Button asChild>
+                        <Link href="/admin/inventory/new">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Product
+                        </Link>
                     </Button>
                 </div>
             </CardHeader>

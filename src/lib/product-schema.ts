@@ -1,0 +1,25 @@
+
+import { z } from 'zod';
+
+const VariantSchema = z.object({
+  size: z.string().optional(),
+  color: z.string().optional(),
+  stock: z.coerce.number().min(0, "Stock must be 0 or more"),
+});
+
+export const ProductFormSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().min(1, "Description is required"),
+  price: z.coerce.number().min(0.01, "Price must be greater than 0"),
+  category: z.string().min(1, "Category is required"),
+  brand: z.string().min(1, "Brand is required"),
+  images: z.array(z.string().url()).min(1, "At least one image is required"),
+  
+  // Represents a single product's stock if no variants are provided
+  stock: z.coerce.number().min(0).optional(), 
+
+  // Used for products with multiple variations (e.g., size, color)
+  variants: z.array(VariantSchema),
+});
+
+export type ProductFormValues = z.infer<typeof ProductFormSchema>;
