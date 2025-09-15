@@ -73,6 +73,51 @@ export const seedDatabase = async () => {
           }
         ],
         themeName: 'Blue',
+        offers: [
+            {
+                title: 'Mega Monsoon Sale',
+                description: 'Get flat 20% off on all items. Limited time offer!',
+                code: 'MONSOON20',
+            },
+            {
+                title: 'First-Time User?',
+                description: 'Use this code to get a special discount on your first purchase.',
+                code: 'NEWBIE15',
+            },
+            {
+                title: 'Weekend Bonanza',
+                description: 'Enjoy free shipping on all orders above ₹999.',
+                code: 'WEEKEND',
+            },
+        ],
+        reviews: [
+            {
+                customerName: 'Aisha Khan',
+                rating: 5,
+                reviewText: 'Absolutely love the quality and service. My go-to store for all fashion needs!',
+                customerAvatarUrl: 'https://picsum.photos/seed/avatar1/100/100'
+            },
+            {
+                customerName: 'Rohan Sharma',
+                rating: 4,
+                reviewText: 'Great collection and fast delivery. The packaging was also very impressive. Will shop again.',
+                customerAvatarUrl: 'https://picsum.photos/seed/avatar2/100/100'
+            },
+            {
+                customerName: 'Priya Singh',
+                rating: 5,
+                reviewText: 'Reeva never disappoints! Found exactly what I was looking for. Highly recommended to everyone.',
+                customerAvatarUrl: 'https://picsum.photos/seed/avatar3/100/100'
+            }
+        ],
+        promoBanner: {
+            title: 'The Style Update',
+            description: 'Discover the latest trends and refresh your wardrobe with our new arrivals. Explore curated collections just for you.',
+            imageUrl: 'https://picsum.photos/seed/promobanner/1200/600',
+            imageHint: 'fashion collection',
+            buttonText: 'Shop New Arrivals',
+            buttonLink: '/reeva/products'
+        }
       });
       await reevaBrand.save();
       console.log('Created default "reeva" brand.');
