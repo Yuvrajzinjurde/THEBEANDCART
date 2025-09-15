@@ -221,11 +221,11 @@ function BusinessDashboardPage() {
             </div>
 
             <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
-                <StatCard title="Total Views" value={totalViews.toLocaleString()} change={percentageChanges.views} />
-                <StatCard title="Total Clicks" value={totalClicks.toLocaleString()} change={percentageChanges.clicks} />
-                <StatCard title="Total Orders" value={totalOrders.toLocaleString()} change={percentageChanges.orders}/>
-                <StatCard title="Conversion Rate" value={`${conversionRate.toFixed(1)}%`} change={percentageChanges.conversion} info="Conversion rate from clicks to orders"/>
-                <StatCard title="Total Sales" value={`₹${totalRevenue.toLocaleString()}`} change={percentageChanges.revenue} />
+                <StatCard title="Total Views" value={(totalViews || 0).toLocaleString()} change={percentageChanges.views} />
+                <StatCard title="Total Clicks" value={(totalClicks || 0).toLocaleString()} change={percentageChanges.clicks} />
+                <StatCard title="Total Orders" value={(totalOrders || 0).toLocaleString()} change={percentageChanges.orders}/>
+                <StatCard title="Conversion Rate" value={`${(conversionRate || 0).toFixed(1)}%`} change={percentageChanges.conversion} info="Conversion rate from clicks to orders"/>
+                <StatCard title="Total Sales" value={`₹${(totalRevenue || 0).toLocaleString()}`} change={percentageChanges.revenue} />
                 <StatCard title="Return Percentage" value="0%" />
             </div>
         </CardContent>
@@ -328,5 +328,3 @@ function BusinessDashboardPage() {
 }
 
 export default BusinessDashboardPage;
-
-    
