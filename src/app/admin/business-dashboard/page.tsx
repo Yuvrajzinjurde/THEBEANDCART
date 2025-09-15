@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format, subDays } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown, Info, Clock, LineChart } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -68,6 +68,8 @@ function BusinessDashboardPage() {
       color: 'hsl(var(--primary))',
     },
   };
+  
+  const hasChartData = chartData && chartData.some(d => d.sales > 0 || d.orders > 0);
 
   if (loading) {
     return (
@@ -166,6 +168,7 @@ function BusinessDashboardPage() {
             </div>
 
             <div className="h-[300px] w-full">
+            {hasChartData ? (
                <ChartContainer config={chartConfig} className="h-full w-full">
                     <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -185,6 +188,20 @@ function BusinessDashboardPage() {
                         />
                     </AreaChart>
                 </ChartContainer>
+            ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center bg-background rounded-lg">
+                    <div className="p-4 rounded-full bg-muted/80">
+                         <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground/50">
+                            <path d="M10 34L18 26L24 32L36 20" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M38 10C40.2091 10 42 11.7909 42 14V34C42 36.2091 40.2091 38 38 38H10C7.79086 38 6 36.2091 6 34V14C6 11.7909 7.79086 10 10 10H38Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round"/>
+                            <circle cx="32" cy="32" r="8" fill="hsl(var(--background))" stroke="currentColor" strokeWidth="3" />
+                            <path d="M35 29L29 35" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                         </svg>
+                    </div>
+                    <p className="mt-4 font-bold text-lg text-foreground">No Trend to Show</p>
+                    <p className="text-sm text-muted-foreground">There is no sufficient data to show the results in the selected timeframe.</p>
+                </div>
+            )}
             </div>
 
             <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
@@ -243,17 +260,19 @@ function BusinessDashboardPage() {
                                     <TableHead>Recommendations</TableHead>
                                 </TableRow>
                             </TableHeader>
-                             <TableBody>
-                                {productRows.length > 0 ? (
-                                    productRows
-                                ) : (
-                                     <TableRow>
-                                         <TableCell colSpan={9} className="h-24 text-center">
-                                             No products to display.
-                                         </TableCell>
-                                     </TableRow>
-                                )}
-                            </TableBody>
+                            {productRows.length > 0 ? (
+                                <TableBody>
+                                    {productRows}
+                                </TableBody>
+                            ) : (
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={9} className="h-24 text-center">
+                                            No products to display.
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
                         </Table>
                     </div>
                 </TabsContent>
