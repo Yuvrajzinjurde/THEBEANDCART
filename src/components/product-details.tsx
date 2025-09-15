@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Star, Heart, ShoppingCart, Minus, Plus } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -16,6 +16,7 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Badge } from './ui/badge';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -31,6 +32,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   
   const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
+  const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
 
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
@@ -115,11 +117,41 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         </div>
 
         <div className="flex items-baseline gap-3">
-            <p className="text-3xl font-bold">₹{product.sellingPrice.toFixed(2)}</p>
+            <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
             {hasDiscount && (
-                <p className="text-xl font-medium text-muted-foreground line-through">
-                    ₹{product.mrp!.toFixed(2)}
-                </p>
+                <>
+                    <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                    <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button className="cursor-pointer">
+                                    <Info className="h-4 w-4 text-muted-foreground" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="p-4 w-64">
+                                <div className="space-y-3">
+                                    <p className="font-bold text-base">Price details</p>
+                                    <div className="flex justify-between text-sm">
+                                        <div>
+                                            <p>Maximum Retail Price</p>
+                                            <p className="text-xs text-muted-foreground">(incl. of all taxes)</p>
+                                        </div>
+                                        <p>₹{product.mrp!.toFixed(2)}</p>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <p>Selling Price</p>
+                                        <p>₹{product.sellingPrice.toFixed(2)}</p>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex justify-between text-sm font-semibold text-green-600">
+                                       <p>Overall you save ₹{amountSaved.toFixed(2)} ({discountPercentage}%) on this product</p>
+                                    </div>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </>
             )}
         </div>
         
