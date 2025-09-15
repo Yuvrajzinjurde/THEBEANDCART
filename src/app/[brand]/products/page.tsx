@@ -82,55 +82,55 @@ export default function ProductsPage() {
 
   return (
     <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6">
-            <Breadcrumb>
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbLink href={`/${brandName}/products`}>Products</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    {category && (
-                        <>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>{category}</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </>
-                    )}
-                </BreadcrumbList>
-            </Breadcrumb>
-            
-            <div className="flex items-baseline justify-between mt-4">
-                <div>
-                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
-                        {category ? `${category}` : `All Products`}
-                    </h1>
-                    <p className="text-sm text-muted-foreground mt-1">{products.length} products</p>
-                </div>
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="shrink-0">
-                            Sort by: <span className="font-semibold ml-1">Relevance</span>
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem>Relevance</DropdownMenuItem>
-                        <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                        <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
-                        <DropdownMenuItem>Newest</DropdownMenuItem>
-                        <DropdownMenuItem>Rating</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        </div>
-
         <div className="flex flex-col lg:flex-row gap-8">
             <ProductFilters products={products} />
             <div className="flex-1">
+                 <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-4 mb-6">
+                    <Breadcrumb>
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbLink href={`/${brandName}/products`}>Products</BreadcrumbLink>
+                            </BreadcrumbItem>
+                            {category && (
+                                <>
+                                    <BreadcrumbSeparator />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbPage>{category}</BreadcrumbPage>
+                                    </BreadcrumbItem>
+                                </>
+                            )}
+                        </BreadcrumbList>
+                    </Breadcrumb>
+                    
+                    <div className="flex items-baseline justify-between mt-4">
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
+                                {category ? `${category}` : `All Products`}
+                            </h1>
+                            <p className="text-sm text-muted-foreground mt-1">{products.length} products</p>
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="shrink-0">
+                                    Sort by: <span className="font-semibold ml-1">Relevance</span>
+                                    <ChevronDown className="ml-2 h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>Relevance</DropdownMenuItem>
+                                <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
+                                <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
+                                <DropdownMenuItem>Newest</DropdownMenuItem>
+                                <DropdownMenuItem>Rating</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+
                 {products.length > 0 ? (
                     <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                         {products.map((product) => (
