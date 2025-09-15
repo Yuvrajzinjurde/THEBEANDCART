@@ -39,11 +39,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
       {/* Image Gallery */}
       <div className="grid gap-4">
         <div className="relative overflow-hidden rounded-lg border aspect-square">
-            {hasDiscount && (
-                <Badge variant="destructive" className="absolute top-3 left-3 z-10 text-base">
-                    {discountPercentage}% OFF
-                </Badge>
-            )}
             <Image
                 src={selectedImage}
                 alt={product.name}
