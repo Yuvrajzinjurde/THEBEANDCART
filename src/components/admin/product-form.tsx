@@ -123,6 +123,16 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const hasVariants = form.watch('variants').length > 0;
   const productName = form.watch('name');
 
+  const handleAIError = (error: any) => {
+    const errorMessage = error.message || '';
+    if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+      toast.error("The AI service is currently overloaded. Please try again later or fill out the form manually.");
+    } else {
+      toast.error("Failed to generate AI content. Please try again.");
+    }
+    console.error(error);
+  }
+
   const handleGenerateDescription = async () => {
       if (!productName) {
           toast.warn("Please enter a product name first.");
@@ -134,8 +144,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
           form.setValue('description', result.description, { shouldValidate: true });
           toast.success("AI description generated!");
       } catch (error) {
-          toast.error("Failed to generate description.");
-          console.error(error);
+          handleAIError(error);
       } finally {
           setIsGenerating(false);
       }
@@ -158,8 +167,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       form.setValue('stock', result.stock, { shouldValidate: true });
       toast.success("Form autofilled successfully!");
     } catch (error) {
-      toast.error("Failed to autofill form.");
-      console.error(error);
+      handleAIError(error);
     } finally {
       setIsAutofilling(false);
     }
