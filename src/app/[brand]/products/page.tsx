@@ -85,28 +85,30 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
             <ProductFilters products={products} />
             <div className="flex-1">
-                 <div className="sticky top-[65px] z-10 bg-background pb-4 pt-2">
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href={`/${brandName}/products`}>Products</BreadcrumbLink>
-                            </BreadcrumbItem>
-                            {category && (
-                                <>
-                                    <BreadcrumbSeparator />
-                                    <BreadcrumbItem>
-                                        <BreadcrumbPage>{category}</BreadcrumbPage>
-                                    </BreadcrumbItem>
-                                </>
-                            )}
-                        </BreadcrumbList>
-                    </Breadcrumb>
+                 <div className="sticky top-16 z-10 bg-background/95 backdrop-blur-sm">
+                    <div className="pt-4">
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink href={`/${brandName}/products`}>Products</BreadcrumbLink>
+                                </BreadcrumbItem>
+                                {category && (
+                                    <>
+                                        <BreadcrumbSeparator />
+                                        <BreadcrumbItem>
+                                            <BreadcrumbPage>{category}</BreadcrumbPage>
+                                        </BreadcrumbItem>
+                                    </>
+                                )}
+                            </BreadcrumbList>
+                        </Breadcrumb>
+                    </div>
                     
-                    <div className="flex items-baseline justify-between mt-4">
+                    <div className="flex items-baseline justify-between mt-4 pb-4">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
                                 {category ? `${category}` : `All Products`}
