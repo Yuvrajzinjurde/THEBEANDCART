@@ -89,7 +89,7 @@ export default function BrandHomePage() {
             if(!productResponse.ok) {
                 const errorData = await productResponse.json();
                 throw new Error(errorData.message || 'Failed to fetch products');
-_            }
+            }
             const productData = await productResponse.json();
             setProducts(productData.products);
 
