@@ -40,11 +40,6 @@ export default function Header() {
   const brandName = (params.brand as string) || 'reeva';
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   useEffect(() => {
     async function fetchBrandLogo() {
@@ -74,15 +69,7 @@ export default function Header() {
                 <Bell className="h-5 w-5" />
             </Link>
         </Button>
-        {loading ? null : user ? (
-            <UserNav />
-            ) : (
-             <Button variant="ghost" size="icon" aria-label="Sign In" asChild>
-                <Link href={`/${brandName}/login`}>
-                    <User className="h-5 w-5" />
-                </Link>
-            </Button>
-        )}
+        <UserNav user={user} loading={loading} brandName={brandName} />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
             <Link href="#">
                 <ShoppingCart className="h-5 w-5" />
@@ -91,9 +78,6 @@ export default function Header() {
     </div>
   );
 
-  if (!hasMounted) {
-    return null;
-  }
 
   return (
     <header className="w-full border-b bg-background">

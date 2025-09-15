@@ -11,21 +11,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
 import { CreditCard, LogOut, User as UserIcon, Settings, MoreHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface UserNavProps {
+    user: User | null;
+    loading: boolean;
+    brandName: string;
     isCollapsed?: boolean;
 }
 
-export function UserNav({ isCollapsed = false }: UserNavProps) {
-  const { user, logout } = useAuth();
+export function UserNav({ user, loading, brandName, isCollapsed = false }: UserNavProps) {
+  const { logout } = useAuth();
+
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center h-10 w-10">
+            <Avatar className="h-9 w-9">
+                <AvatarFallback>...</AvatarFallback>
+            </Avatar>
+        </div>
+    );
+  }
 
   if (!user) {
-    return null;
+    return (
+         <Button variant="ghost" size="icon" aria-label="Sign In" asChild>
+            <Link href={`/${brandName}/login`}>
+                <UserIcon className="h-5 w-5" />
+            </Link>
+        </Button>
+    );
   }
 
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "U";
@@ -87,28 +105,24 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
         </DropdownMenu>
     );
   }
-
-  return (
-     <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-            <Avatar className="h-9 w-9">
-                <AvatarFallback>{userInitial}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-                <span className="text-sm font-medium">{user.name}</span>
-                {/* Can add email here if needed */}
-            </div>
-        </div>
+  
+    // Expanded view for regular header
+    return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-9 w-9">
+                        <AvatarFallback>{userInitial}</AvatarFallback>
+                    </Avatar>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.name}</p>
+                         <p className="text-xs leading-none text-muted-foreground">
+                            {user.roles.includes('admin') ? 'Admin' : 'Customer'}
+                        </p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -148,6 +162,5 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-    </div>
-  );
+    );
 }
