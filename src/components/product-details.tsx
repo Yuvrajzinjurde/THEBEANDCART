@@ -141,12 +141,12 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
         {/* Left Column: Image Gallery & Actions */}
         <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-[80px_1fr] gap-4">
+            <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
             {/* Vertical Thumbnails */}
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col justify-center items-start gap-3">
                 <Button
                     variant="ghost" size="icon"
-                    className="h-8 w-8 flex-shrink-0"
+                    className="h-8 w-8 flex-shrink-0 mx-auto"
                     onClick={thumbScrollPrev}
                 ><ChevronUp className="h-5 w-5" /></Button>
                 <div className="overflow-hidden w-full max-h-[350px]" ref={thumbRef}>
@@ -175,7 +175,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
                 </div>
                 <Button
                     variant="ghost" size="icon"
-                    className="h-8 w-8 flex-shrink-0"
+                    className="h-8 w-8 flex-shrink-0 mx-auto"
                     onClick={thumbScrollNext}
                 ><ChevronDown className="h-5 w-5" /></Button>
             </div>
@@ -215,6 +215,19 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
             </div>
           </div>
            {/* Action Buttons */}
+           <div className='space-y-4'>
+            <div className="flex items-center gap-4">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+              <div className="flex items-center gap-1 rounded-lg border p-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                      <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-8 text-center font-semibold">{quantity}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                      <Plus className="h-4 w-4" />
+                  </Button>
+              </div>
+            </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 <Button size="lg" className="h-12 text-base">
                     <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
@@ -223,6 +236,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
                     Buy Now
                 </Button>
             </div>
+           </div>
         </div>
 
 
@@ -337,19 +351,6 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
               </div>
             </div>
           )}
-
-           <div className="flex items-center gap-4">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-              <div className="flex items-center gap-1 rounded-lg border p-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                      <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-semibold">{quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                      <Plus className="h-4 w-4" />
-                  </Button>
-              </div>
-          </div>
           
           <Separator />
 
