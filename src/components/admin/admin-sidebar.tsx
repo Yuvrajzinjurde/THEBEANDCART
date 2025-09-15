@@ -15,6 +15,7 @@ import {
   Settings,
   HelpCircle,
   Sun,
+  Briefcase,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -38,6 +39,7 @@ import { Separator } from "../ui/separator";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/users", icon: Users, label: "Users" },
@@ -171,10 +173,10 @@ export function AdminSidebar() {
 
              {/* Sidebar Footer */}
              <div className="mt-auto border-t">
-                 <div className={cn(isCollapsed ? "py-2" : "p-2")}>
+                <div className={cn("p-2", isCollapsed ? "py-2" : "p-2")}>
                     <TooltipProvider delayDuration={0}>
                         <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
-                        {!isCollapsed && <span className="text-xs text-muted-foreground p-2">Help &amp; Settings</span>}
+                        {!isCollapsed && <span className="text-xs text-muted-foreground">Help &amp; Settings</span>}
                         <div className={cn("flex items-center gap-1", isCollapsed && "flex-col")}>
                             <Tooltip>
                                 <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button></TooltipTrigger>
@@ -191,9 +193,9 @@ export function AdminSidebar() {
                         </div>
                         </div>
                     </TooltipProvider>
-                 </div>
+                </div>
                 <Separator className="my-0" />
-                <div className={cn(isCollapsed && "py-2")}>
+                 <div className={cn("py-2", isCollapsed && "p-2 flex justify-center")}>
                     <UserNav isCollapsed={isCollapsed} />
                 </div>
             </div>
