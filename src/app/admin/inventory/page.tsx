@@ -188,14 +188,19 @@ export default function InventoryPage() {
                     </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                     <Button variant="outline" onClick={handleDownloadTemplate} disabled={isUpdating || filteredProducts.length === 0}>
+                     <Button
+                        variant="outline"
+                        onClick={handleDownloadTemplate}
+                        disabled={isUpdating || filteredProducts.length === 0}
+                        className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700"
+                    >
                         <Download className="mr-2 h-4 w-4" />
                         Download Template
                     </Button>
-                    <Button asChild variant="outline" className="relative cursor-pointer">
+                    <Button asChild variant="outline" className="relative cursor-pointer bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700">
                         <div>
                             <Upload className="mr-2 h-4 w-4" />
-                            <span>{isUpdating ? 'Processing...' : 'Upload File'}</span>
+                            <span>{isUpdating ? 'Processing...' : 'Bulk Stock Update'}</span>
                             <input 
                                 type="file" 
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
