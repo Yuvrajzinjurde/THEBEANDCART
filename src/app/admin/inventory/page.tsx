@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
@@ -15,7 +16,8 @@ import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Info } from 'lucide-react';
+import { Info, FileSpreadsheet } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const LOW_STOCK_THRESHOLD = 10;
 
@@ -26,7 +28,10 @@ export default function InventoryPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSeeding, setIsSeeding] = useState(false);
+    
     const [activeTab, setActiveTab] = useState('all');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [sortOption, setSortOption] = useState('estimated-orders-desc');
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -45,25 +50,44 @@ export default function InventoryPage() {
         fetchProducts();
     }, [selectedBrand]);
 
-    const stockCounts = useMemo(() => {
+    const { stockCounts, uniqueCategories } = useMemo(() => {
         const outOfStock = allProducts.filter(p => p.stock === 0).length;
         const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length;
+        const categories = new Set(allProducts.map(p => p.category));
         return {
-            all: allProducts.length,
-            outOfStock,
-            lowStock,
+            stockCounts: {
+                all: allProducts.length,
+                outOfStock,
+                lowStock,
+            },
+            uniqueCategories: ['all', ...Array.from(categories)],
         };
     }, [allProducts]);
 
     useEffect(() => {
         let productsToDisplay = allProducts;
+
+        // Tab filter
         if (activeTab === 'out-of-stock') {
-            productsToDisplay = allProducts.filter(p => p.stock === 0);
+            productsToDisplay = productsToDisplay.filter(p => p.stock === 0);
         } else if (activeTab === 'low-stock') {
-            productsToDisplay = allProducts.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+            productsToDisplay = productsToDisplay.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
         }
+
+        // Category filter
+        if (categoryFilter !== 'all') {
+            productsToDisplay = productsToDisplay.filter(p => p.category === categoryFilter);
+        }
+
+        // Sorting (placeholder for now)
+        if (sortOption === 'estimated-orders-desc') {
+            // This is a placeholder. Real sorting would need order data.
+            // For now, we can sort by stock as a proxy.
+            productsToDisplay.sort((a, b) => b.stock - a.stock);
+        }
+        
         setFilteredProducts(productsToDisplay);
-    }, [activeTab, allProducts]);
+    }, [activeTab, categoryFilter, sortOption, allProducts]);
 
     const handleSeed = async () => {
         setIsSeeding(true);
@@ -82,7 +106,7 @@ export default function InventoryPage() {
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-start justify-between">
                 <div>
                     <CardTitle>Inventory</CardTitle>
                     <CardDescription>
@@ -105,26 +129,61 @@ export default function InventoryPage() {
                     </div>
                 ) : (
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList>
-                            <TabsTrigger value="all">All Stock ({stockCounts.all})</TabsTrigger>
-                            <TabsTrigger value="out-of-stock">Out of Stock ({stockCounts.outOfStock})</TabsTrigger>
-                            <TabsTrigger value="low-stock">
-                                <div className="flex items-center gap-2">
-                                    <span>Low Stock ({stockCounts.lowStock})</span>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Products with less than or equal to {LOW_STOCK_THRESHOLD} items in stock.</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value={activeTab} className="mt-4">
+                        <div className="flex items-center justify-between border-b">
+                            <TabsList className="bg-transparent p-0 border-none">
+                                <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">All Stock ({stockCounts.all})</TabsTrigger>
+                                <TabsTrigger value="out-of-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">Out of Stock ({stockCounts.outOfStock})</TabsTrigger>
+                                <TabsTrigger value="low-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">
+                                    <div className="flex items-center gap-2">
+                                        <span>Low Stock ({stockCounts.lowStock})</span>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Products with less than or equal to {LOW_STOCK_THRESHOLD} items in stock.</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                </TabsTrigger>
+                            </TabsList>
+                             <Button variant="link" className="text-primary">
+                                <FileSpreadsheet className="mr-2 h-4 w-4"/>
+                                Bulk Stock Update
+                            </Button>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 py-4 px-1">
+                             <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
+                                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {uniqueCategories.map(category => (
+                                            <SelectItem key={category} value={category} className="capitalize">{category}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-muted-foreground">Sort catalogs by:</span>
+                                 <Select value={sortOption} onValueChange={setSortOption}>
+                                    <SelectTrigger className="w-[220px]">
+                                        <SelectValue placeholder="Sort by" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="estimated-orders-desc">Highest Estimated Orders</SelectItem>
+                                        <SelectItem value="stock-asc">Lowest Stock</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <TabsContent value={activeTab} className="mt-0">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -184,3 +243,4 @@ export default function InventoryPage() {
         </Card>
     );
 }
+
