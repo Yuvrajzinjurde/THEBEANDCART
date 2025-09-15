@@ -40,6 +40,11 @@ export default function Header() {
   const brandName = (params.brand as string) || 'reeva';
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchBrandLogo() {
@@ -85,6 +90,10 @@ export default function Header() {
         </Button>
     </div>
   );
+
+  if (!hasMounted) {
+    return null;
+  }
 
   return (
     <header className="w-full border-b bg-background">
