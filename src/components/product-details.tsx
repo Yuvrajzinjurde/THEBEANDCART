@@ -98,9 +98,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery */}
-      <div className="grid grid-cols-[80px_1fr] gap-4">
+      <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
         {/* Vertical Thumbnails */}
-        <div className="relative h-[500px]">
+        <div className="relative h-full max-h-[500px]">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={thumbScrollPrev}>
                     <ChevronLeft className="h-4 w-4 rotate-90" />
