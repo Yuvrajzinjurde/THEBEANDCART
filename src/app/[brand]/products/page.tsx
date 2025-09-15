@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
@@ -24,15 +24,40 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 
+export type ActiveFilters = {
+  categories: string[];
+  brands: string[];
+  genders: string[];
+  colors: string[];
+};
+
+const SORT_OPTIONS: { [key: string]: string } = {
+  relevance: "Relevance",
+  "price-asc": "Price: Low to High",
+  "price-desc": "Price: High to Low",
+  newest: "Newest",
+  rating: "Rating",
+};
+
+
 export default function ProductsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const brandName = params.brand as string;
-  const category = searchParams.get('category');
+  const initialCategory = searchParams.get('category');
 
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
+    categories: initialCategory ? [initialCategory] : [],
+    brands: [],
+    genders: [],
+    colors: [],
+  });
+  const [sortOption, setSortOption] = useState<string>('relevance');
 
   useEffect(() => {
     async function fetchProducts() {
@@ -41,17 +66,14 @@ export default function ProductsPage() {
         setError(null);
         try {
             const query = new URLSearchParams({ storefront: brandName });
-            if (category) {
-                query.set('category', category);
-            }
-            
+            // Fetch all products for the storefront initially
             const productResponse = await fetch(`/api/products?${query.toString()}`);
             if(!productResponse.ok) {
                 const errorData = await productResponse.json();
                 throw new Error(errorData.message || 'Failed to fetch products');
             }
             const productData = await productResponse.json();
-            setProducts(productData.products);
+            setAllProducts(productData.products);
 
         } catch (error: any) {
             console.error(error);
@@ -61,7 +83,74 @@ export default function ProductsPage() {
         }
     }
     fetchProducts();
-  }, [brandName, category]);
+  }, [brandName]);
+
+  useEffect(() => {
+    let productsToFilter = [...allProducts];
+
+    // Apply filters
+    if (activeFilters.categories.length > 0) {
+      productsToFilter = productsToFilter.filter(p => activeFilters.categories.includes(p.category));
+    }
+    if (activeFilters.brands.length > 0) {
+      productsToFilter = productsToFilter.filter(p => activeFilters.brands.includes(p.brand));
+    }
+    // Genders and colors need data in the product model to work.
+    // Placeholder logic for now:
+    if (activeFilters.genders.length > 0) {
+       // productsToFilter = productsToFilter.filter(p => activeFilters.genders.includes(p.gender));
+    }
+     if (activeFilters.colors.length > 0) {
+      // Assuming a product's color is in its name or a field
+      // productsToFilter = productsToFilter.filter(p => activeFilters.colors.some(c => p.color === c));
+    }
+
+    // Apply sorting
+    switch(sortOption) {
+        case 'price-asc':
+            productsToFilter.sort((a, b) => a.sellingPrice - b.sellingPrice);
+            break;
+        case 'price-desc':
+            productsToFilter.sort((a, b) => b.sellingPrice - a.sellingPrice);
+            break;
+        case 'newest':
+            productsToFilter.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+            break;
+        case 'rating':
+            productsToFilter.sort((a, b) => b.rating - a.rating);
+            break;
+        case 'relevance':
+        default:
+             // Default sort is by creation date (newest first) as fetched from API
+            break;
+    }
+
+    setFilteredProducts(productsToFilter);
+  }, [allProducts, activeFilters, sortOption]);
+  
+  const handleFilterChange = (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => {
+    setActiveFilters(prev => {
+        const currentValues = prev[filterType];
+        const newValues = isChecked 
+            ? [...currentValues, value] 
+            : currentValues.filter(v => v !== value);
+        return { ...prev, [filterType]: newValues };
+    });
+  };
+
+  const clearAllFilters = () => {
+    setActiveFilters({ categories: [], brands: [], genders: [], colors: [] });
+    // Also clear the URL query param if needed
+    const newUrl = `/${brandName}/products`;
+    window.history.pushState({}, '', newUrl);
+  };
+  
+  const currentCategory = useMemo(() => {
+    // If there's one category selected, show it. Otherwise, fallback to initial.
+    if (activeFilters.categories.length === 1) return activeFilters.categories[0];
+    return null;
+  }, [activeFilters.categories]);
+
 
   if (loading) {
     return (
@@ -82,8 +171,8 @@ export default function ProductsPage() {
 
   return (
     <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-4">
-            <Breadcrumb>
+        <div className="flex items-center justify-between mb-4">
+             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
@@ -92,11 +181,11 @@ export default function ProductsPage() {
                     <BreadcrumbItem>
                         <BreadcrumbLink href={`/${brandName}/products`}>Products</BreadcrumbLink>
                     </BreadcrumbItem>
-                    {category && (
+                    {currentCategory && (
                         <>
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
-                                <BreadcrumbPage>{category}</BreadcrumbPage>
+                                <BreadcrumbPage>{currentCategory}</BreadcrumbPage>
                             </BreadcrumbItem>
                         </>
                     )}
@@ -104,42 +193,47 @@ export default function ProductsPage() {
             </Breadcrumb>
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
-            <ProductFilters products={products} />
+            <ProductFilters 
+                products={allProducts} 
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
+                onClearAll={clearAllFilters}
+            />
             <div className="flex-1">
-                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4 border-b">
+                 <div className="sticky top-16 z-10 bg-background/95 backdrop-blur-sm pt-4 pb-4">
                     <div className="flex items-baseline justify-between">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
-                                {category ? `${category}` : `All Products`}
+                                {currentCategory ? `${currentCategory}` : `All Products`}
                             </h1>
-                            <p className="text-sm text-muted-foreground mt-1">{products.length} products</p>
+                            <p className="text-sm text-muted-foreground mt-1">{filteredProducts.length} products</p>
                         </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="shrink-0">
-                                    Sort by: <span className="font-semibold ml-1">Relevance</span>
+                                    Sort by: <span className="font-semibold ml-1">{SORT_OPTIONS[sortOption]}</span>
                                     <ChevronDown className="ml-2 h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem>Relevance</DropdownMenuItem>
-                                <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                                <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
-                                <DropdownMenuItem>Newest</DropdownMenuItem>
-                                <DropdownMenuItem>Rating</DropdownMenuItem>
+                                {Object.entries(SORT_OPTIONS).map(([key, value]) => (
+                                     <DropdownMenuItem key={key} onClick={() => setSortOption(key)}>
+                                        {value}
+                                    </DropdownMenuItem>
+                                ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
                 </div>
 
-                {products.length > 0 ? (
+                {filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 pt-6">
-                        {products.map((product) => (
+                        {filteredProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-16 border rounded-lg">
+                    <div className="text-center py-16 border rounded-lg mt-6">
                         <p className="text-lg font-semibold">No Products Found</p>
                         <p className="text-sm text-muted-foreground">Try adjusting your filters.</p>
                     </div>
