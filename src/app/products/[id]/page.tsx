@@ -11,21 +11,33 @@ export default function ProductPage() {
   const params = useParams();
   const { id } = params;
   const [product, setProduct] = useState<IProduct | null>(null);
+  const [variants, setVariants] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    async function fetchProductAndTrackView() {
+    async function fetchProductAndVariants() {
       try {
-        // Fetch product data
-        const response = await fetch(`/api/products/${id}`);
-        if (!response.ok) {
+        setLoading(true);
+        // Fetch main product data
+        const productResponse = await fetch(`/api/products/${id}`);
+        if (!productResponse.ok) {
           throw new Error('Failed to fetch product');
         }
-        const data = await response.json();
-        setProduct(data.product);
+        const data = await productResponse.json();
+        const mainProduct: IProduct = data.product;
+        setProduct(mainProduct);
+
+        // If the product has a styleId, fetch its variants
+        if (mainProduct.styleId) {
+          const variantsResponse = await fetch(`/api/products/variants/${mainProduct.styleId}`);
+          if (variantsResponse.ok) {
+            const variantsData = await variantsResponse.json();
+            setVariants(variantsData.variants);
+          }
+        }
 
         // Track the view - fire and forget
         fetch(`/api/products/${id}/track`, {
@@ -41,7 +53,7 @@ export default function ProductPage() {
       }
     }
 
-    fetchProductAndTrackView();
+    fetchProductAndVariants();
   }, [id]);
 
   if (loading) {
@@ -62,7 +74,7 @@ export default function ProductPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <ProductDetails product={product} />
+      <ProductDetails product={product} variants={variants.length > 0 ? variants : [product]} />
     </div>
   );
 }

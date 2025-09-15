@@ -1,18 +1,21 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ZoomIn, PlayCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import useEmblaCarousel, { type EmblaCarouselType } from 'embla-carousel-react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './ui/breadcrumb';
 
 interface ProductDetailsProps {
   product: IProduct;
+  variants: IProduct[];
 }
 
 const ThumbsButton: React.FC<React.PropsWithChildren<{
@@ -36,9 +39,14 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, variants }: ProductDetailsProps) {
+  const router = useRouter();
+  const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(product.color);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(product.size);
 
   const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
   const [thumbRef, thumbApi] = useEmblaCarousel({
@@ -46,6 +54,50 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     dragFree: false,
     axis: 'y',
   });
+
+  // Update product when initialProduct changes
+  useEffect(() => {
+      setProduct(initialProduct);
+      setSelectedColor(initialProduct.color);
+      setSelectedSize(initialProduct.size);
+  }, [initialProduct]);
+
+  const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
+    const colorMap = new Map<string, string>(); // color -> image
+    const sizeSet = new Set<string>();
+    
+    variants.forEach(v => {
+      if (v.color && !colorMap.has(v.color)) {
+        colorMap.set(v.color, v.images[0]);
+      }
+      if (v.color === selectedColor && v.size) {
+        sizeSet.add(v.size);
+      }
+    });
+
+    return {
+      uniqueColors: Array.from(colorMap.entries()).map(([color, imageUrl]) => ({ color, imageUrl })),
+      sizesForSelectedColor: Array.from(sizeSet).sort(),
+    };
+  }, [variants, selectedColor]);
+  
+  // Navigate to the correct variant URL when color/size changes
+  useEffect(() => {
+    if (!selectedColor && !selectedSize) return;
+
+    const variant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
+    if (variant && variant._id !== product._id) {
+        // Use replace to avoid polluting browser history for variant selection
+        router.replace(`/products/${variant._id}`);
+    } else if (!variant && selectedColor) {
+      // If a color is selected but not a size yet, find the first available size for that color
+      const firstVariantOfColor = variants.find(v => v.color === selectedColor);
+      if (firstVariantOfColor && firstVariantOfColor._id !== product._id) {
+        router.replace(`/products/${firstVariantOfColor._id}`);
+      }
+    }
+  }, [selectedColor, selectedSize, variants, product._id, router]);
+
 
   const onThumbClick = useCallback(
     (index: number) => {
@@ -68,9 +120,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   }, [mainApi, onSelect]);
 
 
-  const scrollPrev = useCallback(() => mainApi?.scrollPrev(), [mainApi]);
-  const scrollNext = useCallback(() => mainApi?.scrollNext(), [mainApi]);
-  
   const thumbScrollPrev = useCallback(() => thumbApi?.scrollPrev(), [thumbApi]);
   const thumbScrollNext = useCallback(() => thumbApi?.scrollNext(), [thumbApi]);
 
@@ -82,7 +131,6 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
   const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
   
-  // Combine images and videos for the gallery
   const mediaItems = [
     ...product.images.map(url => ({ type: 'image', url })),
     // ...(product.videos?.map(url => ({ type: 'video', url })) || [])
@@ -90,17 +138,18 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Image Gallery Column */}
-        <div className="grid grid-cols-[80px_1fr] items-start gap-4">
-          {/* Vertical Thumbnails */}
-           <div className="flex flex-col gap-2">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
+        {/* Left Column: Image Gallery & Actions */}
+        <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-[80px_1fr] gap-4">
+            {/* Vertical Thumbnails */}
+            <div className="flex flex-col items-center gap-2">
                 <Button
                     variant="ghost" size="icon"
                     className="h-8 w-8 flex-shrink-0"
                     onClick={thumbScrollPrev}
                 ><ChevronUp className="h-5 w-5" /></Button>
-                <div className="overflow-hidden w-full h-[344px]" ref={thumbRef}>
+                <div className="overflow-hidden w-full max-h-[350px]" ref={thumbRef}>
                     <div className="flex flex-col gap-3 h-full">
                         {mediaItems.map((media, index) => (
                             <div key={index} className="flex-[0_0_80px] min-w-0">
@@ -130,66 +179,83 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={thumbScrollNext}
                 ><ChevronDown className="h-5 w-5" /></Button>
             </div>
-          
-          {/* Main Image Viewer */}
-          <div className="relative overflow-hidden rounded-lg aspect-square">
-              <div className="overflow-hidden h-full" ref={mainRef}>
-                   <div className="flex h-full bg-muted">
-                      {mediaItems.map((media, index) => (
-                          <div key={index} className="flex-[0_0_100%] min-w-0 h-full relative">
-                              {media.type === 'image' ? (
-                                  <Image
-                                      src={media.url}
-                                      alt={product.name}
-                                      fill
-                                      className="object-cover"
-                                  />
-                              ) : (
-                                  <video
-                                      src={media.url}
-                                      controls
-                                      className="w-full h-full object-cover"
-                                  />
-                              )}
-                          </div>
-                      ))}
-                  </div>
-              </div>
-              <Button
-                  variant="outline" size="icon"
-                  className="absolute top-1/2 -translate-y-1/2 left-2 rounded-full h-8 w-8 bg-background/60 hover:bg-background"
-                  onClick={scrollPrev}
-              ><ChevronLeft /></Button>
-              <Button
-                  variant="outline" size="icon"
-                  className="absolute top-1/2 -translate-y-1/2 right-2 rounded-full h-8 w-8 bg-background/60 hover:bg-background"
-                  onClick={scrollNext}
-              ><ChevronRight /></Button>
-               <div className="absolute top-2 right-2 flex flex-col gap-2">
-                  <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500">
-                      <Heart />
-                  </Button>
-                   <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background">
-                      <ZoomIn />
-                  </Button>
-              </div>
+            
+            {/* Main Image Viewer */}
+            <div className="relative overflow-hidden aspect-square">
+                <div className="overflow-hidden h-full" ref={mainRef}>
+                    <div className="flex h-full bg-muted">
+                        {mediaItems.map((media, index) => (
+                            <div key={index} className="flex-[0_0_100%] min-w-0 h-full relative">
+                                {media.type === 'image' ? (
+                                    <Image
+                                        src={media.url}
+                                        alt={product.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <video
+                                        src={media.url}
+                                        controls
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="absolute top-2 right-2 flex flex-col gap-2">
+                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500">
+                        <Heart />
+                    </Button>
+                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background">
+                        <ZoomIn />
+                    </Button>
+                </div>
+            </div>
           </div>
+           {/* Action Buttons */}
+            <div className="grid sm:grid-cols-2 gap-4">
+                <Button size="lg" className="h-12 text-base">
+                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                </Button>
+                <Button size="lg" variant="secondary" className="h-12 text-base">
+                    Buy Now
+                </Button>
+            </div>
         </div>
 
-        {/* Product Info */}
+
+        {/* Right Column: Product Info */}
         <div className="flex flex-col gap-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={`/${product.storefront}/home`}>Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href={`/${product.storefront}/products?category=${product.category}`}>{product.category}</BreadcrumbLink>
+                </BreadcrumbItem>
+                 <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{product.name}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            
           <div>
-              <p className="text-muted-foreground">{product.brand}</p>
               <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
+              <p className="text-muted-foreground mt-1">{product.brand}</p>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-yellow-500">
+            <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className={cn("w-5 h-5", i < Math.round(product.rating) ? 'fill-current' : 'text-muted-foreground/50')} />
+                <Star key={i} className={cn("w-5 h-5", i < Math.round(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30')} />
               ))}
             </div>
-            <span className="text-sm text-muted-foreground">({product.rating.toFixed(1)})</span>
+            <span className="text-sm text-muted-foreground">({product.rating.toFixed(1)} Rating)</span>
           </div>
 
           <div className="flex items-baseline gap-3">
@@ -232,36 +298,65 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           </div>
           
           <Separator />
+            
+          {uniqueColors.length > 0 && (
+            <div className="space-y-2">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
+                <div className="flex flex-wrap gap-2">
+                    {uniqueColors.map(({ color }) => (
+                         <Button 
+                            key={color} 
+                            variant="outline"
+                            onClick={() => setSelectedColor(color)}
+                            className={cn(
+                                "capitalize",
+                                selectedColor === color && "ring-2 ring-primary"
+                            )}
+                         >{color}</Button>
+                    ))}
+                </div>
+            </div>
+          )}
 
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Description</h3>
-            <p className="text-muted-foreground">{product.description}</p>
-          </div>
-          
-          <div className="flex flex-col gap-4 mt-auto pt-4">
-              <div className="flex items-center gap-4">
-                  <h3 className="text-lg font-semibold">Quantity</h3>
-                  <div className="flex items-center gap-2 rounded-lg border p-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                          <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-8 text-center font-semibold">{quantity}</span>
-                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                          <Plus className="h-4 w-4" />
-                      </Button>
-                  </div>
+          {sizesForSelectedColor.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
+              <div className="flex flex-wrap gap-2">
+                {sizesForSelectedColor.map((size) => (
+                   <Button 
+                        key={size}
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => setSelectedSize(size)}
+                        className={cn(
+                            "w-12 h-12",
+                            selectedSize === size && "ring-2 ring-primary"
+                        )}
+                    >{size}</Button>
+                ))}
               </div>
-               <div className="grid sm:grid-cols-2 gap-4">
-                  <Button size="lg" >
-                      <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+            </div>
+          )}
+
+           <div className="flex items-center gap-4">
+              <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+              <div className="flex items-center gap-1 rounded-lg border p-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                      <Minus className="h-4 w-4" />
                   </Button>
-                  <Button size="lg" variant="secondary">
-                      Buy Now
+                  <span className="w-8 text-center font-semibold">{quantity}</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                      <Plus className="h-4 w-4" />
                   </Button>
               </div>
           </div>
           
           <Separator />
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Description</h3>
+            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+          </div>
         </div>
       </div>
     </div>
