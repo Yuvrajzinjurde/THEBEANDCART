@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useTransition } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Frown } from 'lucide-react';
 
 export type ActiveFilters = {
   categories: string[];
@@ -50,6 +50,7 @@ export default function ProductsPage() {
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
     categories: initialCategory ? [initialCategory] : [],
@@ -74,6 +75,7 @@ export default function ProductsPage() {
             }
             const productData = await productResponse.json();
             setAllProducts(productData.products);
+            setFilteredProducts(productData.products); // Initially, all products are filtered products
 
         } catch (error: any) {
             console.error(error);
@@ -86,46 +88,43 @@ export default function ProductsPage() {
   }, [brandName]);
 
   useEffect(() => {
-    let productsToFilter = [...allProducts];
+    startTransition(() => {
+        let productsToFilter = [...allProducts];
 
-    // Apply filters
-    if (activeFilters.categories.length > 0) {
-      productsToFilter = productsToFilter.filter(p => activeFilters.categories.includes(p.category));
-    }
-    if (activeFilters.brands.length > 0) {
-      productsToFilter = productsToFilter.filter(p => activeFilters.brands.includes(p.brand));
-    }
-    // Genders and colors need data in the product model to work.
-    // Placeholder logic for now:
-    if (activeFilters.genders.length > 0) {
-       // productsToFilter = productsToFilter.filter(p => activeFilters.genders.includes(p.gender));
-    }
-     if (activeFilters.colors.length > 0) {
-      // Assuming a product's color is in its name or a field
-      // productsToFilter = productsToFilter.filter(p => activeFilters.colors.some(c => p.color === c));
-    }
+        // Apply filters
+        if (activeFilters.categories.length > 0) {
+        productsToFilter = productsToFilter.filter(p => activeFilters.categories.includes(p.category));
+        }
+        if (activeFilters.brands.length > 0) {
+        productsToFilter = productsToFilter.filter(p => p.brand && activeFilters.brands.includes(p.brand));
+        }
+        if (activeFilters.colors.length > 0) {
+            productsToFilter = productsToFilter.filter(p => p.color && activeFilters.colors.includes(p.color));
+        }
 
-    // Apply sorting
-    switch(sortOption) {
-        case 'price-asc':
-            productsToFilter.sort((a, b) => a.sellingPrice - b.sellingPrice);
-            break;
-        case 'price-desc':
-            productsToFilter.sort((a, b) => b.sellingPrice - a.sellingPrice);
-            break;
-        case 'newest':
-            productsToFilter.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-            break;
-        case 'rating':
-            productsToFilter.sort((a, b) => b.rating - a.rating);
-            break;
-        case 'relevance':
-        default:
-             // Default sort is by creation date (newest first) as fetched from API
-            break;
-    }
-
-    setFilteredProducts(productsToFilter);
+        // Apply sorting
+        switch(sortOption) {
+            case 'price-asc':
+                productsToFilter.sort((a, b) => a.sellingPrice - b.sellingPrice);
+                break;
+            case 'price-desc':
+                productsToFilter.sort((a, b) => b.sellingPrice - a.sellingPrice);
+                break;
+            case 'newest':
+                productsToFilter.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+                break;
+            case 'rating':
+                // @ts-ignore
+                productsToFilter.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                break;
+            case 'relevance':
+            default:
+                // Default sort is by creation date (newest first) as fetched from API
+                break;
+        }
+        
+        setFilteredProducts(productsToFilter);
+    });
   }, [allProducts, activeFilters, sortOption]);
   
   const handleFilterChange = (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => {
@@ -151,6 +150,11 @@ export default function ProductsPage() {
     return null;
   }, [activeFilters.categories]);
 
+  // Determine which set of products to use for generating filter options
+  // For categories, we always want to show all possible categories from the storefront
+  // For other filters, we want to show options based on the currently filtered products
+  const productsForCategoryFilter = allProducts;
+  const productsForOtherFilters = filteredProducts;
 
   if (loading) {
     return (
@@ -171,7 +175,7 @@ export default function ProductsPage() {
 
   return (
     <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -191,16 +195,17 @@ export default function ProductsPage() {
                     )}
                 </BreadcrumbList>
             </Breadcrumb>
+            <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
             <ProductFilters 
-                products={allProducts} 
+                productsForCategories={productsForCategoryFilter}
+                productsForOthers={productsForOtherFilters}
                 activeFilters={activeFilters}
                 onFilterChange={handleFilterChange}
-                onClearAll={clearAllFilters}
             />
             <div className="flex-1">
-                 <div className="sticky top-16 z-10 bg-background/95 backdrop-blur-sm pt-4 pb-4">
+                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
                     <div className="flex items-baseline justify-between">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
@@ -226,16 +231,22 @@ export default function ProductsPage() {
                     </div>
                 </div>
 
-                {filteredProducts.length > 0 ? (
+                {isPending ? (
+                     <div className="flex flex-1 items-center justify-center pt-16">
+                        <Loader className="h-8 w-8" />
+                    </div>
+                ) : filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 pt-6">
                         {filteredProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-16 border rounded-lg mt-6">
+                    <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
+                        <Frown className="w-16 h-16 text-muted-foreground/50 mb-4" />
                         <p className="text-lg font-semibold">No Products Found</p>
-                        <p className="text-sm text-muted-foreground">Try adjusting your filters.</p>
+                        <p className="text-sm text-muted-foreground">Your filter combination yielded no results.</p>
+                         <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
                     </div>
                 )}
             </div>
@@ -243,3 +254,5 @@ export default function ProductsPage() {
     </main>
   );
 }
+
+    
