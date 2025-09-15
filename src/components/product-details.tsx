@@ -1,29 +1,85 @@
 
 "use client";
 
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Star, Heart, ShoppingCart, Minus, Plus, Info } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import useEmblaCarousel from 'embla-carousel-react';
+import type { EmblaCarouselType, EmblaPluginType } from 'embla-carousel-react';
 
 interface ProductDetailsProps {
   product: IProduct;
 }
 
+const ThumbsButton: React.FC<React.PropsWithChildren<{
+  selected: boolean
+  onClick: () => void
+}>> = (props) => {
+  const { selected, onClick, children } = props
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "relative aspect-square w-full h-auto rounded-md overflow-hidden transition-shadow",
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+        selected ? 'ring-2 ring-primary ring-offset-1' : 'hover:opacity-90'
+      )}
+      type="button"
+    >
+        {children}
+    </button>
+  )
+}
+
 export default function ProductDetails({ product }: ProductDetailsProps) {
-  const [selectedImage, setSelectedImage] = useState(product.images[0]);
   const [quantity, setQuantity] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [mainCarouselApi, setMainCarouselApi] = useState<EmblaCarouselType | undefined>();
+  const [thumbCarouselApi, setThumbCarouselApi] = useState<EmblaCarouselType | undefined>();
+
+  const [mainCarouselRef, mainApi] = useEmblaCarousel({ loop: true, watchDrag: false });
+  const [thumbCarouselRef, thumbApi] = useEmblaCarousel({
+    containScroll: 'keepSnaps',
+    dragFree: true,
+    align: 'start',
+    axis: 'y',
+  });
+
+  useEffect(() => {
+    if (!mainApi || !thumbApi) return;
+    setMainCarouselApi(mainApi);
+    setThumbCarouselApi(thumbApi);
+
+    const onSelect = () => {
+      setSelectedIndex(mainApi.selectedScrollSnap());
+      thumbApi.scrollTo(mainApi.selectedScrollSnap());
+    };
+    mainApi.on('select', onSelect);
+    onSelect(); // Initial sync
+
+    return () => {
+      mainApi.off('select', onSelect);
+    };
+  }, [mainApi, thumbApi]);
+  
+  const onThumbClick = useCallback(
+    (index: number) => {
+      mainApi?.scrollTo(index)
+    },
+    [mainApi]
+  );
+  
+  const scrollPrev = useCallback(() => mainApi?.scrollPrev(), [mainApi]);
+  const scrollNext = useCallback(() => mainApi?.scrollNext(), [mainApi]);
+  const thumbScrollPrev = useCallback(() => thumbApi?.scrollPrev(), [thumbApi]);
+  const thumbScrollNext = useCallback(() => thumbApi?.scrollNext(), [thumbApi]);
+
 
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => Math.max(1, prev + amount));
@@ -32,75 +88,100 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
   const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
+  
+  // Combine images and videos for the gallery
+  const mediaItems = [
+    ...product.images.map(url => ({ type: 'image', url })),
+    // ...(product.videos?.map(url => ({ type: 'video', url })) || [])
+  ];
 
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery */}
-      <div className="grid gap-4">
-        <div className="relative overflow-hidden rounded-lg border aspect-square">
-            <Image
-                src={selectedImage}
-                alt={product.name}
-                fill
-                className="object-cover"
-            />
-        </div>
-        <div className="hidden md:grid grid-cols-4 gap-4">
-          {product.images.map((img, index) => (
-            <button
-              key={index}
-              className={cn(
-                "overflow-hidden rounded-lg border aspect-square transition",
-                selectedImage === img ? 'ring-2 ring-primary' : 'hover:border-primary'
-              )}
-              onClick={() => setSelectedImage(img)}
-            >
-              <Image
-                src={img}
-                alt={`${product.name} thumbnail ${index + 1}`}
-                width={100}
-                height={100}
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-         <div className="md:hidden">
-            <Carousel opts={{
-                align: "start",
-            }}>
-                <CarouselContent className="-ml-2">
-                    {product.images.map((img, index) => (
-                        <CarouselItem key={index} className="basis-1/4 pl-2">
-                            <button
-                                className={cn(
-                                    "overflow-hidden rounded-lg border aspect-square transition w-full",
-                                    selectedImage === img ? 'ring-2 ring-primary' : 'hover:border-primary'
-                                )}
-                                onClick={() => setSelectedImage(img)}
-                                >
+      <div className="grid grid-cols-[80px_1fr] gap-4">
+        {/* Vertical Thumbnails */}
+        <div className="relative h-[500px]">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={thumbScrollPrev}>
+                    <ChevronLeft className="h-4 w-4 rotate-90" />
+                </Button>
+            </div>
+            <div className="overflow-hidden h-full" ref={thumbCarouselRef}>
+                <div className="flex flex-col h-full gap-3">
+                    {mediaItems.map((media, index) => (
+                         <div key={index} className="flex-[0_0_80px] min-h-0">
+                            <ThumbsButton
+                                onClick={() => onThumbClick(index)}
+                                selected={index === selectedIndex}
+                            >
                                 <Image
-                                    src={img}
-                                    alt={`${product.name} thumbnail ${index + 1}`}
-                                    width={100}
-                                    height={100}
+                                  src={media.url}
+                                  alt={`${product.name} thumbnail ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                />
+                                {media.type === 'video' && (
+                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                        <PlayCircle className="w-8 h-8 text-white" />
+                                    </div>
+                                )}
+                            </ThumbsButton>
+                        </div>
+                    ))}
+                </div>
+            </div>
+             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10">
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={thumbScrollNext}>
+                    <ChevronRight className="h-4 w-4 rotate-90" />
+                </Button>
+            </div>
+        </div>
+        
+        {/* Main Image Viewer */}
+        <div className="relative overflow-hidden rounded-lg aspect-square">
+            <div className="overflow-hidden h-full" ref={mainCarouselRef}>
+                 <div className="flex h-full">
+                    {mediaItems.map((media, index) => (
+                        <div key={index} className="flex-[0_0_100%] min-w-0 h-full relative">
+                            {media.type === 'image' ? (
+                                <Image
+                                    src={media.url}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <video
+                                    src={media.url}
+                                    controls
                                     className="w-full h-full object-cover"
                                 />
-                            </button>
-                        </CarouselItem>
+                            )}
+                        </div>
                     ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden sm:flex" />
-                <CarouselNext className="hidden sm:flex" />
-            </Carousel>
+                </div>
+            </div>
+            <Button
+                variant="outline" size="icon"
+                className="absolute top-1/2 -translate-y-1/2 left-2 rounded-full h-8 w-8 bg-background/60 hover:bg-background"
+                onClick={scrollPrev}
+            ><ChevronLeft /></Button>
+            <Button
+                variant="outline" size="icon"
+                className="absolute top-1/2 -translate-y-1/2 right-2 rounded-full h-8 w-8 bg-background/60 hover:bg-background"
+                onClick={scrollNext}
+            ><ChevronRight /></Button>
+             <Button variant="outline" size="icon" className="absolute top-2 right-2 rounded-full bg-background/60 hover:bg-background hover:text-red-500">
+                <Heart />
+            </Button>
         </div>
       </div>
 
       {/* Product Info */}
       <div className="flex flex-col gap-4">
         <div>
+            <p className="text-muted-foreground">{product.brand}</p>
             <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-            <p className="text-muted-foreground mt-1">{product.brand}</p>
         </div>
 
         <div className="flex items-center gap-4">
