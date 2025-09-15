@@ -314,7 +314,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     <Input 
                                         id="video-upload"
                                         type="file" 
-                                        accept="video/mp4, video/webm, audio/mp3"
+                                        accept="video/mp4,video/webm,audio/mp3"
                                         className="hidden"
                                         multiple
                                         // onChange={handleVideoFileChange} // You would need a new handler for videos
@@ -477,5 +477,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
