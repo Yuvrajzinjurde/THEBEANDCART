@@ -72,25 +72,26 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       onMouseLeave={() => plugin.current.stop()}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
-        <div className="aspect-square w-full overflow-hidden">
-           <Carousel
-              plugins={[plugin.current]}
-              className="w-full h-full"
-            >
-              <CarouselContent>
-                {product.images.map((img, index) => (
-                  <CarouselItem key={index} className="relative">
-                     <Image
-                      src={img}
-                      alt={`${product.name} image ${index + 1}`}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-        </div>
+        <Carousel
+            plugins={[plugin.current]}
+            className="w-full"
+        >
+            <CarouselContent>
+            {product.images.map((img, index) => (
+                <CarouselItem key={index}>
+                    <div className="w-full aspect-square relative">
+                        <Image
+                            src={img}
+                            alt={`${product.name} image ${index + 1}`}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                    </div>
+                </CarouselItem>
+            ))}
+            </CarouselContent>
+        </Carousel>
+
         <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Button
             size="icon"
