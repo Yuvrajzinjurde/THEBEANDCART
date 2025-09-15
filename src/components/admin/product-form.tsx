@@ -129,7 +129,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
       setAiError("⚠️ AI service is overloaded. Please try again later or fill in the form manually.");
     } else {
-      setAiError("⚠️ Failed to generate AI content. Please try again.");
+      setAiError("⚠️ AI service is unavailable. Please try again later.");
     }
     console.error(error);
   }
@@ -450,5 +450,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
