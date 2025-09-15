@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format, subDays } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ArrowUp, ArrowDown, Info, Clock, LineChart } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,22 @@ import type { IProduct } from "@/models/product.model";
 
 type Period = '7d' | '30d' | 'yesterday' | 'custom';
 type ChartView = 'orders' | 'sales';
+
+const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center text-center py-16">
+        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="20" width="70" height="60" rx="4" fill="#F3F4F6"/>
+            <path d="M25 35H75" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round"/>
+            <path d="M25 45H75" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round"/>
+            <path d="M25 55H55" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="68" cy="68" r="14" fill="white"/>
+            <path d="M72 64L64 72" stroke="#9CA3AF" strokeWidth="3" strokeLinecap="round"/>
+            <path d="M64 64L72 72" stroke="#9CA3AF" strokeWidth="3" strokeLinecap="round"/>
+        </svg>
+        <p className="mt-4 font-bold text-lg text-foreground">No Data to Show</p>
+        <p className="text-sm text-muted-foreground">There is no sufficient data to show the results in the selected timeframe.</p>
+    </div>
+);
 
 function BusinessDashboardPage() {
   const { selectedBrand } = useBrandStore();
@@ -244,7 +260,7 @@ function BusinessDashboardPage() {
                     <TabsTrigger value="high-returns">High Returns (0)</TabsTrigger>
                     <TabsTrigger value="low-ratings">Low Ratings (0)</TabsTrigger>
                 </TabsList>
-                 <TabsContent value="all" className="mt-4">
+                <TabsContent value="all" className="mt-4">
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
@@ -276,6 +292,36 @@ function BusinessDashboardPage() {
                         </Table>
                     </div>
                 </TabsContent>
+                <TabsContent value="low-orders" className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-4">
+                        <span className="font-semibold text-foreground">Low Orders:</span> Orders for these products have reduced by 30% or more in the last 7 days as compared to the previous 7 days
+                    </p>
+                    <EmptyState />
+                </TabsContent>
+                 <TabsContent value="low-views" className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-4">
+                        <span className="font-semibold text-foreground">Low Views:</span> Views for these products have reduced by 30% or more in the last 7 days as compared to the previous 7 days
+                    </p>
+                    <EmptyState />
+                </TabsContent>
+                 <TabsContent value="low-conversion" className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-4">
+                        <span className="font-semibold text-foreground">Low Conversion Rate:</span> Conversion rate for these products is below the category average.
+                    </p>
+                    <EmptyState />
+                </TabsContent>
+                 <TabsContent value="high-returns" className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-4">
+                        <span className="font-semibold text-foreground">High Returns:</span> These products have a return rate higher than the category average.
+                    </p>
+                    <EmptyState />
+                </TabsContent>
+                 <TabsContent value="low-ratings" className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-4">
+                        <span className="font-semibold text-foreground">Low Ratings:</span> These products have an average rating of 3 stars or less.
+                    </p>
+                    <EmptyState />
+                </TabsContent>
             </Tabs>
         </CardContent>
       </Card>
@@ -284,3 +330,5 @@ function BusinessDashboardPage() {
 }
 
 export default BusinessDashboardPage;
+
+    
