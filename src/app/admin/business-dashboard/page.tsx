@@ -276,19 +276,17 @@ function BusinessDashboardPage() {
                                     <TableHead>Recommendations</TableHead>
                                 </TableRow>
                             </TableHeader>
-                            {productRows.length > 0 ? (
-                                <TableBody>
-                                    {productRows}
-                                </TableBody>
-                            ) : (
-                                <TableBody>
+                            <TableBody>
+                                {productRows.length > 0 ? (
+                                    productRows
+                                ) : (
                                     <TableRow>
                                         <TableCell colSpan={9} className="h-24 text-center">
                                             No products to display.
                                         </TableCell>
                                     </TableRow>
-                                </TableBody>
-                            )}
+                                )}
+                            </TableBody>
                         </Table>
                     </div>
                 </TabsContent>

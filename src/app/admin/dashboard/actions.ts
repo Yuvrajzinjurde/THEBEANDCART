@@ -37,7 +37,7 @@ const calculatePercentageChange = (current: number, previous: number): number =>
 export async function getDashboardStats(brand: string): Promise<DashboardStats> {
     await dbConnect();
     try {
-        const brandQuery = brand === 'All Brands' ? {} : { brand: { $regex: new RegExp(`^${brand}$`, 'i') } };
+        const brandQuery = brand === 'All Brands' ? {} : { brand };
         
         const now = new Date();
         const sevenDaysAgo = startOfDay(subDays(now, 6));
@@ -124,3 +124,5 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         throw new Error('Could not fetch dashboard statistics from the database.');
     }
 }
+
+    
