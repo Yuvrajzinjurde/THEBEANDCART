@@ -98,7 +98,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 variant="ghost" size="icon"
                 className="h-8 w-8"
                 onClick={thumbScrollPrev}
-            ><ChevronUp /></Button>
+            ><ChevronUp className="mx-auto" /></Button>
             <div className="overflow-hidden w-full" ref={thumbRef}>
                 <div className="flex flex-col gap-3">
                     {mediaItems.map((media, index) => (
@@ -127,7 +127,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 variant="ghost" size="icon"
                 className="h-8 w-8"
                 onClick={thumbScrollNext}
-            ><ChevronDown /></Button>
+            ><ChevronDown className="mx-auto" /></Button>
         </div>
         
         {/* Main Image Viewer */}
