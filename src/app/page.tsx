@@ -131,29 +131,29 @@ export default function LandingPage() {
                 </div>
             ) : (
                 <div className="w-full max-w-4xl mx-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {brands.map((brand) => (
-                    <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} passHref>
-                        <Card className="group relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                        <CardContent className="p-0">
-                            <div className="aspect-square relative bg-muted flex items-center justify-center">
-                                <Image
-                                    src={brand.logoUrl}
-                                    alt={`${brand.displayName} Logo`}
-                                    width={120}
-                                    height={120}
-                                    className="object-contain transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-50"></div>
-                            </div>
-                            <div className="p-4 border-t">
-                                <h2 className="text-center text-lg font-bold text-foreground">{brand.displayName}</h2>
-                            </div>
-                        </CardContent>
-                        </Card>
-                    </Link>
-                    ))}
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {brands.map((brand) => (
+                            <Card key={brand.permanentName} className="group relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <Link href={`/${brand.permanentName}/home`} className="block">
+                                    <CardContent className="p-0">
+                                        <div className="aspect-square relative bg-muted flex items-center justify-center">
+                                            <Image
+                                                src={brand.logoUrl}
+                                                alt={`${brand.displayName} Logo`}
+                                                width={120}
+                                                height={120}
+                                                className="object-contain transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-50"></div>
+                                        </div>
+                                        <div className="p-4 border-t">
+                                            <h2 className="text-center text-lg font-bold text-foreground">{brand.displayName}</h2>
+                                        </div>
+                                    </CardContent>
+                                </Link>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
             )}
         </section>
