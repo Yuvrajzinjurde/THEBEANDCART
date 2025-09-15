@@ -40,6 +40,12 @@ export default function Header() {
   const brandName = (params.brand as string) || 'reeva';
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   useEffect(() => {
     async function fetchBrandLogo() {
@@ -145,7 +151,7 @@ export default function Header() {
       </div>
       
       {/* Secondary Navigation */}
-      {isHomePage && (
+      {isMounted && isHomePage && (
         <>
             <Separator />
             <div className="hidden md:flex justify-center">
