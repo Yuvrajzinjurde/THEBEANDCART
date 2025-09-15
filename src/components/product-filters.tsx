@@ -58,11 +58,11 @@ export function ProductFilters({ products }: ProductFiltersProps) {
   return (
     <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
       <div className="sticky top-24">
-         <div className="flex items-center justify-between mb-4">
+         <div className="flex items-center justify-between pb-4 border-b">
           <h2 className="text-lg font-bold">Filters</h2>
           <Button variant="link" className="p-0 h-auto text-primary">CLEAR ALL</Button>
         </div>
-        <ScrollArea className="h-[calc(100vh-8rem-4rem)]">
+        <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
             <div className="pr-4">
                 {uniqueCategories.length > 0 && (
                     <FilterSection title="Categories">
