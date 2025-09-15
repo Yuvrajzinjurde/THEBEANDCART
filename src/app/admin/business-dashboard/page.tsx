@@ -110,11 +110,12 @@ function BusinessDashboardPage() {
   );
 
   const getProductConversion = (product: IProduct) => {
-      if (!product.clicks || product.clicks === 0) return 0;
+      const clicks = product.clicks || 0;
+      if (clicks === 0) return 0;
       // This is a simplified conversion. A real app would track orders per product.
       // For now, we'll simulate it based on a product's rating.
-      const simulatedOrders = (product.rating / 5) * product.clicks * 0.1; // 10% max conversion based on clicks
-      return (simulatedOrders / product.clicks) * 100;
+      const simulatedOrders = (product.rating / 5) * clicks * 0.1; // 10% max conversion based on clicks
+      return (simulatedOrders / clicks) * 100;
   }
 
   return (
@@ -231,8 +232,8 @@ function BusinessDashboardPage() {
                                                  <span>{product.name}</span>
                                              </div>
                                          </TableCell>
-                                         <TableCell>{product.views.toLocaleString()}</TableCell>
-                                         <TableCell>{product.clicks.toLocaleString()}</TableCell>
+                                         <TableCell>{(product.views || 0).toLocaleString()}</TableCell>
+                                         <TableCell>{(product.clicks || 0).toLocaleString()}</TableCell>
                                          <TableCell>N/A</TableCell> {/* Orders per product not tracked yet */}
                                          <TableCell>{getProductConversion(product).toFixed(1)}%</TableCell>
                                          <TableCell>N/A</TableCell> {/* Sales per product not tracked yet */}
