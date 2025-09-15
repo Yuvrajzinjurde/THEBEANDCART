@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -26,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import useUserStore from "@/stores/user-store";
 
 const secondaryNavItems = [
     { href: "#", icon: Gift, label: "Gifts" },
@@ -43,6 +45,11 @@ export default function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const [showSecondaryNav, setShowSecondaryNav] = useState(false);
+  const { cart, wishlist } = useUserStore();
+
+  const cartCount = cart?.totalItems ?? 0;
+  const wishlistCount = wishlist?.totalItems ?? 0;
+
 
   useEffect(() => {
     // This effect runs only on the client, after initial render and hydration.
@@ -73,8 +80,9 @@ export default function Header() {
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
         <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
-            <Link href="#">
+            <Link href="#" className="relative">
                 <Heart className="h-5 w-5" />
+                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
             </Link>
         </Button>
         <Button variant="ghost" size="icon" aria-label="Notifications" asChild>
@@ -84,8 +92,9 @@ export default function Header() {
         </Button>
         <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href="#">
+            <Link href="#" className="relative">
                 <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
             </Link>
         </Button>
     </div>

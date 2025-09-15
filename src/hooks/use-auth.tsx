@@ -1,9 +1,11 @@
 
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import useUserStore from '@/stores/user-store';
 
 interface User {
   userId: string;
@@ -30,39 +32,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
   const params = useParams();
   const brandName = params.brand as string || 'reeva';
+  const { setCart, setWishlist } = useUserStore();
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setUser(null);
     setToken(null);
+    setCart(null);
+    setWishlist(null);
     const isAuthPage = /login|signup/.test(pathname);
     if (!isAuthPage) {
       router.push(`/${brandName}/login`);
     }
-  }, [router, pathname, brandName]);
+  }, [router, pathname, brandName, setCart, setWishlist]);
 
   useEffect(() => {
-    setLoading(true);
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      try {
-        const decoded = jwtDecode<User>(storedToken);
-        if (decoded.exp * 1000 < Date.now()) {
+    const initializeAuth = async () => {
+      setLoading(true);
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        try {
+          const decoded = jwtDecode<User>(storedToken);
+          if (decoded.exp * 1000 < Date.now()) {
+            logout();
+          } else {
+            setUser(decoded);
+            setToken(storedToken);
+            // Fetch cart and wishlist
+            const [cartRes, wishlistRes] = await Promise.all([
+              fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
+              fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
+            ]);
+            
+            if (cartRes.ok) {
+              const { cart } = await cartRes.json();
+              setCart(cart);
+            }
+            if (wishlistRes.ok) {
+              const { wishlist } = await wishlistRes.json();
+              setWishlist(wishlist);
+            }
+
+          }
+        } catch (error) {
+          console.error("Invalid token:", error);
           logout();
-        } else {
-          setUser(decoded);
-          setToken(storedToken);
         }
-      } catch (error) {
-        console.error("Invalid token:", error);
-        logout();
+      } else {
+          setUser(null);
+          setToken(null);
+          setCart(null);
+          setWishlist(null);
       }
-    } else {
-        setUser(null);
-        setToken(null);
+      setLoading(false);
     }
-    setLoading(false);
-  }, [logout, pathname]); // Rerun on path change
+    initializeAuth();
+  }, [logout, pathname, setCart, setWishlist]); // Rerun on path change
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>

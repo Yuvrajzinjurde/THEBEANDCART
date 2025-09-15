@@ -1,4 +1,5 @@
 
+
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 export interface ICartItem {
@@ -23,6 +24,16 @@ const CartSchema: Schema<ICart> = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
   items: [CartItemSchema],
 }, { timestamps: true });
+
+
+CartSchema.virtual('totalItems').get(function() {
+    return this.items.reduce((total: number, item: ICartItem) => total + item.quantity, 0);
+});
+
+// Ensure virtuals are included
+CartSchema.set('toObject', { virtuals: true });
+CartSchema.set('toJSON', { virtuals: true });
+
 
 const Cart: Model<ICart> = mongoose.models.Cart || mongoose.model<ICart>('Cart', CartSchema);
 

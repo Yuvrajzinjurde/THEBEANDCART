@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -19,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/use-auth";
+import useUserStore from "@/stores/user-store";
 
 interface BrandProductCardProps {
   product: IProduct;
@@ -28,6 +30,7 @@ interface BrandProductCardProps {
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
   const { user, token } = useAuth();
+  const { setWishlist, setCart } = useUserStore();
   const plugin = useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true, playOnInit: false })
   );
@@ -40,7 +43,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         router.push(`/${product.storefront}/login`);
         return;
     }
-    toast.info("Adding to wishlist...");
+    toast.info("Updating wishlist...");
     try {
         const response = await fetch('/api/wishlist', {
             method: 'POST',
@@ -52,9 +55,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        setWishlist(result.wishlist);
         toast.success(result.message);
     } catch (error: any) {
-        toast.error(error.message || "Failed to add to wishlist.");
+        toast.error(error.message || "Failed to update wishlist.");
     }
   };
 
@@ -78,6 +82,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        setCart(result.cart);
         toast.success("Added to cart!");
     } catch (error: any) {
         toast.error(error.message || "Failed to add to cart.");

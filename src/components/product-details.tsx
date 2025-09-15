@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -21,6 +22,7 @@ import useEmblaCarousel, { type EmblaCarouselType } from 'embla-carousel-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './ui/breadcrumb';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'react-toastify';
+import useUserStore from '@/stores/user-store';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -51,6 +53,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
 export default function ProductDetails({ product: initialProduct, variants }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
+  const { setCart, setWishlist } = useUserStore();
   const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -164,6 +167,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        setCart(result.cart);
         toast.success("Added to cart!");
     } catch (error: any) {
         toast.error(error.message || "Failed to add to cart.");
@@ -176,7 +180,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
         router.push(`/${product.storefront}/login`);
         return;
     }
-    toast.info("Adding to wishlist...");
+    toast.info("Updating wishlist...");
     try {
         const response = await fetch('/api/wishlist', {
             method: 'POST',
@@ -188,9 +192,10 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        setWishlist(result.wishlist);
         toast.success(result.message);
     } catch (error: any) {
-        toast.error(error.message || "Failed to add to wishlist.");
+        toast.error(error.message || "Failed to update wishlist.");
     }
   };
 
@@ -202,7 +207,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
         <div className="flex flex-col gap-4">
             <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
               {/* Vertical Thumbnails */}
-              <div className="flex flex-col items-center justify-start">
+              <div className="flex flex-col items-center">
                   <Button
                       variant="ghost" size="icon"
                       className="h-8 w-8 flex-shrink-0"
