@@ -17,7 +17,7 @@ import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import useBrandStore from '@/stores/brand-store';
-import { ProductFormSchema, type ProductFormValues } from '@/lib/product-schema';
+import { ProductFormSchemaForClient, type ProductFormValues } from '@/lib/product-schema';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import type { IBrand } from '@/models/brand.model';
@@ -76,6 +76,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
+    images: existingProduct.images.map(img => ({value: img})),
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
@@ -94,7 +95,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
 
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(ProductFormSchema),
+    resolver: zodResolver(ProductFormSchemaForClient),
     defaultValues,
     mode: 'onChange',
   });
@@ -485,5 +486,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
