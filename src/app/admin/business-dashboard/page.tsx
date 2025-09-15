@@ -7,7 +7,7 @@ import { getDashboardStats, type DashboardStats } from "../dashboard/actions";
 import { Loader } from "@/components/ui/loader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format, subDays } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react';
@@ -128,9 +128,9 @@ function BusinessDashboardPage() {
           </TableCell>
           <TableCell>{(product.views || 0).toLocaleString()}</TableCell>
           <TableCell>{(product.clicks || 0).toLocaleString()}</TableCell>
-          <TableCell>N/A</TableCell> {/* Orders per product not tracked yet */}
+          <TableCell>N/A</TableCell>
           <TableCell>{getProductConversion(product).toFixed(1)}%</TableCell>
-          <TableCell>N/A</TableCell> {/* Sales per product not tracked yet */}
+          <TableCell>N/A</TableCell>
           <TableCell>0</TableCell>
           <TableCell>
               <Button variant="outline" size="sm">View</Button>
@@ -247,7 +247,7 @@ function BusinessDashboardPage() {
                                     <TableHead>Recommendations</TableHead>
                                 </TableRow>
                             </TableHeader>
-                             <TableBody>
+                            <TableBody>
                                 {productRows.length > 0 ? (
                                     productRows
                                 ) : (
@@ -269,5 +269,3 @@ function BusinessDashboardPage() {
 }
 
 export default BusinessDashboardPage;
-
-    
