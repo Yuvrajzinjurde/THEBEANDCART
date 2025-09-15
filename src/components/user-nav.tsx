@@ -28,11 +28,9 @@ export function UserNav({ user, loading, brandName, isCollapsed = false }: UserN
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center h-10 w-10">
-            <Avatar className="h-9 w-9">
-                <AvatarFallback>...</AvatarFallback>
-            </Avatar>
-        </div>
+        <Avatar className="h-9 w-9">
+            <AvatarFallback>...</AvatarFallback>
+        </Avatar>
     );
   }
 
