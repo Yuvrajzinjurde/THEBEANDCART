@@ -95,9 +95,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <p className="text-base font-bold text-foreground">
                 ₹{price.toFixed(2)}
             </p>
-            {hasDiscount && (
+            {hasDiscount && product.mrp && (
                 <p className="text-sm font-medium text-muted-foreground line-through">
-                    ₹{product.mrp!.toFixed(2)}
+                    ₹{product.mrp.toFixed(2)}
                 </p>
             )}
           </div>

@@ -11,9 +11,9 @@ export async function GET(req: Request) {
     await dbConnect();
     
     const { searchParams } = new URL(req.url);
-    const brand = searchParams.get('brand');
+    const storefront = searchParams.get('storefront');
 
-    const query = brand ? { brand } : {};
+    const query = storefront ? { storefront } : {};
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first
