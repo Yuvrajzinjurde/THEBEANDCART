@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
-import { CreditCard, LogOut, User as UserIcon, Settings, MoreHorizontal } from "lucide-react";
+import { CreditCard, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
 
 interface UserNavProps {
     user: User | null;
@@ -27,11 +28,7 @@ export function UserNav({ user, loading, brandName, isCollapsed = false }: UserN
   const { logout } = useAuth();
 
   if (loading) {
-    return (
-        <Avatar className="h-9 w-9">
-            <AvatarFallback>...</AvatarFallback>
-        </Avatar>
-    );
+    return <Skeleton className="h-9 w-9 rounded-full" />;
   }
 
   if (!user) {
