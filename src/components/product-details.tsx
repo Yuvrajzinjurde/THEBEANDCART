@@ -43,7 +43,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const [mainCarouselApi, setMainCarouselApi] = useState<EmblaCarouselType | undefined>();
   const [thumbCarouselApi, setThumbCarouselApi] = useState<EmblaCarouselType | undefined>();
 
-  const [mainCarouselRef, mainApi] = useEmblaCarousel({ loop: true, watchDrag: false });
+  const [mainCarouselRef, mainApi] = useEmblaCarousel({ loop: true });
   const [thumbCarouselRef, thumbApi] = useEmblaCarousel({
     containScroll: 'keepSnaps',
     dragFree: true,
@@ -93,8 +93,8 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-      {/* Image Gallery */}
-      <div className="grid gap-4">
+      {/* Image Gallery Column */}
+      <div className="flex flex-col gap-4">
         {/* Main Image Viewer */}
         <div className="relative overflow-hidden rounded-lg aspect-square">
             <div className="overflow-hidden h-full" ref={mainCarouselRef}>
@@ -160,6 +160,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             </div>
         </div>
 
+        {/* Actions */}
         <div className="flex flex-col gap-4 mt-4">
             <div className="flex items-center gap-4">
                 <h3 className="text-lg font-semibold">Quantity</h3>
