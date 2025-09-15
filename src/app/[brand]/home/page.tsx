@@ -22,6 +22,19 @@ import { Loader } from '@/components/ui/loader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
+const ProductGridSkeleton = () => (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8 mt-8">
+        {Array.from({ length: 10 }).map((_, index) => (
+            <div key={index} className="space-y-2">
+                <Skeleton className="aspect-square w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+            </div>
+        ))}
+    </div>
+);
+
+
 export default function BrandHomePage() {
   const { user, loading: authLoading } = useAuth();
   const params = useParams();
@@ -30,6 +43,7 @@ export default function BrandHomePage() {
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -44,26 +58,35 @@ export default function BrandHomePage() {
         if (!brandName) return;
         setLoading(true);
         try {
-            // Fetch brand details
             const brandResponse = await fetch(`/api/brands/${brandName}`);
             if (!brandResponse.ok) throw new Error('Brand not found');
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
-
-            // Fetch products for the brand
-            const productResponse = await fetch(`/api/products?storefront=${brandName}`);
-            if (!productResponse.ok) throw new Error('Failed to fetch products');
-            const productData = await productResponse.json();
-            setProducts(productData.products);
-
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
     }
-
     fetchBrandData();
+  }, [brandName]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+        if (!brandName) return;
+        setProductsLoading(true);
+        try {
+            const productResponse = await fetch(`/api/products?storefront=${brandName}`);
+            if (!productResponse.ok) throw new Error('Failed to fetch products');
+            const productData = await productResponse.json();
+            setProducts(productData.products);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setProductsLoading(false);
+        }
+    }
+    fetchProducts();
   }, [brandName]);
 
 
@@ -71,15 +94,15 @@ export default function BrandHomePage() {
     try {
       await fetch('/api/seed', { method: 'POST' });
       alert('Database seeded! Refresh the page to see new products.');
-      // Optionally re-fetch products
-      setLoading(true);
+      // Re-fetch products
+      setProductsLoading(true);
        const response = await fetch(`/api/products?storefront=${brandName}`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
         setProducts(data.products);
-        setLoading(false);
+        setProductsLoading(false);
 
     } catch (error) {
       alert('Failed to seed database.');
@@ -124,7 +147,7 @@ export default function BrandHomePage() {
   }, [products]);
 
 
-  // While checking auth or loading products, show a loader.
+  // While checking auth or loading brand show a loader.
   if (authLoading || loading) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center">
@@ -190,11 +213,15 @@ export default function BrandHomePage() {
             onSortChange={setSortOption}
           />
         
+        {productsLoading ? (
+            <ProductGridSkeleton />
+        ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8 mt-8">
             {filteredAndSortedProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>
+        )}
       </div>
       {user?.roles.includes('admin') && (
         <div className="fixed bottom-4 right-4 z-50">
