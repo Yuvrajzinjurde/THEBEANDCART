@@ -5,8 +5,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Package, Users, IndianRupee, ShoppingCart, AlertCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SalesByCategory } from "@/components/admin/sales-by-category";
-import { RevenueStatistics } from "@/components/admin/revenue-statistics";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
 import { Loader } from "@/components/ui/loader";
