@@ -88,8 +88,10 @@ function BusinessDashboardPage() {
     );
   }
 
-  const { totalInventoryValue, totalProducts, totalUsers, totalRevenue, totalLoss, salesByCategoryData, percentageChanges } = data;
-  const totalClicks = Math.floor(totalUsers * 3.5);
+  const { totalProducts, totalUsers, totalRevenue, percentageChanges } = data;
+  // NOTE: Clicks and Conversion Rate are currently placeholders as we don't track this data yet.
+  const totalClicks = Math.floor(totalProducts * 1.5); 
+  const conversionRate = totalUsers > 0 ? (totalUsers / totalClicks) * 100 : 0;
 
   const StatCard = ({ title, value, change, info }: { title: string, value: string, change?: number, info?: string }) => (
     <div className="p-4 bg-background rounded-lg flex-1 min-w-[150px]">
@@ -162,10 +164,10 @@ function BusinessDashboardPage() {
             <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
                 <StatCard title="Total Views" value={totalProducts.toLocaleString()} change={percentageChanges.inventory} />
                 <StatCard title="Total Clicks" value={totalClicks.toLocaleString()} change={-43.3} />
-                <StatCard title="Total Orders" value={totalUsers.toLocaleString()} />
-                <StatCard title="Conversion Rate" value={`${(totalUsers / totalClicks * 100).toFixed(1)}%`} change={5.1} info="Conversion rate from clicks to orders"/>
+                <StatCard title="Total Orders" value={totalUsers.toLocaleString()} change={percentageChanges.users}/>
+                <StatCard title="Conversion Rate" value={`${conversionRate.toFixed(1)}%`} change={5.1} info="Conversion rate from clicks to orders"/>
                 <StatCard title="Total Sales" value={`₹${totalRevenue.toLocaleString()}`} change={percentageChanges.revenue} />
-                <StatCard title="Return Percentage" value="0" />
+                <StatCard title="Return Percentage" value="0%" />
             </div>
         </CardContent>
       </Card>
@@ -250,3 +252,5 @@ function BusinessDashboardPage() {
 }
 
 export default BusinessDashboardPage;
+
+    
