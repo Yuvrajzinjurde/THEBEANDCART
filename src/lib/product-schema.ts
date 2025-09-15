@@ -22,7 +22,10 @@ export const ProductFormSchema = z.object({
 
   // Used for products with multiple variations (e.g., size, color)
   variants: z.array(VariantSchema),
-}).refine(data => !data.mrp || data.sellingPrice <= data.mrp, {
+}).refine(data => {
+    if (data.mrp === undefined || data.mrp === null) return true;
+    return data.sellingPrice <= data.mrp;
+}, {
   message: "Selling price cannot be greater than MRP",
   path: ["sellingPrice"],
 });

@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { cn } from '@/lib/utils';
 import type { IBrand } from '@/models/brand.model';
 import { getSEODescription } from '@/ai/flows/seo-description-flow';
+import { autofillProductDetails } from '@/ai/flows/autofill-product-flow';
 
 interface ProductFormProps {
   mode: 'create' | 'edit';
@@ -66,6 +67,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isAutofilling, setIsAutofilling] = React.useState(false);
   
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
 
@@ -138,6 +140,30 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
           setIsGenerating(false);
       }
   };
+  
+  const handleAutofill = async () => {
+    if (!productName) {
+      toast.warn("Please enter a product name to autofill the form.");
+      return;
+    }
+    setIsAutofilling(true);
+    toast.info("Autofilling form with AI...");
+    try {
+      const result = await autofillProductDetails({ productName });
+      form.setValue('description', result.description, { shouldValidate: true });
+      form.setValue('mrp', result.mrp, { shouldValidate: true });
+      form.setValue('sellingPrice', result.sellingPrice, { shouldValidate: true });
+      form.setValue('category', result.category, { shouldValidate: true });
+      form.setValue('brand', result.brand, { shouldValidate: true });
+      form.setValue('stock', result.stock, { shouldValidate: true });
+      toast.success("Form autofilled successfully!");
+    } catch (error) {
+      toast.error("Failed to autofill form.");
+      console.error(error);
+    } finally {
+      setIsAutofilling(false);
+    }
+  };
 
 
   async function onSubmit(data: ProductFormValues) {
@@ -182,7 +208,13 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Product Name</FormLabel>
-                                <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
+                                <div className="flex gap-2">
+                                  <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
+                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !productName}>
+                                    {isAutofilling ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
+                                    Autofill
+                                  </Button>
+                                </div>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -284,7 +316,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormField control={form.control} name={`variants.${index}.stock`} render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Stock</FormLabel>
-                                        <FormControl><Input type="number" placeholder="0" {...field} /></FormControl>
+                                        <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl>
                                     </FormItem>
                                 )} />
                             </div>
@@ -297,7 +329,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormField control={form.control} name="stock" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Stock</FormLabel>
-                                    <FormControl><Input type="number" placeholder="Enter stock quantity" {...field} /></FormControl>
+                                    <FormControl><Input type="number" placeholder="Enter stock quantity" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
                                     <FormDescription>Enter stock for this product if it has no variants.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -315,7 +347,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <FormField control={form.control} name="storefront" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Storefront</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a storefront" />
@@ -342,7 +374,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <FormField control={form.control} name="category" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a category" />
