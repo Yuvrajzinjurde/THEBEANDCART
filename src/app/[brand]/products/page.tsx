@@ -85,7 +85,7 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
             <ProductFilters products={products} />
             <div className="flex-1">
-                 <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-4 mb-6">
+                 <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-4">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
@@ -132,7 +132,7 @@ export default function ProductsPage() {
                 </div>
 
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 pt-6">
                         {products.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
