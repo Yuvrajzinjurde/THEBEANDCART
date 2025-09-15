@@ -17,6 +17,7 @@ import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import useBrandStore from '@/stores/brand-store';
 import { ProductFormSchemaForClient, type ProductFormValues } from '@/lib/product-schema';
+import { themeColors } from '@/lib/brand-schema';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import type { IBrand } from '@/models/brand.model';
@@ -25,6 +26,8 @@ import { autofillProductDetails } from '@/ai/flows/autofill-product-flow';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { ProductCard } from '../product-card';
 
 
 const CATEGORIES = [
@@ -96,6 +99,11 @@ const SortableImage = ({ id, url, onRemove }: { id: any; url: string; onRemove: 
 };
 
 
+interface ProductFormProps {
+    mode: 'create' | 'edit';
+    existingProduct?: IProduct;
+}
+
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
   const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
@@ -104,6 +112,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const [isAutofilling, setIsAutofilling] = React.useState(false);
   const [aiError, setAiError] = React.useState<string | null>(null);
   
+  const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+  const [previewProduct, setPreviewProduct] = React.useState<Partial<IProduct> | null>(null);
+
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
 
 
@@ -249,6 +260,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       }
 
       toast.success(`Product ${mode === 'create' ? 'created' : 'updated'} successfully!`);
+      setIsPreviewOpen(false);
       router.push('/admin/inventory');
       router.refresh();
 
@@ -275,6 +287,53 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         moveImage(oldIndex, newIndex);
     }
   };
+
+  const handlePreview = async () => {
+    const isValid = await form.trigger();
+    if (isValid) {
+      const formData = form.getValues();
+      const mockProduct: Partial<IProduct> = {
+        _id: 'preview-id',
+        name: formData.name,
+        category: formData.category,
+        sellingPrice: Number(formData.sellingPrice),
+        mrp: Number(formData.mrp) || undefined,
+        images: formData.images.map(img => img.value),
+        rating: 4.5, // Use a default rating for preview
+      };
+      setPreviewProduct(mockProduct);
+      setIsPreviewOpen(true);
+    } else {
+        toast.error("Please fill out all required fields before previewing.");
+    }
+  };
+
+  const selectedStorefront = form.watch("storefront");
+  const activeTheme = themeColors.find(t => t.name.toLowerCase().includes(selectedStorefront.toLowerCase()));
+
+  const previewStyle = activeTheme ? {
+      '--background': activeTheme.background,
+      '--foreground': '222.2 84% 4.9%', // Assuming dark text on light bg
+      '--card': activeTheme.background,
+      '--card-foreground': '222.2 84% 4.9%',
+      '--popover': activeTheme.background,
+      '--popover-foreground': '222.2 84% 4.9%',
+      '--primary': activeTheme.primary,
+      '--primary-foreground': '210 40% 98%',
+      '--secondary': '210 40% 96.1%',
+      '--secondary-foreground': '222.2 47.4% 11.2%',
+      '--muted': '210 40% 96.1%',
+      '--muted-foreground': '215.4 16.3% 46.9%',
+      '--accent': activeTheme.accent,
+      '--accent-foreground': '222.2 47.4% 11.2%',
+      '--destructive': '0 84.2% 60.2%',
+      '--destructive-foreground': '210 40% 98%',
+      '--border': '214.3 31.8% 91.4%',
+      '--input': '214.3 31.8% 91.4%',
+      '--ring': '222.2 84% 4.9%',
+      '--radius': '0.5rem',
+  } as React.CSSProperties : {};
+
 
   return (
     <Form {...form}>
@@ -367,7 +426,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         <SortableContext items={imageFields} strategy={rectSortingStrategy}>
                                             <div className="grid grid-cols-4 gap-4 mt-4">
                                                 {imageFields.map((field, index) => (
-                                                    <SortableImage key={field.id} id={field.id} url={field.value} onRemove={() => removeImage(index)} />
+                                                   field.value && <SortableImage key={field.id} id={field.id} url={field.value} onRemove={() => removeImage(index)} />
                                                 ))}
                                             </div>
                                         </SortableContext>
@@ -376,43 +435,45 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             </FormItem>
                          )} />
 
-                        <FormItem>
-                            <FormLabel>Videos</FormLabel>
-                            <FormControl>
-                                <div className="w-full">
-                                    <Input 
-                                        id="video-upload"
-                                        type="file" 
-                                        accept="video/mp4,video/webm,audio/mp3"
-                                        className="hidden"
-                                        multiple
-                                        onChange={(e) => handleFileChange(e, appendVideo)}
-                                    />
-                                    <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                            <p className="text-xs text-muted-foreground">MP4, WEBM, or MP3</p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                             {videoFields.length > 0 && (
-                                <div className="grid grid-cols-4 gap-4 mt-4">
-                                    {videoFields.map((field, index) => (
-                                        <div key={field.id} className="relative aspect-square">
-                                            {field.value && (
-                                                <video src={field.value} controls className="w-full h-full object-cover rounded-md bg-muted" />
-                                            )}
-                                            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVideo(index)}>
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </FormItem>
+                        <FormField control={form.control} name="videos" render={() => (
+                            <FormItem>
+                                <FormLabel>Videos</FormLabel>
+                                <FormControl>
+                                    <div className="w-full">
+                                        <Input 
+                                            id="video-upload"
+                                            type="file" 
+                                            accept="video/mp4,video/webm,audio/mp3"
+                                            className="hidden"
+                                            multiple
+                                            onChange={(e) => handleFileChange(e, appendVideo)}
+                                        />
+                                        <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                <p className="text-xs text-muted-foreground">MP4, WEBM, or MP3</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                                {videoFields.length > 0 && (
+                                    <div className="grid grid-cols-4 gap-4 mt-4">
+                                        {videoFields.map((field, index) => (
+                                            <div key={field.id} className="relative aspect-square">
+                                                {field.value && (
+                                                    <video src={field.value} controls className="w-full h-full object-cover rounded-md bg-muted" />
+                                                )}
+                                                <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVideo(index)}>
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </FormItem>
+                         )} />
                     </CardContent>
                 </Card>
 
@@ -550,12 +611,39 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
         <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader className="mr-2" />}
-              {mode === 'create' ? 'Create Product' : 'Save Changes'}
-            </Button>
+            
+            <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                <Button type="button" onClick={handlePreview} disabled={isSubmitting}>
+                    {isSubmitting && <Loader className="mr-2" />}
+                    {mode === 'create' ? 'Create Product' : 'Save Changes'}
+                </Button>
+                <AlertDialogContent className="max-w-2xl" style={previewStyle}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Product Preview</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This is how your product card will appear on the storefront.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    
+                    <div className="flex justify-center p-8 bg-background rounded-lg">
+                        {previewProduct && (
+                            <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
+                        )}
+                    </div>
+                    
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Keep Editing</AlertDialogCancel>
+                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                            {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
+                            Confirm & Create
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
       </form>
     </Form>
   );
 }
+
+    
