@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 const secondaryNavItems = [
     { href: "#", icon: Gift, label: "Gifts" },
@@ -40,12 +41,6 @@ export default function Header() {
   const brandName = (params.brand as string) || 'reeva';
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
 
   useEffect(() => {
     async function fetchBrandLogo() {
@@ -151,21 +146,19 @@ export default function Header() {
       </div>
       
       {/* Secondary Navigation */}
-      {isMounted && isHomePage && (
-        <>
-            <Separator />
-            <div className="hidden md:flex justify-center">
-                <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
-                    {secondaryNavItems.map((item) => (
-                        <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                            <item.icon className="h-4 w-4" />
-                            {item.label}
-                        </Link>
-                    ))}
-                </nav>
-            </div>
-        </>
-      )}
+      <div className={cn(!isHomePage && "hidden")}>
+          <Separator />
+          <div className="hidden md:flex justify-center">
+              <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
+                  {secondaryNavItems.map((item) => (
+                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                      </Link>
+                  ))}
+              </nav>
+          </div>
+      </div>
     </header>
   );
 }
