@@ -79,55 +79,53 @@ export const seedDatabase = async () => {
     }
 
 
-    // --- Update Products with brand 'reeva' ---
-    const productsToUpdate = await Product.find({ brand: 'reeva' });
-    let updatedCount = 0;
-
-    for (const product of productsToUpdate) {
-      const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
-      const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.5)).toFixed(2)); // 0-50% discount
-      
-      product.mrp = mrp;
-      product.sellingPrice = sellingPrice;
-      
-      await product.save();
-      updatedCount++;
-    }
+    // --- Check for existing products for the 'reeva' storefront ---
+    const existingProducts = await Product.find({ storefront: 'reeva' });
     
-    if (updatedCount > 0) {
-      console.log(`Updated ${updatedCount} products with new MRP and selling prices.`);
+    if (existingProducts.length > 0) {
+        // --- Update Existing Products ---
+        let updatedCount = 0;
+        for (const product of existingProducts) {
+            const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
+            const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.5)).toFixed(2)); // 0-50% discount
+            
+            product.mrp = mrp;
+            product.sellingPrice = sellingPrice;
+            
+            await product.save();
+            updatedCount++;
+        }
+        console.log(`Updated ${updatedCount} products for storefront 'reeva' with new MRP and selling prices.`);
     } else {
-      console.log("No products found for brand 'reeva' to update. Seeding new products instead.");
-      // --- Create Products if none were updated ---
-      await Product.deleteMany({ brand: 'reeva' }); // Clear only reeva products before seeding new ones
-      const products = [];
-      for (let i = 1; i <= 50; i++) {
-        const category = CATEGORIES[i % CATEGORIES.length];
-        const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
-        const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.5)).toFixed(2)); // 0-50% discount
+        // --- Create New Products if none exist ---
+        console.log("No products found for storefront 'reeva'. Seeding new products.");
+        const products = [];
+        for (let i = 1; i <= 50; i++) {
+            const category = CATEGORIES[i % CATEGORIES.length];
+            const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
+            const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
 
-        products.push({
-          name: `${category} Product ${i}`,
-          description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
-          mrp: mrp,
-          sellingPrice: sellingPrice,
-          category: category,
-          brand: 'reeva', // Set all products to the 'reeva' brand
-          storefront: 'reeva', // Set all products to the 'reeva' storefront
-          images: [
-            `https://picsum.photos/seed/${i}/600/600`,
-            `https://picsum.photos/seed/${i}_2/600/600`,
-            `https://picsum.photos/seed/${i}_3/600/600`,
-            `https://picsum.photos/seed/${i}_4/600/600`,
-          ],
-          stock: Math.floor(Math.random() * 100),
-          rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
-        });
-      }
-      await Product.insertMany(products);
-      console.log(`Created ${products.length} products for brand 'reeva'.`);
+            products.push({
+                name: `${category} Product ${i}`,
+                description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
+                mrp: mrp,
+                sellingPrice: sellingPrice,
+                category: category,
+                brand: 'Reeva Originals', // The product's actual brand
+                storefront: 'reeva', // The storefront it belongs to
+                images: [
+                    `https://picsum.photos/seed/${i}/600/600`,
+                    `https://picsum.photos/seed/${i}_2/600/600`,
+                    `https://picsum.photos/seed/${i}_3/600/600`,
+                    `https://picsum.photos/seed/${i}_4/600/600`,
+                ],
+                stock: Math.floor(Math.random() * 100),
+                rating: parseFloat((Math.random() * 4 + 1).toFixed(1)), // Rating between 1.0 and 5.0
+            });
+        }
+        await Product.insertMany(products);
+        console.log(`Created ${products.length} products for storefront 'reeva'.`);
     }
-
 
     return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
