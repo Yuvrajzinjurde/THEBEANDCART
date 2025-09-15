@@ -8,12 +8,38 @@ interface IBanner {
     imageHint: string;
 }
 
+interface IOffer {
+    title: string;
+    description: string;
+    code: string;
+}
+
+interface IReview {
+    customerName: string;
+    rating: number;
+    reviewText: string;
+    customerAvatarUrl: string;
+}
+
+interface IPromoBanner {
+    title: string;
+    description: string;
+    imageUrl: string;
+    imageHint: string;
+    buttonText: string;
+    buttonLink: string;
+}
+
+
 export interface IBrand extends Document {
   displayName: string;
   permanentName: string;
   logoUrl: string;
   banners: IBanner[];
   themeName: string;
+  offers?: IOffer[];
+  reviews?: IReview[];
+  promoBanner?: IPromoBanner;
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -23,6 +49,28 @@ const BannerSchema: Schema<IBanner> = new Schema({
     imageHint: { type: String, required: true },
 }, { _id: false });
 
+const OfferSchema: Schema<IOffer> = new Schema({
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    code: { type: String, required: true },
+}, { _id: false });
+
+const ReviewSchema: Schema<IReview> = new Schema({
+    customerName: { type: String, required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    reviewText: { type: String, required: true },
+    customerAvatarUrl: { type: String, required: true },
+}, { _id: false });
+
+const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    imageUrl: { type: String, required: true },
+    imageHint: { type: String, required: true },
+    buttonText: { type: String, required: true },
+    buttonLink: { type: String, required: true },
+}, { _id: false });
+
 
 const BrandSchema: Schema<IBrand> = new Schema({
   displayName: { type: String, required: true },
@@ -30,6 +78,9 @@ const BrandSchema: Schema<IBrand> = new Schema({
   logoUrl: { type: String, required: true },
   banners: [BannerSchema],
   themeName: { type: String, required: true },
+  offers: { type: [OfferSchema], required: false },
+  reviews: { type: [ReviewSchema], required: false },
+  promoBanner: { type: PromoBannerSchema, required: false },
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);

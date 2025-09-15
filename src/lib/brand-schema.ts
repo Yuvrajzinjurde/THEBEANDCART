@@ -8,6 +8,29 @@ export const bannerSchema = z.object({
   imageHint: z.string().min(1, "Image hint is required"),
 });
 
+const offerSchema = z.object({
+  title: z.string().min(1, "Offer title is required"),
+  description: z.string().min(1, "Offer description is required"),
+  code: z.string().min(1, "Offer code is required"),
+});
+
+const reviewSchema = z.object({
+  customerName: z.string().min(1, "Customer name is required"),
+  rating: z.coerce.number().min(1).max(5, "Rating must be between 1 and 5"),
+  reviewText: z.string().min(1, "Review text is required"),
+  customerAvatarUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Avatar is required"),
+});
+
+const promoBannerSchema = z.object({
+  title: z.string().min(1, "Promo banner title is required"),
+  description: z.string().min(1, "Promo banner description is required"),
+  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
+  imageHint: z.string().min(1, "Image hint is required"),
+  buttonText: z.string().min(1, "Button text is required"),
+  buttonLink: z.string().url("Must be a valid URL").min(1, "Button link is required"),
+});
+
+
 export const themeColors = [
     { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
     { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
@@ -27,6 +50,9 @@ export const BrandFormSchema = z.object({
   logoUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Logo is required"),
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
   themeName: z.string({ required_error: "Please select a theme." }),
+  offers: z.array(offerSchema).optional(),
+  reviews: z.array(reviewSchema).optional(),
+  promoBanner: promoBannerSchema.optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;

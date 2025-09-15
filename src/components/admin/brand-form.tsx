@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X } from 'lucide-react';
+import { Trash, UploadCloud, X, Star } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
+import { Separator } from '../ui/separator';
 
 interface BrandFormProps {
   mode: 'create' | 'edit';
@@ -38,18 +39,23 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues = existingBrand ? {
+  const defaultValues: Partial<BrandFormValues> = existingBrand ? {
     displayName: existingBrand.displayName,
     permanentName: existingBrand.permanentName,
     logoUrl: existingBrand.logoUrl,
     banners: existingBrand.banners,
     themeName: existingBrand.themeName,
+    offers: existingBrand.offers,
+    reviews: existingBrand.reviews,
+    promoBanner: existingBrand.promoBanner,
   } : {
     displayName: '',
     permanentName: '',
     logoUrl: '',
     banners: [{ title: '', description: '', imageUrl: '', imageHint: '' }],
-    themeName: undefined, // Default to no theme selected
+    themeName: undefined,
+    offers: [],
+    reviews: [],
   };
 
   const form = useForm<BrandFormValues>({
@@ -58,10 +64,21 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     mode: 'onChange', // Validate on change
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
     control: form.control,
     name: 'banners',
   });
+  
+  const { fields: offerFields, append: appendOffer, remove: removeOffer } = useFieldArray({
+    control: form.control,
+    name: 'offers',
+  });
+
+  const { fields: reviewFields, append: appendReview, remove: removeReview } = useFieldArray({
+    control: form.control,
+    name: 'reviews',
+  });
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
     const file = e.target.files?.[0];
@@ -183,11 +200,11 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         
         <Card>
             <CardHeader>
-                <CardTitle>Banners</CardTitle>
-                <CardDescription>Add at least one banner for the homepage. Recommended size: 1600x400px.</CardDescription>
+                <CardTitle>Homepage Banners</CardTitle>
+                <CardDescription>Add at least one banner for the homepage carousel. Recommended size: 1600x400px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 {fields.map((field, index) => (
+                 {bannerFields.map((field, index) => (
                     <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -202,7 +219,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => remove(index)}>Continue</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => removeBanner(index)}>Continue</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -272,7 +289,127 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                         />
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => append({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
+                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Offers</CardTitle>
+                <CardDescription>Add special offers to display on the homepage.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {offerFields.map((field, index) => (
+                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeOffer(index)}>
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                        <FormField control={form.control} name={`offers.${index}.title`} render={({ field }) => (
+                            <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name={`offers.${index}.description`} render={({ field }) => (
+                            <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name={`offers.${index}.code`} render={({ field }) => (
+                            <FormItem><FormLabel>Coupon Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                    </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => appendOffer({ title: '', description: '', code: '' })}>Add Offer</Button>
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Promotional Banner</CardTitle>
+                <CardDescription>A large banner to highlight a special campaign or collection. Recommended size: 1200x600px.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
+                    <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.description" render={({ field }) => (
+                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Image</FormLabel>
+                         <FormControl>
+                           <div className="w-full">
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange)} />
+                                {field.value ? (
+                                    <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
+                                        <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
+                                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
+                                    </div>
+                                ) : (
+                                    <label htmlFor="promo-banner-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                        <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                    </label>
+                                )}
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
+                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                 <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
+                        <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
+                        <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Customer Reviews</CardTitle>
+                <CardDescription>Showcase testimonials from happy customers.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {reviewFields.map((field, index) => (
+                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeReview(index)}>
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                        <div className="flex items-start gap-4">
+                            <FormField control={form.control} name={`reviews.${index}.customerAvatarUrl`} render={({ field }) => (
+                                <FormItem className="flex-shrink-0">
+                                    <FormLabel>Avatar</FormLabel>
+                                    <FormControl>
+                                        <div>
+                                            <Input id={`avatar-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange)} />
+                                            <label htmlFor={`avatar-upload-${index}`} className="cursor-pointer">
+                                                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border overflow-hidden">
+                                                    {field.value ? <Image src={field.value} alt="Avatar" width={64} height={64} className="object-cover" /> : <UploadCloud className="w-6 h-6 text-muted-foreground" />}
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            <div className="flex-grow space-y-4">
+                                <FormField control={form.control} name={`reviews.${index}.customerName`} render={({ field }) => (
+                                    <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                )}/>
+                                 <FormField control={form.control} name={`reviews.${index}.rating`} render={({ field }) => (
+                                    <FormItem><FormLabel>Rating (1-5)</FormLabel><FormControl><Input type="number" min="1" max="5" {...field} /></FormControl><FormMessage /></FormItem>
+                                )}/>
+                            </div>
+                        </div>
+                        <FormField control={form.control} name={`reviews.${index}.reviewText`} render={({ field }) => (
+                            <FormItem><FormLabel>Review Text</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                    </div>
+                ))}
+                 <Button type="button" variant="outline" onClick={() => appendReview({ customerName: '', rating: 5, reviewText: '', customerAvatarUrl: '' })}>Add Review</Button>
             </CardContent>
         </Card>
 

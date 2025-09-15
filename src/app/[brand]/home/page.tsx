@@ -18,12 +18,124 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 type GroupedProducts = {
   [category: string]: IProduct[];
 };
+
+const OffersSection = ({ brand }: { brand: IBrand | null }) => {
+    if (!brand?.offers || brand.offers.length === 0) return null;
+    return (
+        <section className="w-full py-12 md:py-16 bg-muted/50">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Special Offers</h2>
+                    <p className="text-muted-foreground mt-2">Don't miss out on these exclusive deals!</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {brand.offers.map((offer, index) => (
+                        <Card key={index} className="flex flex-col items-center text-center p-6 border-dashed border-2 hover:border-primary hover:shadow-lg transition-all">
+                             <div className="p-4 bg-primary/10 rounded-full mb-4">
+                                <ShoppingBag className="w-8 h-8 text-primary" />
+                            </div>
+                            <CardTitle className="text-xl">{offer.title}</CardTitle>
+                            <p className="text-muted-foreground mt-2 flex-grow">{offer.description}</p>
+                            <div className="mt-4">
+                                <span className="text-sm text-muted-foreground">Use Code:</span>
+                                <Badge variant="secondary" className="text-lg ml-2">{offer.code}</Badge>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const PromoBannerSection = ({ brand }: { brand: IBrand | null }) => {
+    if (!brand?.promoBanner) return null;
+    const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
+    return (
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="relative rounded-lg overflow-hidden h-[400px] bg-secondary text-foreground flex items-center">
+                 <Image
+                    src={imageUrl}
+                    alt={title}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={imageHint}
+                />
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative z-10 p-8 md:p-16 max-w-2xl">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white">{title}</h2>
+                    <p className="text-lg text-white/90 mt-4">{description}</p>
+                    <Button asChild size="lg" className="mt-6">
+                        <Link href={buttonLink}>
+                            {buttonText} <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+    )
+}
+
+const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
+    if (!brand?.reviews || brand.reviews.length === 0) return null;
+    return (
+        <section className="w-full py-12 md:py-16">
+             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">What Our Customers Say</h2>
+                </div>
+                <Carousel
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                    className="w-full"
+                >
+                    <CarouselContent>
+                        {brand.reviews.map((review, index) => (
+                        <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                            <div className="p-1 h-full">
+                                <Card className="p-6 text-center h-full flex flex-col justify-between shadow-sm hover:shadow-xl transition-shadow">
+                                    <div>
+                                        <div className="flex justify-center text-yellow-400 mb-4">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className={cn("w-5 h-5", i < review.rating ? 'fill-current' : 'text-muted-foreground/30')} />
+                                            ))}
+                                        </div>
+                                        <p className="text-muted-foreground italic">&quot;{review.reviewText}&quot;</p>
+                                    </div>
+                                    <div className="mt-6 flex items-center justify-center gap-3">
+                                        <Avatar>
+                                            <AvatarImage src={review.customerAvatarUrl} />
+                                            <AvatarFallback>{review.customerName.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <p className="font-semibold">{review.customerName}</p>
+                                    </div>
+                                </Card>
+                            </div>
+                        </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="hidden sm:flex" />
+                    <CarouselNext className="hidden sm:flex" />
+                </Carousel>
+             </div>
+        </section>
+    );
+};
+
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
@@ -172,7 +284,7 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
 
-      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {Object.keys(groupedProducts).length > 0 ? (
           Object.entries(groupedProducts).map(([category, items]) => (
             <section key={category} className="mb-12">
@@ -198,6 +310,11 @@ export default function BrandHomePage() {
           </div>
         )}
       </div>
+
+        <OffersSection brand={brand} />
+        <PromoBannerSection brand={brand} />
+        <ReviewsSection brand={brand} />
+
     </main>
     <BrandFooter brand={brand} />
     </>
