@@ -44,6 +44,7 @@ export default function BrandHomePage() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -57,13 +58,18 @@ export default function BrandHomePage() {
     async function fetchBrandData() {
         if (!brandName) return;
         setLoading(true);
+        setError(null);
         try {
             const brandResponse = await fetch(`/api/brands/${brandName}`);
-            if (!brandResponse.ok) throw new Error('Brand not found');
+            if (!brandResponse.ok) {
+              const errorData = await brandResponse.json();
+              throw new Error(errorData.message || 'Brand not found');
+            }
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -75,18 +81,25 @@ export default function BrandHomePage() {
     async function fetchProducts() {
         if (!brandName) return;
         setProductsLoading(true);
+        setError(null);
         try {
             const productResponse = await fetch(`/api/products?storefront=${brandName}`);
-            if (!productResponse.ok) throw new Error('Failed to fetch products');
+            if (!productResponse.ok) {
+                const errorData = await productResponse.json();
+                throw new Error(errorData.message || 'Failed to fetch products');
+            }
             const productData = await productResponse.json();
             setProducts(productData.products);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            setError(error.message);
         } finally {
             setProductsLoading(false);
         }
     }
-    fetchProducts();
+    if (brandName) {
+        fetchProducts();
+    }
   }, [brandName]);
 
 
@@ -161,6 +174,7 @@ export default function BrandHomePage() {
           <main className="flex min-h-screen flex-col items-center justify-center">
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">The requested brand does not exist.</p>
+              {error && <p className="mt-4 text-sm text-destructive bg-destructive/10 p-2 rounded-md">{error}</p>}
           </main>
       )
   }
@@ -215,6 +229,11 @@ export default function BrandHomePage() {
         
         {productsLoading ? (
             <ProductGridSkeleton />
+        ) : error ? (
+            <div className="text-center text-destructive py-10">
+                <h2 className="text-xl font-bold">Something went wrong</h2>
+                <p className="mt-2 text-destructive bg-destructive/10 p-2 rounded-md">{error}</p>
+            </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8 mt-8">
             {filteredAndSortedProducts.map((product) => (
