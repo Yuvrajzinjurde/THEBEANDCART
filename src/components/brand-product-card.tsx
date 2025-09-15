@@ -24,7 +24,7 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
-  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: true }));
+  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -60,7 +60,13 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
 
   return (
-    <Link href={`/products/${product._id}`} onClick={handleCardClick} className={cn("group block", className)}>
+    <Link 
+      href={`/products/${product._id}`} 
+      onClick={handleCardClick} 
+      className={cn("group block", className)}
+      onMouseEnter={() => plugin.current.play()}
+      onMouseLeave={() => plugin.current.stop()}
+    >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
          {hasDiscount && (
             <Badge variant="destructive" className="absolute top-2 left-2 z-10 font-bold">
