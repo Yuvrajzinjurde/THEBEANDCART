@@ -68,6 +68,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
+  const [aiError, setAiError] = React.useState<string | null>(null);
   
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
 
@@ -126,9 +127,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const handleAIError = (error: any) => {
     const errorMessage = error.message || '';
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-      toast.error("The AI service is currently overloaded. Please try again later or fill out the form manually.");
+      setAiError("⚠️ AI service is overloaded. Please try again later or fill in the form manually.");
     } else {
-      toast.error("Failed to generate AI content. Please try again.");
+      setAiError("⚠️ Failed to generate AI content. Please try again.");
     }
     console.error(error);
   }
@@ -138,6 +139,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
           toast.warn("Please enter a product name first.");
           return;
       }
+      setAiError(null);
       setIsGenerating(true);
       try {
           const result = await getSEODescription({ productName });
@@ -155,6 +157,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       toast.warn("Please enter a product name to autofill the form.");
       return;
     }
+    setAiError(null);
     setIsAutofilling(true);
     toast.info("Autofilling form with AI...");
     try {
@@ -216,16 +219,21 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Product Name</FormLabel>
-                                <div className="flex gap-2">
-                                  <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
+                                <div className="flex gap-2 items-start">
+                                  <div className="flex-grow">
+                                    <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
+                                    <FormMessage />
+                                  </div>
                                   <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !productName}>
                                     {isAutofilling ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                     Autofill
                                   </Button>
                                 </div>
-                                <FormMessage />
                             </FormItem>
                         )} />
+
+                        {aiError && <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded-md">{aiError}</p>}
+
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
                                  <div className="flex items-center justify-between">
