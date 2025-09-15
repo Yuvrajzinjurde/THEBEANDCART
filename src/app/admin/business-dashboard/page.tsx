@@ -248,8 +248,9 @@ function BusinessDashboardPage() {
                                 </TableRow>
                             </TableHeader>
                              <TableBody>
-                                {productRows}
-                                {productRows.length === 0 && (
+                                {productRows.length > 0 ? (
+                                    productRows
+                                ) : (
                                      <TableRow>
                                          <TableCell colSpan={9} className="h-24 text-center">
                                              No products to display.
