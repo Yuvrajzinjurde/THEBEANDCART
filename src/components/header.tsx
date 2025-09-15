@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home, User, Bell } from "lucide-react";
+import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home as HomeIcon, User, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -10,13 +10,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import type { IBrand } from "@/models/brand.model";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -30,13 +29,14 @@ import { Separator } from "@/components/ui/separator";
 const secondaryNavItems = [
     { href: "#", icon: Gift, label: "Gifts" },
     { href: "#", icon: Shirt, label: "Fashion Finds" },
-    { href: "#", icon: Home, label: "Home Favourites" },
+    { href: "#", icon: HomeIcon, label: "Home Favourites" },
 ];
 
 
 export default function Header() {
   const { user, loading } = useAuth();
   const params = useParams();
+  const pathname = usePathname();
   const brandName = (params.brand as string) || 'reeva';
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -77,6 +77,8 @@ export default function Header() {
         </Button>
     </div>
   );
+  
+  const isHomePage = pathname === `/${brandName}/home`;
 
 
   return (
@@ -143,17 +145,21 @@ export default function Header() {
       </div>
       
       {/* Secondary Navigation */}
-      <Separator />
-      <div className="hidden md:flex justify-center">
-         <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
-            {secondaryNavItems.map((item) => (
-                <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                </Link>
-            ))}
-        </nav>
-      </div>
+      {isHomePage && (
+        <>
+            <Separator />
+            <div className="hidden md:flex justify-center">
+                <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
+                    {secondaryNavItems.map((item) => (
+                        <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                        </Link>
+                    ))}
+                </nav>
+            </div>
+        </>
+      )}
     </header>
   );
 }
