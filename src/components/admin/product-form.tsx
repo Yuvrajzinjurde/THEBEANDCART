@@ -26,7 +26,38 @@ interface ProductFormProps {
   existingProduct?: IProduct; // For edit mode
 }
 
-const CATEGORIES = ['Electronics', 'Apparel', 'Books', 'Home Goods', 'Health', 'Footwear', 'Accessories'];
+const CATEGORIES = [
+    "Men Fashion",
+    "Women Fashion",
+    "Home & Living",
+    "Kids & Toys",
+    "Personal Care & Wellness",
+    "Mobiles & Tablets",
+    "Consumer Electronics",
+    "Appliances",
+    "Automotive",
+    "Beauty & Personal Care",
+    "Home Utility",
+    "Kids",
+    "Grocery",
+    "Women",
+    "Home & Kitchen",
+    "Health & Wellness",
+    "Beauty & Makeup",
+    "Personal Care",
+    "Men'S Grooming",
+    "Craft & Office Supplies",
+    "Sports & Fitness",
+    "Automotive Accessories",
+    "Pet Supplies",
+    "Office Supplies & Stationery",
+    "Industrial & Scientific Products",
+    "Musical Instruments",
+    "Books",
+    "Eye Utility",
+    "Bags, Luggage & Travel Accessories",
+    "Mens Personal Care & Grooming"
+];
 
 
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
@@ -312,3 +343,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
