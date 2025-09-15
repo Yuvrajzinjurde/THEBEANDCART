@@ -17,7 +17,8 @@ export async function GET(req: Request) {
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first
-      .limit(50); // Limit to 50 products
+      .limit(50)
+      .lean(); // *** FIX: Use .lean() to get plain JS objects for serialization
 
     return NextResponse.json({ products }, { status: 200 });
   } catch (error) {
