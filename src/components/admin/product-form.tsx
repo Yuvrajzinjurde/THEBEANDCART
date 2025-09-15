@@ -613,10 +613,15 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
             <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
             
             <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                <Button type="button" onClick={handlePreview} disabled={isSubmitting}>
-                    {isSubmitting && <Loader className="mr-2" />}
-                    {mode === 'create' ? 'Create Product' : 'Save Changes'}
+                 <Button type="button" variant="outline" onClick={handlePreview}>
+                    Preview
                 </Button>
+                <AlertDialogTrigger asChild>
+                    <Button type="button" onClick={handlePreview} disabled={isSubmitting}>
+                        {isSubmitting && <Loader className="mr-2" />}
+                        {mode === 'create' ? 'Create Product' : 'Save Changes'}
+                    </Button>
+                </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-2xl" style={previewStyle}>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Product Preview</AlertDialogTitle>
@@ -634,8 +639,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     <AlertDialogFooter>
                         <AlertDialogCancel>Keep Editing</AlertDialogCancel>
                         <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-                            {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
-                            Confirm & Create
+                            {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                            {isSubmitting ? 'Saving...' : 'Confirm & Create'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -645,5 +650,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
 
     
