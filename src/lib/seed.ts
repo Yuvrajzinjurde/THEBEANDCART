@@ -88,7 +88,7 @@ export const seedDatabase = async () => {
     for (let i = 1; i <= 50; i++) {
       const category = CATEGORIES[i % CATEGORIES.length];
       const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
-      const sellingPrice = parseFloat((mrp - (mrp * (Math.random() * 0.5))).toFixed(2)); // 0-50% discount
+      const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.5)).toFixed(2)); // 0-50% discount
 
       products.push({
         name: `${category} Product ${i}`,
