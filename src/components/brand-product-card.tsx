@@ -24,7 +24,9 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
-  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
+  const plugin = useRef(
+    Autoplay({ delay: 1000, stopOnInteraction: false, playOnInit: false })
+  );
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
