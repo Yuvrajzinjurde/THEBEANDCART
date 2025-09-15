@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle } from 'lucide-react';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -20,6 +20,7 @@ import { ProductFormSchema, type ProductFormValues } from '@/lib/product-schema'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
 import type { IBrand } from '@/models/brand.model';
+import { getSEODescription } from '@/ai/flows/seo-description-flow';
 
 interface ProductFormProps {
   mode: 'create' | 'edit';
@@ -64,6 +65,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
   const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isGenerating, setIsGenerating] = React.useState(false);
   
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
 
@@ -117,6 +119,26 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
 
   const hasVariants = form.watch('variants').length > 0;
+  const productName = form.watch('name');
+
+  const handleGenerateDescription = async () => {
+      if (!productName) {
+          toast.warn("Please enter a product name first.");
+          return;
+      }
+      setIsGenerating(true);
+      try {
+          const result = await getSEODescription({ productName });
+          form.setValue('description', result.description, { shouldValidate: true });
+          toast.success("AI description generated!");
+      } catch (error) {
+          toast.error("Failed to generate description.");
+          console.error(error);
+      } finally {
+          setIsGenerating(false);
+      }
+  };
+
 
   async function onSubmit(data: ProductFormValues) {
     setIsSubmitting(true);
@@ -166,8 +188,28 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
-                                <FormControl><Textarea placeholder="Describe the product..." {...field} /></FormControl>
+                                 <div className="flex items-center justify-between">
+                                    <FormLabel>Description</FormLabel>
+                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGenerating || !productName}>
+                                        {isGenerating ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
+                                        Generate with AI
+                                    </Button>
+                                </div>
+                                <FormControl>
+                                  <div className="rounded-md border border-input">
+                                      <div className="border-b px-3 py-2 flex items-center gap-2">
+                                          <Button type="button" variant="ghost" size="sm">Normal</Button>
+                                          <Button type="button" variant="ghost" size="sm" className="font-bold">B</Button>
+                                          <Button type="button" variant="ghost" size="sm" className="italic">I</Button>
+                                          <Button type="button" variant="ghost" size="sm" className="underline">U</Button>
+                                      </div>
+                                      <Textarea 
+                                          placeholder="Describe the product..." 
+                                          {...field} 
+                                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[150px]"
+                                      />
+                                  </div>
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
