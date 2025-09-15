@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from 'react';
@@ -325,7 +324,7 @@ export default function InventoryPage() {
                                                         {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>₹{product.price.toFixed(2)}</TableCell>
+                                                <TableCell>₹{product.sellingPrice.toFixed(2)}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
                                             </TableRow>
@@ -375,7 +374,7 @@ export default function InventoryPage() {
                                                         Out of Stock
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>₹{product.price.toFixed(2)}</TableCell>
+                                                <TableCell>₹{product.sellingPrice.toFixed(2)}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
                                             </TableRow>
@@ -425,7 +424,7 @@ export default function InventoryPage() {
                                                         Low Stock
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell>₹{product.price.toFixed(2)}</TableCell>
+                                                <TableCell>₹{product.sellingPrice.toFixed(2)}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                                 <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
                                             </TableRow>

@@ -87,10 +87,14 @@ export const seedDatabase = async () => {
     const products = [];
     for (let i = 1; i <= 50; i++) {
       const category = CATEGORIES[i % CATEGORIES.length];
+      const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
+      const sellingPrice = parseFloat((mrp - (mrp * (Math.random() * 0.5))).toFixed(2)); // 0-50% discount
+
       products.push({
         name: `${category} Product ${i}`,
         description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
-        price: parseFloat((Math.random() * 100 + 10).toFixed(2)),
+        mrp: mrp,
+        sellingPrice: sellingPrice,
         category: category,
         brand: 'Reeva', // Set all products to the 'Reeva' brand
         storefront: 'reeva', // Set all products to the 'reeva' storefront

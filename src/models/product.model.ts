@@ -4,7 +4,8 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 export interface IProduct extends Document {
   name: string;
   description: string;
-  price: number;
+  mrp?: number; // Original Price (Maximum Retail Price)
+  sellingPrice: number; // Discounted/Selling Price
   category: string;
   images: string[];
   stock: number;
@@ -22,7 +23,8 @@ export interface IProduct extends Document {
 const ProductSchema: Schema<IProduct> = new Schema({
   name: { type: String, required: true, trim: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true, min: 0 },
+  mrp: { type: Number, min: 0 },
+  sellingPrice: { type: Number, required: true, min: 0 },
   category: { type: String, required: true, index: true },
   images: [{ type: String, required: true }],
   stock: { type: Number, required: true, min: 0, default: 0 },
@@ -35,6 +37,12 @@ const ProductSchema: Schema<IProduct> = new Schema({
   color: { type: String },
   size: { type: String },
 }, { timestamps: true });
+
+// For backwards compatibility, rename 'price' to 'sellingPrice' where it might be used
+ProductSchema.virtual('price').get(function() {
+  return this.sellingPrice;
+});
+
 
 // Compound index to quickly find variants of a style
 ProductSchema.index({ styleId: 1, storefront: 1 });

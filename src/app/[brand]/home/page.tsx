@@ -102,10 +102,10 @@ export default function BrandHomePage() {
     // Sort products
     switch (sortOption) {
       case 'price-asc':
-        result.sort((a, b) => a.price - b.price);
+        result.sort((a, b) => a.sellingPrice - b.sellingPrice);
         break;
       case 'price-desc':
-        result.sort((a, b) => b.price - a.price);
+        result.sort((a, b) => b.sellingPrice - a.sellingPrice);
         break;
       case 'rating-desc':
         result.sort((a, b) => b.rating - a.rating);

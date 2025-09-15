@@ -10,7 +10,8 @@ const VariantSchema = z.object({
 export const ProductFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
-  price: z.coerce.number().min(0.01, "Price must be greater than 0"),
+  mrp: z.coerce.number().min(0, "MRP must be a positive number").optional(),
+  sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
   category: z.string().min(1, "Category is required"),
   brand: z.string().min(1, "Product brand is required"), // The actual brand of the product, e.g., Nike
   storefront: z.string().min(1, "Storefront is required"), // The store this product belongs to, e.g., reeva
@@ -21,6 +22,10 @@ export const ProductFormSchema = z.object({
 
   // Used for products with multiple variations (e.g., size, color)
   variants: z.array(VariantSchema),
+}).refine(data => !data.mrp || data.sellingPrice <= data.mrp, {
+  message: "Selling price cannot be greater than MRP",
+  path: ["sellingPrice"],
 });
+
 
 export type ProductFormValues = z.infer<typeof ProductFormSchema>;

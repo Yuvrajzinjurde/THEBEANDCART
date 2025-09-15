@@ -8,6 +8,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Badge } from "./ui/badge";
 
 interface ProductCardProps {
   product: IProduct;
@@ -45,10 +46,18 @@ export function ProductCard({ product, className }: ProductCardProps) {
       router.push(`/products/${product._id}`);
     }
   };
+  
+  const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
+  const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
 
   return (
     <Link href={`/products/${product._id}`} onClick={handleCardClick} className={cn("group block", className)}>
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-md">
+         {hasDiscount && (
+            <Badge variant="destructive" className="absolute top-2 left-2 z-10">
+                {discountPercentage}% OFF
+            </Badge>
+        )}
         <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden xl:aspect-h-8 xl:aspect-w-7">
           <Image
             src={product.images[0]}
@@ -81,9 +90,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="p-3">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
           <p className="mt-1 text-xs text-muted-foreground">{product.category}</p>
-          <p className="mt-2 text-base font-bold text-foreground">
-            ₹{product.price.toFixed(2)}
-          </p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <p className="text-base font-bold text-foreground">
+                ₹{product.sellingPrice.toFixed(2)}
+            </p>
+            {hasDiscount && (
+                <p className="text-sm font-medium text-muted-foreground line-through">
+                    ₹{product.mrp!.toFixed(2)}
+                </p>
+            )}
+          </div>
         </div>
       </div>
     </Link>

@@ -70,12 +70,15 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
+    mrp: existingProduct.mrp || undefined,
+    sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
     variants: [], // TODO: Populate variants for editing
   } : {
     name: '',
     description: '',
-    price: 0,
+    mrp: undefined,
+    sellingPrice: 0,
     category: '',
     brand: '', // Product's actual brand
     storefront: selectedBrand === 'All Brands' ? (storefronts[0] || '') : selectedBrand,
@@ -314,16 +317,30 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 </Card>
                  <Card>
                     <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
-                    <CardContent>
-                         <FormField control={form.control} name="price" render={({ field }) => (
+                    <CardContent className="grid grid-cols-2 gap-4">
+                         <FormField control={form.control} name="mrp" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Price</FormLabel>
+                                <FormLabel>MRP</FormLabel>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
                                     <FormControl>
                                         <Input type="number" placeholder="0.00" className="pl-7" {...field} />
                                     </FormControl>
                                 </div>
+                                <FormDescription>Original price (optional).</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                         )} />
+                         <FormField control={form.control} name="sellingPrice" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Selling Price</FormLabel>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                                    <FormControl>
+                                        <Input type="number" placeholder="0.00" className="pl-7" {...field} />
+                                    </FormControl>
+                                </div>
+                                 <FormDescription>The price it will be sold at.</FormDescription>
                                 <FormMessage />
                             </FormItem>
                          )} />
@@ -343,5 +360,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    

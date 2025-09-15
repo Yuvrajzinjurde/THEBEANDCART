@@ -15,6 +15,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Badge } from './ui/badge';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -28,11 +29,19 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     setQuantity((prev) => Math.max(1, prev + amount));
   };
   
+  const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
+  const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
+
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery */}
       <div className="grid gap-4">
         <div className="relative overflow-hidden rounded-lg border aspect-square">
+            {hasDiscount && (
+                <Badge variant="destructive" className="absolute top-3 left-3 z-10 text-base">
+                    {discountPercentage}% OFF
+                </Badge>
+            )}
             <Image
                 src={selectedImage}
                 alt={product.name}
@@ -105,7 +114,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
           <span className="text-sm text-muted-foreground">({product.rating.toFixed(1)})</span>
         </div>
 
-        <p className="text-3xl font-bold">₹{product.price.toFixed(2)}</p>
+        <div className="flex items-baseline gap-3">
+            <p className="text-3xl font-bold">₹{product.sellingPrice.toFixed(2)}</p>
+            {hasDiscount && (
+                <p className="text-xl font-medium text-muted-foreground line-through">
+                    ₹{product.mrp!.toFixed(2)}
+                </p>
+            )}
+        </div>
         
         <Separator />
 

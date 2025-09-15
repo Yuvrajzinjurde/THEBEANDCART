@@ -63,7 +63,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const totalUsers = await User.countDocuments(userQuery);
 
         const totalProducts = allProductsObject.length;
-        const totalInventoryValue = allProductsObject.reduce((sum, p) => sum + (p.price * p.stock), 0);
+        const totalInventoryValue = allProductsObject.reduce((sum, p) => sum + (p.sellingPrice * p.stock), 0);
         
         const totalViews = allProductsObject.reduce((sum, p) => sum + (p.views || 0), 0);
         const totalClicks = allProductsObject.reduce((sum, p) => sum + (p.clicks || 0), 0);
