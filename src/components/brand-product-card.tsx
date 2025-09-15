@@ -72,7 +72,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       onMouseLeave={() => plugin.current.stop()}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
-        <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden xl:aspect-h-8 xl:aspect-w-7">
+        <div className="aspect-square w-full overflow-hidden">
            <Carousel
               plugins={[plugin.current]}
               className="w-full h-full"
@@ -83,9 +83,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                      <Image
                       src={img}
                       alt={`${product.name} image ${index + 1}`}
-                      width={300}
-                      height={300}
-                      className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </CarouselItem>
                 ))}
