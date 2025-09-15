@@ -33,7 +33,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-muted/40 p-4 sm:p-8">
+    <main className="flex min-h-screen flex-col items-center bg-background p-4 sm:p-8">
         <div className="text-center mb-10">
             <div className="inline-block p-4 bg-background rounded-full shadow-md mb-4">
                 <Logo className="h-16 w-16 text-primary" />
@@ -62,12 +62,13 @@ export default function LandingPage() {
               <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} passHref>
                 <Card className="group relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                   <CardContent className="p-0">
-                    <div className="aspect-video relative">
+                    <div className="aspect-square relative bg-muted flex items-center justify-center">
                         <Image
                             src={brand.logoUrl}
                             alt={`${brand.displayName} Logo`}
-                            fill
-                            className="object-contain p-8 transition-transform duration-300 group-hover:scale-105"
+                            width={120}
+                            height={120}
+                            className="object-contain transition-transform duration-300 group-hover:scale-105"
                         />
                          <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-50"></div>
                     </div>
