@@ -23,7 +23,7 @@ const VariantSchema = z.object({
 export const ProductFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
-  mrp: z.coerce.number().min(0, "MRP must be a positive number").optional(),
+  mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
   category: z.string().min(1, "Category is required"),
   brand: z.string().min(1, "Product brand is required"), // The actual brand of the product, e.g., Nike
@@ -36,7 +36,7 @@ export const ProductFormSchema = z.object({
   // Used for products with multiple variations (e.g., size, color)
   variants: z.array(VariantSchema),
 }).refine(data => {
-    if (data.mrp === undefined || data.mrp === null) return true;
+    if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
     return data.sellingPrice <= data.mrp;
 }, {
   message: "Selling price cannot be greater than MRP",
@@ -63,3 +63,5 @@ export const AutofillProductOutputSchema = z.object({
   stock: z.number().describe('A suggested initial stock quantity, between 50 and 200.'),
 });
 export type AutofillProductOutput = z.infer<typeof AutofillProductOutputSchema>;
+
+    

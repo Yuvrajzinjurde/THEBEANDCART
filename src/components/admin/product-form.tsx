@@ -74,14 +74,14 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
-    mrp: existingProduct.mrp || undefined,
+    mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
     variants: [], // TODO: Populate variants for editing
   } : {
     name: '',
     description: '',
-    mrp: undefined,
+    mrp: '',
     sellingPrice: 0,
     category: '',
     brand: '', // Product's actual brand
@@ -434,3 +434,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
