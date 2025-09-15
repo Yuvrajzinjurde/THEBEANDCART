@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Separator } from "./ui/separator";
 
 interface BrandProductCardProps {
   product: IProduct;
@@ -58,6 +60,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const sellingPrice = typeof product.sellingPrice === 'number' ? product.sellingPrice : 0;
   const mrp = typeof product.mrp === 'number' ? product.mrp : 0;
   const hasDiscount = mrp > sellingPrice;
+  const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
+  const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
 
   return (
     <Link 
@@ -108,7 +112,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-3 space-y-1">
+        <div className="p-3 space-y-1.5">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span>{product.category}</span>
@@ -120,12 +124,44 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           </div>
           <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-base font-bold text-foreground">
-                ₹{sellingPrice.toFixed(2)}
+                ₹{sellingPrice.toLocaleString('en-IN')}
             </p>
             {hasDiscount && (
+              <>
                 <p className="text-sm font-medium text-muted-foreground line-through">
-                    ₹{mrp.toFixed(2)}
+                    ₹{mrp.toLocaleString('en-IN')}
                 </p>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-semibold text-green-600">{discountPercentage}% off</span>
+                  <TooltipProvider>
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                              <button className="cursor-pointer" onClick={(e) => e.preventDefault()}>
+                                  <Info className="h-3 w-3 text-muted-foreground" />
+                              </button>
+                          </TooltipTrigger>
+                          <TooltipContent className="p-3 w-56">
+                              <div className="space-y-2">
+                                  <p className="font-bold text-sm">Price details</p>
+                                  <div className="flex justify-between text-xs">
+                                      <p>MRP</p>
+                                      <p>₹{mrp.toFixed(2)}</p>
+                                  </div>
+                                  <div className="flex justify-between text-xs">
+                                      <p>Selling Price</p>
+                                      <p>₹{sellingPrice.toFixed(2)}</p>
+                                  </div>
+                                  <Separator />
+                                  <div className="flex justify-between text-xs font-semibold text-green-600">
+                                     <p>Overall savings</p>
+                                     <p>₹{amountSaved.toFixed(2)}</p>
+                                  </div>
+                              </div>
+                          </TooltipContent>
+                      </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </>
             )}
           </div>
         </div>
