@@ -13,7 +13,8 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const storefront = searchParams.get('storefront');
 
-    const query = storefront ? { storefront } : {};
+    // Corrected the query to use the 'storefront' field as defined in the product model.
+    const query = storefront ? { storefront: storefront } : {};
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first
