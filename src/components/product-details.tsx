@@ -91,14 +91,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery Column */}
-      <div className="grid grid-cols-[80px_1fr] gap-4">
+      <div className="grid grid-cols-[80px_1fr] items-start gap-4">
         {/* Vertical Thumbnails */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="space-y-3">
              <Button
                 variant="ghost" size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 mx-auto flex"
                 onClick={thumbScrollPrev}
-            ><ChevronUp className="mx-auto" /></Button>
+            ><ChevronUp className="h-5 w-5" /></Button>
             <div className="overflow-hidden w-full" ref={thumbRef}>
                 <div className="flex flex-col gap-3">
                     {mediaItems.map((media, index) => (
@@ -125,9 +125,9 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             </div>
             <Button
                 variant="ghost" size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 mx-auto flex"
                 onClick={thumbScrollNext}
-            ><ChevronDown className="mx-auto" /></Button>
+            ><ChevronDown className="h-5 w-5" /></Button>
         </div>
         
         {/* Main Image Viewer */}
@@ -265,5 +265,3 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     </div>
   );
 }
-
-    
