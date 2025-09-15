@@ -93,10 +93,10 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
       {/* Image Gallery Column */}
       <div className="grid grid-cols-[80px_1fr] items-start gap-4">
         {/* Vertical Thumbnails */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center">
              <Button
                 variant="ghost" size="icon"
-                className="h-8 w-8 flex-shrink-0"
+                className="h-8 w-8 flex-shrink-0 mb-3"
                 onClick={thumbScrollPrev}
             ><ChevronUp className="h-5 w-5" /></Button>
             <div className="overflow-hidden w-full" ref={thumbRef}>
@@ -125,7 +125,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             </div>
             <Button
                 variant="ghost" size="icon"
-                className="h-8 w-8 flex-shrink-0"
+                className="h-8 w-8 flex-shrink-0 mt-3"
                 onClick={thumbScrollNext}
             ><ChevronDown className="h-5 w-5" /></Button>
         </div>
@@ -265,3 +265,5 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     </div>
   );
 }
+
+    
