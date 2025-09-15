@@ -12,9 +12,17 @@ export async function GET(req: Request) {
     
     const { searchParams } = new URL(req.url);
     const storefront = searchParams.get('storefront');
+    const category = searchParams.get('category');
+    
+    let query: any = {};
 
-    // Corrected the query to use the 'brand' field as defined in the product model.
-    const query = storefront ? { storefront: storefront } : {};
+    if (storefront) {
+      query.storefront = storefront;
+    }
+    
+    if (category) {
+        query.category = category;
+    }
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 }) // Sort by newest first

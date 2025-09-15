@@ -18,7 +18,8 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type GroupedProducts = {
   [category: string]: IProduct[];
@@ -175,9 +176,17 @@ export default function BrandHomePage() {
         {Object.keys(groupedProducts).length > 0 ? (
           Object.entries(groupedProducts).map(([category, items]) => (
             <section key={category} className="mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight border-b pb-2 mb-6">{category}</h2>
+              <div className="flex justify-between items-center border-b pb-2 mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{category}</h2>
+                 <Button variant="link" asChild>
+                    <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
+                        Discover All
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+              </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {items.map((product) => (
+                {items.slice(0, 5).map((product) => (
                   <BrandProductCard key={product._id as string} product={product} />
                 ))}
               </div>

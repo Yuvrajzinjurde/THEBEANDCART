@@ -1,63 +1,104 @@
 
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { X, ChevronDown } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search } from "lucide-react";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-type ProductFiltersProps = {
-  categories: string[];
-  onSearchChange: (value: string) => void;
-  onCategoryChange: (value: string) => void;
-  onSortChange: (value: string) => void;
+type FilterSectionProps = {
+  title: string;
+  children: React.ReactNode;
 };
 
-export function ProductFilters({
-  categories,
-  onSearchChange,
-  onCategoryChange,
-  onSortChange,
-}: ProductFiltersProps) {
-  return (
-    <div className="mb-8 rounded-lg border bg-card p-4 shadow-sm">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        <div className="relative sm:col-span-2 md:col-span-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            className="pl-10"
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
-        <Select onValueChange={onCategoryChange} defaultValue="all">
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category} className="capitalize">
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select onValueChange={onSortChange} defaultValue="rating-desc">
-          <SelectTrigger>
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="rating-desc">Sort by rating</SelectItem>
-            <SelectItem value="price-asc">Sort by price: low to high</SelectItem>
-            <SelectItem value="price-desc">Sort by price: high to low</SelectItem>
-          </SelectContent>
-        </Select>
+const FilterSection = ({ title, children }: FilterSectionProps) => (
+  <Collapsible defaultOpen={true}>
+    <CollapsibleTrigger className="w-full">
+      <div className="flex w-full items-center justify-between border-b py-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wider">{title}</h3>
+        <ChevronDown className="h-4 w-4 transition-transform [&[data-state=open]]:rotate-180" />
       </div>
-    </div>
+    </CollapsibleTrigger>
+    <CollapsibleContent>
+      <div className="py-4 space-y-3">{children}</div>
+    </CollapsibleContent>
+  </Collapsible>
+);
+
+export function ProductFilters() {
+  const [activeFilters, setActiveFilters] = useState(["NIKE", "60% or more", "CAMPUS", "REEBOK"]);
+  const [showMore, setShowMore] = useState(false);
+
+  const colors = ["Black", "White", "Pink", "Grey", "Beige", "Dark Blue"];
+
+  return (
+    <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+      <div className="sticky top-24">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">Filters</h2>
+          <Button variant="link" className="p-0 h-auto text-primary">CLEAR ALL</Button>
+        </div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {activeFilters.slice(0, showMore ? activeFilters.length : 4).map(filter => (
+            <Button
+              key={filter}
+              variant="secondary"
+              size="sm"
+              className="h-auto py-1 pl-2 pr-1 rounded-sm bg-gray-100 hover:bg-gray-200"
+            >
+              {filter}
+              <X className="h-4 w-4 ml-1" />
+            </Button>
+          ))}
+        </div>
+        {activeFilters.length > 4 && (
+          <Button variant="link" size="sm" className="p-0 h-auto text-primary mb-4" onClick={() => setShowMore(!showMore)}>
+            {showMore ? "SHOW LESS" : "SHOW MORE"}
+          </Button>
+        )}
+
+        <FilterSection title="Categories">
+          <div className="space-y-2 text-sm text-muted-foreground">
+             <a href="#" className="flex items-center gap-2 hover:text-primary">&lt; Footwear</a>
+             <a href="#" className="flex items-center gap-2 hover:text-primary">&lt; Women's Footwear</a>
+             <p className="font-semibold text-foreground pl-4">Women's Sports Shoes</p>
+          </div>
+        </FilterSection>
+
+        <FilterSection title="Brand">
+            {["Puma", "Adidas", "Fila", "ASICS", "Sketchers"].map(brand => (
+                <div key={brand} className="flex items-center space-x-2">
+                    <Checkbox id={`brand-${brand}`} />
+                    <Label htmlFor={`brand-${brand}`} className="font-normal">{brand}</Label>
+                </div>
+            ))}
+        </FilterSection>
+        
+        <FilterSection title="Gender">
+            {["Men", "Women", "Unisex"].map(gender => (
+                 <div key={gender} className="flex items-center space-x-2">
+                    <Checkbox id={`gender-${gender}`} />
+                    <Label htmlFor={`gender-${gender}`} className="font-normal">{gender}</Label>
+                </div>
+            ))}
+        </FilterSection>
+
+        <FilterSection title="Color">
+           {colors.map(color => (
+                <div key={color} className="flex items-center space-x-2">
+                    <Checkbox id={color} />
+                    <Label htmlFor={color} className="font-normal">{color}</Label>
+                </div>
+           ))}
+           <Button variant="link" className="p-0 h-auto text-primary">12 MORE</Button>
+        </FilterSection>
+      </div>
+    </aside>
   );
 }
