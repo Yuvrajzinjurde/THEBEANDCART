@@ -8,7 +8,6 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { Badge } from "./ui/badge";
 import {
   Carousel,
   CarouselContent,
@@ -25,7 +24,7 @@ interface BrandProductCardProps {
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
   const plugin = useRef(
-    Autoplay({ delay: 1000, stopOnInteraction: false, playOnInit: false })
+    Autoplay({ delay: 2000, stopOnInteraction: true, playOnInit: false })
   );
 
   const handleWishlistClick = (e: React.MouseEvent) => {
@@ -113,7 +112,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         <div className="p-3">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
           <p className="mt-1 text-xs text-muted-foreground">{product.category}</p>
-          <div className="mt-2 flex items-baseline gap-2">
+          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toFixed(2)}
             </p>
@@ -122,9 +121,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                     <p className="text-sm font-medium text-muted-foreground line-through">
                         ₹{mrp.toFixed(2)}
                     </p>
-                    <Badge variant="destructive" className="font-bold">
+                    <div className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-md">
                         {discountPercentage}% OFF
-                    </Badge>
+                    </div>
                 </>
             )}
           </div>
