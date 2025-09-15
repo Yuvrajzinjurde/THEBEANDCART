@@ -4,12 +4,19 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 import useEmblaCarousel, { type EmblaCarouselType } from 'embla-carousel-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './ui/breadcrumb';
 
@@ -142,69 +149,81 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
         {/* Left Column: Image Gallery & Actions */}
         <div className="flex flex-col gap-4">
             <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
-            {/* Vertical Thumbnails */}
-            <div className="flex flex-col justify-center items-start gap-3">
-                <Button
-                    variant="ghost" size="icon"
-                    className="h-8 w-8 flex-shrink-0 mx-auto"
-                    onClick={thumbScrollPrev}
-                ><ChevronUp className="h-5 w-5" /></Button>
-                <div className="overflow-hidden w-full max-h-[350px]" ref={thumbRef}>
-                    <div className="flex flex-col gap-3 h-full">
-                        {mediaItems.map((media, index) => (
-                            <div key={index} className="flex-[0_0_80px] min-w-0">
-                                <ThumbsButton
-                                    onClick={() => onThumbClick(index)}
-                                    selected={index === selectedIndex}
-                                >
-                                    <Image
-                                      src={media.url}
-                                      alt={`${product.name} thumbnail ${index + 1}`}
-                                      fill
-                                      className="object-cover"
-                                    />
-                                    {media.type === 'video' && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                            <PlayCircle className="w-8 h-8 text-white" />
-                                        </div>
-                                    )}
-                                </ThumbsButton>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <Button
-                    variant="ghost" size="icon"
-                    className="h-8 w-8 flex-shrink-0 mx-auto"
-                    onClick={thumbScrollNext}
-                ><ChevronDown className="h-5 w-5" /></Button>
-            </div>
-            
-            {/* Main Image Viewer */}
-            <div className="relative overflow-hidden aspect-square">
-                <div className="overflow-hidden h-full" ref={mainRef}>
-                    <div className="flex h-full bg-muted">
-                        {mediaItems.map((media, index) => (
-                            <div key={index} className="flex-[0_0_100%] min-w-0 h-full relative">
-                                {media.type === 'image' ? (
-                                    <Image
+              {/* Vertical Thumbnails */}
+              <div className="flex flex-col items-center justify-start gap-3">
+                  <Button
+                      variant="ghost" size="icon"
+                      className="h-8 w-8 flex-shrink-0"
+                      onClick={thumbScrollPrev}
+                  ><ChevronUp className="h-5 w-5" /></Button>
+                  <div className="overflow-hidden w-full max-h-[350px]" ref={thumbRef}>
+                      <div className="flex flex-col gap-3 h-full">
+                          {mediaItems.map((media, index) => (
+                              <div key={index} className="flex-[0_0_80px] min-w-0">
+                                  <ThumbsButton
+                                      onClick={() => onThumbClick(index)}
+                                      selected={index === selectedIndex}
+                                  >
+                                      <Image
                                         src={media.url}
-                                        alt={product.name}
+                                        alt={`${product.name} thumbnail ${index + 1}`}
                                         fill
                                         className="object-cover"
-                                    />
-                                ) : (
-                                    <video
-                                        src={media.url}
-                                        controls
-                                        className="w-full h-full object-cover"
-                                    />
-                                )}
-                            </div>
+                                      />
+                                      {media.type === 'video' && (
+                                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                              <PlayCircle className="w-8 h-8 text-white" />
+                                          </div>
+                                      )}
+                                  </ThumbsButton>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+                  <Button
+                      variant="ghost" size="icon"
+                      className="h-8 w-8 flex-shrink-0"
+                      onClick={thumbScrollNext}
+                  ><ChevronDown className="h-5 w-5" /></Button>
+              </div>
+              
+              {/* Main Image Viewer */}
+              <div className="relative overflow-hidden aspect-square group">
+                <Carousel
+                    opts={{ loop: true }}
+                    ref={mainRef}
+                    className="w-full h-full"
+                >
+                    <CarouselContent className="-ml-0 h-full">
+                        {mediaItems.map((media, index) => (
+                            <CarouselItem key={index} className="pl-0">
+                                <div className="min-w-0 h-full relative bg-muted">
+                                    {media.type === 'image' ? (
+                                        <Image
+                                            src={media.url}
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    ) : (
+                                        <video
+                                            src={media.url}
+                                            controls
+                                            className="w-full h-full object-cover"
+                                        />
+                                    )}
+                                </div>
+                            </CarouselItem>
                         ))}
-                    </div>
-                </div>
-                <div className="absolute top-2 right-2 flex flex-col gap-2">
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowLeft />
+                    </CarouselPrevious>
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowRight />
+                    </CarouselNext>
+                </Carousel>
+                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                     <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500">
                         <Heart />
                     </Button>
@@ -213,7 +232,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
                     </Button>
                 </div>
             </div>
-          </div>
+            </div>
            {/* Action Buttons */}
            <div className='space-y-4'>
             <div className="flex items-center gap-4">
@@ -363,3 +382,5 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
     </div>
   );
 }
+
+    
