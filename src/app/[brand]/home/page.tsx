@@ -51,7 +51,7 @@ export default function BrandHomePage() {
             setBrand(brandData.brand);
 
             // Fetch products for the brand
-            const productResponse = await fetch(`/api/products?brand=${brandName}`);
+            const productResponse = await fetch(`/api/products?storefront=${brandName}`);
             if (!productResponse.ok) throw new Error('Failed to fetch products');
             const productData = await productResponse.json();
             setProducts(productData.products);
@@ -73,7 +73,7 @@ export default function BrandHomePage() {
       alert('Database seeded! Refresh the page to see new products.');
       // Optionally re-fetch products
       setLoading(true);
-       const response = await fetch(`/api/products?brand=${brandName}`);
+       const response = await fetch(`/api/products?storefront=${brandName}`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -206,6 +206,3 @@ export default function BrandHomePage() {
     </main>
   );
 }
-
-
-    

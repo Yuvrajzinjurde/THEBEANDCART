@@ -12,7 +12,8 @@ export const ProductFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.coerce.number().min(0.01, "Price must be greater than 0"),
   category: z.string().min(1, "Category is required"),
-  brand: z.string().min(1, "Brand is required"),
+  brand: z.string().min(1, "Product brand is required"), // The actual brand of the product, e.g., Nike
+  storefront: z.string().min(1, "Storefront is required"), // The store this product belongs to, e.g., reeva
   images: z.array(z.string().url()).min(1, "At least one image is required"),
   
   // Represents a single product's stock if no variants are provided

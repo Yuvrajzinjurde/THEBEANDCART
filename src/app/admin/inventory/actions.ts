@@ -8,7 +8,7 @@ import type { IProduct } from '@/models/product.model';
 export async function getProductsByBrand(brand: string): Promise<IProduct[]> {
     await dbConnect();
     try {
-        const query = brand === 'All Brands' ? {} : { brand };
+        const query = brand === 'All Brands' ? {} : { storefront: brand };
         const products = await Product.find(query).sort({ createdAt: -1 }).lean();
         
         // Mongoose returns objects that are not plain JS objects.

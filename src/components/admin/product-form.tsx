@@ -19,6 +19,7 @@ import useBrandStore from '@/stores/brand-store';
 import { ProductFormSchema, type ProductFormValues } from '@/lib/product-schema';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { cn } from '@/lib/utils';
+import type { IBrand } from '@/models/brand.model';
 
 interface ProductFormProps {
   mode: 'create' | 'edit';
@@ -30,18 +31,23 @@ const CATEGORIES = ['Electronics', 'Apparel', 'Books', 'Home Goods', 'Health', '
 
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
-  const { selectedBrand } = useBrandStore();
+  const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+  const storefronts = allStorefronts.filter(b => b !== 'All Brands');
+
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
+    storefront: existingProduct.storefront,
     variants: [], // TODO: Populate variants for editing
   } : {
     name: '',
     description: '',
     price: 0,
     category: '',
-    brand: selectedBrand === 'All Brands' ? '' : selectedBrand,
+    brand: '', // Product's actual brand
+    storefront: selectedBrand === 'All Brands' ? (storefronts[0] || '') : selectedBrand,
     images: [],
     variants: [],
     stock: 0,
@@ -230,15 +236,33 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 <Card>
                     <CardHeader><CardTitle>Organization</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                         <FormField control={form.control} name="brand" render={({ field }) => (
+                        <FormField control={form.control} name="storefront" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Brand</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled />
-                                </FormControl>
+                                <FormLabel>Storefront</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a storefront" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {storefronts.map(store => <SelectItem key={store} value={store} className="capitalize">{store}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <FormDescription>The storefront where this product will be displayed.</FormDescription>
                                 <FormMessage />
                             </FormItem>
-                         )} />
+                        )} />
+                        <FormField control={form.control} name="brand" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Product Brand</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Nike, Sony, Apple" {...field} />
+                                </FormControl>
+                                <FormDescription>The actual brand of the product.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                         <FormField control={form.control} name="category" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Category</FormLabel>

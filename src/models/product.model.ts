@@ -9,7 +9,8 @@ export interface IProduct extends Document {
   images: string[];
   stock: number;
   rating: number;
-  brand: string;
+  brand: string; // The product's actual brand, e.g., "Nike"
+  storefront: string; // The storefront this product belongs to, e.g., "reeva"
   views: number;
   clicks: number;
   // New fields for variants
@@ -26,7 +27,8 @@ const ProductSchema: Schema<IProduct> = new Schema({
   images: [{ type: String, required: true }],
   stock: { type: Number, required: true, min: 0, default: 0 },
   rating: { type: Number, min: 0, max: 5, default: 0 },
-  brand: { type: String, required: true, index: true },
+  brand: { type: String, required: true },
+  storefront: { type: String, required: true, index: true },
   views: { type: Number, default: 0 },
   clicks: { type: Number, default: 0 },
   styleId: { type: String, index: true },
@@ -35,7 +37,7 @@ const ProductSchema: Schema<IProduct> = new Schema({
 }, { timestamps: true });
 
 // Compound index to quickly find variants of a style
-ProductSchema.index({ styleId: 1, brand: 1 });
+ProductSchema.index({ styleId: 1, storefront: 1 });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
