@@ -21,34 +21,31 @@ const VariantSchema = z.object({
   stock: z.coerce.number().min(0, "Stock must be 0 or more"),
 });
 
+// Base schema for server-side validation, expecting image URLs as strings
 export const ProductFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
   mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
   category: z.string().min(1, "Category is required"),
-  brand: z.string().min(1, "Product brand is required"), // The actual brand of the product, e.g., Nike
-  storefront: z.string().min(1, "Storefront is required"), // The store this product belongs to, e.g., reeva
+  brand: z.string().min(1, "Product brand is required"),
+  storefront: z.string().min(1, "Storefront is required"),
   images: z.array(z.string().url()).min(1, "At least one image is required"),
-  
-  // Represents a single product's stock if no variants are provided
-  stock: z.coerce.number().min(0).optional(), 
-
-  // Used for products with multiple variations (e.g., size, color)
+  stock: z.coerce.number().min(0).optional(),
   variants: z.array(VariantSchema),
+});
+
+// Schema for client-side form which uses { value: string } for images
+const ImageValueSchema = z.object({ value: z.string().url() });
+
+export const ProductFormSchemaForClient = ProductFormSchema.extend({
+  images: z.array(ImageValueSchema).min(1, "At least one image is required"),
 }).refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
     return data.sellingPrice <= data.mrp;
 }, {
   message: "Selling price cannot be greater than MRP",
   path: ["sellingPrice"],
-});
-
-
-const ImageValueSchema = z.object({ value: z.string().url() });
-
-export const ProductFormSchemaForClient = ProductFormSchema.extend({
-  images: z.array(ImageValueSchema).min(1, "At least one image is required"),
 });
 
 export type ProductFormValues = z.infer<typeof ProductFormSchemaForClient>;
