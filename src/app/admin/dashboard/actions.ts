@@ -5,24 +5,26 @@ import dbConnect from '@/lib/mongodb';
 import Product, { IProduct } from '@/models/product.model';
 import User from '@/models/user.model';
 import Order from '@/models/order.model';
-import { subDays, startOfDay, endOfDay, format } from 'date-fns';
+import { subDays, startOfDay, format } from 'date-fns';
+import { Types } from 'mongoose';
 
 
 export interface DashboardStats {
   totalRevenue: number;
   totalOrders: number;
-  totalViews: number;
-  totalClicks: number;
-  conversionRate: number;
-  returnPercentage: number;
+  totalProducts: number;
+  totalUsers: number;
+  totalInventoryValue: number;
+  totalLoss: number;
   allProducts: IProduct[];
   chartData: { date: string; sales: number, orders: number }[];
   percentageChanges: {
     revenue: number;
     orders: number;
-    views: number;
-    clicks: number;
-    conversion: number;
+    products: number;
+    users: number;
+    inventory: number;
+    loss: number;
   };
 }
 
@@ -43,23 +45,24 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const sevenDaysAgo = startOfDay(subDays(now, 6));
         const prevSevenDaysAgo = startOfDay(subDays(now, 13));
 
-        // === Product Stats (Current & Previous) ===
+        // === Product, User, and Inventory Stats ===
         const allProducts = await Product.find(brandQuery).lean();
         const allProductsObject: IProduct[] = JSON.parse(JSON.stringify(allProducts));
 
-        const productStats = allProductsObject.reduce((acc, p) => {
-            acc.totalViews += p.views || 0;
-            acc.totalClicks += p.clicks || 0;
-            return acc;
-        }, { totalViews: 0, totalClicks: 0 });
+        const adminRoleId = await Types.ObjectId.createFromHexString('66a55e97573d808e7c1e5a5b'); // Assuming this is the admin role ID
+        const userQuery: any = { roles: { $ne: adminRoleId } };
+        if (brand !== 'All Brands') {
+            userQuery.brand = brand;
+        }
+        const totalUsers = await User.countDocuments(userQuery);
 
-        // Dummy previous month data for views/clicks as we don't have historical tracking
-        // This is a simplification for calculating percentage change
-        const prevProductStats = {
-            totalViews: Math.floor(productStats.totalViews / 2),
-            totalClicks: Math.floor(productStats.totalClicks / 2),
-        };
+        const totalProducts = allProductsObject.length;
+        const totalInventoryValue = allProductsObject.reduce((sum, p) => sum + (p.price * p.stock), 0);
         
+        // Dummy previous data for percentage change calculation
+        const prevTotalProducts = Math.floor(totalProducts / 2);
+        const prevTotalUsers = Math.floor(totalUsers / 2);
+        const prevTotalInventoryValue = Math.floor(totalInventoryValue / 2);
 
         // === Order Stats (Current & Previous) ===
         const currentOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } });
@@ -96,24 +99,22 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         });
 
         // === Calculations & Percentages ===
-        const conversionRate = productStats.totalClicks > 0 ? (totalOrders / productStats.totalClicks) * 100 : 0;
-        const prevConversionRate = prevProductStats.totalClicks > 0 ? (prevTotalOrders / prevProductStats.totalClicks) * 100 : 0;
-        
         const percentageChanges = {
             revenue: calculatePercentageChange(totalRevenue, prevTotalRevenue),
             orders: calculatePercentageChange(totalOrders, prevTotalOrders),
-            views: calculatePercentageChange(productStats.totalViews, prevProductStats.totalViews),
-            clicks: calculatePercentageChange(productStats.totalClicks, prevProductStats.totalClicks),
-            conversion: calculatePercentageChange(conversionRate, prevConversionRate),
+            products: calculatePercentageChange(totalProducts, prevTotalProducts),
+            users: calculatePercentageChange(totalUsers, prevTotalUsers),
+            inventory: calculatePercentageChange(totalInventoryValue, prevTotalInventoryValue),
+            loss: 0, // No loss tracking yet
         };
 
         return {
             totalRevenue,
             totalOrders,
-            totalViews: productStats.totalViews,
-            totalClicks: productStats.totalClicks,
-            conversionRate,
-            returnPercentage: 0, // Not tracked yet
+            totalProducts,
+            totalUsers,
+            totalInventoryValue,
+            totalLoss: 0, // No loss tracking yet
             allProducts: allProductsObject,
             chartData,
             percentageChanges,
@@ -124,5 +125,3 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         throw new Error('Could not fetch dashboard statistics from the database.');
     }
 }
-
-    

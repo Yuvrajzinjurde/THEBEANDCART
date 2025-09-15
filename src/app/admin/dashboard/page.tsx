@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Package, Users, IndianRupee, ArrowUp, ArrowDown } from "lucide-react";
+import { Package, Users, IndianRupee, ArrowUp, ArrowDown, Info, ShoppingCart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
@@ -82,7 +82,7 @@ function AdminDashboardPage() {
         </div>
       </div>
       
-       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="bg-blue-100 text-blue-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -91,6 +91,26 @@ function AdminDashboardPage() {
           <CardContent>
             <div className="text-3xl font-bold">₹{(stats.totalRevenue || 0).toLocaleString('en-IN')}</div>
             <PercentageChange value={stats.percentageChanges.revenue || 0} />
+          </CardContent>
+        </Card>
+        <Card className="bg-red-100 text-red-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
+            <Info className="h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">₹{(stats.totalLoss || 0).toLocaleString('en-IN')}</div>
+            <PercentageChange value={stats.percentageChanges.loss || 0} />
+          </CardContent>
+        </Card>
+        <Card className="bg-green-100 text-green-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
+            <ShoppingCart className="h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">₹{(stats.totalInventoryValue || 0).toLocaleString('en-IN')}</div>
+            <PercentageChange value={stats.percentageChanges.inventory || 0} />
           </CardContent>
         </Card>
         <Card className="bg-green-100 text-green-800">
@@ -109,7 +129,7 @@ function AdminDashboardPage() {
             <Package className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{(stats.allProducts.length || 0)}</div>
+            <div className="text-3xl font-bold">{(stats.totalProducts || 0)}</div>
              <p className="text-xs text-muted-foreground">Count of all listed products</p>
           </CardContent>
         </Card>
