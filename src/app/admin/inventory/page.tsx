@@ -69,7 +69,7 @@ export default function InventoryPage() {
     }, [allProducts]);
 
     useEffect(() => {
-        let productsToDisplay = allProducts;
+        let productsToDisplay = [...allProducts];
 
         // Tab filter
         if (activeTab === 'out-of-stock') {
@@ -83,10 +83,11 @@ export default function InventoryPage() {
             productsToDisplay = productsToDisplay.filter(p => p.category === categoryFilter);
         }
 
-        // Sorting (placeholder for now)
-        if (sortOption === 'estimated-orders-desc') {
-            // This is a placeholder. Real sorting would need order data.
-            // For now, we can sort by stock as a proxy.
+        // Sorting
+        if (sortOption === 'stock-asc') {
+            productsToDisplay.sort((a, b) => a.stock - b.stock);
+        } else if (sortOption === 'estimated-orders-desc') {
+            // Placeholder: sort by highest stock as a proxy
             productsToDisplay.sort((a, b) => b.stock - a.stock);
         }
         
@@ -278,7 +279,7 @@ export default function InventoryPage() {
                             </div>
                         </div>
 
-                        <TabsContent value={activeTab} className="mt-0">
+                        <TabsContent value="all" className="mt-0">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -326,6 +327,106 @@ export default function InventoryPage() {
                                         <TableRow>
                                             <TableCell colSpan={6} className="h-24 text-center">
                                                 No products to display in this category.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+                         <TabsContent value="out-of-stock" className="mt-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="hidden w-[100px] sm:table-cell">
+                                            <span className="sr-only">Image</span>
+                                        </TableHead>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead className="hidden md:table-cell">Stock</TableHead>
+                                        <TableHead className="hidden md:table-cell">Rating</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredProducts.length > 0 ? (
+                                        filteredProducts.map((product) => (
+                                            <TableRow key={product._id as string}>
+                                                <TableCell className="hidden sm:table-cell">
+                                                    <Image
+                                                        alt={product.name}
+                                                        className="aspect-square rounded-md object-cover"
+                                                        height="64"
+                                                        src={product.images[0]}
+                                                        width="64"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="font-medium">{product.name}</TableCell>
+                                                <TableCell>
+                                                    <Badge 
+                                                        variant="destructive"
+                                                    >
+                                                        Out of Stock
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>₹{product.price.toFixed(2)}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="h-24 text-center">
+                                                No products are out of stock.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </TabsContent>
+                         <TabsContent value="low-stock" className="mt-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="hidden w-[100px] sm:table-cell">
+                                            <span className="sr-only">Image</span>
+                                        </TableHead>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead className="hidden md:table-cell">Stock</TableHead>
+                                        <TableHead className="hidden md:table-cell">Rating</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredProducts.length > 0 ? (
+                                        filteredProducts.map((product) => (
+                                            <TableRow key={product._id as string}>
+                                                <TableCell className="hidden sm:table-cell">
+                                                    <Image
+                                                        alt={product.name}
+                                                        className="aspect-square rounded-md object-cover"
+                                                        height="64"
+                                                        src={product.images[0]}
+                                                        width="64"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="font-medium">{product.name}</TableCell>
+                                                <TableCell>
+                                                     <Badge 
+                                                        className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
+                                                    >
+                                                        Low Stock
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>₹{product.price.toFixed(2)}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                                                <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="h-24 text-center">
+                                                No products are low in stock.
                                             </TableCell>
                                         </TableRow>
                                     )}
