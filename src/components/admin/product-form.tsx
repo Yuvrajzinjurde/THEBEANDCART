@@ -296,7 +296,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     <div className="grid grid-cols-4 gap-4 mt-4">
                                         {imageFields.map((field, index) => (
                                             <div key={field.id} className="relative aspect-square">
-                                                <Image src={field.value} alt={`Preview ${index}`} fill className="object-cover rounded-md" />
+                                                {field.value && <Image src={field.value} alt={`Preview ${index}`} fill className="object-cover rounded-md" />}
                                                 <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6" onClick={() => removeImage(index)}>
                                                     <X className="h-4 w-4" />
                                                 </Button>
@@ -477,3 +477,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
