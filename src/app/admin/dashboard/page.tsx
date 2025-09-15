@@ -109,7 +109,7 @@ function AdminDashboardPage() {
             <Package className="h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{(stats.totalProducts || 0)}</div>
+            <div className="text-3xl font-bold">{(stats.allProducts.length || 0)}</div>
              <p className="text-xs text-muted-foreground">Count of all listed products</p>
           </CardContent>
         </Card>
