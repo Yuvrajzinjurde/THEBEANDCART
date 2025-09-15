@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import useBrandStore from "@/stores/brand-store";
-import { getBusinessDashboardData, type BusinessDashboardData } from "../dashboard/actions";
+import { getDashboardStats, type DashboardStats as BusinessDashboardData } from "../dashboard/actions";
 import { Loader } from "@/components/ui/loader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChartTooltipContent } from "@/components/ui/chart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 type Period = '7d' | '30d' | 'yesterday' | 'custom';
 type ChartView = 'orders' | 'sales';
@@ -223,15 +226,6 @@ function BusinessDashboardPage() {
       </Card>
     </div>
   );
-}
-
-// Dummy getDashboardStats to avoid breaking the code, as it's now in another folder
-const getDashboardStats = async (brand: string): Promise<BusinessDashboardData> => {
-  const response = await fetch(`/api/admin/dashboard-stats?brand=${brand}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch stats');
-  }
-  return response.json();
 }
 
 export default BusinessDashboardPage;
