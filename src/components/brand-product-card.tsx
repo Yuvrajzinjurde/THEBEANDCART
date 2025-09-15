@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, Star } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -58,7 +58,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const sellingPrice = typeof product.sellingPrice === 'number' ? product.sellingPrice : 0;
   const mrp = typeof product.mrp === 'number' ? product.mrp : 0;
   const hasDiscount = mrp > sellingPrice;
-  const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
 
   return (
     <Link 
@@ -109,22 +108,24 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-3">
+        <div className="p-3 space-y-1">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">{product.category}</p>
-          <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{product.category}</span>
+              <span className="h-1 w-1 rounded-full bg-muted-foreground/50"></span>
+              <div className="flex items-center gap-1">
+                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  <span>{product.rating.toFixed(1)}</span>
+              </div>
+          </div>
+          <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toFixed(2)}
             </p>
             {hasDiscount && (
-                <>
-                    <p className="text-sm font-medium text-muted-foreground line-through">
-                        ₹{mrp.toFixed(2)}
-                    </p>
-                    <div className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-md">
-                        {discountPercentage}% OFF
-                    </div>
-                </>
+                <p className="text-sm font-medium text-muted-foreground line-through">
+                    ₹{mrp.toFixed(2)}
+                </p>
             )}
           </div>
         </div>
