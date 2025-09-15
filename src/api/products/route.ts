@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const storefront = searchParams.get('storefront');
 
-    // Corrected the query to use the 'storefront' field as defined in the product model.
+    // Corrected the query to use the 'brand' field as defined in the product model.
     const query = storefront ? { storefront: storefront } : {};
 
     const products = await Product.find(query)

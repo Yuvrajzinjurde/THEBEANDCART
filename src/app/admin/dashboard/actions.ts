@@ -45,7 +45,7 @@ const calculatePercentageChange = (current: number, previous: number): number =>
 export async function getDashboardStats(brand: string): Promise<DashboardStats> {
     await dbConnect();
     try {
-        const brandQuery = brand === 'All Brands' ? {} : { brand };
+        const brandQuery = brand === 'All Brands' ? {} : { storefront: brand };
         
         const now = new Date();
         const sevenDaysAgo = startOfDay(subDays(now, 6));
@@ -76,8 +76,9 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const prevTotalClicks = Math.floor(totalClicks / 2);
 
         // === Order Stats (Current & Previous) ===
-        const currentOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } });
-        const previousOrders = await Order.find({ ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: prevSevenDaysAgo, $lt: sevenDaysAgo } });
+        const orderBrandQuery = brand === 'All Brands' ? {} : { brand: brand };
+        const currentOrders = await Order.find({ ...orderBrandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } });
+        const previousOrders = await Order.find({ ...orderBrandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: prevSevenDaysAgo, $lt: sevenDaysAgo } });
         
         const totalOrders = currentOrders.length;
         const prevTotalOrders = previousOrders.length;
@@ -87,7 +88,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
 
         // === Chart Data (Last 7 Days) ===
         const dailyStats = await Order.aggregate([
-          { $match: { ...brandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } } },
+          { $match: { ...orderBrandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } } },
           { $group: {
               _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
               sales: { $sum: "$totalAmount" },
