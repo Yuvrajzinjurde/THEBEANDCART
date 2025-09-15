@@ -117,6 +117,30 @@ function BusinessDashboardPage() {
       const simulatedOrders = (product.rating / 5) * clicks * 0.1; // 10% max conversion based on clicks
       return (simulatedOrders / clicks) * 100;
   }
+  
+  const productRows = allProducts.map((product) => (
+      <TableRow key={product._id as string}>
+          <TableCell className="font-medium">
+              <div className="flex items-center gap-3">
+                  <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md"/>
+                  <span>{product.name}</span>
+              </div>
+          </TableCell>
+          <TableCell>{(product.views || 0).toLocaleString()}</TableCell>
+          <TableCell>{(product.clicks || 0).toLocaleString()}</TableCell>
+          <TableCell>N/A</TableCell> {/* Orders per product not tracked yet */}
+          <TableCell>{getProductConversion(product).toFixed(1)}%</TableCell>
+          <TableCell>N/A</TableCell> {/* Sales per product not tracked yet */}
+          <TableCell>0</TableCell>
+          <TableCell>
+              <Button variant="outline" size="sm">View</Button>
+          </TableCell>
+          <TableCell>
+              <Button variant="outline" size="sm">View</Button>
+          </TableCell>
+      </TableRow>
+  ));
+
 
   return (
     <div className="flex-1 space-y-6">
@@ -224,28 +248,15 @@ function BusinessDashboardPage() {
                                 </TableRow>
                             </TableHeader>
                              <TableBody>
-                                 {allProducts.map((product) => (
-                                     <TableRow key={product._id as string}>
-                                         <TableCell className="font-medium">
-                                             <div className="flex items-center gap-3">
-                                                 <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md"/>
-                                                 <span>{product.name}</span>
-                                             </div>
-                                         </TableCell>
-                                         <TableCell>{(product.views || 0).toLocaleString()}</TableCell>
-                                         <TableCell>{(product.clicks || 0).toLocaleString()}</TableCell>
-                                         <TableCell>N/A</TableCell> {/* Orders per product not tracked yet */}
-                                         <TableCell>{getProductConversion(product).toFixed(1)}%</TableCell>
-                                         <TableCell>N/A</TableCell> {/* Sales per product not tracked yet */}
-                                         <TableCell>0</TableCell>
-                                         <TableCell>
-                                             <Button variant="outline" size="sm">View</Button>
-                                         </TableCell>
-                                          <TableCell>
-                                             <Button variant="outline" size="sm">View</Button>
+                                 {productRows.length > 0 ? (
+                                     productRows
+                                 ) : (
+                                     <TableRow>
+                                         <TableCell colSpan={9} className="h-24 text-center">
+                                             No products to display.
                                          </TableCell>
                                      </TableRow>
-                                 ))}
+                                 )}
                             </TableBody>
                         </Table>
                     </div>
