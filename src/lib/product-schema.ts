@@ -31,15 +31,17 @@ export const ProductFormSchema = z.object({
   brand: z.string().min(1, "Product brand is required"),
   storefront: z.string().min(1, "Storefront is required"),
   images: z.array(z.string().url()).min(1, "At least one image is required"),
+  videos: z.array(z.string().url()).optional(),
   stock: z.coerce.number().min(0).optional(),
   variants: z.array(VariantSchema),
 });
 
-// Schema for client-side form which uses { value: string } for images
-const ImageValueSchema = z.object({ value: z.string().url() });
+// Schema for client-side form which uses { value: string } for images/videos
+const FileValueSchema = z.object({ value: z.string().url() });
 
 export const ProductFormSchemaForClient = ProductFormSchema.extend({
-  images: z.array(ImageValueSchema).min(1, "At least one image is required"),
+  images: z.array(FileValueSchema).min(1, "At least one image is required"),
+  videos: z.array(FileValueSchema).optional(),
 }).refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
     return data.sellingPrice <= data.mrp;
@@ -68,3 +70,4 @@ export const AutofillProductOutputSchema = z.object({
   stock: z.number().describe('A suggested initial stock quantity, between 50 and 200.'),
 });
 export type AutofillProductOutput = z.infer<typeof AutofillProductOutputSchema>;
+

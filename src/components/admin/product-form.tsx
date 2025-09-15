@@ -77,6 +77,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
     images: existingProduct.images.map(img => ({value: img})),
+    videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
@@ -90,6 +91,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     brand: '', // Product's actual brand
     storefront: selectedBrand === 'All Brands' ? (storefronts[0] || '') : selectedBrand,
     images: [],
+    videos: [],
     variants: [],
     stock: 0,
   };
@@ -105,23 +107,29 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     name: 'images',
   });
 
+  const { fields: videoFields, append: appendVideo, remove: removeVideo } = useFieldArray({
+    control: form.control,
+    name: 'videos',
+  });
+
   const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
     control: form.control,
     name: 'variants',
   });
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value: { value: string }) => void) => {
     const files = e.target.files;
     if (files) {
       for (const file of Array.from(files)) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          appendImage({ value: reader.result as string });
+          append({ value: reader.result as string });
         };
         reader.readAsDataURL(file);
       }
     }
   };
+
 
   const hasVariants = form.watch('variants').length > 0;
   const productName = form.watch('name');
@@ -183,10 +191,11 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   async function onSubmit(data: ProductFormValues) {
     setIsSubmitting(true);
-    // Before submitting, we need to flatten the images array
+    // Before submitting, we need to flatten the images/videos array
     const dataToSubmit = {
       ...data,
       images: data.images.map(img => img.value),
+      videos: data.videos?.map(vid => vid.value),
     };
 
 
@@ -289,7 +298,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             accept="image/png, image/jpeg, image/webp"
                                             className="hidden"
                                             multiple
-                                            onChange={handleFileChange}
+                                            onChange={(e) => handleFileChange(e, appendImage)}
                                         />
                                          <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -326,7 +335,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         accept="video/mp4,video/webm,audio/mp3"
                                         className="hidden"
                                         multiple
-                                        // onChange={handleVideoFileChange} // You would need a new handler for videos
+                                        onChange={(e) => handleFileChange(e, appendVideo)}
                                     />
                                     <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -338,7 +347,20 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 </div>
                             </FormControl>
                             <FormMessage />
-                            {/* You would also need a way to display video previews here */}
+                             {videoFields.length > 0 && (
+                                <div className="grid grid-cols-4 gap-4 mt-4">
+                                    {videoFields.map((field, index) => (
+                                        <div key={field.id} className="relative aspect-square">
+                                            {field.value && (
+                                                <video src={field.value} controls className="w-full h-full object-cover rounded-md bg-muted" />
+                                            )}
+                                            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVideo(index)}>
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </FormItem>
                     </CardContent>
                 </Card>
@@ -486,3 +508,4 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
