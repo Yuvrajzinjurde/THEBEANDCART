@@ -122,7 +122,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                   <span>{product.rating.toFixed(1)}</span>
               </div>
           </div>
-          <div className="flex items-baseline gap-2 flex-wrap">
+          <div className="flex items-baseline gap-2 flex-nowrap">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toLocaleString('en-IN')}
             </p>
@@ -132,7 +132,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                     ₹{mrp.toLocaleString('en-IN')}
                 </p>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-semibold text-green-600">{discountPercentage}% off</span>
+                  <span className="text-sm font-semibold text-green-600 whitespace-nowrap">{discountPercentage}% off</span>
                   <TooltipProvider>
                       <Tooltip>
                           <TooltipTrigger asChild>
