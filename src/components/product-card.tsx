@@ -55,11 +55,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
   return (
     <Link href={`/products/${product._id}`} onClick={handleCardClick} className={cn("group block", className)}>
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-md">
-         {hasDiscount && (
-            <Badge variant="destructive" className="absolute top-2 left-2 z-10">
-                {discountPercentage}% OFF
-            </Badge>
-        )}
         <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden xl:aspect-h-8 xl:aspect-w-7">
           <Image
             src={product.images[0]}
@@ -97,9 +92,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 ₹{sellingPrice.toFixed(2)}
             </p>
             {hasDiscount && (
-                <p className="text-sm font-medium text-muted-foreground line-through">
-                    ₹{mrp.toFixed(2)}
-                </p>
+                <>
+                    <p className="text-sm font-medium text-muted-foreground line-through">
+                        ₹{mrp.toFixed(2)}
+                    </p>
+                    <Badge variant="destructive" className="font-bold">
+                        {discountPercentage}% OFF
+                    </Badge>
+                </>
             )}
           </div>
         </div>
