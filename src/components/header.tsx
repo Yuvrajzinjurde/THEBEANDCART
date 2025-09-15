@@ -46,7 +46,11 @@ export default function Header() {
 
   useEffect(() => {
     // This effect runs only on the client, after initial render
-    setShowSecondaryNav(pathname === `/${brandName}/home`);
+    if (pathname === `/${brandName}/home`) {
+      setShowSecondaryNav(true);
+    } else {
+      setShowSecondaryNav(false);
+    }
   }, [pathname, brandName]);
 
   useEffect(() => {
@@ -150,21 +154,19 @@ export default function Header() {
       </div>
       
       {/* Secondary Navigation */}
-       {showSecondaryNav && (
-          <div>
-              <Separator />
-              <div className="hidden md:flex justify-center">
-                  <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
-                      {secondaryNavItems.map((item) => (
-                          <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                              <item.icon className="h-4 w-4" />
-                              {item.label}
-                          </Link>
-                      ))}
-                  </nav>
-              </div>
+       <div className={cn(!showSecondaryNav && "hidden")}>
+          <Separator />
+          <div className="hidden md:flex justify-center">
+              <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
+                  {secondaryNavItems.map((item) => (
+                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                      </Link>
+                  ))}
+              </nav>
           </div>
-       )}
+       </div>
     </header>
   );
 }
