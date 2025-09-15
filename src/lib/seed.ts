@@ -12,10 +12,6 @@ export const seedDatabase = async () => {
   await dbConnect();
 
   try {
-    // Only clear products
-    await Product.deleteMany({});
-    console.log('Cleared existing products.');
-
     // --- Check for Roles and Admin User, create if they don't exist ---
     let userRole = await Role.findOne({ name: 'user' });
     let adminRole = await Role.findOne({ name: 'admin' });
@@ -83,37 +79,57 @@ export const seedDatabase = async () => {
     }
 
 
-    // --- Create Products ---
-    const products = [];
-    for (let i = 1; i <= 50; i++) {
-      const category = CATEGORIES[i % CATEGORIES.length];
+    // --- Update Products with brand 'reeva' ---
+    const productsToUpdate = await Product.find({ brand: 'reeva' });
+    let updatedCount = 0;
+
+    for (const product of productsToUpdate) {
       const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
       const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.5)).toFixed(2)); // 0-50% discount
+      
+      product.mrp = mrp;
+      product.sellingPrice = sellingPrice;
+      
+      await product.save();
+      updatedCount++;
+    }
+    
+    if (updatedCount > 0) {
+      console.log(`Updated ${updatedCount} products with new MRP and selling prices.`);
+    } else {
+      console.log("No products found for brand 'reeva' to update. Seeding new products instead.");
+      // --- Create Products if none were updated ---
+      await Product.deleteMany({ brand: 'reeva' }); // Clear only reeva products before seeding new ones
+      const products = [];
+      for (let i = 1; i <= 50; i++) {
+        const category = CATEGORIES[i % CATEGORIES.length];
+        const mrp = parseFloat((Math.random() * 100 + 50).toFixed(2));
+        const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.5)).toFixed(2)); // 0-50% discount
 
-      products.push({
-        name: `${category} Product ${i}`,
-        description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
-        mrp: mrp,
-        sellingPrice: sellingPrice,
-        category: category,
-        brand: 'Reeva', // Set all products to the 'Reeva' brand
-        storefront: 'reeva', // Set all products to the 'reeva' storefront
-        images: [
-          `https://picsum.photos/seed/${i}/600/600`,
-          `https://picsum.photos/seed/${i}_2/600/600`,
-          `https://picsum.photos/seed/${i}_3/600/600`,
-          `https://picsum.photos/seed/${i}_4/600/600`,
-        ],
-        stock: Math.floor(Math.random() * 100),
-        rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
-      });
+        products.push({
+          name: `${category} Product ${i}`,
+          description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
+          mrp: mrp,
+          sellingPrice: sellingPrice,
+          category: category,
+          brand: 'reeva', // Set all products to the 'reeva' brand
+          storefront: 'reeva', // Set all products to the 'reeva' storefront
+          images: [
+            `https://picsum.photos/seed/${i}/600/600`,
+            `https://picsum.photos/seed/${i}_2/600/600`,
+            `https://picsum.photos/seed/${i}_3/600/600`,
+            `https://picsum.photos/seed/${i}_4/600/600`,
+          ],
+          stock: Math.floor(Math.random() * 100),
+          rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
+        });
+      }
+      await Product.insertMany(products);
+      console.log(`Created ${products.length} products for brand 'reeva'.`);
     }
 
-    await Product.insertMany(products);
-    console.log(`Created ${products.length} products.`);
 
-
-    return { success: true, message: 'Database seeded successfully!' };
+    return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
     console.error('Error seeding database:', error);
     throw new Error('Error seeding database: ' + error.message);
