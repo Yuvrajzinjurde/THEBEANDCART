@@ -108,57 +108,54 @@ export const seedDatabase = async () => {
     };
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
     console.log('Upserted "nevermore" brand.');
-
-
-    // --- Seed Products and Tags for 'reeva' storefront ---
-    const productTemplates = Array.from({ length: 50 }, (_, i) => {
-        const index = i + 1;
-        const category = CATEGORIES[index % CATEGORIES.length];
-        const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
-        const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
-        return {
-            name: `${category} Product ${index}`,
-            description: `This is a detailed description for product number ${index}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
-            mrp: mrp,
-            sellingPrice: sellingPrice,
-            category: category,
-            brand: 'Reeva Originals',
-            storefront: 'reeva',
-            images: [
-                `https://picsum.photos/seed/${index}/600/600`,
-                `https://picsum.photos/seed/${index}_2/600/600`,
-                `https://picsum.photos/seed/${index}_3/600/600`,
-                `https://picsum.photos/seed/${index}_4/600/600`,
-            ],
-            stock: Math.floor(Math.random() * 100),
-            rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
-            tags: [
-                category.toLowerCase(), 
-                ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-            ],
-        };
-    });
-
-    const bulkOps = productTemplates.map(template => ({
-        updateOne: {
-            filter: { name: template.name, storefront: 'reeva' },
-            update: {
-                $set: { tags: template.tags },
-                $setOnInsert: {
-                    ...template,
-                }
-            },
-            upsert: true
-        }
-    }));
     
-    if (bulkOps.length > 0) {
-        const result = await Product.bulkWrite(bulkOps);
-        console.log(`Product seeding complete. Matched: ${result.matchedCount}, Upserted: ${result.upsertedCount}, Modified: ${result.modifiedCount}`);
-    } else {
-        console.log("No product templates to seed.");
-    }
+    // --- DIRECT TAG UPDATE SCRIPT ---
+    console.log("Fetching all 'reeva' storefront products to update tags...");
+    const productsToUpdate = await Product.find({ storefront: 'reeva' });
 
+    if (productsToUpdate.length === 0) {
+        console.log("No products found for 'reeva' storefront. Seeding new products.");
+        // If no products exist, create them with tags.
+        const productTemplates = Array.from({ length: 50 }, (_, i) => {
+            const index = i + 1;
+            const category = CATEGORIES[index % CATEGORIES.length];
+            const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
+            const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
+            return {
+                name: `${category} Product ${index}`,
+                description: `This is a detailed description for product number ${index}. It is a high-quality item from the ${category.toLowerCase()} category.`,
+                mrp: mrp, sellingPrice: sellingPrice, category: category,
+                images: [`https://picsum.photos/seed/${index}/600/600`],
+                stock: Math.floor(Math.random() * 100), rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
+                brand: 'Reeva Originals', storefront: 'reeva',
+                tags: [category.toLowerCase(), ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)],
+            };
+        });
+        await Product.insertMany(productTemplates);
+        console.log(`Created and seeded ${productTemplates.length} new products with tags.`);
+
+    } else {
+        const bulkOps = productsToUpdate.map(product => {
+            const newTags = [
+                product.category.toLowerCase(),
+                ...(tagOptions[product.category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
+            ];
+            return {
+                updateOne: {
+                    filter: { _id: product._id },
+                    update: { $set: { tags: newTags } }
+                }
+            };
+        });
+
+        if (bulkOps.length > 0) {
+            console.log(`Found ${bulkOps.length} products. Updating all with new tags.`);
+            const result = await Product.bulkWrite(bulkOps);
+            console.log(`Tag update complete. Modified products: ${result.modifiedCount}`);
+        } else {
+            console.log("All products already have tags.");
+        }
+    }
 
     return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
@@ -166,3 +163,5 @@ export const seedDatabase = async () => {
     throw new Error('Error seeding database: ' + error.message);
   }
 };
+
+    
