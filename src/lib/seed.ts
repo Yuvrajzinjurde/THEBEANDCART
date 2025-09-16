@@ -17,7 +17,8 @@ const CATEGORIES = [
     "Craft & Office Supplies", "Sports & Fitness", "Automotive Accessories",
     "Pet Supplies", "Office Supplies & Stationery",
     "Industrial & Scientific Products", "Musical Instruments", "Books",
-    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming"
+    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming",
+    "Combos", "Corrugated Boxes"
 ];
 
 

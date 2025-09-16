@@ -62,7 +62,9 @@ const CATEGORIES = [
     "Books",
     "Eye Utility",
     "Bags, Luggage & Travel Accessories",
-    "Mens Personal Care & Grooming"
+    "Mens Personal Care & Grooming",
+    "Combos",
+    "Corrugated Boxes"
 ];
 
 

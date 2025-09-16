@@ -11,7 +11,8 @@ const CATEGORIES = [
     "Craft & Office Supplies", "Sports & Fitness", "Automotive Accessories",
     "Pet Supplies", "Office Supplies & Stationery",
     "Industrial & Scientific Products", "Musical Instruments", "Books",
-    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming"
+    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming",
+    "Combos", "Corrugated Boxes"
 ];
 
 const FileValueSchema = z.object({ value: z.string().url() });
@@ -116,3 +117,4 @@ export const GenerateTagsOutputSchema = z.object({
   tags: z.array(z.string()).describe('An array of 5-7 relevant, single-word tags for the product.'),
 });
 export type GenerateTagsOutput = z.infer<typeof GenerateTagsOutputSchema>;
+
