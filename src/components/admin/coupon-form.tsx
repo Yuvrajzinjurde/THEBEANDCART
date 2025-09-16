@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -33,11 +32,10 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues: Partial<CouponFormValues> = existingCoupon ? {
+  const defaultValues = React.useMemo(() => (existingCoupon ? {
       ...existingCoupon,
       startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
       endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
-      value: existingCoupon.value,
   } : {
     code: '',
     type: 'percentage',
@@ -46,7 +44,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
     startDate: undefined,
     endDate: undefined
-  };
+  }), [existingCoupon, selectedBrand]);
 
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(CouponFormSchema),
@@ -64,10 +62,15 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
-    // For free shipping, ensure value is not sent
-    const submissionData = { ...data };
-    if (submissionData.type === 'free-shipping') {
-        delete (submissionData as any).value;
+    // Manually transform data right before submission to ensure correct types
+    const transformedData = {
+        ...data,
+        value: data.value === '' || data.value === null || isNaN(Number(data.value)) ? undefined : parseFloat(String(data.value)),
+        minPurchase: data.minPurchase === '' || data.minPurchase === null || isNaN(Number(data.minPurchase)) ? 0 : parseFloat(String(data.minPurchase)),
+    };
+
+    if (transformedData.type === 'free-shipping') {
+        delete transformedData.value;
     }
 
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
@@ -77,7 +80,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(transformedData),
       });
 
       const result = await response.json();
@@ -151,9 +154,9 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormLabel>Discount Type</FormLabel>
                     <FormControl>
                         <RadioGroup
-                        onValueChange={(value: 'percentage' | 'fixed' | 'free-shipping') => {
+                        onValueChange={(value) => {
                             field.onChange(value);
-                             if (value === 'free-shipping') {
+                            if (value === 'free-shipping') {
                                 form.setValue('value', undefined, { shouldValidate: true });
                             }
                         }}
@@ -197,11 +200,9 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             <FormControl>
                                 <Input 
                                   type="number"
+                                  step="0.01"
+                                  placeholder="0"
                                   {...field}
-                                  onChange={(e) => {
-                                      const val = e.target.value;
-                                      field.onChange(val === '' ? undefined : parseFloat(val));
-                                  }}
                                   value={field.value ?? ''}
                                   className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')}
                                 />
@@ -226,8 +227,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                         <FormControl>
                             <Input 
                               type="number"
+                              placeholder="0"
                               {...field} 
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                               value={field.value}
                               className="pl-7"
                             />
