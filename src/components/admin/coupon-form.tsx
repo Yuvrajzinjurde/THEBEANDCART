@@ -62,11 +62,18 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
+    // Conditionally remove value for free-shipping coupons
+    const dataToSubmit: Partial<CouponFormValues> = { ...data };
+    if (data.type === 'free-shipping') {
+      delete dataToSubmit.value;
+    }
+
+
     try {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSubmit),
       });
 
       const result = await response.json();
@@ -98,7 +105,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
             render={({ field }) => (
                 <FormItem>
                     <FormLabel>Brand</FormLabel>
-                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={mode === 'edit'}>
+                     <Select onValueChange={field.onChange} value={field.value} disabled={mode === 'edit'}>
                         <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select brand this coupon applies to" />
