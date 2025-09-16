@@ -16,7 +16,7 @@ import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Info, Download, Upload, PlusCircle } from 'lucide-react';
+import { Info, Download, Upload, PlusCircle, ImageIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
@@ -215,13 +215,19 @@ export default function InventoryPage() {
                             className="cursor-pointer"
                         >
                             <TableCell className="hidden sm:table-cell">
-                                <Image
-                                    alt={product.name}
-                                    className="aspect-square rounded-md object-cover"
-                                    height="64"
-                                    src={product.images[0]}
-                                    width="64"
-                                />
+                                {product.images && product.images.length > 0 ? (
+                                    <Image
+                                        alt={product.name}
+                                        className="aspect-square rounded-md object-cover"
+                                        height="64"
+                                        src={product.images[0]}
+                                        width="64"
+                                    />
+                                ) : (
+                                    <div className="flex aspect-square h-full w-full items-center justify-center rounded-md bg-muted">
+                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                )}
                             </TableCell>
                             <TableCell className="font-medium">{product.name}</TableCell>
                             <TableCell>

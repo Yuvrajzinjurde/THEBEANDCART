@@ -135,10 +135,7 @@ export const seedDatabase = async () => {
                 mrp,
                 sellingPrice,
                 category,
-                images: [
-                    `https://picsum.photos/seed/${storefront}-${i}-a/600/600`,
-                    `https://picsum.photos/seed/${storefront}-${i}-b/600/600`,
-                ],
+                images: [],
                 stock: Math.floor(Math.random() * 200),
                 rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
                 brand: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Designs`,
