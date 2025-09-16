@@ -454,33 +454,29 @@ export default function BrandHomePage() {
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {productSections.map(([category, items], index) => (
-              <React.Fragment key={category}>
-                  <div className="border rounded-lg p-4">
+            {productSections.map(([category, items]) => (
+                <div key={category} className="border rounded-lg p-4">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-semibold tracking-tight">{category}</h2>
-                       <Button variant="link" asChild>
-                          <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
-                              Discover All
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                      </Button>
+                        <h2 className="text-xl font-semibold tracking-tight">{category}</h2>
+                        <Button variant="link" asChild>
+                            <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
+                                Discover All
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
                     </div>
                     <Separator className="mb-6" />
-                     <div className="grid grid-cols-2 gap-4">
-                          {items.slice(0, 2).map((product) => (
-                              <BrandProductCard key={product._id as string} product={product} />
-                          ))}
-                      </div>
-                  </div>
-                  {index === 0 && (
-                      <div className="lg:col-span-3">
-                          <OffersSection brand={brand} />
-                          <CategoryBannerGrid brand={brand} />
-                      </div>
-                  )}
-              </React.Fragment>
+                    <div className="grid grid-cols-2 gap-4">
+                        {items.slice(0, 2).map((product) => (
+                            <BrandProductCard key={product._id as string} product={product} />
+                        ))}
+                    </div>
+                </div>
             ))}
+            <div className="lg:col-span-3">
+                <OffersSection brand={brand} />
+                <CategoryBannerGrid brand={brand} />
+            </div>
           </div>
         ) : (
           <div className="text-center py-16">
