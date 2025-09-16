@@ -62,9 +62,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
+    // Create a mutable copy of the data to submit
+    const dataToSubmit: Record<string, any> = { ...data };
+
     // Conditionally remove value for free-shipping coupons
-    const dataToSubmit: Partial<CouponFormValues> = { ...data };
-    if (data.type === 'free-shipping') {
+    if (dataToSubmit.type === 'free-shipping') {
       delete dataToSubmit.value;
     }
 
@@ -317,5 +319,3 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     </Form>
   );
 }
-
-    
