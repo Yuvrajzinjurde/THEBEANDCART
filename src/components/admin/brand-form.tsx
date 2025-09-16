@@ -112,8 +112,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
       const newCategory = categoryInput.trim();
-      const currentCategories = form.getValues('categories') || [];
-      if (newCategory && !currentCategories.includes(newCategory)) {
+      if (newCategory && !(form.getValues('categories') || []).includes(newCategory)) {
         appendCategory(newCategory);
         setCategoryInput('');
       }
@@ -251,8 +250,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     <div className="flex flex-wrap gap-2 mt-4">
                                         {categoryFields.map((field, index) => (
                                             <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
-                                                {/* @ts-ignore */}
-                                                {field.value}
+                                                {form.getValues('categories')?.[index]}
                                                 <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
                                                     <X className="h-3 w-3" />
                                                 </button>
