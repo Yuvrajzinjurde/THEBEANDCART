@@ -14,8 +14,6 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { useRef } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
@@ -31,10 +29,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const router = useRouter();
   const { user, token } = useAuth();
   const { setWishlist, setCart } = useUserStore();
-  const plugin = useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true, playOnInit: false })
-  );
-
+  
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -114,12 +109,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       href={`/products/${product._id}`} 
       onClick={handleCardClick} 
       className={cn("group block", className)}
-      onMouseEnter={() => plugin.current?.play()}
-      onMouseLeave={() => plugin.current?.stop()}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
         <Carousel
-            plugins={[plugin.current]}
+            opts={{ loop: product.images.length > 1 }}
             className="w-full"
         >
             <CarouselContent>
