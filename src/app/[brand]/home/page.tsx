@@ -48,7 +48,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
             <Carousel
                 opts={{
                     align: "start",
-                    loop: true,
+                    loop: products.length > 6,
                 }}
                 className="w-full"
             >
@@ -343,15 +343,15 @@ export default function BrandHomePage() {
                 return (views * 0.2) + (clicks * 0.5) + (rating * 0.3);
             };
             const sortedByPopularity = [...fetchedProducts].sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
-            setTrendingProducts(sortedByPopularity.slice(0, 10));
+            setTrendingProducts(sortedByPopularity.slice(0, 12));
 
             // 2. People's Choice (by highest rating)
             const sortedByRating = [...fetchedProducts].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-            setPeoplesChoiceProducts(sortedByRating.slice(0, 10));
+            setPeoplesChoiceProducts(sortedByRating.slice(0, 12));
             
             // 3. Newest Arrivals (by creation date)
             const sortedByDate = [...fetchedProducts].sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-            setNewestProducts(sortedByDate.slice(0, 10));
+            setNewestProducts(sortedByDate.slice(0, 12));
 
 
             // 4. Group products by category for main sections
