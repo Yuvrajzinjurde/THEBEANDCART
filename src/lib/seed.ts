@@ -4,24 +4,125 @@ import Role from '@/models/role.model';
 import User from '@/models/user.model';
 import Product from '@/models/product.model';
 import Brand from '@/models/brand.model';
+import Review from '@/models/review.model';
 import bcrypt from 'bcryptjs';
+import { Types } from 'mongoose';
 
-const CATEGORIES = ['Electronics', 'Apparel', 'Books', 'Home Goods', 'Health'];
 
-const tagOptions: { [key: string]: string[] } = {
-    'Electronics': ['gadget', 'tech', 'smart', 'device', 'portable'],
-    'Apparel': ['fashion', 'clothing', 'style', 'wear', 'outfit'],
-    'Books': ['reading', 'literature', 'novel', 'hardcover', 'pages'],
-    'Home Goods': ['decor', 'living', 'kitchen', 'furniture', 'utility'],
-    'Health': ['wellness', 'care', 'personal', 'supplement', 'vitamin']
-};
+const realisticProducts = [
+    {
+        name: "Classic Crewneck T-Shirt",
+        description: "A timeless wardrobe staple, this crewneck t-shirt is crafted from ultra-soft, breathable 100% premium cotton for all-day comfort. Its classic fit is not too tight, not too loose, making it perfect for layering or wearing on its own. Available in a variety of essential colors.",
+        category: "Apparel",
+        brand: "Reeva Basics",
+        storefront: "reeva",
+        variants: [
+            {
+                color: "Heather Grey", size: "M", stock: 89,
+                images: ["https://picsum.photos/seed/grey-tshirt1/600/600", "https://picsum.photos/seed/grey-tshirt2/600/600"]
+            },
+            {
+                color: "Heather Grey", size: "L", stock: 65,
+                images: ["https://picsum.photos/seed/grey-tshirt1/600/600", "https://picsum.photos/seed/grey-tshirt2/600/600"]
+            },
+            {
+                color: "Navy Blue", size: "M", stock: 78,
+                images: ["https://picsum.photos/seed/blue-tshirt1/600/600", "https://picsum.photos/seed/blue-tshirt2/600/600"]
+            },
+            {
+                color: "Navy Blue", size: "XL", stock: 43,
+                images: ["https://picsum.photos/seed/blue-tshirt1/600/600", "https://picsum.photos/seed/blue-tshirt2/600/600"]
+            },
+             {
+                color: "Forrest Green", size: "L", stock: 55,
+                images: ["https://picsum.photos/seed/green-tshirt1/600/600", "https://picsum.photos/seed/green-tshirt2/600/600"]
+            },
+        ],
+        tags: ["t-shirt", "apparel", "casual", "cotton", "menswear"],
+        mrp: 1299,
+        sellingPrice: 799,
+    },
+    {
+        name: "Artisan Roast Coffee Beans",
+        description: "Experience the rich, aromatic flavor of our single-origin artisan coffee beans. Sourced from the high-altitude farms of Colombia, these beans are medium-roasted to perfection, unlocking notes of chocolate, citrus, and caramel. Ideal for espresso, French press, or your favorite brewing method.",
+        category: "Grocery",
+        brand: "The Daily Grind",
+        storefront: "reeva",
+        variants: [
+            {
+                size: "250g", stock: 150,
+                images: ["https://picsum.photos/seed/coffee1/600/600", "https://picsum.photos/seed/coffee2/600/600"]
+            },
+            {
+                size: "500g", stock: 90,
+                images: ["https://picsum.photos/seed/coffee3/600/600", "https://picsum.photos/seed/coffee4/600/600"]
+            },
+            {
+                size: "1kg", stock: 40,
+                images: ["https://picsum.photos/seed/coffee5/600/600", "https://picsum.photos/seed/coffee6/600/600"]
+            }
+        ],
+        tags: ["coffee", "beans", "beverage", "grocery", "artisan"],
+        mrp: 800,
+        sellingPrice: 650,
+    },
+    {
+        name: "Celestial Moonstone Necklace",
+        description: "Adorn yourself with the ethereal glow of our Celestial Moonstone Necklace. This enchanting piece features a genuine, ethically-sourced rainbow moonstone, known for its calming energy and connection to the moon's cycles. The minimalist design showcases the stone's natural beauty, set in a delicate 925 sterling silver chain.",
+        category: "Women Fashion",
+        brand: "Luna Jewels",
+        storefront: "nevermore",
+        variants: [
+            {
+                color: "Silver", stock: 60,
+                images: ["https://picsum.photos/seed/necklace1/600/600", "https://picsum.photos/seed/necklace2/600/600"]
+            },
+            {
+                color: "Gold Plated", stock: 35,
+                images: ["https://picsum.photos/seed/necklace3/600/600", "https://picsum.photos/seed/necklace4/600/600"]
+            }
+        ],
+        tags: ["jewelry", "necklace", "moonstone", "silver", "women"],
+        mrp: 4999,
+        sellingPrice: 3499,
+    },
+    {
+        name: "Evergreen Scented Soy Candle",
+        description: "Bring the crisp, refreshing scent of a forest into your home with our Evergreen Scented Soy Candle. Hand-poured with 100% natural soy wax and infused with a blend of pine, cedarwood, and eucalyptus essential oils, this candle provides a clean, long-lasting burn. Housed in a minimalist ceramic jar that complements any decor.",
+        category: "Home & Living",
+        brand: "Hearth & Home",
+        storefront: "reeva",
+        variants: [
+            {
+                size: "8 oz", stock: 120,
+                images: ["https://picsum.photos/seed/candle1/600/600", "https://picsum.photos/seed/candle2/600/600"]
+            },
+            {
+                size: "12 oz", stock: 70,
+                images: ["https://picsum.photos/seed/candle3/600/600", "https://picsum.photos/seed/candle4/600/600"]
+            }
+        ],
+        tags: ["candle", "home-decor", "scented", "soy-wax", "evergreen"],
+        mrp: 1500,
+        sellingPrice: 1100,
+    }
+];
 
 
 export const seedDatabase = async () => {
   await dbConnect();
 
   try {
-    // --- Always ensure Roles and Admin User exist ---
+    console.log('Starting database seed...');
+
+    // --- Clean up old data ---
+    console.log('Clearing old products and reviews...');
+    await Product.deleteMany({ storefront: { $in: ['reeva', 'nevermore'] } });
+    await Review.deleteMany({});
+    console.log('Old data cleared.');
+    
+
+    // --- Ensure Roles and Admin User exist ---
     let userRole = await Role.findOne({ name: 'user' });
     let adminRole = await Role.findOne({ name: 'admin' });
 
@@ -41,19 +142,15 @@ export const seedDatabase = async () => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('password', salt);
       const adminUser = new User({
-        firstName: 'Admin',
-        lastName: 'User',
-        email: 'admin@reeva.com',
-        password: hashedPassword,
-        roles: [adminRole._id],
-        brand: 'reeva',
+        firstName: 'Admin', lastName: 'User', email: 'admin@reeva.com',
+        password: hashedPassword, roles: [adminRole._id], brand: 'reeva',
         address: { street: '123 Admin St', city: 'Adminville', state: 'AS', zip: '12345', country: 'USA' }
       });
       await adminUser.save();
       console.log('Created admin user.');
     }
     
-    // --- Always ensure Brands exist ---
+    // --- Upsert Brands ---
     const reevaBrandData = {
       displayName: 'Reeva', permanentName: 'reeva', logoUrl: 'https://picsum.photos/seed/reevalogo/200/200',
       banners: [
@@ -108,56 +205,58 @@ export const seedDatabase = async () => {
     };
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
     console.log('Upserted "nevermore" brand.');
-    
-    // --- UNCONDITIONAL TAG UPDATE SCRIPT ---
-    console.log("Starting unconditional tag update for all 'reeva' storefront products...");
-    const productsToUpdate = await Product.find({ storefront: 'reeva' });
-    console.log(`Found ${productsToUpdate.length} products to process for tag updates.`);
 
-    if (productsToUpdate.length > 0) {
-        const bulkOps = productsToUpdate.map(product => {
-            const newTags = [
-                product.category.toLowerCase(),
-                ...(tagOptions[product.category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-            ].filter(tag => tag); // Ensure no undefined tags
+    // --- Create Products and Reviews ---
+    console.log('Creating new realistic products...');
+    let createdProductsCount = 0;
+    const reviewPromises = [];
 
-            return {
-                updateOne: {
-                    filter: { _id: product._id },
-                    // $set will either add the field or overwrite the existing one.
-                    update: { $set: { tags: newTags } }
-                }
-            };
-        });
+    for (const productTemplate of realisticProducts) {
+        const styleId = new Types.ObjectId().toHexString();
+        const productDocs = productTemplate.variants.map(variant => ({
+            ...productTemplate,
+            ...variant,
+            styleId,
+            name: `${productTemplate.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+            mrp: productTemplate.mrp,
+            sellingPrice: productTemplate.sellingPrice,
+            rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
+            variants: undefined, // remove nested variants array
+        }));
+        
+        const newProducts = await Product.insertMany(productDocs);
+        createdProductsCount += newProducts.length;
 
-        console.log(`Created ${bulkOps.length} bulk update operations. Executing now...`);
-        const result = await Product.bulkWrite(bulkOps);
-        console.log(`Tag update complete. Matched products: ${result.matchedCount}, Modified products: ${result.modifiedCount}`);
-
-        return { success: true, message: `Database seed/update completed successfully! ${result.modifiedCount} products had their tags updated.` };
-    } else {
-        console.log("No products found for 'reeva' storefront. Seeding new products instead.");
-        const productTemplates = Array.from({ length: 50 }, (_, i) => {
-            const index = i + 1;
-            const category = CATEGORIES[index % CATEGORIES.length];
-            const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
-            const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
-            return {
-                name: `${category} Product ${index}`,
-                description: `This is a detailed description for product number ${index}. It is a high-quality item from the ${category.toLowerCase()} category.`,
-                mrp: mrp, sellingPrice: sellingPrice, category: category,
-                images: [`https://picsum.photos/seed/${index}/600/600`],
-                stock: Math.floor(Math.random() * 100), rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
-                brand: 'Reeva Originals', storefront: 'reeva',
-                tags: [category.toLowerCase(), ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)],
-            };
-        });
-        await Product.insertMany(productTemplates);
-        console.log(`Created and seeded ${productTemplates.length} new products with tags.`);
-        return { success: true, message: `Database seeded successfully with ${productTemplates.length} new products.` };
+        // Create reviews for the first product variant
+        const firstProductId = newProducts[0]._id;
+        reviewPromises.push(Review.create({
+            productId: firstProductId,
+            userId: new Types.ObjectId(), // dummy user
+            userName: "Alex Doe",
+            rating: 5,
+            review: "Absolutely fantastic quality! It feels durable and looks even better in person. I've already gotten so many compliments. Highly recommend to anyone on the fence.",
+        }));
+        if (createdProductsCount % 2 === 0) { // Add a second review for some products
+            reviewPromises.push(Review.create({
+                productId: firstProductId,
+                userId: new Types.ObjectId(), // dummy user
+                userName: "Samira Jones",
+                rating: 4,
+                review: "Really great product, very happy with my purchase. It arrived quickly and was well-packaged. The color is slightly different than the photo, but I still love it.",
+            }));
+        }
     }
+
+    await Promise.all(reviewPromises);
+    console.log(`Created ${createdProductsCount} products and ${reviewPromises.length} reviews.`);
+    console.log('Database seed completed successfully!');
+
+    return { success: true, message: `Database seeded successfully with ${createdProductsCount} products and ${reviewPromises.length} reviews.` };
+
   } catch (error: any) {
     console.error('Error seeding database:', error);
     throw new Error('Error seeding database: ' + error.message);
   }
 };
+
+    
