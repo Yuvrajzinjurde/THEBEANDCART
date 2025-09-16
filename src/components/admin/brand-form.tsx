@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -303,7 +304,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Category Banners</CardTitle>
-                <CardDescription>Banners for the category grid on the main landing page.</CardDescription>
+                <CardDescription>Manage the category grid banners for the main landing page. A total of 9 banners are needed for the grid layout.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {categoryBannerFields.map((field, index) => (
@@ -558,3 +559,5 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
+
+    
