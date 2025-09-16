@@ -40,7 +40,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   } : {
     code: '',
     type: 'percentage',
-    value: 0,
+    value: undefined,
     minPurchase: 0,
     brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
     startDate: undefined,
@@ -55,14 +55,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const discountType = form.watch('type');
 
-  useEffect(() => {
-    // When type changes to 'free-shipping', clear the value.
-    // When it changes back, the user needs to re-enter it.
-    if (discountType === 'free-shipping') {
-      form.setValue('value', undefined);
-    }
-  }, [discountType, form]);
-
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
     form.setValue('code', `SALE${randomPart}`);
@@ -71,11 +63,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
-    const dataToSubmit: Partial<CouponFormValues> = { ...data };
-    if (data.type === 'free-shipping') {
-      delete dataToSubmit.value;
-    }
-
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -83,7 +70,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSubmit),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -157,8 +144,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormLabel>Discount Type</FormLabel>
                     <FormControl>
                         <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        onValueChange={(value) => {
+                            field.onChange(value);
+                            // When changing type, clear the value to avoid validation errors
+                            form.setValue('value', undefined, { shouldValidate: true });
+                        }}
+                        value={field.value}
                         className="flex items-center gap-4"
                         >
                         <FormItem className="flex items-center space-x-2 space-y-0">

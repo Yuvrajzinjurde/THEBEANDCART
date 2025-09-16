@@ -14,40 +14,6 @@ export const CouponFormSchema = z.object({
   startDate: z.date().optional(),
   endDate: z.date().optional(),
 }).refine(data => {
-  // If type is not free-shipping, value must be a number
-  if (data.type !== 'free-shipping') {
-    return typeof data.value === 'number';
-  }
-  return true;
-}, {
-  message: "Discount value is required for this type.",
-  path: ["value"],
-}).refine(data => {
-  if (data.type === 'percentage') {
-    return data.value! >= 0 && data.value! <= 100;
-  }
-  return true;
-}, {
-  message: "Percentage value must be between 0 and 100.",
-  path: ["value"],
-}).refine(data => {
-  if (data.type === 'fixed') {
-    return data.value! >= 0;
-  }
-  return true;
-}, {
-  message: "Fixed amount cannot be negative.",
-  path: ["value"],
-}).refine(data => {
-  // if type is free-shipping, value must be undefined
-  if (data.type === 'free-shipping') {
-    return data.value === undefined;
-  }
-  return true;
-}, {
-    message: "Value should not be set for free shipping.",
-    path: ["value"],
-}).refine(data => {
     if (data.startDate && data.endDate) {
         return data.endDate > data.startDate;
     }
@@ -55,6 +21,20 @@ export const CouponFormSchema = z.object({
 }, {
     message: "End date must be after start date.",
     path: ["endDate"],
+}).refine(data => {
+  if (data.type === 'percentage') {
+    return typeof data.value === 'number' && data.value >= 0 && data.value <= 100;
+  }
+  if (data.type === 'fixed') {
+    return typeof data.value === 'number' && data.value >= 0;
+  }
+  if (data.type === 'free-shipping') {
+    return data.value === undefined;
+  }
+  return false; // Should not happen
+}, {
+  message: "Invalid value for the selected discount type. Percentage must be 0-100, Fixed must be >= 0, and Free Shipping must have no value.",
+  path: ["value"],
 });
 
 
