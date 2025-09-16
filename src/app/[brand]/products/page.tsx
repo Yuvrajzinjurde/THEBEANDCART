@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Frown } from 'lucide-react';
+import { ChevronDown, Smile } from 'lucide-react';
 
 export type ActiveFilters = {
   categories: string[];
@@ -253,9 +253,9 @@ export default function ProductsPage() {
                     </div>
                 ) : (
                     <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
-                        <Frown className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                        <p className="text-lg font-semibold">No Products Found</p>
-                        <p className="text-sm text-muted-foreground">Your filter combination yielded no results.</p>
+                        <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                        <p className="text-lg font-semibold">We're working to get these products on board for you, with a smile!</p>
+                        <p className="text-sm text-muted-foreground">Your filter combination yielded no results for now.</p>
                          <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
                     </div>
                 )}
