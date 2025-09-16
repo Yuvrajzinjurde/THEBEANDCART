@@ -45,6 +45,7 @@ export async function PUT(
             return NextResponse.json({ message: 'Invalid Product ID' }, { status: 400 });
         }
 
+        // Use the server-side schema that expects flat arrays for tags/images
         const validation = ProductFormSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
@@ -53,6 +54,7 @@ export async function PUT(
         // For now, we only support updating the main product, not variants through this endpoint.
         const { variants, ...updateData } = validation.data;
 
+        // The updateData now correctly includes the 'tags' field from the validated data
         const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!updatedProduct) {
