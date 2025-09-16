@@ -109,12 +109,34 @@ export const seedDatabase = async () => {
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
     console.log('Upserted "nevermore" brand.');
     
-    // --- FORCE TAG UPDATE SCRIPT ---
-    console.log("Fetching all 'reeva' storefront products to force update tags...");
+    // --- UNCONDITIONAL TAG UPDATE SCRIPT ---
+    console.log("Starting unconditional tag update for all 'reeva' storefront products...");
     const productsToUpdate = await Product.find({ storefront: 'reeva' });
+    console.log(`Found ${productsToUpdate.length} products to process for tag updates.`);
 
-    if (productsToUpdate.length === 0) {
-        console.log("No products found for 'reeva' storefront. Seeding new products.");
+    if (productsToUpdate.length > 0) {
+        const bulkOps = productsToUpdate.map(product => {
+            const newTags = [
+                product.category.toLowerCase(),
+                ...(tagOptions[product.category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
+            ].filter(tag => tag); // Ensure no undefined tags
+
+            return {
+                updateOne: {
+                    filter: { _id: product._id },
+                    // $set will either add the field or overwrite the existing one.
+                    update: { $set: { tags: newTags } }
+                }
+            };
+        });
+
+        console.log(`Created ${bulkOps.length} bulk update operations. Executing now...`);
+        const result = await Product.bulkWrite(bulkOps);
+        console.log(`Tag update complete. Matched products: ${result.matchedCount}, Modified products: ${result.modifiedCount}`);
+
+        return { success: true, message: `Database seed/update completed successfully! ${result.modifiedCount} products had their tags updated.` };
+    } else {
+        console.log("No products found for 'reeva' storefront. Seeding new products instead.");
         const productTemplates = Array.from({ length: 50 }, (_, i) => {
             const index = i + 1;
             const category = CATEGORIES[index % CATEGORIES.length];
@@ -132,33 +154,8 @@ export const seedDatabase = async () => {
         });
         await Product.insertMany(productTemplates);
         console.log(`Created and seeded ${productTemplates.length} new products with tags.`);
-
-    } else {
-        const bulkOps = productsToUpdate.map(product => {
-            const newTags = [
-                product.category.toLowerCase(),
-                ...(tagOptions[product.category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-            ].filter(tag => tag); // Ensure no undefined tags
-
-            return {
-                updateOne: {
-                    filter: { _id: product._id },
-                    // $set will either add the field or overwrite the existing one.
-                    update: { $set: { tags: newTags } }
-                }
-            };
-        });
-
-        if (bulkOps.length > 0) {
-            console.log(`Found ${bulkOps.length} products. Force updating all with new tags.`);
-            const result = await Product.bulkWrite(bulkOps);
-            console.log(`Tag update complete. Modified products: ${result.modifiedCount}`);
-        } else {
-            console.log("No products to update.");
-        }
+        return { success: true, message: `Database seeded successfully with ${productTemplates.length} new products.` };
     }
-
-    return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
     console.error('Error seeding database:', error);
     throw new Error('Error seeding database: ' + error.message);
