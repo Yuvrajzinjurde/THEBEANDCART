@@ -29,7 +29,7 @@ interface CouponFormProps {
 
 export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const router = useRouter();
-  const { selectedBrand } = useBrandStore();
+  const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const defaultValues: CouponFormValues = existingCoupon ? {
@@ -41,7 +41,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     type: 'percentage',
     value: 0,
     minPurchase: 0,
-    brand: selectedBrand === 'All Brands' ? '' : selectedBrand,
+    brand: selectedBrand,
     startDate: undefined,
     endDate: undefined
   };
@@ -105,11 +105,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                           <SelectItem value="All Brands">All Brands</SelectItem>
-                           {/* TODO: Fetch and list available brands */}
+                           {availableBrands.map(brand => (
+                               <SelectItem key={brand} value={brand} className="capitalize">{brand}</SelectItem>
+                           ))}
                         </SelectContent>
                     </Select>
-                    <FormDescription>The brand this promotion will be active for.</FormDescription>
+                    <FormDescription>The brand this promotion will be active for. Select "All Brands" for a global coupon.</FormDescription>
                     <FormMessage />
                 </FormItem>
             )}
@@ -309,3 +310,5 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     </Form>
   );
 }
+
+    
