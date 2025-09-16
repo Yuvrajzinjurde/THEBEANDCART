@@ -21,7 +21,7 @@ export const seedDatabase = async () => {
   await dbConnect();
 
   try {
-    // --- Check for Roles and Admin User, create if they don't exist ---
+    // --- Always ensure Roles and Admin User exist ---
     let userRole = await Role.findOne({ name: 'user' });
     let adminRole = await Role.findOne({ name: 'admin' });
 
@@ -40,44 +40,25 @@ export const seedDatabase = async () => {
     if (!adminUserExists) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('password', salt);
-
       const adminUser = new User({
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@reeva.com',
         password: hashedPassword,
         roles: [adminRole._id],
-        brand: 'reeva', // Belongs to a default brand
-        address: {
-          street: '123 Admin St',
-          city: 'Adminville',
-          state: 'AS',
-          zip: '12345',
-          country: 'USA'
-        }
+        brand: 'reeva',
+        address: { street: '123 Admin St', city: 'Adminville', state: 'AS', zip: '12345', country: 'USA' }
       });
       await adminUser.save();
       console.log('Created admin user.');
     }
     
-    // --- Seed Reeva Brand ---
+    // --- Always ensure Brands exist ---
     const reevaBrandData = {
-      displayName: 'Reeva',
-      permanentName: 'reeva',
-      logoUrl: 'https://picsum.photos/seed/reevalogo/200/200',
+      displayName: 'Reeva', permanentName: 'reeva', logoUrl: 'https://picsum.photos/seed/reevalogo/200/200',
       banners: [
-        {
-          title: 'Welcome to Reeva',
-          description: 'Your one-stop shop for everything you need.',
-          imageUrl: 'https://picsum.photos/seed/reevabanner1/1600/400',
-          imageHint: 'modern storefront',
-        },
-        {
-          title: 'Summer Sale!',
-          description: 'Up to 50% off on selected items. Dont miss out!',
-          imageUrl: 'https://picsum.photos/seed/reevabanner2/1600/400',
-          imageHint: 'shopping sale',
-        }
+        { title: 'Welcome to Reeva', description: 'Your one-stop shop for everything you need.', imageUrl: 'https://picsum.photos/seed/reevabanner1/1600/400', imageHint: 'modern storefront' },
+        { title: 'Summer Sale!', description: 'Up to 50% off on selected items. Dont miss out!', imageUrl: 'https://picsum.photos/seed/reevabanner2/1600/400', imageHint: 'shopping sale' }
       ],
       themeName: 'Blue',
       offers: [
@@ -91,12 +72,8 @@ export const seedDatabase = async () => {
           { customerName: 'Priya Singh', rating: 5, reviewText: 'Reeva never disappoints! Found exactly what I was looking for. Highly recommended to everyone.', customerAvatarUrl: 'https://picsum.photos/seed/avatar3/100/100' }
       ],
       promoBanner: {
-          title: 'The Style Update',
-          description: 'Discover the latest trends and refresh your wardrobe with our new arrivals. Explore curated collections just for you.',
-          imageUrl: 'https://picsum.photos/seed/reevapromo/1200/600',
-          imageHint: 'fashion collection',
-          buttonText: 'Shop New Arrivals',
-          buttonLink: '/reeva/products'
+          title: 'The Style Update', description: 'Discover the latest trends and refresh your wardrobe with our new arrivals. Explore curated collections just for you.',
+          imageUrl: 'https://picsum.photos/seed/reevapromo/1200/600', imageHint: 'fashion collection', buttonText: 'Shop New Arrivals', buttonLink: '/reeva/products'
       },
       categoryBanners: [
           { categoryName: "Women's Fashion", imageUrl: "https://picsum.photos/seed/cat1/400/600", imageHint: "woman fashion" },
@@ -111,36 +88,17 @@ export const seedDatabase = async () => {
       ]
     };
     await Brand.findOneAndUpdate({ permanentName: 'reeva' }, reevaBrandData, { upsert: true, new: true });
-    console.log('Upserted "reeva" brand with full details.');
+    console.log('Upserted "reeva" brand.');
 
-    
-    // --- Seed Nevermore Brand ---
     const nevermoreBrandData = {
-      displayName: 'Nevermore',
-      permanentName: 'nevermore',
-      logoUrl: 'https://picsum.photos/seed/nevermorelogo/200/200',
-      banners: [
-        {
-          title: 'Nevermore: Style Redefined',
-          description: 'Embrace the darkness. Unique fashion for the bold.',
-          imageUrl: 'https://picsum.photos/seed/nevermorebanner1/1600/400',
-          imageHint: 'dark fashion',
-        }
-      ],
+      displayName: 'Nevermore', permanentName: 'nevermore', logoUrl: 'https://picsum.photos/seed/nevermorelogo/200/200',
+      banners: [{ title: 'Nevermore: Style Redefined', description: 'Embrace the darkness. Unique fashion for the bold.', imageUrl: 'https://picsum.photos/seed/nevermorebanner1/1600/400', imageHint: 'dark fashion' }],
       themeName: 'Slate (Dark)',
-      offers: [
-          { title: 'Eternal Night Sale', description: '25% off all black apparel.', code: 'ETERNAL25' },
-      ],
-      reviews: [
-          { customerName: 'Edgar A.', rating: 5, reviewText: 'Quoth the raven, "This is amazing!"', customerAvatarUrl: 'https://picsum.photos/seed/avatar4/100/100' }
-      ],
+      offers: [{ title: 'Eternal Night Sale', description: '25% off all black apparel.', code: 'ETERNAL25' }],
+      reviews: [{ customerName: 'Edgar A.', rating: 5, reviewText: 'Quoth the raven, "This is amazing!"', customerAvatarUrl: 'https://picsum.photos/seed/avatar4/100/100' }],
       promoBanner: {
-          title: 'Gothic Glamour',
-          description: 'Unleash your inner enigma with our latest collection of gothic-inspired attire.',
-          imageUrl: 'https://picsum.photos/seed/nevermorepromo/1200/600',
-          imageHint: 'gothic fashion',
-          buttonText: 'Explore the Shadows',
-          buttonLink: '/nevermore/products'
+          title: 'Gothic Glamour', description: 'Unleash your inner enigma with our latest collection of gothic-inspired attire.',
+          imageUrl: 'https://picsum.photos/seed/nevermorepromo/1200/600', imageHint: 'gothic fashion', buttonText: 'Explore the Shadows', buttonLink: '/nevermore/products'
       },
       categoryBanners: [
           { categoryName: "Corsets", imageUrl: "https://picsum.photos/seed/nmcat1/400/600", imageHint: "gothic corset" },
@@ -149,75 +107,82 @@ export const seedDatabase = async () => {
       ]
     };
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
-    console.log('Upserted "nevermore" brand with full details.');
+    console.log('Upserted "nevermore" brand.');
 
 
-    // --- Check for existing products for the 'reeva' storefront ---
-    const existingProductsCount = await Product.countDocuments({ storefront: 'reeva' });
-    
-    if (existingProductsCount === 0) {
-        console.log("No products found for storefront 'reeva'. Seeding new products.");
-        const products = [];
-        for (let i = 1; i <= 50; i++) {
-            const category = CATEGORIES[i % CATEGORIES.length];
-            const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
-            const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
+    // --- Seed Products for 'reeva' storefront ---
+    const productTemplates = Array.from({ length: 50 }, (_, i) => {
+        const index = i + 1;
+        const category = CATEGORIES[index % CATEGORIES.length];
+        const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
+        const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
+        return {
+            name: `${category} Product ${index}`,
+            description: `This is a detailed description for product number ${index}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
+            mrp: mrp,
+            sellingPrice: sellingPrice,
+            category: category,
+            brand: 'Reeva Originals',
+            storefront: 'reeva',
+            images: [
+                `https://picsum.photos/seed/${index}/600/600`,
+                `https://picsum.photos/seed/${index}_2/600/600`,
+                `https://picsum.photos/seed/${index}_3/600/600`,
+                `https://picsum.photos/seed/${index}_4/600/600`,
+            ],
+            stock: Math.floor(Math.random() * 100),
+            rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
+            tags: [
+                category.toLowerCase(), 
+                ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
+            ],
+        };
+    });
 
-            products.push({
-                name: `${category} Product ${i}`,
-                description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
-                mrp: mrp,
-                sellingPrice: sellingPrice,
-                category: category,
-                brand: 'Reeva Originals', // The product's actual brand
-                storefront: 'reeva', // The storefront it belongs to
-                images: [
-                    `https://picsum.photos/seed/${i}/600/600`,
-                    `https://picsum.photos/seed/${i}_2/600/600`,
-                    `https://picsum.photos/seed/${i}_3/600/600`,
-                    `https://picsum.photos/seed/${i}_4/600/600`,
-                ],
-                stock: Math.floor(Math.random() * 100),
-                rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
-                tags: [
-                    category.toLowerCase(), 
-                    ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-                ],
-            });
-        }
-        await Product.insertMany(products);
-        console.log(`Created ${products.length} products for storefront 'reeva'.`);
+    const productNames = productTemplates.map(p => p.name);
+    const existingProducts = await Product.find({ name: { $in: productNames }, storefront: 'reeva' });
+    const existingProductNames = new Set(existingProducts.map(p => p.name));
+
+    const newProductsToCreate = productTemplates.filter(p => !existingProductNames.has(p.name));
+
+    if (newProductsToCreate.length > 0) {
+        await Product.insertMany(newProductsToCreate);
+        console.log(`Created ${newProductsToCreate.length} new products for storefront 'reeva'.`);
     } else {
-        console.log("Existing products found. Checking if any need tags.");
-        const productsToUpdate = await Product.find({ 
-            storefront: 'reeva', 
-            $or: [
-                { tags: { $exists: false } }, 
-                { tags: { $size: 0 } }
-            ]
-        });
-
-        if (productsToUpdate.length > 0) {
-            console.log(`Found ${productsToUpdate.length} products without tags. Adding tags now.`);
-            const bulkOps = productsToUpdate.map(product => {
-                const category = product.category;
-                const newTags = [
-                    category.toLowerCase(),
-                    ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-                ];
-                return {
-                    updateOne: {
-                        filter: { _id: product._id },
-                        update: { $set: { tags: newTags } }
-                    }
-                };
-            });
-            await Product.bulkWrite(bulkOps);
-            console.log(`Updated ${productsToUpdate.length} products with new tags.`);
-        } else {
-            console.log("All existing products already have tags. No updates needed.");
-        }
+        console.log("All seed products already exist.");
     }
+
+    // Now, update any existing products that are missing tags
+    const productsMissingTags = await Product.find({
+        storefront: 'reeva',
+        name: { $in: productNames }, // Only check our seed products
+        $or: [
+            { tags: { $exists: false } },
+            { tags: { $size: 0 } }
+        ]
+    });
+
+    if (productsMissingTags.length > 0) {
+        console.log(`Found ${productsMissingTags.length} products missing tags. Updating now...`);
+        const bulkOps = productsMissingTags.map(product => {
+            const category = product.category;
+            const newTags = [
+                category.toLowerCase(),
+                ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
+            ];
+            return {
+                updateOne: {
+                    filter: { _id: product._id },
+                    update: { $set: { tags: newTags } }
+                }
+            };
+        });
+        await Product.bulkWrite(bulkOps);
+        console.log(`Updated ${productsMissingTags.length} products with tags.`);
+    } else {
+        console.log("All seed products have tags. No tag updates needed.");
+    }
+
 
     return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
