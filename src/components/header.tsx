@@ -105,7 +105,7 @@ export default function Header() {
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={`/${brandName}/home`} className="mr-4 flex items-center space-x-2">
           {brand?.logoUrl ? (
-            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 object-contain" />
+            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
