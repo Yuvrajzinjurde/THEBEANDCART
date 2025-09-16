@@ -467,13 +467,11 @@ export default function BrandHomePage() {
                     </Button>
                   </div>
                   <Separator className="mb-6" />
-                  <div className="inline-grid grid-flow-col auto-cols-max gap-x-4">
-                    {items.slice(0, 2).map((product) => (
-                      <div key={product._id as string} className="w-[280px]">
-                        <BrandProductCard product={product} />
-                      </div>
-                    ))}
-                  </div>
+                   <div className="grid grid-cols-2 gap-4">
+                        {items.slice(0, 2).map((product) => (
+                            <BrandProductCard key={product._id as string} product={product} />
+                        ))}
+                    </div>
                 </section>
                 {index === 0 && (
                     <>
