@@ -33,7 +33,7 @@ type GroupedProducts = {
 const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
     if (!products || products.length === 0) return null;
 
-    const plugin = useRef(
+    const plugin = React.useRef(
       Autoplay({ delay: 2000, stopOnInteraction: true })
     );
 
@@ -55,8 +55,8 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                     loop: products.length > 6,
                 }}
                 plugins={[plugin.current]}
-                onMouseEnter={() => plugin.current.play()}
-                onMouseLeave={() => plugin.current.stop()}
+                onMouseEnter={plugin.current.play}
+                onMouseLeave={plugin.current.stop}
                 className="w-full"
             >
                 <CarouselContent>
