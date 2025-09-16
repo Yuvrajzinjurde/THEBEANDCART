@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Badge } from 'lucide-react';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -29,6 +29,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, r
 import { CSS } from '@dnd-kit/utilities';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { ProductCard } from '../product-card';
+import { Badge } from '../ui/badge';
 
 
 const CATEGORIES = [
@@ -639,7 +640,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             {tagFields.map((tagField, index) => (
                                                 <Badge key={tagField.id} variant="secondary" className="flex items-center gap-1">
                                                     {tagField.value}
-                                                    <button type="button" onClick={() => removeTag(index)} className="rounded-full hover:bg-muted-foreground/20">
+                                                    <button type="button" onClick={() => removeTag(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
                                                         <X className="h-3 w-3" />
                                                     </button>
                                                 </Badge>
@@ -728,3 +729,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
