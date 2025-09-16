@@ -2,6 +2,9 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Product from '@/models/product.model';
+import { ProductFormSchema } from '@/lib/product-schema';
+import { Types } from 'mongoose';
+
 
 export async function GET(
   req: Request,
@@ -27,4 +30,39 @@ export async function GET(
     console.error('Failed to fetch product:', error);
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+    try {
+        await dbConnect();
+        const { id } = params;
+        const body = await req.json();
+
+        if (!Types.ObjectId.isValid(id)) {
+            return NextResponse.json({ message: 'Invalid Product ID' }, { status: 400 });
+        }
+
+        const validation = ProductFormSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
+        }
+        
+        // For now, we only support updating the main product, not variants through this endpoint.
+        const { variants, ...updateData } = validation.data;
+
+        const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
+
+        if (!updatedProduct) {
+            return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: 'Product updated successfully', product: updatedProduct }, { status: 200 });
+
+    } catch (error) {
+        console.error('Failed to update product:', error);
+        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    }
 }

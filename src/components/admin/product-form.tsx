@@ -10,8 +10,8 @@ import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Edit, Lock, Unlock } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -67,8 +67,8 @@ const CATEGORIES = [
 ];
 
 
-const SortableImage = ({ id, url, onRemove }: { id: any; url: string; onRemove: () => void }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+const SortableImage = ({ id, url, onRemove, disabled }: { id: any; url: string; onRemove: () => void; disabled: boolean }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id, disabled });
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
@@ -78,24 +78,28 @@ const SortableImage = ({ id, url, onRemove }: { id: any; url: string; onRemove: 
         <div ref={setNodeRef} style={style} className="relative aspect-square group">
             <div className="relative w-full h-full">
                 {url && <Image src={url} alt={`Preview`} fill className="object-cover rounded-md" />}
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-1 right-1 h-6 w-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={onRemove}
-                >
-                    <X className="h-4 w-4" />
-                </Button>
-                 <button
-                    type="button"
-                    {...attributes}
-                    {...listeners}
-                    className="absolute bottom-1 right-1 h-6 w-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-                >
-                    <GripVertical className="h-4 w-4 text-white" />
-                </button>
+                {!disabled && (
+                    <>
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={onRemove}
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                         <button
+                            type="button"
+                            {...attributes}
+                            {...listeners}
+                            className="absolute bottom-1 right-1 h-6 w-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+                        >
+                            <GripVertical className="h-4 w-4 text-white" />
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );
@@ -129,7 +133,7 @@ const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) =
     }
 };
 
-const VariantItem = ({ control, index, removeVariant }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; }) => {
+const VariantItem = ({ control, index, removeVariant, disabled }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; disabled: boolean; }) => {
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -147,26 +151,28 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
 
     return (
         <div className="space-y-4 p-4 border rounded-lg relative">
-            <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 text-muted-foreground" onClick={() => removeVariant(index)}>
-                <Trash className="h-4 w-4" />
-            </Button>
+            {!disabled && (
+                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 text-muted-foreground" onClick={() => removeVariant(index)}>
+                    <Trash className="h-4 w-4" />
+                </Button>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <FormField control={control} name={`variants.${index}.size`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Size</FormLabel>
-                        <FormControl><Input placeholder="e.g., M" {...field} /></FormControl>
+                        <FormControl><Input placeholder="e.g., M" {...field} disabled={disabled} /></FormControl>
                     </FormItem>
                 )} />
                 <FormField control={control} name={`variants.${index}.color`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Color</FormLabel>
-                        <FormControl><Input placeholder="e.g., Blue" {...field} /></FormControl>
+                        <FormControl><Input placeholder="e.g., Blue" {...field} disabled={disabled} /></FormControl>
                     </FormItem>
                 )} />
                 <FormField control={control} name={`variants.${index}.stock`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Stock</FormLabel>
-                        <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl>
+                        <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} disabled={disabled} /></FormControl>
                     </FormItem>
                 )} />
             </div>
@@ -174,7 +180,7 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
                 <FormField control={control} name={`variants.${index}.images`} render={() => (
                     <FormItem>
                         <FormLabel>Variant Images</FormLabel>
-                        <FormControl>
+                         <FormControl>
                             <div>
                                 <Input 
                                     id={`variant-image-upload-${index}`}
@@ -183,13 +189,16 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
                                     className="hidden"
                                     multiple
                                     onChange={(e) => handleFileChange(e, appendVariantImage)}
+                                    disabled={disabled}
                                 />
-                                <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                    <div className="flex flex-col items-center justify-center">
-                                        <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
-                                        <p className="text-xs text-muted-foreground">Upload images</p>
-                                    </div>
-                                </label>
+                                {!disabled && (
+                                    <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
+                                            <p className="text-xs text-muted-foreground">Upload images</p>
+                                        </div>
+                                    </label>
+                                )}
                             </div>
                         </FormControl>
                         <FormMessage />
@@ -198,7 +207,7 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
                                 <SortableContext items={variantImageFields} strategy={rectSortingStrategy}>
                                     <div className="grid grid-cols-3 gap-2 mt-2">
                                         {variantImageFields.map((imgField, imgIndex) => (
-                                        imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} />
+                                        imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} disabled={disabled} />
                                         ))}
                                     </div>
                                 </SortableContext>
@@ -218,13 +227,16 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
                                     className="hidden"
                                     multiple
                                     onChange={(e) => handleFileChange(e, appendVariantVideo)}
+                                    disabled={disabled}
                                 />
-                                <label htmlFor={`variant-video-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                    <div className="flex flex-col items-center justify-center">
-                                        <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
-                                        <p className="text-xs text-muted-foreground">Upload videos</p>
-                                    </div>
-                                </label>
+                                 {!disabled && (
+                                    <label htmlFor={`variant-video-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
+                                            <p className="text-xs text-muted-foreground">Upload videos</p>
+                                        </div>
+                                    </label>
+                                )}
                             </div>
                         </FormControl>
                         <FormMessage />
@@ -233,9 +245,11 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
                                 {variantVideoFields.map((vidField, vidIndex) => (
                                     <div key={vidField.id} className="relative aspect-square">
                                         {vidField.value && <video src={vidField.value} controls className="w-full h-full object-cover rounded-md bg-muted" />}
-                                        <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVariantVideo(vidIndex)}>
-                                            <X className="h-4 w-4" />
-                                        </Button>
+                                        {!disabled && (
+                                            <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVariantVideo(vidIndex)}>
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -266,6 +280,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
   const [previewProduct, setPreviewProduct] = React.useState<Partial<IProduct> | null>(null);
+  
+  const [isFormDisabled, setIsFormDisabled] = React.useState(mode === 'edit');
+  const [isCancelAlertOpen, setIsCancelAlertOpen] = React.useState(false);
 
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
 
@@ -307,7 +324,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     mode: 'onChange',
   });
   
-  const { control } = form;
+  const { control, formState: { isDirty } } = form;
 
   const { fields: imageFields, append: appendImage, remove: removeImage, move: moveImage } = useFieldArray({
     control,
@@ -484,6 +501,24 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         toast.error("Please fill out all required fields before previewing.");
     }
   };
+  
+  const handleCancel = () => {
+    if (isDirty) {
+      setIsCancelAlertOpen(true);
+    } else {
+      if (mode === 'edit') {
+        setIsFormDisabled(true);
+      } else {
+        router.push('/admin/inventory');
+      }
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    form.reset(defaultValues);
+    setIsCancelAlertOpen(false);
+    setIsFormDisabled(true);
+  };
 
   const selectedStorefront = form.watch("storefront");
   const activeTheme = themeColors.find(t => t.name.toLowerCase().includes(selectedStorefront.toLowerCase()));
@@ -515,7 +550,24 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {mode === 'edit' && (
+            <div className="flex items-center justify-between">
+                <CardTitle>{isFormDisabled ? 'View Product' : 'Edit Product'}</CardTitle>
+                <Button type="button" variant="outline" size="icon" onClick={() => setIsFormDisabled(!isFormDisabled)}>
+                    {isFormDisabled ? <Edit className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                </Button>
+            </div>
+        )}
+        {mode === 'create' && (
+             <CardHeader className="p-0">
+                <CardTitle>Create a New Product / Catalog</CardTitle>
+                <CardDescription>
+                  Fill out the form below to add a new product to your inventory. Add variants to create a catalog.
+                </CardDescription>
+            </CardHeader>
+        )}
+
+        <fieldset disabled={isFormDisabled} className="grid grid-cols-1 md:grid-cols-3 gap-6 group">
             {/* Left Column */}
             <div className="md:col-span-2 space-y-6">
                  <Card>
@@ -529,7 +581,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
                                     <FormMessage />
                                   </div>
-                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !productName}>
+                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !productName || isFormDisabled}>
                                     {isAutofilling ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                     Autofill
                                   </Button>
@@ -543,7 +595,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Description</FormLabel>
-                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGeneratingDesc || !productName}>
+                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGeneratingDesc || !productName || isFormDisabled}>
                                         {isGeneratingDesc ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate with AI
                                     </Button>
@@ -551,10 +603,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormControl>
                                   <div className="rounded-md border border-input">
                                       <div className="border-b px-3 py-2 flex items-center gap-2">
-                                          <Button type="button" variant="ghost" size="sm">Normal</Button>
-                                          <Button type="button" variant="ghost" size="sm" className="font-bold">B</Button>
-                                          <Button type="button" variant="ghost" size="sm" className="italic">I</Button>
-                                          <Button type="button" variant="ghost" size="sm" className="underline">U</Button>
+                                          <Button type="button" variant="ghost" size="sm" disabled={isFormDisabled}>Normal</Button>
+                                          <Button type="button" variant="ghost" size="sm" className="font-bold" disabled={isFormDisabled}>B</Button>
+                                          <Button type="button" variant="ghost" size="sm" className="italic" disabled={isFormDisabled}>I</Button>
+                                          <Button type="button" variant="ghost" size="sm" className="underline" disabled={isFormDisabled}>U</Button>
                                       </div>
                                       <Textarea 
                                           placeholder="Describe the product..." 
@@ -577,7 +629,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                 <div className="flex justify-between items-center">
                                     <FormLabel>Images</FormLabel>
-                                    <FormDescription>Drag and drop to reorder images.</FormDescription>
+                                    {!isFormDisabled && <FormDescription>Drag and drop to reorder images.</FormDescription>}
                                 </div>
                                 <FormControl>
                                     <div className="w-full">
@@ -588,14 +640,17 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             className="hidden"
                                             multiple
                                             onChange={(e) => handleFileChange(e, appendImage)}
+                                            disabled={isFormDisabled}
                                         />
-                                         <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p className="text-xs text-muted-foreground">PNG, JPG, WEBP, or AVIF</p>
-                                            </div>
-                                        </label>
+                                         {!isFormDisabled && (
+                                            <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                    <p className="text-xs text-muted-foreground">PNG, JPG, WEBP, or AVIF</p>
+                                                </div>
+                                            </label>
+                                        )}
                                     </div>
                                 </FormControl>
                                 <FormMessage />
@@ -604,7 +659,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         <SortableContext items={imageFields} strategy={rectSortingStrategy}>
                                             <div className="grid grid-cols-4 gap-4 mt-4">
                                                 {imageFields.map((field, index) => (
-                                                   field.value && <SortableImage key={field.id} id={field.id} url={field.value} onRemove={() => removeImage(index)} />
+                                                   field.value && <SortableImage key={field.id} id={field.id} url={field.value} onRemove={() => removeImage(index)} disabled={isFormDisabled} />
                                                 ))}
                                             </div>
                                         </SortableContext>
@@ -625,14 +680,17 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             className="hidden"
                                             multiple
                                             onChange={(e) => handleFileChange(e, appendVideo)}
+                                            disabled={isFormDisabled}
                                         />
-                                        <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p className="text-xs text-muted-foreground">MP4, WEBM, or MP3</p>
-                                            </div>
-                                        </label>
+                                        {!isFormDisabled && (
+                                            <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                    <p className="text-xs text-muted-foreground">MP4, WEBM, or MP3</p>
+                                                </div>
+                                            </label>
+                                        )}
                                     </div>
                                 </FormControl>
                                 <FormMessage />
@@ -643,9 +701,11 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                                 {field.value && (
                                                     <video src={field.value} controls className="w-full h-full object-cover rounded-md bg-muted" />
                                                 )}
-                                                <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVideo(index)}>
-                                                    <X className="h-4 w-4" />
-                                                </Button>
+                                                {!isFormDisabled && (
+                                                    <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVideo(index)}>
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -662,12 +722,14 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {variantFields.map((field, index) => (
-                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} />
+                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} disabled={isFormDisabled} />
                         ))}
-                         <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [], videos: [] })}>
-                            <PlusCircle className="mr-2" />
-                            {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
-                        </Button>
+                         {!isFormDisabled && (
+                            <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [], videos: [] })}>
+                                <PlusCircle className="mr-2" />
+                                {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
+                            </Button>
+                         )}
                          {!hasVariants && (
                             <FormField control={control} name="stock" render={({ field }) => (
                                 <FormItem>
@@ -690,7 +752,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <FormField control={control} name="storefront" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Storefront</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a storefront" />
@@ -717,7 +779,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <FormField control={control} name="category" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a category" />
@@ -734,7 +796,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Tags</FormLabel>
-                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !productName || !productDescription}>
+                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !productName || !productDescription || isFormDisabled}>
                                         {isGeneratingTags ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate Tags
                                     </Button>
@@ -746,14 +808,17 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             value={tagInput}
                                             onChange={(e) => setTagInput(e.target.value)}
                                             onKeyDown={handleTagKeyDown}
+                                            disabled={isFormDisabled}
                                         />
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {tagFields.map((tagField, index) => (
                                                 <Badge key={tagField.id} variant="secondary" className="flex items-center gap-1">
                                                     {tagField.value}
-                                                    <button type="button" onClick={() => removeTag(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
-                                                        <X className="h-3 w-3" />
-                                                    </button>
+                                                    {!isFormDisabled && (
+                                                        <button type="button" onClick={() => removeTag(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    )}
                                                 </Badge>
                                             ))}
                                         </div>
@@ -797,45 +862,59 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </fieldset>
 
-        <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-            
-            <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                 <Button type="button" variant="outline" onClick={handlePreview}>
-                    Preview
-                </Button>
-                <AlertDialogTrigger asChild>
-                    <Button type="button" onClick={handlePreview} disabled={isSubmitting}>
-                        {isSubmitting && <Loader className="mr-2" />}
-                        {mode === 'create' ? 'Create Product' : 'Save Changes'}
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-2xl" style={previewStyle}>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Product Preview</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This is how your product card will appear on the storefront.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    
-                    <div className="flex justify-center p-8 bg-background rounded-lg">
-                        {previewProduct && (
-                            <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
-                        )}
-                    </div>
-                    
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Keep Editing</AlertDialogCancel>
-                        <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-                            {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                            {isSubmitting ? 'Saving...' : 'Confirm & Create'}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-        </div>
+        {!isFormDisabled && (
+            <div className="flex justify-end gap-2 pt-6">
+                <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
+                
+                <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                    <AlertDialogTrigger asChild>
+                        <Button type="button" onClick={handlePreview} disabled={isSubmitting || !isDirty}>
+                            {isSubmitting && <Loader className="mr-2" />}
+                            {mode === 'create' ? 'Create Product' : 'Save Changes'}
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-2xl" style={previewStyle}>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Product Preview</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This is how your product card will appear on the storefront.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        
+                        <div className="flex justify-center p-8 bg-background rounded-lg">
+                            {previewProduct && (
+                                <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
+                            )}
+                        </div>
+                        
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Keep Editing</AlertDialogCancel>
+                            <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                                {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                                {isSubmitting ? 'Saving...' : 'Confirm & Save'}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+        )}
+        
+        <AlertDialog open={isCancelAlertOpen} onOpenChange={setIsCancelAlertOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Discard Changes?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        You have unsaved changes. Are you sure you want to discard them?
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>No, Keep Editing</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDiscardChanges}>Yes, Discard</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
       </form>
     </Form>
   );

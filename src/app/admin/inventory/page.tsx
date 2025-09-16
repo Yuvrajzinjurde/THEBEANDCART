@@ -20,6 +20,7 @@ import { Info, Download, Upload, PlusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -37,6 +38,7 @@ export default function InventoryPage() {
     const [sortOption, setSortOption] = useState('estimated-orders-desc');
     const [isUpdating, setIsUpdating] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const router = useRouter();
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -99,11 +101,17 @@ export default function InventoryPage() {
         setIsSeeding(true);
         toast.info("Seeding database... This might take a moment.");
         try {
-          await fetch('/api/seed', { method: 'POST' });
-          toast.success('Database seeded successfully!');
+          const response = await fetch('/api/seed', { method: 'POST' });
+          const result = await response.json();
+          if (response.ok) {
+            toast.success(result.message);
+            console.log(result.log);
+          } else {
+            throw new Error(result.message);
+          }
           await fetchProducts();
-        } catch (error) {
-          toast.error('Failed to seed database.');
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to seed database.');
           console.error(error);
         } finally {
           setIsSeeding(false);
@@ -178,7 +186,72 @@ export default function InventoryPage() {
 
         reader.readAsArrayBuffer(file);
     };
+    
+    const handleRowClick = (productId: string) => {
+        router.push(`/admin/inventory/edit/${productId}`);
+    };
 
+
+    const renderTable = (products: IProduct[]) => (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="hidden w-[100px] sm:table-cell">
+                        <span className="sr-only">Image</span>
+                    </TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead className="hidden md:table-cell">Stock</TableHead>
+                    <TableHead className="hidden md:table-cell">Rating</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {products.length > 0 ? (
+                    products.map((product) => (
+                        <TableRow 
+                            key={product._id as string} 
+                            onClick={() => handleRowClick(product._id as string)}
+                            className="cursor-pointer"
+                        >
+                            <TableCell className="hidden sm:table-cell">
+                                <Image
+                                    alt={product.name}
+                                    className="aspect-square rounded-md object-cover"
+                                    height="64"
+                                    src={product.images[0]}
+                                    width="64"
+                                />
+                            </TableCell>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell>
+                                <Badge 
+                                    variant={product.stock > 0 ? "default" : "destructive"}
+                                    className={cn(
+                                        product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
+                                        product.stock > LOW_STOCK_THRESHOLD && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                                    )}
+                                >
+                                    {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
+                                </Badge>
+                            </TableCell>
+                            <TableCell>
+                                {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                            <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
+                        </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                            No products to display in this category.
+                        </TableCell>
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
 
     return (
         <Card>
@@ -287,164 +360,13 @@ export default function InventoryPage() {
                         </div>
 
                         <TabsContent value="all" className="mt-0">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="hidden w-[100px] sm:table-cell">
-                                            <span className="sr-only">Image</span>
-                                        </TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Price</TableHead>
-                                        <TableHead className="hidden md:table-cell">Stock</TableHead>
-                                        <TableHead className="hidden md:table-cell">Rating</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredProducts.length > 0 ? (
-                                        filteredProducts.map((product) => (
-                                            <TableRow key={product._id as string}>
-                                                <TableCell className="hidden sm:table-cell">
-                                                    <Image
-                                                        alt={product.name}
-                                                        className="aspect-square rounded-md object-cover"
-                                                        height="64"
-                                                        src={product.images[0]}
-                                                        width="64"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="font-medium">{product.name}</TableCell>
-                                                <TableCell>
-                                                    <Badge 
-                                                        variant={product.stock > 0 ? "default" : "destructive"}
-                                                        className={cn(
-                                                            product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-                                                            product.stock > LOW_STOCK_THRESHOLD && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-                                                        )}
-                                                    >
-                                                        {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
-                                                <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="h-24 text-center">
-                                                No products to display in this category.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
+                            {renderTable(filteredProducts)}
                         </TabsContent>
                          <TabsContent value="out-of-stock" className="mt-0">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="hidden w-[100px] sm:table-cell">
-                                            <span className="sr-only">Image</span>
-                                        </TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Price</TableHead>
-                                        <TableHead className="hidden md:table-cell">Stock</TableHead>
-                                        <TableHead className="hidden md:table-cell">Rating</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredProducts.length > 0 ? (
-                                        filteredProducts.map((product) => (
-                                            <TableRow key={product._id as string}>
-                                                <TableCell className="hidden sm:table-cell">
-                                                    <Image
-                                                        alt={product.name}
-                                                        className="aspect-square rounded-md object-cover"
-                                                        height="64"
-                                                        src={product.images[0]}
-                                                        width="64"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="font-medium">{product.name}</TableCell>
-                                                <TableCell>
-                                                    <Badge 
-                                                        variant="destructive"
-                                                    >
-                                                        Out of Stock
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
-                                                <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="h-24 text-center">
-                                                No products are out of stock.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
+                            {renderTable(filteredProducts)}
                         </TabsContent>
                          <TabsContent value="low-stock" className="mt-0">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="hidden w-[100px] sm:table-cell">
-                                            <span className="sr-only">Image</span>
-                                        </TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Price</TableHead>
-                                        <TableHead className="hidden md:table-cell">Stock</TableHead>
-                                        <TableHead className="hidden md:table-cell">Rating</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredProducts.length > 0 ? (
-                                        filteredProducts.map((product) => (
-                                            <TableRow key={product._id as string}>
-                                                <TableCell className="hidden sm:table-cell">
-                                                    <Image
-                                                        alt={product.name}
-                                                        className="aspect-square rounded-md object-cover"
-                                                        height="64"
-                                                        src={product.images[0]}
-                                                        width="64"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="font-medium">{product.name}</TableCell>
-                                                <TableCell>
-                                                     <Badge 
-                                                        className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
-                                                    >
-                                                        Low Stock
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
-                                                </TableCell>
-                                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
-                                                <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="h-24 text-center">
-                                                No products are low in stock.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
+                            {renderTable(filteredProducts)}
                         </TabsContent>
                     </Tabs>
                 )}
@@ -453,3 +375,4 @@ export default function InventoryPage() {
     );
 
     
+}
