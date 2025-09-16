@@ -473,10 +473,6 @@ export default function BrandHomePage() {
                     </div>
                 </div>
             ))}
-            <div className="lg:col-span-3">
-                <OffersSection brand={brand} />
-                <CategoryBannerGrid brand={brand} />
-            </div>
           </div>
         ) : (
           <div className="text-center py-16">
@@ -485,6 +481,8 @@ export default function BrandHomePage() {
         )}
       </div>
 
+        <OffersSection brand={brand} />
+        <CategoryBannerGrid brand={brand} />
         <PromoBannerSection brand={brand} />
         <ReviewsSection brand={brand} />
 
@@ -493,3 +491,5 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
