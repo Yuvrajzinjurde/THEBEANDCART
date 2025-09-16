@@ -6,11 +6,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { toast } from 'react-toastify';
 
 
@@ -127,23 +126,6 @@ export default function LandingPage() {
     <LandingHeader />
     <main className="flex-1 flex flex-col items-center bg-background">
 
-        <section className="w-full bg-destructive/10 text-center py-10 sm:py-16 border-b border-destructive/20">
-            <Card className="max-w-2xl mx-auto bg-transparent border-destructive/50">
-                <CardHeader>
-                    <CardTitle className="text-destructive">Database Fix Required</CardTitle>
-                    <CardDescription className="text-destructive/80">
-                        It looks like there's corrupted product data in the database causing application errors. Click the button below to clear the old data and seed fresh, clean products.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <Button onClick={handleSeed} disabled={isSeeding} size="lg" variant="destructive">
-                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
-                        {isSeeding ? 'Seeding Database...' : 'Fix and Seed Database'}
-                    </Button>
-                </CardContent>
-            </Card>
-        </section>
-
         <section id="brands" className="w-full py-12 sm:py-20 px-4 sm:px-8">
             <div className="text-center mb-10">
                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
@@ -202,5 +184,3 @@ export default function LandingPage() {
     </>
   );
 }
-
-    
