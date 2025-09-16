@@ -47,6 +47,7 @@ export interface IBrand extends Document {
   reviews: IReview[];
   promoBanner: IPromoBanner;
   categoryBanners: ICategoryBanner[];
+  categories: string[];
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -95,6 +96,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   reviews: [ReviewSchema],
   promoBanner: PromoBannerSchema,
   categoryBanners: [CategoryBannerSchema],
+  categories: { type: [String], default: [] },
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);

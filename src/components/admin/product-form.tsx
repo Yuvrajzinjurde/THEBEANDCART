@@ -32,42 +32,6 @@ import { ProductCard } from '../product-card';
 import { Badge } from '../ui/badge';
 
 
-const CATEGORIES = [
-    "Men Fashion",
-    "Women Fashion",
-    "Home & Living",
-    "Kids & Toys",
-    "Personal Care & Wellness",
-    "Mobiles & Tablets",
-    "Consumer Electronics",
-    "Appliances",
-    "Automotive",
-    "Beauty & Personal Care",
-    "Home Utility",
-    "Kids",
-    "Grocery",
-    "Women",
-    "Home & Kitchen",
-    "Health & Wellness",
-    "Beauty & Makeup",
-    "Personal Care",
-    "Men'S Grooming",
-    "Craft & Office Supplies",
-    "Sports & Fitness",
-    "Automotive Accessories",
-    "Pet Supplies",
-    "Office Supplies & Stationery",
-    "Industrial & Scientific Products",
-    "Musical Instruments",
-    "Books",
-    "Eye Utility",
-    "Bags, Luggage & Travel Accessories",
-    "Mens Personal Care & Grooming",
-    "Combos",
-    "Corrugated Boxes"
-];
-
-
 const SortableImage = ({ id, url, onRemove, disabled }: { id: any; url: string; onRemove: () => void; disabled: boolean }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id, disabled });
     const style = {
@@ -284,8 +248,31 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   
   const [isFormDisabled, setIsFormDisabled] = React.useState(mode === 'edit');
   const [isCancelAlertOpen, setIsCancelAlertOpen] = React.useState(false);
+  
+  const [availableCategories, setAvailableCategories] = React.useState<string[]>([]);
+  const [productCategories, setProductCategories] = React.useState<string[]>([]);
+
 
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
+  const selectedStorefront = useWatch({ control: form.control, name: 'storefront' });
+
+  React.useEffect(() => {
+    async function fetchBrandCategories() {
+        if (!selectedStorefront) return;
+        try {
+            const res = await fetch(`/api/brands/${selectedStorefront}`);
+            if (res.ok) {
+                const { brand } = await res.json();
+                setProductCategories(brand.categories || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch categories for brand', error);
+            setProductCategories([]);
+        }
+    }
+    fetchBrandCategories();
+  }, [selectedStorefront]);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -527,7 +514,6 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setIsFormDisabled(true);
   };
 
-  const selectedStorefront = form.watch("storefront");
   const activeTheme = themeColors.find(t => t.name.toLowerCase().includes(selectedStorefront.toLowerCase()));
 
   const previewStyle = activeTheme ? {
@@ -793,7 +779,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {CATEGORIES.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                        {productCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

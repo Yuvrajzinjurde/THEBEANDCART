@@ -8,7 +8,7 @@ import Review from '@/models/review.model';
 import bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
 
-const CATEGORIES = [
+const REEVA_CATEGORIES = [
     "Men Fashion", "Women Fashion", "Home & Living", "Kids & Toys",
     "Personal Care & Wellness", "Mobiles & Tablets", "Consumer Electronics",
     "Appliances", "Automotive", "Beauty & Personal Care", "Home Utility",
@@ -95,7 +95,8 @@ export const seedDatabase = async () => {
           { categoryName: "Groceries", imageUrl: "https://picsum.photos/seed/cat7/400/600", imageHint: "fresh groceries" },
           { categoryName: "Sports", imageUrl: "https://picsum.photos/seed/cat8/400/400", imageHint: "sports equipment" },
           { categoryName: "Books", imageUrl: "https://picsum.photos/seed/cat9/400/400", imageHint: "old books" },
-      ]
+      ],
+      categories: REEVA_CATEGORIES,
     };
     await Brand.findOneAndUpdate({ permanentName: 'reeva' }, reevaBrandData, { upsert: true, new: true });
     console.log('Upserted "reeva" brand.');
@@ -114,7 +115,8 @@ export const seedDatabase = async () => {
           { categoryName: "Corsets", imageUrl: "https://picsum.photos/seed/nmcat1/400/600", imageHint: "gothic corset" },
           { categoryName: "Gowns", imageUrl: "https://picsum.photos/seed/nmcat2/400/400", imageHint: "black gown" },
           { categoryName: "Accessories", imageUrl: "https://picsum.photos/seed/nmcat3/400/400", imageHint: "gothic accessories" },
-      ]
+      ],
+      categories: ["Corsets", "Gowns", "Accessories", "Gothic Home Decor", "Dark Academia"],
     };
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
     console.log('Upserted "nevermore" brand.');
@@ -122,30 +124,43 @@ export const seedDatabase = async () => {
     // --- Create Products ---
     console.log('Generating 100 new products...');
     const productsToCreate = [];
-    const brandsToSeed = ['reeva', 'nevermore'];
+    
+    // Seed Reeva products
+    for (let i = 1; i <= 50; i++) {
+        const category = REEVA_CATEGORIES[i % REEVA_CATEGORIES.length];
+        const sellingPrice = Math.floor(Math.random() * 5000) + 500;
+        const mrp = sellingPrice + Math.floor(Math.random() * 1000) + 200;
+        productsToCreate.push({
+            name: `Reeva Product #${i}`,
+            description: `This is a high-quality ${category.toLowerCase()} product from Reeva. Item number ${i} is designed for excellence and durability.`,
+            mrp, sellingPrice, category,
+            images: [`https://picsum.photos/seed/reeva${i}/600/600`],
+            stock: Math.floor(Math.random() * 200),
+            rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
+            brand: `Reeva Designs`,
+            storefront: 'reeva',
+            keywords: ['reeva', category.split(' ')[0]],
+            styleId: new Types.ObjectId().toHexString(),
+        });
+    }
 
-    for (const storefront of brandsToSeed) {
-        for (let i = 1; i <= 50; i++) {
-            const category = CATEGORIES[i % CATEGORIES.length];
-            const sellingPrice = Math.floor(Math.random() * 5000) + 500;
-            const mrp = sellingPrice + Math.floor(Math.random() * 1000) + 200;
-
-            const product = {
-                name: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Product #${i}`,
-                description: `This is a high-quality ${category.toLowerCase()} product from ${storefront}. Item number ${i} is designed for excellence and durability.`,
-                mrp,
-                sellingPrice,
-                category,
-                images: [`https://picsum.photos/seed/${storefront}${i}/600/600`],
-                stock: Math.floor(Math.random() * 200),
-                rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
-                brand: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Designs`,
-                storefront: storefront,
-                keywords: [storefront, category.split(' ')[0]],
-                styleId: new Types.ObjectId().toHexString(),
-            };
-            productsToCreate.push(product);
-        }
+    // Seed Nevermore products
+    for (let i = 1; i <= 50; i++) {
+        const category = nevermoreBrandData.categories[i % nevermoreBrandData.categories.length];
+        const sellingPrice = Math.floor(Math.random() * 8000) + 1500;
+        const mrp = sellingPrice + Math.floor(Math.random() * 2000) + 500;
+         productsToCreate.push({
+            name: `Nevermore Item #${i}`,
+            description: `A dark and elegant ${category.toLowerCase()} from Nevermore. Item # ${i} is crafted for the discerning individual.`,
+            mrp, sellingPrice, category,
+            images: [`https://picsum.photos/seed/nevermore${i}/600/600`],
+            stock: Math.floor(Math.random() * 100),
+            rating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)), // 3.5 to 5.0
+            brand: `Nevermore Atelier`,
+            storefront: 'nevermore',
+            keywords: ['nevermore', 'gothic', category.split(' ')[0]],
+            styleId: new Types.ObjectId().toHexString(),
+        });
     }
     
     await Product.insertMany(productsToCreate);

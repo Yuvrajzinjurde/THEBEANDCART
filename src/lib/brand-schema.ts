@@ -60,6 +60,7 @@ export const BrandFormSchema = z.object({
   reviews: z.array(reviewSchema).optional(),
   promoBanner: promoBannerSchema.optional(),
   categoryBanners: z.array(categoryBannerSchema).optional(),
+  categories: z.array(z.string()).optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;

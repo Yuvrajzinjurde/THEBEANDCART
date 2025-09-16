@@ -2,19 +2,6 @@
 
 import { z } from 'zod';
 
-const CATEGORIES = [
-    "Men Fashion", "Women Fashion", "Home & Living", "Kids & Toys",
-    "Personal Care & Wellness", "Mobiles & Tablets", "Consumer Electronics",
-    "Appliances", "Automotive", "Beauty & Personal Care", "Home Utility",
-    "Kids", "Grocery", "Women", "Home & Kitchen", "Health & Wellness",
-    "Beauty & Makeup", "Personal Care", "Men'S Grooming",
-    "Craft & Office Supplies", "Sports & Fitness", "Automotive Accessories",
-    "Pet Supplies", "Office Supplies & Stationery",
-    "Industrial & Scientific Products", "Musical Instruments", "Books",
-    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming",
-    "Combos", "Corrugated Boxes"
-];
-
 const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
@@ -100,7 +87,7 @@ export const AutofillProductOutputSchema = z.object({
   description: z.string().describe('The generated SEO-optimized product description. Should be around 100-150 words.'),
   mrp: z.number().describe('The suggested Maximum Retail Price (MRP). Should be higher than the selling price.'),
   sellingPrice: z.number().describe('The suggested selling price.'),
-  category: z.enum(CATEGORIES as [string, ...string[]]).describe('The most relevant product category from the provided list.'),
+  category: z.string().describe('The most relevant product category from a dynamic list that will be provided.'),
   brand: z.string().describe("The product's actual brand name (e.g., Nike, Sony, Apple)."),
   stock: z.number().describe('A suggested initial stock quantity, between 50 and 200.'),
 });
@@ -117,4 +104,3 @@ export const GenerateTagsOutputSchema = z.object({
   tags: z.array(z.string()).describe('An array of 5-7 relevant, single-word tags for the product.'),
 });
 export type GenerateTagsOutput = z.infer<typeof GenerateTagsOutputSchema>;
-

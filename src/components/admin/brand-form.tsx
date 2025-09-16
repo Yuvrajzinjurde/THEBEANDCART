@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
 import { Separator } from '../ui/separator';
+import { Badge } from '../ui/badge';
 
 interface BrandFormProps {
   mode: 'create' | 'edit';
@@ -39,6 +40,7 @@ interface BrandFormProps {
 export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [categoryInput, setCategoryInput] = React.useState('');
 
   const defaultValues: Partial<BrandFormValues> = existingBrand ? {
     displayName: existingBrand.displayName,
@@ -50,6 +52,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     reviews: existingBrand.reviews,
     promoBanner: existingBrand.promoBanner,
     categoryBanners: existingBrand.categoryBanners,
+    categories: existingBrand.categories,
   } : {
     displayName: '',
     permanentName: '',
@@ -59,6 +62,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     offers: [],
     reviews: [],
     categoryBanners: [],
+    categories: [],
   };
 
   const form = useForm<BrandFormValues>({
@@ -86,6 +90,11 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     control: form.control,
     name: 'categoryBanners',
   });
+  
+  const { fields: categoryFields, append: appendCategory, remove: removeCategory } = useFieldArray({
+    control: form.control,
+    name: 'categories',
+  });
 
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
@@ -98,6 +107,19 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleCategoryKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      const newCategory = categoryInput.trim();
+      const currentCategories = form.getValues('categories') || [];
+      if (newCategory && !currentCategories.includes(newCategory)) {
+        appendCategory(newCategory);
+        setCategoryInput('');
+      }
+    }
+  };
+
 
   async function onSubmit(data: BrandFormValues) {
     setIsSubmitting(true);
@@ -118,7 +140,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       }
 
       toast.success(`Brand ${mode === 'create' ? 'created' : 'updated'} successfully!`);
-      router.push('/admin/dashboard');
+      router.push('/admin/brands');
       router.refresh();
 
     } catch (error: any) {
@@ -204,6 +226,47 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 )}
             />
           </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Manage Categories</CardTitle>
+                <CardDescription>Add or remove product categories for this brand.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <FormField
+                    control={form.control}
+                    name="categories"
+                    render={() => (
+                        <FormItem>
+                            <FormLabel>Categories</FormLabel>
+                            <FormControl>
+                                <div>
+                                    <Input
+                                        placeholder="Add a category and press Enter"
+                                        value={categoryInput}
+                                        onChange={(e) => setCategoryInput(e.target.value)}
+                                        onKeyDown={handleCategoryKeyDown}
+                                    />
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {categoryFields.map((field, index) => (
+                                            <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
+                                                {/* @ts-ignore */}
+                                                {field.value}
+                                                <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            </FormControl>
+                            <FormDescription>These categories will appear in the product filters and forms for this brand.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </CardContent>
         </Card>
         
         <Card>
@@ -559,5 +622,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
-
-    

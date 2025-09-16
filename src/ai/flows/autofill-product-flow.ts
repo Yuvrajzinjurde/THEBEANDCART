@@ -26,7 +26,7 @@ const autofillProductPrompt = ai.definePrompt({
 
   The generated description should be engaging, SEO-optimized, and highlight key features.
   The pricing should be realistic for the given product. The MRP must be higher than the selling price to show a discount.
-  Pick the most appropriate category from the list provided in the output schema.
+  Pick the most appropriate category from the list of available categories that will be provided in the context.
   
   Generate all details for the following product:
   Product Name: {{{productName}}}

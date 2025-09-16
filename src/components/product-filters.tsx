@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ChevronDown } from "lucide-react";
@@ -13,19 +13,8 @@ import {
 import type { IProduct } from "@/models/product.model";
 import { ScrollArea } from "./ui/scroll-area";
 import type { ActiveFilters } from "@/app/[brand]/products/page";
-
-const ALL_CATEGORIES = [
-    "Men Fashion", "Women Fashion", "Home & Living", "Kids & Toys",
-    "Personal Care & Wellness", "Mobiles & Tablets", "Consumer Electronics",
-    "Appliances", "Automotive", "Beauty & Personal Care", "Home Utility",
-    "Kids", "Grocery", "Women", "Home & Kitchen", "Health & Wellness",
-    "Beauty & Makeup", "Personal Care", "Men'S Grooming",
-    "Craft & Office Supplies", "Sports & Fitness", "Automotive Accessories",
-    "Pet Supplies", "Office Supplies & Stationery",
-    "Industrial & Scientific Products", "Musical Instruments", "Books",
-    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming",
-    "Combos", "Corrugated Boxes"
-].sort();
+import type { IBrand } from "@/models/brand.model";
+import { useParams } from "next/navigation";
 
 
 type FilterSectionProps = {
@@ -62,6 +51,26 @@ interface ProductFiltersProps {
 }
 
 export function ProductFilters({ productsForCategories, productsForOthers, activeFilters, onFilterChange }: ProductFiltersProps) {
+  const params = useParams();
+  const brandName = params.brand as string;
+  const [brand, setBrand] = useState<IBrand | null>(null);
+
+  useEffect(() => {
+    async function fetchBrand() {
+        if (!brandName) return;
+        try {
+            const res = await fetch(`/api/brands/${brandName}`);
+            if (res.ok) {
+                const { brand: brandData } = await res.json();
+                setBrand(brandData);
+            }
+        } catch (error) {
+            console.error('Failed to fetch brand for filters', error);
+        }
+    }
+    fetchBrand();
+  }, [brandName]);
+
 
   const { uniqueBrands, uniqueColors } = useMemo(() => {
     const brands = new Set<string>();
@@ -85,6 +94,8 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
     return ["Men", "Women", "Unisex"]; // Static for now
   }, []);
 
+  const allCategories = useMemo(() => (brand?.categories || []).sort(), [brand]);
+
   return (
     <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
       <div className="sticky top-20">
@@ -93,8 +104,8 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
         </div>
         <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
             <div className="pr-4">
-                <FilterSection title="Categories" defaultOpen count={ALL_CATEGORIES.length}>
-                    {ALL_CATEGORIES.map(category => (
+                <FilterSection title="Categories" defaultOpen count={allCategories.length}>
+                    {allCategories.map(category => (
                         <div key={category} className="flex items-center space-x-2">
                             <Checkbox 
                                 id={`cat-${category}`} 
@@ -151,5 +162,3 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
     </aside>
   );
 }
-
-    
