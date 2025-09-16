@@ -418,7 +418,7 @@ export default function BrandHomePage() {
   }
   
   const productSections = Object.entries(groupedProducts).filter(([_, items]) => {
-    if (items.length <= 2) return false;
+    if (items.length < 2) return false;
     const topTwoProducts = items.slice(0, 2);
     return topTwoProducts.every(p => p.rating >= 3);
   });
