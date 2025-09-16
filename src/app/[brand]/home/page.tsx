@@ -54,7 +54,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
             >
                 <CarouselContent>
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -454,8 +454,8 @@ export default function BrandHomePage() {
                     </Button>
                   </div>
                   <Separator className="mb-6" />
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {items.slice(0, 5).map((product) => (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                    {items.slice(0, 6).map((product) => (
                       <BrandProductCard key={product._id as string} product={product} />
                     ))}
                   </div>
@@ -483,5 +483,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-    

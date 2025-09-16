@@ -236,7 +236,7 @@ export default function ProductsPage() {
                         <Loader className="h-8 w-8" />
                     </div>
                 ) : filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 pt-6">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
                         {filteredProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
@@ -254,5 +254,3 @@ export default function ProductsPage() {
     </main>
   );
 }
-
-    
