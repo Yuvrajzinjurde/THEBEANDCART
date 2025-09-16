@@ -1,4 +1,6 @@
 
+'use server';
+
 import dbConnect from './mongodb';
 import Brand from '@/models/brand.model';
 
@@ -15,37 +17,39 @@ const staticCategories = [
 export const seedDatabase = async () => {
     try {
         await dbConnect();
-        console.log('Connected to the database, updating brands...');
+        console.log('Connected to the database, checking for brands to update...');
 
-        const result = await Brand.updateMany(
-            { 
-                $or: [
-                    { categories: { $exists: false } },
-                    { categories: { $size: 0 } }
-                ] 
-            },
-            { 
-                $set: { categories: staticCategories } 
-            }
-        );
+        const brandsToUpdate = await Brand.find({
+            $or: [
+                { categories: { $exists: false } },
+                { categories: { $size: 0 } }
+            ]
+        });
 
-        console.log(`Brands update result: ${result.matchedCount} matched, ${result.modifiedCount} modified.`);
-
-        if (result.modifiedCount > 0) {
+        if (brandsToUpdate.length === 0) {
+            console.log('All brands already have categories. No updates were necessary.');
             return { 
-                success: true, 
-                message: `${result.modifiedCount} brand(s) have been updated with the default category list.` 
-            };
-        } else {
-             return { 
                 success: true, 
                 message: 'All brands already had categories. No updates were necessary.' 
             };
         }
+
+        let modifiedCount = 0;
+        for (const brand of brandsToUpdate) {
+            brand.categories = staticCategories;
+            await brand.save();
+            modifiedCount++;
+        }
+
+        console.log(`Update complete. ${modifiedCount} brand(s) were updated with categories.`);
+
+        return { 
+            success: true, 
+            message: `${modifiedCount} brand(s) have been updated with the default category list.` 
+        };
 
     } catch (error: any) {
         console.error('Error updating brand categories:', error);
         throw new Error('Failed to update brand categories in the database.');
     }
 };
-
