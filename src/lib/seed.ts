@@ -139,42 +139,26 @@ export const seedDatabase = async () => {
         };
     });
 
-    const productNames = productTemplates.map(p => p.name);
-
-    // Find products that are missing tags or don't exist
-    const existingProducts = await Product.find({ name: { $in: productNames }, storefront: 'reeva' });
-    const existingProductMap = new Map(existingProducts.map(p => [p.name, p]));
-
-    const bulkOps = [];
-    
-    for (const template of productTemplates) {
-        const existingProduct = existingProductMap.get(template.name);
-        if (existingProduct) {
-            // Product exists, check if tags need updating
-            if (!existingProduct.tags || existingProduct.tags.length === 0) {
-                bulkOps.push({
-                    updateOne: {
-                        filter: { _id: existingProduct._id },
-                        update: { $set: { tags: template.tags } }
-                    }
-                });
-            }
-        } else {
-            // Product doesn't exist, create it
-            bulkOps.push({
-                insertOne: {
-                    document: template
+    const bulkOps = productTemplates.map(template => ({
+        updateOne: {
+            filter: { name: template.name, storefront: 'reeva' },
+            update: {
+                $set: { tags: template.tags },
+                $setOnInsert: {
+                    ...template,
                 }
-            });
+            },
+            upsert: true
         }
-    }
-
+    }));
+    
     if (bulkOps.length > 0) {
         const result = await Product.bulkWrite(bulkOps);
-        console.log(`Seeding complete. Inserted: ${result.insertedCount}, Updated: ${result.modifiedCount}`);
+        console.log(`Product seeding complete. Matched: ${result.matchedCount}, Upserted: ${result.upsertedCount}, Modified: ${result.modifiedCount}`);
     } else {
-        console.log("All seed products for 'reeva' already exist and have tags.");
+        console.log("No product templates to seed.");
     }
+
 
     return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
@@ -182,5 +166,3 @@ export const seedDatabase = async () => {
     throw new Error('Error seeding database: ' + error.message);
   }
 };
-
-    
