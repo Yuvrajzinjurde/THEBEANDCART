@@ -28,7 +28,7 @@ export const seedDatabase = async () => {
     console.log('Starting database seed...');
 
     // --- Clean up old data ---
-    console.log('Clearing old products and reviews...');
+    console.log('Clearing old products and reviews for seeded brands...');
     await Product.deleteMany({ storefront: { $in: ['reeva', 'nevermore'] } });
     await Review.deleteMany({});
     console.log('Old data cleared.');
