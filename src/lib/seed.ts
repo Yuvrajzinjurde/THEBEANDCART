@@ -13,7 +13,7 @@ const realisticProducts = [
     {
         name: "Classic Crewneck T-Shirt",
         description: "A timeless wardrobe staple, this crewneck t-shirt is crafted from ultra-soft, breathable 100% premium cotton for all-day comfort. Its classic fit is not too tight, not too loose, making it perfect for layering or wearing on its own. Available in a variety of essential colors.",
-        category: "Apparel",
+        category: "Men Fashion",
         brand: "Reeva Basics",
         storefront: "reeva",
         variants: [
@@ -258,5 +258,3 @@ export const seedDatabase = async () => {
     throw new Error('Error seeding database: ' + error.message);
   }
 };
-
-    
