@@ -4,8 +4,17 @@ import { z } from 'zod';
 export const CouponFormSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
   type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.number().optional(),
-  minPurchase: z.coerce.number().min(0, "Minimum purchase cannot be negative."),
+  value: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : parseFloat(String(val))),
+    z.number().optional()
+  ),
+  minPurchase: z.preprocess(
+    (val) => {
+        const processed = parseFloat(String(val));
+        return isNaN(processed) ? 0 : processed;
+    },
+    z.number().min(0, "Minimum purchase cannot be negative.")
+  ),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
