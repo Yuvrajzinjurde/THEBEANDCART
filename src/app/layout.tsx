@@ -97,11 +97,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <style>
-          {`
-            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-          `}
-        </style>
         <ThemeInjector brandName={brandNameFromPath} />
       </head>
       <body className="flex min-h-screen flex-col font-body antialiased">
