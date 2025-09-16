@@ -180,7 +180,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
             {shuffledReviews.map((review, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1 h-full">
-                  <Card className="p-6 text-center h-full flex flex-col justify-between shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+                  <Card className="p-6 text-center h-full flex flex-col justify-between shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                     <div>
                       <div className="flex justify-center text-yellow-400 mb-4">
                         {[...Array(5)].map((_, i) => (
@@ -397,5 +397,7 @@ export default function BrandHomePage() {
   );
 }
 
+
+    
 
     
