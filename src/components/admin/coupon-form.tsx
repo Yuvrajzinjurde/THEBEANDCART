@@ -56,6 +56,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const discountType = form.watch('type');
 
+  React.useEffect(() => {
+    if (discountType === 'free-shipping') {
+      form.setValue('value', undefined, { shouldValidate: true });
+    }
+  }, [discountType, form]);
+
+
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
     form.setValue('code', `SALE${randomPart}`);
@@ -147,9 +154,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                         <RadioGroup
                         onValueChange={(value: 'percentage' | 'fixed' | 'free-shipping') => {
                             field.onChange(value);
-                            if (value === 'free-shipping') {
-                                form.setValue('value', undefined, { shouldValidate: true });
-                            }
                         }}
                         value={field.value}
                         className="flex items-center gap-4"
@@ -190,10 +194,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             {discountType === 'fixed' && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>}
                             <FormControl>
                                 <Input 
-                                  type="number" 
-                                  {...field} 
-                                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))}
-                                  value={field.value ?? ''} 
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => {
+                                      const val = e.target.value;
+                                      field.onChange(val === '' ? undefined : parseFloat(val));
+                                  }}
+                                  value={field.value ?? ''}
                                   className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')}
                                 />
                             </FormControl>
