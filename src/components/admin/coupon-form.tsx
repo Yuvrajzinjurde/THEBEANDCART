@@ -34,6 +34,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const defaultValues = React.useMemo(() => (existingCoupon ? {
       ...existingCoupon,
+      value: existingCoupon.value ?? undefined,
+      minPurchase: existingCoupon.minPurchase ?? 0,
       startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
       endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
   } : {
@@ -62,6 +64,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
 
+    const dataToSend: any = { ...data };
+     // Ensure value is not sent for free-shipping, as the schema will handle it
+    if (dataToSend.type === 'free-shipping') {
+      delete dataToSend.value;
+    }
+
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -69,7 +77,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSend),
       });
 
       const result = await response.json();
@@ -191,7 +199,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                                   type="number"
                                   step="0.01"
                                   placeholder="0"
-                                  {...form.register("value", { valueAsNumber: true })}
+                                  {...field}
                                   className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')}
                                 />
                             </FormControl>
@@ -216,7 +224,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             <Input 
                               type="number"
                               placeholder="0"
-                              {...form.register("minPurchase", { valueAsNumber: true })}
+                              {...field}
                               className="pl-7"
                             />
                         </FormControl>
@@ -327,5 +335,3 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     </Form>
   );
 }
-
-    

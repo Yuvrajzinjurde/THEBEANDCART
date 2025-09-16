@@ -1,11 +1,21 @@
 
 import { z } from 'zod';
 
+const emptyStringToUndefined = z.literal('').transform(() => undefined);
+
+// Preprocessor for numeric fields that might be empty strings
+const numericPreprocessor = z.preprocess((val) => {
+    if (typeof val === 'string' && val.trim() === '') return undefined;
+    if (val === null) return undefined;
+    return val;
+}, z.coerce.number().optional());
+
+
 export const CouponFormSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
   type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.number().optional(),
-  minPurchase: z.number().min(0, "Minimum purchase cannot be negative.").default(0),
+  value: numericPreprocessor,
+  minPurchase: numericPreprocessor.default(0),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
@@ -27,11 +37,21 @@ export const CouponFormSchema = z.object({
         return data.value !== undefined && data.value >= 0;
     }
     if (data.type === 'free-shipping') {
-        return data.value === undefined;
+        // For free shipping, a value is not needed.
+        return true;
     }
-    return false; // Should not happen if type is one of the enum values
+    return false;
 }, {
-    message: "A valid discount value is required for 'percentage' or 'fixed' types, and no value for 'free-shipping'.",
+    message: "A valid discount value is required for the selected discount type.",
+    path: ["value"],
+})
+.refine(data => {
+    if (data.type === 'free-shipping') {
+        return data.value === undefined || data.value === null;
+    }
+    return true;
+}, {
+    message: "Discount value should not be set for 'Free Shipping' type.",
     path: ["value"],
 });
 
