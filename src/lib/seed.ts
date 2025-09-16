@@ -40,26 +40,22 @@ export const seedDatabase = async () => {
             ]
         });
 
-        if (brandsToUpdate.length === 0) {
-            console.log('All brands already have categories. No updates were necessary.');
-            return { 
-                success: true, 
-                message: 'All brands already had categories. No updates were necessary.' 
-            };
-        }
-
         let modifiedCount = 0;
         for (const brand of brandsToUpdate) {
             brand.categories = staticCategories;
             await brand.save();
             modifiedCount++;
         }
+        
+        const message = modifiedCount > 0 
+            ? `${modifiedCount} brand(s) have been updated with the default category list.`
+            : 'All brands already had categories. No updates were necessary.';
 
-        console.log(`Update complete. ${modifiedCount} brand(s) were updated with categories.`);
+        console.log(`Update complete. ${message}`);
 
         return { 
             success: true, 
-            message: `${modifiedCount} brand(s) have been updated with the default category list.` 
+            message: message
         };
 
     } catch (error: any) {
@@ -67,3 +63,4 @@ export const seedDatabase = async () => {
         throw new Error('Failed to update brand categories in the database.');
     }
 };
+
