@@ -53,18 +53,19 @@ export const ProductFormSchema = z.object({
 });
 
 // Schema for client-side form which uses { value: string } for images/videos
-export const ProductFormSchemaForClient = ProductFormSchema.extend({
+export const ProductFormSchemaForClient = ProductFormSchema.merge(z.object({
   images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
   tags: z.array(z.object({ value: z.string() })).optional(),
   variants: z.array(VariantSchema),
-}).refine(data => {
+})).refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
     return data.sellingPrice <= data.mrp;
 }, {
   message: "Selling price cannot be greater than MRP",
   path: ["sellingPrice"],
 });
+
 
 export type ProductFormValues = z.infer<typeof ProductFormSchemaForClient>;
 
