@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -56,8 +55,8 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                     loop: products.length > 6,
                 }}
                 plugins={[plugin.current]}
-                onMouseEnter={() => plugin.current.stop()}
-                onMouseLeave={() => plugin.current.reset()}
+                onMouseEnter={() => plugin.current.play()}
+                onMouseLeave={() => plugin.current.stop()}
                 className="w-full"
             >
                 <CarouselContent>
@@ -454,33 +453,35 @@ export default function BrandHomePage() {
 
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
-          productSections.map(([category, items], index) => (
-            <React.Fragment key={category}>
-                <section className="mb-12">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{category}</h2>
-                     <Button variant="link" asChild>
-                        <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
-                            Discover All
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                    </Button>
-                  </div>
-                  <Separator className="mb-6" />
-                   <div className="grid grid-cols-2 gap-4">
-                        {items.slice(0, 2).map((product) => (
-                            <BrandProductCard key={product._id as string} product={product} />
-                        ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {productSections.map(([category, items], index) => (
+              <React.Fragment key={category}>
+                  <div className="border rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold tracking-tight">{category}</h2>
+                       <Button variant="link" asChild>
+                          <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
+                              Discover All
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                      </Button>
                     </div>
-                </section>
-                {index === 0 && (
-                    <>
-                        <OffersSection brand={brand} />
-                        <CategoryBannerGrid brand={brand} />
-                    </>
-                )}
-            </React.Fragment>
-          ))
+                    <Separator className="mb-6" />
+                     <div className="grid grid-cols-2 gap-4">
+                          {items.slice(0, 2).map((product) => (
+                              <BrandProductCard key={product._id as string} product={product} />
+                          ))}
+                      </div>
+                  </div>
+                  {index === 0 && (
+                      <div className="lg:col-span-3">
+                          <OffersSection brand={brand} />
+                          <CategoryBannerGrid brand={brand} />
+                      </div>
+                  )}
+              </React.Fragment>
+            ))}
+          </div>
         ) : (
           <div className="text-center py-16">
             <p className="text-lg text-muted-foreground">No products found for this brand yet.</p>
