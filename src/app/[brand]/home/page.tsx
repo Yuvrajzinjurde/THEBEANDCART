@@ -404,7 +404,7 @@ export default function BrandHomePage() {
       )
   }
   
-  const productSections = Object.entries(groupedProducts);
+  const productSections = Object.entries(groupedProducts).filter(([_, items]) => items.length >= 2);
 
   return (
     <>
@@ -497,5 +497,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-    
