@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -351,17 +350,20 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const productDescription = useWatch({ control, name: 'description' });
 
 
-  const handleAIError = (error: any, context: string) => {
+  const handleAIError = (error: any, context: string): string => {
     const errorMessage = error.message || '';
      const message = `⚠️ AI service failed during ${context}. Please try again later.`;
+    let displayMessage = message;
+
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-      setAiError(`${message} (Service Overloaded)`);
+      displayMessage = `${message} (Service Overloaded)`;
     } else if (errorMessage.includes('429') || errorMessage.includes('Too Many Requests')) {
-      setAiError(`${message} (Request Limit Reached)`);
-    } else {
-      setAiError(message);
+      displayMessage = `${message} (Request Limit Reached)`;
     }
+    
+    setAiError(displayMessage);
     console.error(error);
+    return displayMessage;
   }
 
   const handleGenerateDescription = async () => {
@@ -376,7 +378,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
           form.setValue('description', result.description, { shouldValidate: true });
           toast.success("AI description generated!");
       } catch (error) {
-          handleAIError(error, "description generation");
+          const displayMessage = handleAIError(error, "description generation");
+          toast.error(displayMessage);
       } finally {
           setIsGeneratingDesc(false);
       }
@@ -395,7 +398,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       form.setValue('tags', tagsAsObjects, { shouldValidate: true });
       toast.success("AI tags generated!");
     } catch (error) {
-      handleAIError(error, "tag generation");
+        const displayMessage = handleAIError(error, "tag generation");
+        toast.error(displayMessage);
     } finally {
       setIsGeneratingTags(false);
     }
@@ -420,7 +424,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       form.setValue('stock', result.stock, { shouldValidate: true });
       toast.success("Form autofilled successfully!");
     } catch (error) {
-      handleAIError(error, "autofill");
+      const displayMessage = handleAIError(error, "autofill");
+      toast.error(displayMessage);
     } finally {
       setIsAutofilling(false);
     }
@@ -919,3 +924,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
