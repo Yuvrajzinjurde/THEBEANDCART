@@ -2,7 +2,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -55,8 +55,10 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   });
 
   const discountType = form.watch('type');
-
-  React.useEffect(() => {
+  
+  // This effect ensures that if the user switches to "Free Shipping",
+  // the value field is cleared to prevent validation errors.
+  useEffect(() => {
     if (discountType === 'free-shipping') {
       form.setValue('value', undefined, { shouldValidate: true });
     }
@@ -225,7 +227,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             <Input 
                               type="number"
                               {...field} 
-                              onChange={(e) => field.onChange(e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                               value={field.value}
                               className="pl-7"
                             />
