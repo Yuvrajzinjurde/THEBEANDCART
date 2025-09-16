@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -34,7 +35,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
     if (!products || products.length === 0) return null;
 
     const plugin = useRef(
-      Autoplay({ delay: 2000, stopOnInteraction: true, playOnInteraction: true })
+      Autoplay({ delay: 2000, stopOnInteraction: true })
     );
 
     return (
@@ -466,9 +467,11 @@ export default function BrandHomePage() {
                     </Button>
                   </div>
                   <Separator className="mb-6" />
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                    {items.slice(0, 6).map((product) => (
-                      <BrandProductCard key={product._id as string} product={product} />
+                  <div className="inline-grid grid-flow-col auto-cols-max gap-x-4">
+                    {items.slice(0, 2).map((product) => (
+                      <div key={product._id as string} className="w-[280px]">
+                        <BrandProductCard product={product} />
+                      </div>
                     ))}
                   </div>
                 </section>
