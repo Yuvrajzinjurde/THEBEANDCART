@@ -21,7 +21,7 @@ const autofillProductPrompt = ai.definePrompt({
   name: 'autofillProductPrompt',
   input: {schema: AutofillProductInputSchema},
   output: {schema: AutofillProductOutputSchema},
-  model: 'googleai/gemini-1.5-pro-latest',
+  model: 'googleai/gemini-1.5-flash-latest',
   prompt: `You are an expert e-commerce catalog manager. Your task is to generate complete and realistic product details based on just a product name.
 
   The generated description should be engaging, SEO-optimized, and highlight key features.
