@@ -21,36 +21,13 @@ const VariantSchema = z.object({
   color: z.string().optional(),
   stock: z.coerce.number().min(0, "Stock must be 0 or more"),
   images: z.array(FileValueSchema).min(1, "Each variant must have at least one image."),
+  videos: z.array(FileValueSchema).optional(),
 });
 
 const ServerVariantSchema = VariantSchema.extend({
-    images: z.array(z.string().url()).min(1, "Each variant must have at least one image.")
+    images: z.array(z.string().url()).min(1, "Each variant must have at least one image."),
+    videos: z.array(z.string().url()).optional(),
 })
-
-// Base schema for server-side validation, expecting image URLs as strings
-export const ProductFormSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
-  description: z.string().min(1, "Description is required"),
-  mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
-  sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
-  category: z.string().min(1, "Category is required"),
-  brand: z.string().min(1, "Product brand is required"),
-  storefront: z.string().min(1, "Storefront is required"),
-  images: z.array(z.string().url()).optional(), // Optional now for variant-based products
-  videos: z.array(z.string().url()).optional(),
-  tags: z.array(z.string()).optional(),
-  stock: z.coerce.number().min(0).optional(),
-  variants: z.array(ServerVariantSchema),
-}).refine(data => {
-    // If there are no variants, there must be top-level images.
-    if (data.variants.length === 0) {
-        return Array.isArray(data.images) && data.images.length > 0;
-    }
-    return true;
-}, {
-    message: "A product must have at least one image.",
-    path: ["images"],
-});
 
 // Base schema without the refinement, for merging.
 const BaseProductFormSchema = z.object({
@@ -85,6 +62,18 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
 })
 .refine(data => {
     // If there are no variants, there must be top-level images.
+    if (data.variants.length === 0) {
+        return Array.isArray(data.images) && data.images.length > 0;
+    }
+    return true;
+}, {
+    message: "A product must have at least one image.",
+    path: ["images"],
+});
+
+
+// Server-side schema for POST/PUT requests
+export const ProductFormSchema = BaseProductFormSchema.refine(data => {
     if (data.variants.length === 0) {
         return Array.isArray(data.images) && data.images.length > 0;
     }

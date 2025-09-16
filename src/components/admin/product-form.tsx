@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -139,6 +140,10 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
         control,
         name: `variants.${index}.images`,
     });
+     const { fields: variantVideoFields, append: appendVariantVideo, remove: removeVariantVideo } = useFieldArray({
+        control,
+        name: `variants.${index}.videos`,
+    });
 
     return (
         <div className="space-y-4 p-4 border rounded-lg relative">
@@ -165,41 +170,79 @@ const VariantItem = ({ control, index, removeVariant }: { control: Control<Produ
                     </FormItem>
                 )} />
             </div>
-            <FormField control={control} name={`variants.${index}.images`} render={() => (
-                <FormItem>
-                    <FormLabel>Variant Images</FormLabel>
-                    <FormControl>
-                        <div>
-                            <Input 
-                                id={`variant-image-upload-${index}`}
-                                type="file" 
-                                accept="image/*"
-                                className="hidden"
-                                multiple
-                                onChange={(e) => handleFileChange(e, appendVariantImage)}
-                            />
-                             <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                <div className="flex flex-col items-center justify-center">
-                                    <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
-                                    <p className="text-xs text-muted-foreground">Upload images for this variant</p>
-                                </div>
-                            </label>
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                    {variantImageFields.length > 0 && (
-                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, moveVariantImage)}>
-                            <SortableContext items={variantImageFields} strategy={rectSortingStrategy}>
-                                <div className="grid grid-cols-5 gap-2 mt-2">
-                                    {variantImageFields.map((imgField, imgIndex) => (
-                                       imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} />
-                                    ))}
-                                </div>
-                            </SortableContext>
-                        </DndContext>
-                    )}
-                </FormItem>
-            )} />
+            <div className="grid grid-cols-2 gap-4">
+                <FormField control={control} name={`variants.${index}.images`} render={() => (
+                    <FormItem>
+                        <FormLabel>Variant Images</FormLabel>
+                        <FormControl>
+                            <div>
+                                <Input 
+                                    id={`variant-image-upload-${index}`}
+                                    type="file" 
+                                    accept="image/*"
+                                    className="hidden"
+                                    multiple
+                                    onChange={(e) => handleFileChange(e, appendVariantImage)}
+                                />
+                                <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground">Upload images</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        {variantImageFields.length > 0 && (
+                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, moveVariantImage)}>
+                                <SortableContext items={variantImageFields} strategy={rectSortingStrategy}>
+                                    <div className="grid grid-cols-3 gap-2 mt-2">
+                                        {variantImageFields.map((imgField, imgIndex) => (
+                                        imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} />
+                                        ))}
+                                    </div>
+                                </SortableContext>
+                            </DndContext>
+                        )}
+                    </FormItem>
+                )} />
+                 <FormField control={control} name={`variants.${index}.videos`} render={() => (
+                    <FormItem>
+                        <FormLabel>Variant Videos</FormLabel>
+                        <FormControl>
+                            <div>
+                                <Input 
+                                    id={`variant-video-upload-${index}`}
+                                    type="file" 
+                                    accept="video/*"
+                                    className="hidden"
+                                    multiple
+                                    onChange={(e) => handleFileChange(e, appendVariantVideo)}
+                                />
+                                <label htmlFor={`variant-video-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground">Upload videos</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        {variantVideoFields.length > 0 && (
+                            <div className="grid grid-cols-3 gap-2 mt-2">
+                                {variantVideoFields.map((vidField, vidIndex) => (
+                                    <div key={vidField.id} className="relative aspect-square">
+                                        {vidField.value && <video src={vidField.value} controls className="w-full h-full object-cover rounded-md bg-muted" />}
+                                        <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVariantVideo(vidIndex)}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </FormItem>
+                )} />
+            </div>
         </div>
     );
 };
@@ -388,6 +431,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       variants: data.variants.map(variant => ({
         ...variant,
         images: variant.images.map(img => img.value),
+        videos: variant.videos?.map(vid => vid.value),
       })),
     };
 
@@ -620,7 +664,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         {variantFields.map((field, index) => (
                             <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} />
                         ))}
-                         <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [] })}>
+                         <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [], videos: [] })}>
                             <PlusCircle className="mr-2" />
                             {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                         </Button>
