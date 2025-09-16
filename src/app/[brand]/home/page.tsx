@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import type { IBrand } from '@/models/brand.model';
+import type { IBrand, IReview } from '@/models/brand.model';
 import type { IProduct } from '@/models/product.model';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -151,51 +151,62 @@ const PromoBannerSection = ({ brand }: { brand: IBrand | null }) => {
 }
 
 const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
-    if (!brand?.reviews || brand.reviews.length === 0) return null;
-    return (
-        <section className="w-full py-12 md:py-16">
-             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-10">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">What Our Customers Say</h2>
-                </div>
-                <Carousel
-                    opts={{
-                        align: "start",
-                        loop: true,
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent>
-                        {brand.reviews.map((review, index) => (
-                        <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                            <div className="p-1 h-full">
-                                <Card className="p-6 text-center h-full flex flex-col justify-between shadow-sm hover:shadow-xl transition-shadow">
-                                    <div>
-                                        <div className="flex justify-center text-yellow-400 mb-4">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} className={cn("w-5 h-5", i < review.rating ? 'fill-current' : 'text-muted-foreground/30')} />
-                                            ))}
-                                        </div>
-                                        <p className="text-muted-foreground italic">&quot;{review.reviewText}&quot;</p>
-                                    </div>
-                                    <div className="mt-6 flex items-center justify-center gap-3">
-                                        <Avatar>
-                                            <AvatarImage src={review.customerAvatarUrl} />
-                                            <AvatarFallback>{review.customerName.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <p className="font-semibold">{review.customerName}</p>
-                                    </div>
-                                </Card>
-                            </div>
-                        </CarouselItem>
+  const [shuffledReviews, setShuffledReviews] = useState<IReview[]>([]);
+
+  useEffect(() => {
+    if (brand?.reviews && brand.reviews.length > 0) {
+      // Shuffle the reviews array
+      const shuffled = [...brand.reviews].sort(() => Math.random() - 0.5);
+      setShuffledReviews(shuffled);
+    }
+  }, [brand?.reviews]);
+
+  if (!brand?.reviews || brand.reviews.length === 0) return null;
+
+  return (
+    <section className="w-full py-12 md:py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">What Our Customers Say</h2>
+        </div>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            {shuffledReviews.map((review, index) => (
+              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                <div className="p-1 h-full">
+                  <Card className="p-6 text-center h-full flex flex-col justify-between shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+                    <div>
+                      <div className="flex justify-center text-yellow-400 mb-4">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={cn("w-5 h-5", i < review.rating ? 'fill-current' : 'text-muted-foreground/30')} />
                         ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="hidden sm:flex" />
-                    <CarouselNext className="hidden sm:flex" />
-                </Carousel>
-             </div>
-        </section>
-    );
+                      </div>
+                      <p className="text-muted-foreground italic">&quot;{review.reviewText}&quot;</p>
+                    </div>
+                    <div className="mt-6 flex items-center justify-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={review.customerAvatarUrl} />
+                        <AvatarFallback>{review.customerName.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <p className="font-semibold">{review.customerName}</p>
+                    </div>
+                  </Card>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2" />
+          <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2" />
+        </Carousel>
+      </div>
+    </section>
+  );
 };
 
 
@@ -385,3 +396,6 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+
+    
