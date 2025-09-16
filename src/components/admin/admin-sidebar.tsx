@@ -57,10 +57,14 @@ export function AdminSidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
-        const isMobile = window.innerWidth < 768;
-        if (isMobile) {
-            setIsCollapsed(true);
-        }
+        const checkIsMobile = () => {
+            if (window.innerWidth < 768) {
+                setIsCollapsed(true);
+            }
+        };
+        checkIsMobile(); // Check on initial client render
+        window.addEventListener('resize', checkIsMobile);
+        return () => window.removeEventListener('resize', checkIsMobile);
     }, []);
 
 
