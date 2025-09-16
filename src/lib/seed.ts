@@ -110,12 +110,11 @@ export const seedDatabase = async () => {
     console.log('Upserted "nevermore" brand.');
     
     // --- FORCE TAG UPDATE SCRIPT ---
-    console.log("Fetching all 'reeva' storefront products to update tags...");
+    console.log("Fetching all 'reeva' storefront products to force update tags...");
     const productsToUpdate = await Product.find({ storefront: 'reeva' });
 
     if (productsToUpdate.length === 0) {
         console.log("No products found for 'reeva' storefront. Seeding new products.");
-        // If no products exist, create them with tags.
         const productTemplates = Array.from({ length: 50 }, (_, i) => {
             const index = i + 1;
             const category = CATEGORIES[index % CATEGORIES.length];
@@ -144,6 +143,7 @@ export const seedDatabase = async () => {
             return {
                 updateOne: {
                     filter: { _id: product._id },
+                    // $set will either add the field or overwrite the existing one.
                     update: { $set: { tags: newTags } }
                 }
             };
@@ -154,7 +154,7 @@ export const seedDatabase = async () => {
             const result = await Product.bulkWrite(bulkOps);
             console.log(`Tag update complete. Modified products: ${result.modifiedCount}`);
         } else {
-            console.log("No products needed a tag update."); // Should not be reached with this logic
+            console.log("No products to update.");
         }
     }
 
