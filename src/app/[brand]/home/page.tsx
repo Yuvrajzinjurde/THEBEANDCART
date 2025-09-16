@@ -257,6 +257,7 @@ export default function BrandHomePage() {
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [groupedProducts, setGroupedProducts] = useState<GroupedProducts>({});
+  const [popularProducts, setPopularProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -286,10 +287,22 @@ export default function BrandHomePage() {
                 throw new Error(errorData.message || 'Failed to fetch products');
             }
             const productData = await productResponse.json();
-            setProducts(productData.products);
+            const fetchedProducts: IProduct[] = productData.products;
+            setProducts(fetchedProducts);
+            
+            // Calculate and set popular products
+            const calculatePopularity = (p: IProduct) => {
+                const views = p.views || 0;
+                const clicks = p.clicks || 0;
+                const rating = p.rating || 0;
+                return (views * 0.2) + (clicks * 0.5) + (rating * 0.3);
+            };
+
+            const sortedByPopularity = [...fetchedProducts].sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
+            setPopularProducts(sortedByPopularity.slice(0, 10)); // Top 10 popular products
 
             // Group products by category
-            const grouped = productData.products.reduce((acc: GroupedProducts, product: IProduct) => {
+            const grouped = fetchedProducts.reduce((acc: GroupedProducts, product: IProduct) => {
                 const category = product.category;
                 if (!acc[category]) {
                     acc[category] = [];
@@ -367,8 +380,41 @@ export default function BrandHomePage() {
                 <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
             </Carousel>
         </section>
+      
+      {popularProducts.length > 0 && (
+        <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">Trending Products</h2>
+                 <Button variant="link" asChild>
+                    <Link href={`/${brandName}/products`}>
+                        Discover All
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </div>
+            <Separator className="mb-6" />
+            <Carousel
+                opts={{
+                    align: "start",
+                    loop: true,
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {popularProducts.map((product) => (
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                            <div className="p-1">
+                                <BrandProductCard product={product} />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2 hidden md:flex" />
+                <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2 hidden md:flex" />
+            </Carousel>
+        </section>
+      )}
 
-      <CategoryBannerGrid brand={brand} />
 
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
@@ -391,7 +437,12 @@ export default function BrandHomePage() {
                     ))}
                   </div>
                 </section>
-                {index === 0 && <OffersSection brand={brand} />}
+                {index === 0 && (
+                    <>
+                        <OffersSection brand={brand} />
+                        <CategoryBannerGrid brand={brand} />
+                    </>
+                )}
             </React.Fragment>
           ))
         ) : (
