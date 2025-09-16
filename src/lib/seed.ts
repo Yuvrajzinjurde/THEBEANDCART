@@ -135,7 +135,7 @@ export const seedDatabase = async () => {
                 mrp,
                 sellingPrice,
                 category,
-                images: [],
+                images: [], // Ensure no images are seeded
                 stock: Math.floor(Math.random() * 200),
                 rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
                 brand: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Designs`,
