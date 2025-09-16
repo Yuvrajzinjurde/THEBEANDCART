@@ -298,7 +298,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     ...existingProduct,
     images: existingProduct.images.map(img => ({value: img})),
     videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
-    tags: existingProduct.tags.map(tag => ({ value: tag })),
+    tags: (existingProduct.tags || []).map(tag => ({ value: tag })),
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
