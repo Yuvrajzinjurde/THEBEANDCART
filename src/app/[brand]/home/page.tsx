@@ -417,7 +417,11 @@ export default function BrandHomePage() {
       )
   }
   
-  const productSections = Object.entries(groupedProducts).filter(([_, items]) => items.length >= 2);
+  const productSections = Object.entries(groupedProducts).filter(([_, items]) => {
+    if (items.length <= 2) return false;
+    const topTwoProducts = items.slice(0, 2);
+    return topTwoProducts.every(p => p.rating > 3);
+  });
 
   return (
     <>
@@ -464,7 +468,7 @@ export default function BrandHomePage() {
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
 
       <CategoryBannerGrid brand={brand} />
-
+      
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
