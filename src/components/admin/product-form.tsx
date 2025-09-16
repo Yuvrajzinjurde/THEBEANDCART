@@ -375,7 +375,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       setIsGeneratingDesc(true);
       try {
           const result = await getSEODescription({ productName });
-          form.setValue('description', result.description, { shouldValidate: true });
+          form.setValue('description', result.description, { shouldValidate: true, shouldDirty: true });
           toast.success("AI description generated!");
       } catch (error) {
           const displayMessage = handleAIError(error, "description generation");
@@ -395,7 +395,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     try {
       const result = await generateProductTags({ productName, description: productDescription });
       const tagsAsObjects = result.tags.map(tag => ({ value: tag }));
-      form.setValue('tags', tagsAsObjects, { shouldValidate: true });
+      form.setValue('tags', tagsAsObjects, { shouldValidate: true, shouldDirty: true });
       toast.success("AI tags generated!");
     } catch (error) {
         const displayMessage = handleAIError(error, "tag generation");
@@ -416,12 +416,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     toast.info("Autofilling form with AI...");
     try {
       const result = await autofillProductDetails({ productName });
-      form.setValue('description', result.description, { shouldValidate: true });
-      form.setValue('mrp', result.mrp, { shouldValidate: true });
-      form.setValue('sellingPrice', result.sellingPrice, { shouldValidate: true });
-      form.setValue('category', result.category, { shouldValidate: true });
-      form.setValue('brand', result.brand, { shouldValidate: true });
-      form.setValue('stock', result.stock, { shouldValidate: true });
+      form.setValue('description', result.description, { shouldValidate: true, shouldDirty: true });
+      form.setValue('mrp', result.mrp, { shouldValidate: true, shouldDirty: true });
+      form.setValue('sellingPrice', result.sellingPrice, { shouldValidate: true, shouldDirty: true });
+      form.setValue('category', result.category, { shouldValidate: true, shouldDirty: true });
+      form.setValue('brand', result.brand, { shouldValidate: true, shouldDirty: true });
+      form.setValue('stock', result.stock, { shouldValidate: true, shouldDirty: true });
       toast.success("Form autofilled successfully!");
     } catch (error) {
       const displayMessage = handleAIError(error, "autofill");
