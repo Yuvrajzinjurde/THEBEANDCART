@@ -143,44 +143,44 @@ export const seedDatabase = async () => {
     const existingProducts = await Product.find({ name: { $in: productNames }, storefront: 'reeva' });
     const existingProductNames = new Set(existingProducts.map(p => p.name));
 
+    // Create products that don't exist
     const newProductsToCreate = productTemplates.filter(p => !existingProductNames.has(p.name));
-
     if (newProductsToCreate.length > 0) {
         await Product.insertMany(newProductsToCreate);
         console.log(`Created ${newProductsToCreate.length} new products for storefront 'reeva'.`);
     } else {
-        console.log("All seed products already exist.");
+        console.log("All seed products already exist. Checking for tag updates.");
     }
-
-    // Now, update any existing products that are missing tags
+    
+    // Find existing products that are missing tags
     const productsMissingTags = await Product.find({
+        name: { $in: productNames },
         storefront: 'reeva',
-        name: { $in: productNames }, // Only check our seed products
         $or: [
             { tags: { $exists: false } },
             { tags: { $size: 0 } }
         ]
     });
-
+    
     if (productsMissingTags.length > 0) {
-        console.log(`Found ${productsMissingTags.length} products missing tags. Updating now...`);
+        console.log(`Found ${productsMissingTags.length} products missing tags. Updating...`);
         const bulkOps = productsMissingTags.map(product => {
-            const category = product.category;
-            const newTags = [
-                category.toLowerCase(),
-                ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-            ];
+            const template = productTemplates.find(t => t.name === product.name);
+            if (!template) return null; // Should not happen
             return {
                 updateOne: {
                     filter: { _id: product._id },
-                    update: { $set: { tags: newTags } }
+                    update: { $set: { tags: template.tags } }
                 }
             };
-        });
-        await Product.bulkWrite(bulkOps);
-        console.log(`Updated ${productsMissingTags.length} products with tags.`);
+        }).filter(op => op !== null);
+
+        if (bulkOps.length > 0) {
+            await Product.bulkWrite(bulkOps as any);
+            console.log(`Successfully updated ${bulkOps.length} products with tags.`);
+        }
     } else {
-        console.log("All seed products have tags. No tag updates needed.");
+         console.log("All seed products for 'reeva' already have tags.");
     }
 
 
