@@ -109,7 +109,7 @@ export const seedDatabase = async () => {
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
     console.log('Upserted "nevermore" brand.');
     
-    // --- DIRECT TAG UPDATE SCRIPT ---
+    // --- FORCE TAG UPDATE SCRIPT ---
     console.log("Fetching all 'reeva' storefront products to update tags...");
     const productsToUpdate = await Product.find({ storefront: 'reeva' });
 
@@ -139,7 +139,8 @@ export const seedDatabase = async () => {
             const newTags = [
                 product.category.toLowerCase(),
                 ...(tagOptions[product.category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
-            ];
+            ].filter(tag => tag); // Ensure no undefined tags
+
             return {
                 updateOne: {
                     filter: { _id: product._id },
@@ -149,11 +150,11 @@ export const seedDatabase = async () => {
         });
 
         if (bulkOps.length > 0) {
-            console.log(`Found ${bulkOps.length} products. Updating all with new tags.`);
+            console.log(`Found ${bulkOps.length} products. Force updating all with new tags.`);
             const result = await Product.bulkWrite(bulkOps);
             console.log(`Tag update complete. Modified products: ${result.modifiedCount}`);
         } else {
-            console.log("All products already have tags.");
+            console.log("No products needed a tag update."); // Should not be reached with this logic
         }
     }
 
