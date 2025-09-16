@@ -8,104 +8,16 @@ import Review from '@/models/review.model';
 import bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
 
-
-const realisticProducts = [
-    {
-        name: "Classic Crewneck T-Shirt",
-        description: "A timeless wardrobe staple, this crewneck t-shirt is crafted from ultra-soft, breathable 100% premium cotton for all-day comfort. Its classic fit is not too tight, not too loose, making it perfect for layering or wearing on its own. Available in a variety of essential colors.",
-        category: "Men Fashion",
-        brand: "Reeva Basics",
-        storefront: "reeva",
-        variants: [
-            {
-                color: "Heather Grey", size: "M", stock: 89,
-                images: ["https://picsum.photos/seed/grey-tshirt1/600/600", "https://picsum.photos/seed/grey-tshirt2/600/600"]
-            },
-            {
-                color: "Heather Grey", size: "L", stock: 65,
-                images: ["https://picsum.photos/seed/grey-tshirt1/600/600", "https://picsum.photos/seed/grey-tshirt2/600/600"]
-            },
-            {
-                color: "Navy Blue", size: "M", stock: 78,
-                images: ["https://picsum.photos/seed/blue-tshirt1/600/600", "https://picsum.photos/seed/blue-tshirt2/600/600"]
-            },
-            {
-                color: "Navy Blue", size: "XL", stock: 43,
-                images: ["https://picsum.photos/seed/blue-tshirt1/600/600", "https://picsum.photos/seed/blue-tshirt2/600/600"]
-            },
-             {
-                color: "Forrest Green", size: "L", stock: 55,
-                images: ["https://picsum.photos/seed/green-tshirt1/600/600", "https://picsum.photos/seed/green-tshirt2/600/600"]
-            },
-        ],
-        tags: ["t-shirt", "apparel", "casual", "cotton", "menswear"],
-        mrp: 1299,
-        sellingPrice: 799,
-    },
-    {
-        name: "Artisan Roast Coffee Beans",
-        description: "Experience the rich, aromatic flavor of our single-origin artisan coffee beans. Sourced from the high-altitude farms of Colombia, these beans are medium-roasted to perfection, unlocking notes of chocolate, citrus, and caramel. Ideal for espresso, French press, or your favorite brewing method.",
-        category: "Grocery",
-        brand: "The Daily Grind",
-        storefront: "reeva",
-        variants: [
-            {
-                size: "250g", stock: 150,
-                images: ["https://picsum.photos/seed/coffee1/600/600", "https://picsum.photos/seed/coffee2/600/600"]
-            },
-            {
-                size: "500g", stock: 90,
-                images: ["https://picsum.photos/seed/coffee3/600/600", "https://picsum.photos/seed/coffee4/600/600"]
-            },
-            {
-                size: "1kg", stock: 40,
-                images: ["https://picsum.photos/seed/coffee5/600/600", "https://picsum.photos/seed/coffee6/600/600"]
-            }
-        ],
-        tags: ["coffee", "beans", "beverage", "grocery", "artisan"],
-        mrp: 800,
-        sellingPrice: 650,
-    },
-    {
-        name: "Celestial Moonstone Necklace",
-        description: "Adorn yourself with the ethereal glow of our Celestial Moonstone Necklace. This enchanting piece features a genuine, ethically-sourced rainbow moonstone, known for its calming energy and connection to the moon's cycles. The minimalist design showcases the stone's natural beauty, set in a delicate 925 sterling silver chain.",
-        category: "Women Fashion",
-        brand: "Luna Jewels",
-        storefront: "nevermore",
-        variants: [
-            {
-                color: "Silver", stock: 60,
-                images: ["https://picsum.photos/seed/necklace1/600/600", "https://picsum.photos/seed/necklace2/600/600"]
-            },
-            {
-                color: "Gold Plated", stock: 35,
-                images: ["https://picsum.photos/seed/necklace3/600/600", "https://picsum.photos/seed/necklace4/600/600"]
-            }
-        ],
-        tags: ["jewelry", "necklace", "moonstone", "silver", "women"],
-        mrp: 4999,
-        sellingPrice: 3499,
-    },
-    {
-        name: "Evergreen Scented Soy Candle",
-        description: "Bring the crisp, refreshing scent of a forest into your home with our Evergreen Scented Soy Candle. Hand-poured with 100% natural soy wax and infused with a blend of pine, cedarwood, and eucalyptus essential oils, this candle provides a clean, long-lasting burn. Housed in a minimalist ceramic jar that complements any decor.",
-        category: "Home & Living",
-        brand: "Hearth & Home",
-        storefront: "reeva",
-        variants: [
-            {
-                size: "8 oz", stock: 120,
-                images: ["https://picsum.photos/seed/candle1/600/600", "https://picsum.photos/seed/candle2/600/600"]
-            },
-            {
-                size: "12 oz", stock: 70,
-                images: ["https://picsum.photos/seed/candle3/600/600", "https://picsum.photos/seed/candle4/600/600"]
-            }
-        ],
-        tags: ["candle", "home-decor", "scented", "soy-wax", "evergreen"],
-        mrp: 1500,
-        sellingPrice: 1100,
-    }
+const CATEGORIES = [
+    "Men Fashion", "Women Fashion", "Home & Living", "Kids & Toys",
+    "Personal Care & Wellness", "Mobiles & Tablets", "Consumer Electronics",
+    "Appliances", "Automotive", "Beauty & Personal Care", "Home Utility",
+    "Kids", "Grocery", "Women", "Home & Kitchen", "Health & Wellness",
+    "Beauty & Makeup", "Personal Care", "Men'S Grooming",
+    "Craft & Office Supplies", "Sports & Fitness", "Automotive Accessories",
+    "Pet Supplies", "Office Supplies & Stationery",
+    "Industrial & Scientific Products", "Musical Instruments", "Books",
+    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming"
 ];
 
 
@@ -206,57 +118,47 @@ export const seedDatabase = async () => {
     await Brand.findOneAndUpdate({ permanentName: 'nevermore' }, nevermoreBrandData, { upsert: true, new: true });
     console.log('Upserted "nevermore" brand.');
 
-    // --- Create Products and Reviews ---
-    console.log('Creating new realistic products...');
-    let createdProductsCount = 0;
-    const reviewPromises = [];
+    // --- Create Products ---
+    console.log('Generating 100 new products...');
+    const productsToCreate = [];
+    const brandsToSeed = ['reeva', 'nevermore'];
 
-    for (const productTemplate of realisticProducts) {
-        const styleId = new Types.ObjectId().toHexString();
-        const productDocs = productTemplate.variants.map(variant => ({
-            ...productTemplate,
-            ...variant,
-            styleId,
-            name: `${productTemplate.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
-            mrp: productTemplate.mrp,
-            sellingPrice: productTemplate.sellingPrice,
-            rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
-            variants: undefined, // remove nested variants array
-        }));
-        
-        const newProducts = await Product.insertMany(productDocs);
-        createdProductsCount += newProducts.length;
+    for (const storefront of brandsToSeed) {
+        for (let i = 1; i <= 50; i++) {
+            const category = CATEGORIES[i % CATEGORIES.length];
+            const sellingPrice = Math.floor(Math.random() * 5000) + 500;
+            const mrp = sellingPrice + Math.floor(Math.random() * 1000) + 200;
 
-        // Create reviews for the first product variant
-        const firstProductId = newProducts[0]._id;
-        reviewPromises.push(Review.create({
-            productId: firstProductId,
-            userId: new Types.ObjectId(), // dummy user
-            userName: "Alex Doe",
-            rating: 5,
-            review: "Absolutely fantastic quality! It feels durable and looks even better in person. I've already gotten so many compliments. Highly recommend to anyone on the fence.",
-        }));
-        if (createdProductsCount % 2 === 0) { // Add a second review for some products
-            reviewPromises.push(Review.create({
-                productId: firstProductId,
-                userId: new Types.ObjectId(), // dummy user
-                userName: "Samira Jones",
-                rating: 4,
-                review: "Really great product, very happy with my purchase. It arrived quickly and was well-packaged. The color is slightly different than the photo, but I still love it.",
-            }));
+            const product = {
+                name: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Product #${i}`,
+                description: `This is a high-quality ${category.toLowerCase()} product from ${storefront}. Item number ${i} is designed for excellence and durability.`,
+                mrp,
+                sellingPrice,
+                category,
+                images: [
+                    `https://picsum.photos/seed/${storefront}-${i}-a/600/600`,
+                    `https://picsum.photos/seed/${storefront}-${i}-b/600/600`,
+                ],
+                stock: Math.floor(Math.random() * 200),
+                rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
+                brand: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Designs`,
+                storefront: storefront,
+                tags: [storefront, category.split(' ')[0]],
+                styleId: new Types.ObjectId().toHexString(),
+            };
+            productsToCreate.push(product);
         }
     }
+    
+    await Product.insertMany(productsToCreate);
+    console.log(`Created ${productsToCreate.length} products.`);
 
-    await Promise.all(reviewPromises);
-    console.log(`Created ${createdProductsCount} products and ${reviewPromises.length} reviews.`);
     console.log('Database seed completed successfully!');
 
-    return { success: true, message: `Database seeded successfully with ${createdProductsCount} products and ${reviewPromises.length} reviews.` };
+    return { success: true, message: `Database seeded successfully with ${productsToCreate.length} products.` };
 
   } catch (error: any) {
     console.error('Error seeding database:', error);
     throw new Error('Error seeding database: ' + error.message);
   }
 };
-
-    
