@@ -42,33 +42,35 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
 
-  const defaultValues: Partial<BrandFormValues> = existingBrand ? {
-    displayName: existingBrand.displayName,
-    permanentName: existingBrand.permanentName,
-    logoUrl: existingBrand.logoUrl,
-    banners: existingBrand.banners,
-    themeName: existingBrand.themeName,
-    offers: existingBrand.offers,
-    reviews: existingBrand.reviews,
-    promoBanner: existingBrand.promoBanner,
-    categoryBanners: existingBrand.categoryBanners,
-    categories: existingBrand.categories,
-  } : {
-    displayName: '',
-    permanentName: '',
-    logoUrl: '',
-    banners: [{ title: '', description: '', imageUrl: '', imageHint: '' }],
-    themeName: undefined,
-    offers: [],
-    reviews: [],
-    categoryBanners: [],
-    categories: [],
-  };
+  const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
+    existingBrand ? {
+      displayName: existingBrand.displayName,
+      permanentName: existingBrand.permanentName,
+      logoUrl: existingBrand.logoUrl,
+      banners: existingBrand.banners,
+      themeName: existingBrand.themeName,
+      offers: existingBrand.offers,
+      reviews: existingBrand.reviews,
+      promoBanner: existingBrand.promoBanner,
+      categoryBanners: existingBrand.categoryBanners,
+      categories: existingBrand.categories || [],
+    } : {
+      displayName: '',
+      permanentName: '',
+      logoUrl: '',
+      banners: [{ title: '', description: '', imageUrl: '', imageHint: '' }],
+      themeName: undefined,
+      offers: [],
+      reviews: [],
+      categoryBanners: [],
+      categories: [],
+    }
+  ), [existingBrand]);
 
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(BrandFormSchema),
     defaultValues,
-    mode: 'onChange', // Validate on change
+    mode: 'onChange',
   });
 
   const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
@@ -149,6 +151,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       setIsSubmitting(false);
     }
   }
+  
+  const isFormDirty = form.formState.isDirty;
 
   return (
     <Form {...form}>
@@ -595,9 +599,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         
         <AlertDialog>
           <AlertDialogTrigger asChild>
-              <Button type="button" disabled={!form.formState.isValid || isSubmitting}>
-                 {mode === 'create' ? 'Create Brand' : 'Save Changes'}
-              </Button>
+            <Button type="button" disabled={isSubmitting || (mode === 'edit' && !isFormDirty)}>
+                {mode === 'create' ? 'Create Brand' : 'Save Changes'}
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
               <AlertDialogHeader>
@@ -620,3 +624,5 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </Form>
   );
 }
+
+    
