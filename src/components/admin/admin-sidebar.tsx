@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import {
@@ -38,6 +39,7 @@ import useBrandStore from "@/stores/brand-store";
 import { Button } from "../ui/button";
 import { UserNav } from "../user-nav";
 import { Separator } from "../ui/separator";
+import type { IBrand } from "@/models/brand.model";
 
 const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -56,6 +58,7 @@ export function AdminSidebar() {
     const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
     
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [currentBrand, setCurrentBrand] = useState<IBrand | null>(null);
 
     useEffect(() => {
         const checkIsMobile = () => {
@@ -74,14 +77,24 @@ export function AdminSidebar() {
         try {
             const response = await fetch('/api/brands');
             const data = await response.json();
-            const brandNames = data.brands.map((b: any) => b.permanentName);
+            
+            const allBrands: IBrand[] = data.brands;
+            const brandNames = allBrands.map((b) => b.permanentName);
             setAvailableBrands(['All Brands', ...brandNames]);
+
+            if (selectedBrand !== 'All Brands') {
+                const brandDetails = allBrands.find(b => b.permanentName === selectedBrand);
+                setCurrentBrand(brandDetails || null);
+            } else {
+                setCurrentBrand(null);
+            }
+
         } catch (error) {
             console.error("Failed to fetch brands", error);
         }
         }
         fetchBrands();
-    }, [setAvailableBrands]);
+    }, [setAvailableBrands, selectedBrand]);
 
     const handleBrandSelect = (brand: string) => {
         setSelectedBrand(brand);
@@ -104,7 +117,11 @@ export function AdminSidebar() {
                 isCollapsed ? "justify-center" : "justify-between",
             )}>
                 <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                    <Store className="h-6 w-6 text-primary" />
+                    {currentBrand?.logoUrl ? (
+                         <Image src={currentBrand.logoUrl} alt={currentBrand.displayName} width={32} height={32} className="h-8 w-8 rounded-full object-cover"/>
+                    ) : (
+                        <Store className="h-6 w-6 text-primary" />
+                    )}
                     <span>Admin Panel</span>
                 </Link>
                 <Button variant="ghost" size="icon" onClick={toggleSidebar}>
