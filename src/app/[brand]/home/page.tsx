@@ -33,6 +33,10 @@ type GroupedProducts = {
 const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
     if (!products || products.length === 0) return null;
 
+    const plugin = useRef(
+      Autoplay({ delay: 2000, stopOnInteraction: true, playOnInteraction: true })
+    );
+
     return (
         <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
@@ -50,6 +54,9 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                     align: "start",
                     loop: products.length > 6,
                 }}
+                plugins={[plugin.current]}
+                onMouseEnter={() => plugin.current.stop()}
+                onMouseLeave={() => plugin.current.reset()}
                 className="w-full"
             >
                 <CarouselContent>
