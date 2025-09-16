@@ -4,7 +4,6 @@
 import dbConnect from './mongodb';
 import Brand from '@/models/brand.model';
 
-// The full list of categories to be inserted if a brand has none.
 const staticCategories = [
     'T-Shirts', 'Shirts', 'Jeans', 'Trousers', 'Kurtas', 'Sarees', 'Dresses', 
     'Skirts', 'Heels', 'Flats', 'Sneakers', 'Boots', 'Handbags', 'Wallets', 
@@ -17,27 +16,26 @@ const staticCategories = [
 export const seedDatabase = async () => {
     try {
         await dbConnect();
-        console.log('Connected to the database, checking for brands to update...');
+        console.log('Connected to the database, checking brands for category updates...');
 
-        const brandsToUpdate = await Brand.find({
-            $or: [
-                { categories: { $exists: false } },
-                { categories: { $size: 0 } }
-            ]
-        });
+        const brands = await Brand.find({});
+        let updatedCount = 0;
 
-        let modifiedCount = 0;
-        if (brandsToUpdate.length > 0) {
-            for (const brand of brandsToUpdate) {
-                brand.categories = staticCategories;
+        for (const brand of brands) {
+            const existingCategories = new Set(brand.categories || []);
+            const categoriesToAdd = staticCategories.filter(cat => !existingCategories.has(cat));
+
+            if (categoriesToAdd.length > 0) {
+                brand.categories.push(...categoriesToAdd);
                 await brand.save();
-                modifiedCount++;
+                updatedCount++;
+                console.log(`Updated categories for brand: ${brand.displayName}`);
             }
         }
         
-        const message = modifiedCount > 0 
-            ? `${modifiedCount} brand(s) have been updated with the default category list.`
-            : 'All brands already had categories. No updates were necessary.';
+        const message = updatedCount > 0 
+            ? `${updatedCount} brand(s) have been updated with the full category list.`
+            : 'All brands already had the complete category list. No updates were necessary.';
 
         console.log(`Update complete. ${message}`);
 
