@@ -141,8 +141,7 @@ export function AdminSidebar() {
                                         <Button variant="outline" className={cn("w-full justify-start", isCollapsed && "w-12 h-12 justify-center p-0")}>
                                             <div className="flex items-center gap-2">
                                                 <div className={cn(
-                                                    "flex items-center justify-center h-6 w-6 bg-muted text-xs font-bold shrink-0 capitalize",
-                                                    isCollapsed ? "rounded-lg" : "rounded-md"
+                                                    "flex items-center justify-center h-6 w-6 rounded-md bg-muted text-xs font-bold shrink-0 capitalize"
                                                 )}>
                                                     {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 3)}
                                                 </div>
