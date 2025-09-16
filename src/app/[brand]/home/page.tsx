@@ -278,7 +278,7 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                 <div className="flex items-center gap-3">
                     {brand?.logoUrl && (
-                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={40} height={40} className="h-10 w-10 object-contain" />
+                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={40} height={40} className="h-10 w-10 object-cover rounded-full" />
                     )}
                     <span className="text-xl font-bold capitalize">{brand?.displayName}</span>
                 </div>
