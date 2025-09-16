@@ -32,6 +32,7 @@ export const ProductFormSchema = z.object({
   storefront: z.string().min(1, "Storefront is required"),
   images: z.array(z.string().url()).min(1, "At least one image is required"),
   videos: z.array(z.string().url()).optional(),
+  tags: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
   variants: z.array(VariantSchema),
 });
@@ -71,3 +72,14 @@ export const AutofillProductOutputSchema = z.object({
 });
 export type AutofillProductOutput = z.infer<typeof AutofillProductOutputSchema>;
 
+
+export const GenerateTagsInputSchema = z.object({
+  productName: z.string().describe('The name of the product.'),
+  description: z.string().describe('The description of the product.'),
+});
+export type GenerateTagsInput = z.infer<typeof GenerateTagsInputSchema>;
+
+export const GenerateTagsOutputSchema = z.object({
+  tags: z.array(z.string()).describe('An array of 5-7 relevant, single-word tags for the product.'),
+});
+export type GenerateTagsOutput = z.infer<typeof GenerateTagsOutputSchema>;

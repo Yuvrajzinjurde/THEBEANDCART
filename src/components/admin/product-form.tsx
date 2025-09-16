@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical } from 'lucide-react';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Badge } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import type { IBrand } from '@/models/brand.model';
 import { getSEODescription } from '@/ai/flows/seo-description-flow';
 import { autofillProductDetails } from '@/ai/flows/autofill-product-flow';
+import { generateProductTags } from '@/ai/flows/generate-product-tags-flow';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -108,9 +109,11 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
   const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
+  const [isGeneratingTags, setIsGeneratingTags] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
   const [aiError, setAiError] = React.useState<string | null>(null);
+  const [tagInput, setTagInput] = React.useState('');
   
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
   const [previewProduct, setPreviewProduct] = React.useState<Partial<IProduct> | null>(null);
@@ -122,6 +125,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     ...existingProduct,
     images: existingProduct.images.map(img => ({value: img})),
     videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
+    tags: existingProduct.tags.map(tag => ({ value: tag })),
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
@@ -136,6 +140,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     storefront: selectedBrand === 'All Brands' ? (storefronts[0] || '') : selectedBrand,
     images: [],
     videos: [],
+    tags: [],
     variants: [],
     stock: 0,
   };
@@ -154,6 +159,11 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const { fields: videoFields, append: appendVideo, remove: removeVideo } = useFieldArray({
     control: form.control,
     name: 'videos',
+  });
+  
+  const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray({
+    control: form.control,
+    name: 'tags',
   });
 
   const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
@@ -177,15 +187,17 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const hasVariants = form.watch('variants').length > 0;
   const productName = form.watch('name');
+  const productDescription = form.watch('description');
 
-  const handleAIError = (error: any) => {
+  const handleAIError = (error: any, context: string) => {
     const errorMessage = error.message || '';
+     const message = `⚠️ AI service failed during ${context}. Please try again later.`;
     if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-      setAiError("⚠️ AI service is overloaded. Please try again later or fill in the form manually.");
+      setAiError(`${message} (Service Overloaded)`);
     } else if (errorMessage.includes('429') || errorMessage.includes('Too Many Requests')) {
-      setAiError("⚠️ AI request limit reached. Please try again later or fill in the form manually.");
+      setAiError(`${message} (Request Limit Reached)`);
     } else {
-      setAiError("⚠️ AI service is unavailable. Please try again later.");
+      setAiError(message);
     }
     console.error(error);
   }
@@ -196,18 +208,39 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
           return;
       }
       setAiError(null);
-      setIsGenerating(true);
+      setIsGeneratingDesc(true);
       try {
           const result = await getSEODescription({ productName });
           form.setValue('description', result.description, { shouldValidate: true });
           toast.success("AI description generated!");
       } catch (error) {
-          handleAIError(error);
+          handleAIError(error, "description generation");
       } finally {
-          setIsGenerating(false);
+          setIsGeneratingDesc(false);
       }
   };
   
+  const handleGenerateTags = async () => {
+    if (!productName || !productDescription) {
+      toast.warn("Please enter a product name and description first.");
+      return;
+    }
+    setAiError(null);
+    setIsGeneratingTags(true);
+    try {
+      const result = await generateProductTags({ productName, description: productDescription });
+      // The AI returns an array of strings, but our form uses an array of objects
+      const tagsAsObjects = result.tags.map(tag => ({ value: tag }));
+      form.setValue('tags', tagsAsObjects, { shouldValidate: true });
+      toast.success("AI tags generated!");
+    } catch (error) {
+      handleAIError(error, "tag generation");
+    } finally {
+      setIsGeneratingTags(false);
+    }
+  };
+
+
   const handleAutofill = async () => {
     if (!productName) {
       toast.warn("Please enter a product name to autofill the form.");
@@ -226,20 +259,32 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       form.setValue('stock', result.stock, { shouldValidate: true });
       toast.success("Form autofilled successfully!");
     } catch (error) {
-      handleAIError(error);
+      handleAIError(error, "autofill");
     } finally {
       setIsAutofilling(false);
+    }
+  };
+  
+  const handleTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      const newTag = tagInput.trim();
+      if (newTag && !tagFields.some(field => field.value === newTag)) {
+        appendTag({ value: newTag });
+        setTagInput('');
+      }
     }
   };
 
 
   async function onSubmit(data: ProductFormValues) {
     setIsSubmitting(true);
-    // Before submitting, we need to flatten the images/videos array
+    // Before submitting, we need to flatten the images/videos/tags array
     const dataToSubmit = {
       ...data,
       images: data.images.map(img => img.value),
       videos: data.videos?.map(vid => vid.value),
+      tags: data.tags?.map(tag => tag.value),
     };
 
 
@@ -366,8 +411,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Description</FormLabel>
-                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGenerating || !productName}>
-                                        {isGenerating ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
+                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGeneratingDesc || !productName}>
+                                        {isGeneratingDesc ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate with AI
                                     </Button>
                                 </div>
@@ -573,6 +618,39 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )} />
+                         <FormField control={form.control} name="tags" render={({ field }) => (
+                            <FormItem>
+                                 <div className="flex items-center justify-between">
+                                    <FormLabel>Tags</FormLabel>
+                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !productName || !productDescription}>
+                                        {isGeneratingTags ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
+                                        Generate Tags
+                                    </Button>
+                                </div>
+                                 <FormControl>
+                                    <div>
+                                        <Input
+                                            placeholder="Add a tag and press Enter"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={handleTagKeyDown}
+                                        />
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {tagFields.map((tagField, index) => (
+                                                <Badge key={tagField.id} variant="secondary" className="flex items-center gap-1">
+                                                    {tagField.value}
+                                                    <button type="button" onClick={() => removeTag(index)} className="rounded-full hover:bg-muted-foreground/20">
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </FormControl>
+                                 <FormDescription>Product tags for search and filtering.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                         )} />
                     </CardContent>
                 </Card>
                  <Card>
@@ -650,7 +728,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
 
     

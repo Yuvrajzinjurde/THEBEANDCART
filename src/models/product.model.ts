@@ -14,6 +14,7 @@ export interface IProduct extends Document {
   storefront: string; // The storefront this product belongs to, e.g., "reeva"
   views: number;
   clicks: number;
+  tags: string[]; // New tags field
   // New fields for variants
   styleId?: string; // Groups variants together
   color?: string;
@@ -33,6 +34,7 @@ const ProductSchema: Schema<IProduct> = new Schema({
   storefront: { type: String, required: true, index: true },
   views: { type: Number, default: 0 },
   clicks: { type: Number, default: 0 },
+  tags: { type: [String], default: [] },
   styleId: { type: String, index: true },
   color: { type: String },
   size: { type: String },
