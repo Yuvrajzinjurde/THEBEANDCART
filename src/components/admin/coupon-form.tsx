@@ -32,7 +32,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues = React.useMemo(() => (existingCoupon ? {
+  const defaultValues: any = React.useMemo(() => (existingCoupon ? {
       ...existingCoupon,
       value: existingCoupon.value ?? '',
       minPurchase: existingCoupon.minPurchase ?? '',
@@ -58,7 +58,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   useEffect(() => {
     if (discountType === 'free-shipping') {
-      form.setValue('value', '');
+      form.setValue('value', undefined);
     }
   }, [discountType, form]);
 
