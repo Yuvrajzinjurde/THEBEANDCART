@@ -52,18 +52,46 @@ export const ProductFormSchema = z.object({
     path: ["images"],
 });
 
+// Base schema without the refinement, for merging.
+const BaseProductFormSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().min(1, "Description is required"),
+  mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
+  sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
+  category: z.string().min(1, "Category is required"),
+  brand: z.string().min(1, "Product brand is required"),
+  storefront: z.string().min(1, "Storefront is required"),
+  images: z.array(z.string().url()).optional(),
+  videos: z.array(z.string().url()).optional(),
+  tags: z.array(z.string()).optional(),
+  stock: z.coerce.number().min(0).optional(),
+  variants: z.array(ServerVariantSchema),
+});
+
+
 // Schema for client-side form which uses { value: string } for images/videos
-export const ProductFormSchemaForClient = ProductFormSchema.merge(z.object({
+export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
   images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
   tags: z.array(z.object({ value: z.string() })).optional(),
   variants: z.array(VariantSchema),
-})).refine(data => {
+}))
+.refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
     return data.sellingPrice <= data.mrp;
 }, {
   message: "Selling price cannot be greater than MRP",
   path: ["sellingPrice"],
+})
+.refine(data => {
+    // If there are no variants, there must be top-level images.
+    if (data.variants.length === 0) {
+        return Array.isArray(data.images) && data.images.length > 0;
+    }
+    return true;
+}, {
+    message: "A product must have at least one image.",
+    path: ["images"],
 });
 
 
