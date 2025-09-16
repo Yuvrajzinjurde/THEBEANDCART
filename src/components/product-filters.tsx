@@ -14,6 +14,20 @@ import type { IProduct } from "@/models/product.model";
 import { ScrollArea } from "./ui/scroll-area";
 import type { ActiveFilters } from "@/app/[brand]/products/page";
 
+const ALL_CATEGORIES = [
+    "Men Fashion", "Women Fashion", "Home & Living", "Kids & Toys",
+    "Personal Care & Wellness", "Mobiles & Tablets", "Consumer Electronics",
+    "Appliances", "Automotive", "Beauty & Personal Care", "Home Utility",
+    "Kids", "Grocery", "Women", "Home & Kitchen", "Health & Wellness",
+    "Beauty & Makeup", "Personal Care", "Men'S Grooming",
+    "Craft & Office Supplies", "Sports & Fitness", "Automotive Accessories",
+    "Pet Supplies", "Office Supplies & Stationery",
+    "Industrial & Scientific Products", "Musical Instruments", "Books",
+    "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming",
+    "Combos", "Corrugated Boxes"
+].sort();
+
+
 type FilterSectionProps = {
   title: string;
   children: React.ReactNode;
@@ -49,14 +63,6 @@ interface ProductFiltersProps {
 
 export function ProductFilters({ productsForCategories, productsForOthers, activeFilters, onFilterChange }: ProductFiltersProps) {
 
-  const uniqueCategories = useMemo(() => {
-    const categories = new Set<string>();
-    productsForCategories.forEach(product => {
-      if (product.category) categories.add(product.category);
-    });
-    return Array.from(categories).sort();
-  }, [productsForCategories]);
-
   const { uniqueBrands, uniqueColors } = useMemo(() => {
     const brands = new Set<string>();
     const colors = new Set<string>();
@@ -87,8 +93,8 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
         </div>
         <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
             <div className="pr-4">
-                <FilterSection title="Categories" defaultOpen count={uniqueCategories.length}>
-                    {uniqueCategories.map(category => (
+                <FilterSection title="Categories" defaultOpen count={ALL_CATEGORIES.length}>
+                    {ALL_CATEGORIES.map(category => (
                         <div key={category} className="flex items-center space-x-2">
                             <Checkbox 
                                 id={`cat-${category}`} 
