@@ -57,7 +57,7 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
                 </p>
             </div>
             <div className="container mx-auto p-4 md:p-8 rounded-2xl">
-                 <div className="max-w-4xl mx-auto">
+                 <div className="max-w-3xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
                         {columns.map((columnItems, colIndex) => (
                             <div key={colIndex} className="grid gap-4">
@@ -161,12 +161,16 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
   useEffect(() => {
     if (brand?.reviews && brand.reviews.length > 0) {
+      // This will only run on the client, after initial hydration
       const shuffled = [...brand.reviews].sort(() => Math.random() - 0.5);
       setShuffledReviews(shuffled);
     }
   }, [brand?.reviews]);
 
   if (!brand?.reviews || brand.reviews.length === 0) return null;
+  
+  const reviewsToDisplay = shuffledReviews.length > 0 ? shuffledReviews : brand.reviews;
+
 
   return (
     <section className="w-full py-12 md:py-16">
@@ -182,7 +186,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
           className="w-full"
         >
           <CarouselContent>
-            {shuffledReviews.map((review, index) => (
+            {reviewsToDisplay.map((review, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                 <div className="p-1 h-full">
                   <Card className="p-6 text-center h-full flex flex-col justify-between shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -331,8 +335,8 @@ export default function BrandHomePage() {
             <Carousel 
                 className="w-full"
                 plugins={[plugin.current]}
-                onMouseEnter={() => plugin.current.stop()}
-                onMouseLeave={() => plugin.current.reset()}
+                onMouseEnter={() => plugin.current?.stop()}
+                onMouseLeave={() => plugin.current?.reset()}
             >
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
