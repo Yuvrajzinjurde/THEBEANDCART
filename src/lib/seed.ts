@@ -135,7 +135,7 @@ export const seedDatabase = async () => {
                 mrp,
                 sellingPrice,
                 category,
-                images: [], // Products created with no images
+                images: [`https://picsum.photos/seed/${storefront}${i}/600/600`],
                 stock: Math.floor(Math.random() * 200),
                 rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
                 brand: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Designs`,
@@ -159,5 +159,3 @@ export const seedDatabase = async () => {
     throw new Error('Error seeding database: ' + error.message);
   }
 };
-
-    

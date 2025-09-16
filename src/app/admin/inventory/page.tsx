@@ -99,16 +99,16 @@ export default function InventoryPage() {
 
     const handleSeed = async () => {
         setIsSeeding(true);
-        toast.info("Seeding database... This might take a moment.");
+        toast.info("Clearing old products and seeding new data... This might take a moment.");
         try {
           const response = await fetch('/api/seed', { method: 'POST' });
           const result = await response.json();
           if (response.ok) {
             toast.success(result.message);
-            console.log(result.log);
           } else {
             throw new Error(result.message);
           }
+          // After seeding, fetch the new products
           await fetchProducts();
         } catch (error: any) {
           toast.error(error.message || 'Failed to seed database.');
@@ -259,6 +259,41 @@ export default function InventoryPage() {
         </Table>
     );
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-full flex-1">
+                <Loader className="h-8 w-8 text-primary" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center text-destructive">
+                <p>{error}</p>
+            </div>
+        );
+    }
+    
+    if (allProducts.length === 0) {
+        return (
+            <Card>
+                <CardContent className="flex flex-col items-center justify-center text-center p-12 gap-4">
+                    <CardTitle>No Products Found</CardTitle>
+                    <CardDescription>
+                        It looks like there is corrupted or no product data in the database.
+                        <br/>
+                        Click the button below to clear old data and seed fresh products.
+                    </CardDescription>
+                    <Button onClick={handleSeed} disabled={isSeeding} size="lg">
+                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
+                        {isSeeding ? 'Seeding Database...' : 'Seed Products'}
+                    </Button>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <Card>
             <CardHeader className="flex flex-row items-start justify-between">
@@ -305,82 +340,70 @@ export default function InventoryPage() {
                 </div>
             </CardHeader>
             <CardContent>
-                {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <Loader className="h-8 w-8 text-primary" />
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <div className="flex items-center justify-between border-b">
+                        <TabsList className="bg-transparent p-0 border-none">
+                            <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">All Stock ({stockCounts.all})</TabsTrigger>
+                            <TabsTrigger value="out-of-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">Out of Stock ({stockCounts.outOfStock})</TabsTrigger>
+                            <TabsTrigger value="low-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">
+                                <div className="flex items-center gap-2">
+                                    <span>Low Stock ({stockCounts.lowStock})</span>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Products with less than or equal to {LOW_STOCK_THRESHOLD} items in stock.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            </TabsTrigger>
+                        </TabsList>
                     </div>
-                ) : error ? (
-                    <div className="text-center text-destructive">
-                        <p>{error}</p>
+                    
+                    <div className="flex items-center gap-4 py-4 px-1">
+                         <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {uniqueCategories.map(category => (
+                                        <SelectItem key={category} value={category} className="capitalize">{category}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground">Sort catalogs by:</span>
+                             <Select value={sortOption} onValueChange={setSortOption}>
+                                <SelectTrigger className="w-[220px]">
+                                    <SelectValue placeholder="Sort by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="estimated-orders-desc">Highest Estimated Orders</SelectItem>
+                                    <SelectItem value="stock-asc">Lowest Stock</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                ) : (
-                    <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <div className="flex items-center justify-between border-b">
-                            <TabsList className="bg-transparent p-0 border-none">
-                                <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">All Stock ({stockCounts.all})</TabsTrigger>
-                                <TabsTrigger value="out-of-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">Out of Stock ({stockCounts.outOfStock})</TabsTrigger>
-                                <TabsTrigger value="low-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">
-                                    <div className="flex items-center gap-2">
-                                        <span>Low Stock ({stockCounts.lowStock})</span>
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>Products with less than or equal to {LOW_STOCK_THRESHOLD} items in stock.</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </div>
-                                </TabsTrigger>
-                            </TabsList>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 py-4 px-1">
-                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
-                                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Select Category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {uniqueCategories.map(category => (
-                                            <SelectItem key={category} value={category} className="capitalize">{category}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-muted-foreground">Sort catalogs by:</span>
-                                 <Select value={sortOption} onValueChange={setSortOption}>
-                                    <SelectTrigger className="w-[220px]">
-                                        <SelectValue placeholder="Sort by" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="estimated-orders-desc">Highest Estimated Orders</SelectItem>
-                                        <SelectItem value="stock-asc">Lowest Stock</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
 
-                        <TabsContent value="all" className="mt-0">
-                            {renderTable(filteredProducts)}
-                        </TabsContent>
-                         <TabsContent value="out-of-stock" className="mt-0">
-                            {renderTable(filteredProducts)}
-                        </TabsContent>
-                         <TabsContent value="low-stock" className="mt-0">
-                            {renderTable(filteredProducts)}
-                        </TabsContent>
-                    </Tabs>
-                )}
+                    <TabsContent value="all" className="mt-0">
+                        {renderTable(filteredProducts)}
+                    </TabsContent>
+                     <TabsContent value="out-of-stock" className="mt-0">
+                        {renderTable(filteredProducts)}
+                    </TabsContent>
+                     <TabsContent value="low-stock" className="mt-0">
+                        {renderTable(filteredProducts)}
+                    </TabsContent>
+                </Tabs>
             </CardContent>
         </Card>
     );
 
     
 }
-
-    
