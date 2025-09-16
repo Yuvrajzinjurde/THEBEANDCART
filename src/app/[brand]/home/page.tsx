@@ -57,35 +57,37 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
                 </p>
             </div>
             <div className="container mx-auto p-4 md:p-8 rounded-2xl bg-gradient-to-br from-blue-100/50 to-blue-200/50">
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
-                    {columns.map((columnItems, colIndex) => (
-                        <div key={colIndex} className="grid gap-4">
-                            {columnItems.map((banner, itemIndex) => (
-                                <Link 
-                                    key={itemIndex} 
-                                    href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`}
-                                    className="relative group overflow-hidden rounded-xl shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl"
-                                >
-                                    <Image 
-                                        src={banner.imageUrl}
-                                        alt={banner.categoryName}
-                                        width={400}
-                                        height={colIndex === 1 && itemIndex === 0 ? 600 : 400} // Example of different height
-                                        data-ai-hint={banner.imageHint}
-                                        className={cn(
-                                            "object-cover w-full transition-transform duration-300 group-hover:scale-105",
-                                            colIndex === 1 && itemIndex === 0 ? "aspect-[2/3]" : "aspect-square"
-                                        )}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 p-4">
-                                        <h3 className="text-white text-lg font-bold">{banner.categoryName}</h3>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    ))}
-                 </div>
+                 <div className="max-w-4xl mx-auto">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
+                        {columns.map((columnItems, colIndex) => (
+                            <div key={colIndex} className="grid gap-4">
+                                {columnItems.map((banner, itemIndex) => (
+                                    <Link 
+                                        key={itemIndex} 
+                                        href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`}
+                                        className="relative group overflow-hidden rounded-xl shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl"
+                                    >
+                                        <Image 
+                                            src={banner.imageUrl}
+                                            alt={banner.categoryName}
+                                            width={400}
+                                            height={colIndex === 1 && itemIndex === 0 ? 600 : 400} // Example of different height
+                                            data-ai-hint={banner.imageHint}
+                                            className={cn(
+                                                "object-cover w-full transition-transform duration-300 group-hover:scale-105",
+                                                colIndex === 1 && itemIndex === 0 ? "aspect-[2/3]" : "aspect-square"
+                                            )}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                                        <div className="absolute bottom-0 left-0 p-4">
+                                            <h3 className="text-white text-lg font-bold">{banner.categoryName}</h3>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </section>
     );
