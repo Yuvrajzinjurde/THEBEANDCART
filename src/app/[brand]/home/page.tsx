@@ -459,6 +459,8 @@ export default function BrandHomePage() {
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
       
+      <CategoryBannerGrid brand={brand} />
+
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -490,7 +492,6 @@ export default function BrandHomePage() {
       </div>
 
       <OffersSection brand={brand} />
-      <CategoryBannerGrid brand={brand} />
       <PromoBannerSection brand={brand} />
       <ReviewsSection brand={brand} />
 
@@ -499,7 +500,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-    
-
-    
