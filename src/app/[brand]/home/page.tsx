@@ -56,7 +56,7 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
                     Find what you're looking for from our curated selection of categories.
                 </p>
             </div>
-            <div className="container mx-auto p-4 md:p-8 rounded-2xl bg-gradient-to-br from-blue-100/50 to-blue-200/50">
+            <div className="container mx-auto p-4 md:p-8 rounded-2xl">
                  <div className="max-w-4xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
                         {columns.map((columnItems, colIndex) => (
