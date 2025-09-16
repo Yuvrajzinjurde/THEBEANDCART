@@ -30,6 +30,12 @@ const promoBannerSchema = z.object({
   buttonLink: z.string().url("Must be a valid URL").min(1, "Button link is required"),
 });
 
+const categoryBannerSchema = z.object({
+  categoryName: z.string().min(1, "Category name is required"),
+  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
+  imageHint: z.string().min(1, "Image hint is required"),
+});
+
 
 export const themeColors = [
     { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
@@ -53,6 +59,7 @@ export const BrandFormSchema = z.object({
   offers: z.array(offerSchema).optional(),
   reviews: z.array(reviewSchema).optional(),
   promoBanner: promoBannerSchema.optional(),
+  categoryBanners: z.array(categoryBannerSchema).optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;

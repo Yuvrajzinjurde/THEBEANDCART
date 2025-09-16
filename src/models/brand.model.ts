@@ -30,6 +30,12 @@ interface IPromoBanner {
     buttonLink: string;
 }
 
+interface ICategoryBanner {
+    categoryName: string;
+    imageUrl: string;
+    imageHint: string;
+}
+
 
 export interface IBrand extends Document {
   displayName: string;
@@ -40,6 +46,7 @@ export interface IBrand extends Document {
   offers?: IOffer[];
   reviews?: IReview[];
   promoBanner?: IPromoBanner;
+  categoryBanners?: ICategoryBanner[];
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -71,6 +78,12 @@ const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
     buttonLink: { type: String, required: true },
 }, { _id: false });
 
+const CategoryBannerSchema: Schema<ICategoryBanner> = new Schema({
+    categoryName: { type: String, required: true },
+    imageUrl: { type: String, required: true },
+    imageHint: { type: String, required: true },
+}, { _id: false });
+
 
 const BrandSchema: Schema<IBrand> = new Schema({
   displayName: { type: String, required: true },
@@ -81,11 +94,9 @@ const BrandSchema: Schema<IBrand> = new Schema({
   offers: { type: [OfferSchema], required: false },
   reviews: { type: [ReviewSchema], required: false },
   promoBanner: { type: PromoBannerSchema, required: false },
+  categoryBanners: { type: [CategoryBannerSchema], required: false },
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);
 
 export default Brand;
-
-
-    

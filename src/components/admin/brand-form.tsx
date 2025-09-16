@@ -48,6 +48,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     offers: existingBrand.offers,
     reviews: existingBrand.reviews,
     promoBanner: existingBrand.promoBanner,
+    categoryBanners: existingBrand.categoryBanners,
   } : {
     displayName: '',
     permanentName: '',
@@ -56,6 +57,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     themeName: undefined,
     offers: [],
     reviews: [],
+    categoryBanners: [],
   };
 
   const form = useForm<BrandFormValues>({
@@ -77,6 +79,11 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const { fields: reviewFields, append: appendReview, remove: removeReview } = useFieldArray({
     control: form.control,
     name: 'reviews',
+  });
+
+  const { fields: categoryBannerFields, append: appendCategoryBanner, remove: removeCategoryBanner } = useFieldArray({
+    control: form.control,
+    name: 'categoryBanners',
   });
 
 
@@ -290,6 +297,81 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Category Banners</CardTitle>
+                <CardDescription>Banners for the category grid on the main landing page.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 {categoryBannerFields.map((field, index) => (
+                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeCategoryBanner(index)}>
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name={`categoryBanners.${index}.categoryName`}
+                                render={({ field }) => (
+                                    <FormItem><FormLabel>Category Name</FormLabel><FormControl><Input placeholder="e.g., Skincare" {...field} /></FormControl><FormMessage /></FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name={`categoryBanners.${index}.imageHint`}
+                                render={({ field }) => (
+                                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'skincare products'" {...field} /></FormControl><FormMessage /></FormItem>
+                                )}
+                            />
+                        </div>
+                         <FormField
+                            control={form.control}
+                            name={`categoryBanners.${index}.imageUrl`}
+                            render={({ field: imageField }) => (
+                                <FormItem>
+                                    <FormLabel>Image</FormLabel>
+                                    <FormControl>
+                                       <div className="w-full">
+                                            <Input
+                                                id={`cat-banner-upload-${index}`}
+                                                type="file"
+                                                accept="image/png, image/jpeg"
+                                                className="hidden"
+                                                onChange={(e) => handleFileChange(e, imageField.onChange)}
+                                            />
+                                            {imageField.value ? (
+                                                <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                                    <Image src={imageField.value} alt="Category banner preview" fill objectFit="cover" className="rounded-md" />
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        className="absolute top-1 right-1 h-6 w-6"
+                                                        onClick={() => imageField.onChange('')}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <label htmlFor={`cat-banner-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                        <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                                    </div>
+                                                </label>
+                                            )}
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => appendCategoryBanner({ categoryName: '', imageUrl: '', imageHint: '' })}>Add Category Banner</Button>
             </CardContent>
         </Card>
         
