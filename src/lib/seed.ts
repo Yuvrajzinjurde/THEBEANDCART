@@ -154,6 +154,14 @@ export const seedDatabase = async () => {
             const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
             const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
 
+            const tagOptions: { [key: string]: string[] } = {
+                'Electronics': ['gadget', 'tech', 'smart', 'device', 'portable'],
+                'Apparel': ['fashion', 'clothing', 'style', 'wear', 'outfit'],
+                'Books': ['reading', 'literature', 'novel', 'hardcover', 'pages'],
+                'Home Goods': ['decor', 'living', 'kitchen', 'furniture', 'utility'],
+                'Health': ['wellness', 'care', 'personal', 'supplement', 'vitamin']
+            };
+
             products.push({
                 name: `${category} Product ${i}`,
                 description: `This is a detailed description for product number ${i}. It is a high-quality item from the ${category.toLowerCase()} category, designed for modern needs and built to last. Enjoy its premium features and elegant design.`,
@@ -170,6 +178,10 @@ export const seedDatabase = async () => {
                 ],
                 stock: Math.floor(Math.random() * 100),
                 rating: parseFloat((Math.random() * 4 + 1).toFixed(1)), // Rating between 1.0 and 5.0
+                tags: [
+                    category.toLowerCase(), 
+                    ...tagOptions[category].sort(() => 0.5 - Math.random()).slice(0, 3) // Get 3 random tags
+                ],
             });
         }
         await Product.insertMany(products);
