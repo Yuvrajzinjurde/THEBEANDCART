@@ -161,14 +161,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         <div className="p-3 space-y-1.5">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{product.category}</span>
+              <span className="truncate">{product.category}</span>
               <span className="h-1 w-1 rounded-full bg-muted-foreground/50"></span>
               <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                   <span>{product.rating.toFixed(1)}</span>
               </div>
           </div>
-          <div className="flex items-baseline gap-2 flex-nowrap">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toLocaleString('en-IN')}
             </p>
