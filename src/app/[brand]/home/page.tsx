@@ -14,6 +14,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Loader } from '@/components/ui/loader';
@@ -32,6 +33,24 @@ type GroupedProducts = {
 
 const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
     if (!products || products.length === 0) return null;
+    
+    const [api, setApi] = useState<CarouselApi>()
+    const [isHovered, setIsHovered] = useState(false);
+
+    useEffect(() => {
+        if (!api || isHovered) return;
+
+        const interval = setInterval(() => {
+            if (api.canScrollNext()) {
+                api.scrollNext();
+            } else {
+                api.scrollTo(0);
+            }
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [api, isHovered]);
+
 
     return (
         <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
@@ -46,18 +65,14 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
             </div>
             <Separator className="mb-6" />
             <Carousel
+                setApi={setApi}
                 opts={{
                     align: "start",
-                    loop: products.length > 6,
+                    loop: true,
                 }}
-                plugins={[
-                    Autoplay({
-                      delay: 2000,
-                      stopOnInteraction: true,
-                      stopOnMouseEnter: true,
-                    }),
-                ]}
                 className="w-full"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
             >
                 <CarouselContent>
                     {products.map((product) => (
