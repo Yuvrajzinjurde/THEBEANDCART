@@ -32,7 +32,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues: CouponFormValues = existingCoupon ? {
+  const defaultValues: Partial<CouponFormValues> = existingCoupon ? {
       ...existingCoupon,
       startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
       endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
@@ -42,7 +42,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     type: 'percentage',
     value: 0,
     minPurchase: 0,
-    brand: selectedBrand,
+    brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
     startDate: undefined,
     endDate: undefined
   };
@@ -56,13 +56,10 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const discountType = form.watch('type');
 
   useEffect(() => {
+    // When type changes to 'free-shipping', clear the value.
+    // When it changes back, the user needs to re-enter it.
     if (discountType === 'free-shipping') {
       form.setValue('value', undefined);
-    } else {
-        // When switching back from 'free-shipping', reset value to 0 if it's undefined
-        if (form.getValues('value') === undefined) {
-             form.setValue('value', 0);
-        }
     }
   }, [discountType, form]);
 
@@ -73,6 +70,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
+    
+    const dataToSubmit: Partial<CouponFormValues> = { ...data };
+    if (data.type === 'free-shipping') {
+      delete dataToSubmit.value;
+    }
+
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -80,7 +83,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSubmit),
       });
 
       const result = await response.json();
@@ -193,7 +196,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                          <div className="relative">
                             {discountType === 'fixed' && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>}
                             <FormControl>
-                                <Input type="number" {...field} className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')} />
+                                <Input type="number" {...field} value={field.value ?? ''} className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')} />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}
                         </div>
@@ -322,5 +325,3 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     </Form>
   );
 }
-
-    
