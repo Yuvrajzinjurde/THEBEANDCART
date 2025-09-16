@@ -298,7 +298,7 @@ export default function BrandHomePage() {
   const [groupedProducts, setGroupedProducts] = useState<GroupedProducts>({});
   
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
-  const [peoplesChoiceProducts, setPeoplesChoiceProducts] = useState<IProduct[]>([]);
+  const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
   const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -350,9 +350,9 @@ export default function BrandHomePage() {
             const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
             setTrendingProducts(sortedByPopularity.slice(0, 12));
 
-            // 2. People's Choice (by highest rating)
+            // 2. Top Rated Products (by highest rating)
             const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
-            setPeoplesChoiceProducts(sortedByRating.slice(0, 12));
+            setTopRatedProducts(sortedByRating.slice(0, 12));
             
             // 3. Newest Arrivals (by creation date)
             const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
@@ -440,7 +440,7 @@ export default function BrandHomePage() {
         </section>
       
       <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
-      <ProductCarouselSection title="People's Choice" products={peoplesChoiceProducts} brandName={brandName} />
+      <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
 
 
@@ -488,3 +488,5 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
