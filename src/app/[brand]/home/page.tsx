@@ -18,11 +18,10 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star, ShoppingBag } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -95,26 +94,28 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
 
 const OffersSection = ({ brand }: { brand: IBrand | null }) => {
     if (!brand?.offers || brand.offers.length === 0) return null;
+    
+    // Custom SVG icons for the offer cards
+    const offerIcons = [
+        <svg key="0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>,
+        <svg key="1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>,
+        <svg key="2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>,
+    ];
+
     return (
-        <section className="w-full py-12 md:py-16 bg-muted/50">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-10">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Special Offers</h2>
-                    <p className="text-muted-foreground mt-2">Don't miss out on these exclusive deals!</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="w-full py-16">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {brand.offers.map((offer, index) => (
-                        <Card key={index} className="flex flex-col items-center text-center p-6 border-dashed border-2 hover:border-primary hover:shadow-lg transition-all">
-                             <div className="p-4 bg-primary/10 rounded-full mb-4">
-                                <ShoppingBag className="w-8 h-8 text-primary" />
+                        <div key={index} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-100 to-blue-200 p-1">
+                                <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-blue-500">
+                                    {offerIcons[index % offerIcons.length]}
+                                </div>
                             </div>
-                            <CardTitle className="text-xl">{offer.title}</CardTitle>
-                            <p className="text-muted-foreground mt-2 flex-grow">{offer.description}</p>
-                            <div className="mt-4">
-                                <span className="text-sm text-muted-foreground">Use Code:</span>
-                                <Badge variant="secondary" className="text-lg ml-2">{offer.code}</Badge>
-                            </div>
-                        </Card>
+                            <h3 className="text-xl font-bold text-gray-900">{offer.title}</h3>
+                            <p className="mt-2 text-gray-500">{offer.description}</p>
+                        </div>
                     ))}
                 </div>
             </div>
@@ -316,6 +317,8 @@ export default function BrandHomePage() {
           </main>
       )
   }
+  
+  const productSections = Object.entries(groupedProducts);
 
   return (
     <>
@@ -360,25 +363,29 @@ export default function BrandHomePage() {
       <CategoryBannerGrid brand={brand} />
 
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
-        {Object.keys(groupedProducts).length > 0 ? (
-          Object.entries(groupedProducts).map(([category, items]) => (
-            <section key={category} className="mb-12">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{category}</h2>
-                 <Button variant="link" asChild>
-                    <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
-                        Discover All
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
-              </div>
-              <Separator className="mb-6" />
-              <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {items.slice(0, 5).map((product) => (
-                  <BrandProductCard key={product._id as string} product={product} />
-                ))}
-              </div>
-            </section>
+        {productSections.length > 0 ? (
+          productSections.map(([category, items], index) => (
+            <React.Fragment key={category}>
+                <section className="mb-12">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{category}</h2>
+                     <Button variant="link" asChild>
+                        <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
+                            Discover All
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                  </div>
+                  <Separator className="mb-6" />
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {items.slice(0, 5).map((product) => (
+                      <BrandProductCard key={product._id as string} product={product} />
+                    ))}
+                  </div>
+                </section>
+                {/* After the first product section, show the offers */}
+                {index === 0 && <OffersSection brand={brand} />}
+            </React.Fragment>
           ))
         ) : (
           <div className="text-center py-16">
@@ -387,7 +394,6 @@ export default function BrandHomePage() {
         )}
       </div>
 
-        <OffersSection brand={brand} />
         <PromoBannerSection brand={brand} />
         <ReviewsSection brand={brand} />
 
