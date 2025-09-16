@@ -229,7 +229,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
     <section className="w-full py-12 md:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">What Our Customers Say</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Your Cheers, Our Motivation</h2>
         </div>
         <Carousel
           opts={{
@@ -459,8 +459,6 @@ export default function BrandHomePage() {
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
       
-      <CategoryBannerGrid brand={brand} />
-
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -491,14 +489,17 @@ export default function BrandHomePage() {
         )}
       </div>
 
-        <OffersSection brand={brand} />
-        <PromoBannerSection brand={brand} />
-        <ReviewsSection brand={brand} />
+      <OffersSection brand={brand} />
+      <CategoryBannerGrid brand={brand} />
+      <PromoBannerSection brand={brand} />
+      <ReviewsSection brand={brand} />
 
     </main>
     <BrandFooter brand={brand} />
     </>
   );
 }
+
+    
 
     
