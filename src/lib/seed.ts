@@ -110,7 +110,7 @@ export const seedDatabase = async () => {
     console.log('Upserted "nevermore" brand.');
 
 
-    // --- Seed Products for 'reeva' storefront ---
+    // --- Seed Products and Tags for 'reeva' storefront ---
     const productTemplates = Array.from({ length: 50 }, (_, i) => {
         const index = i + 1;
         const category = CATEGORIES[index % CATEGORIES.length];
@@ -140,49 +140,41 @@ export const seedDatabase = async () => {
     });
 
     const productNames = productTemplates.map(p => p.name);
+
+    // Find products that are missing tags or don't exist
     const existingProducts = await Product.find({ name: { $in: productNames }, storefront: 'reeva' });
-    const existingProductNames = new Set(existingProducts.map(p => p.name));
+    const existingProductMap = new Map(existingProducts.map(p => [p.name, p]));
 
-    // Create products that don't exist
-    const newProductsToCreate = productTemplates.filter(p => !existingProductNames.has(p.name));
-    if (newProductsToCreate.length > 0) {
-        await Product.insertMany(newProductsToCreate);
-        console.log(`Created ${newProductsToCreate.length} new products for storefront 'reeva'.`);
-    } else {
-        console.log("All seed products already exist. Checking for tag updates.");
-    }
+    const bulkOps = [];
     
-    // Find existing products that are missing tags
-    const productsMissingTags = await Product.find({
-        name: { $in: productNames },
-        storefront: 'reeva',
-        $or: [
-            { tags: { $exists: false } },
-            { tags: { $size: 0 } }
-        ]
-    });
-    
-    if (productsMissingTags.length > 0) {
-        console.log(`Found ${productsMissingTags.length} products missing tags. Updating...`);
-        const bulkOps = productsMissingTags.map(product => {
-            const template = productTemplates.find(t => t.name === product.name);
-            if (!template) return null; // Should not happen
-            return {
-                updateOne: {
-                    filter: { _id: product._id },
-                    update: { $set: { tags: template.tags } }
+    for (const template of productTemplates) {
+        const existingProduct = existingProductMap.get(template.name);
+        if (existingProduct) {
+            // Product exists, check if tags need updating
+            if (!existingProduct.tags || existingProduct.tags.length === 0) {
+                bulkOps.push({
+                    updateOne: {
+                        filter: { _id: existingProduct._id },
+                        update: { $set: { tags: template.tags } }
+                    }
+                });
+            }
+        } else {
+            // Product doesn't exist, create it
+            bulkOps.push({
+                insertOne: {
+                    document: template
                 }
-            };
-        }).filter(op => op !== null);
-
-        if (bulkOps.length > 0) {
-            await Product.bulkWrite(bulkOps as any);
-            console.log(`Successfully updated ${bulkOps.length} products with tags.`);
+            });
         }
-    } else {
-         console.log("All seed products for 'reeva' already have tags.");
     }
 
+    if (bulkOps.length > 0) {
+        const result = await Product.bulkWrite(bulkOps);
+        console.log(`Seeding complete. Inserted: ${result.insertedCount}, Updated: ${result.modifiedCount}`);
+    } else {
+        console.log("All seed products for 'reeva' already exist and have tags.");
+    }
 
     return { success: true, message: 'Database seed/update completed successfully!' };
   } catch (error: any) {
@@ -190,3 +182,5 @@ export const seedDatabase = async () => {
     throw new Error('Error seeding database: ' + error.message);
   }
 };
+
+    
