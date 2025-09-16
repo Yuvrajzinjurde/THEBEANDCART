@@ -30,6 +30,45 @@ type GroupedProducts = {
   [category: string]: IProduct[];
 };
 
+const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
+    if (!products || products.length === 0) return null;
+
+    return (
+        <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
+                 <Button variant="link" asChild>
+                    <Link href={`/${brandName}/products`}>
+                        Discover All
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </div>
+            <Separator className="mb-6" />
+            <Carousel
+                opts={{
+                    align: "start",
+                    loop: true,
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {products.map((product) => (
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                            <div className="p-1">
+                                <BrandProductCard product={product} />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2 hidden md:flex" />
+                <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2 hidden md:flex" />
+            </Carousel>
+        </section>
+    );
+};
+
+
 const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
     if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
         return null;
@@ -47,7 +86,7 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
     ].map(col => col.filter(Boolean)); // Filter out undefined if banners array is shorter
 
     return (
-        <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8 bg-muted/30">
+        <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8">
              <div className="text-center mb-10">
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
                     Shop by Category
@@ -255,9 +294,13 @@ export default function BrandHomePage() {
   const brandName = params.brand as string;
 
   const [brand, setBrand] = useState<IBrand | null>(null);
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [groupedProducts, setGroupedProducts] = useState<GroupedProducts>({});
-  const [popularProducts, setPopularProducts] = useState<IProduct[]>([]);
+  
+  const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
+  const [peoplesChoiceProducts, setPeoplesChoiceProducts] = useState<IProduct[]>([]);
+  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -288,20 +331,30 @@ export default function BrandHomePage() {
             }
             const productData = await productResponse.json();
             const fetchedProducts: IProduct[] = productData.products;
-            setProducts(fetchedProducts);
+            setAllProducts(fetchedProducts);
             
-            // Calculate and set popular products
+            // --- Sort products for different sections ---
+
+            // 1. Trending Products (by popularity score)
             const calculatePopularity = (p: IProduct) => {
                 const views = p.views || 0;
                 const clicks = p.clicks || 0;
                 const rating = p.rating || 0;
                 return (views * 0.2) + (clicks * 0.5) + (rating * 0.3);
             };
-
             const sortedByPopularity = [...fetchedProducts].sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
-            setPopularProducts(sortedByPopularity.slice(0, 10)); // Top 10 popular products
+            setTrendingProducts(sortedByPopularity.slice(0, 10));
 
-            // Group products by category
+            // 2. People's Choice (by highest rating)
+            const sortedByRating = [...fetchedProducts].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            setPeoplesChoiceProducts(sortedByRating.slice(0, 10));
+            
+            // 3. Newest Arrivals (by creation date)
+            const sortedByDate = [...fetchedProducts].sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+            setNewestProducts(sortedByDate.slice(0, 10));
+
+
+            // 4. Group products by category for main sections
             const grouped = fetchedProducts.reduce((acc: GroupedProducts, product: IProduct) => {
                 const category = product.category;
                 if (!acc[category]) {
@@ -381,39 +434,9 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      {popularProducts.length > 0 && (
-        <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">Trending Products</h2>
-                 <Button variant="link" asChild>
-                    <Link href={`/${brandName}/products`}>
-                        Discover All
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
-            </div>
-            <Separator className="mb-6" />
-            <Carousel
-                opts={{
-                    align: "start",
-                    loop: true,
-                }}
-                className="w-full"
-            >
-                <CarouselContent>
-                    {popularProducts.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                            <div className="p-1">
-                                <BrandProductCard product={product} />
-                            </div>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2 hidden md:flex" />
-                <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2 hidden md:flex" />
-            </Carousel>
-        </section>
-      )}
+      <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
+      <ProductCarouselSection title="People's Choice" products={peoplesChoiceProducts} brandName={brandName} />
+      <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
 
 
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
@@ -460,3 +483,5 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
