@@ -36,7 +36,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       ...existingCoupon,
       startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
       endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
-      value: existingCoupon.type === 'free-shipping' ? undefined : existingCoupon.value,
+      value: existingCoupon.value,
   } : {
     code: '',
     type: 'percentage',
@@ -58,6 +58,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   useEffect(() => {
     if (discountType === 'free-shipping') {
       form.setValue('value', undefined);
+    } else {
+        // When switching back from 'free-shipping', reset value to 0 if it's undefined
+        if (form.getValues('value') === undefined) {
+             form.setValue('value', 0);
+        }
     }
   }, [discountType, form]);
 

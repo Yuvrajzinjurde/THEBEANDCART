@@ -21,7 +21,7 @@ const FixedCouponSchema = BaseCouponSchema.extend({
 
 const FreeShippingCouponSchema = BaseCouponSchema.extend({
   type: z.literal('free-shipping'),
-  value: z.undefined().optional(), // Ensure value is not present
+  value: z.undefined().optional(),
 });
 
 
@@ -41,3 +41,5 @@ export const CouponFormSchema = z.discriminatedUnion('type', [
 
 
 export type CouponFormValues = z.infer<typeof CouponFormSchema>;
+
+    
