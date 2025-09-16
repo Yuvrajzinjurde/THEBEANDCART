@@ -23,10 +23,12 @@ export const seedDatabase = async () => {
 
         for (const brand of brands) {
             const existingCategories = new Set(brand.categories || []);
-            const categoriesToAdd = staticCategories.filter(cat => !existingCategories.has(cat));
+            const initialSize = existingCategories.size;
 
-            if (categoriesToAdd.length > 0) {
-                brand.categories.push(...categoriesToAdd);
+            staticCategories.forEach(cat => existingCategories.add(cat));
+            
+            if (existingCategories.size > initialSize) {
+                brand.categories = Array.from(existingCategories).sort();
                 await brand.save();
                 updatedCount++;
                 console.log(`Updated categories for brand: ${brand.displayName}`);
