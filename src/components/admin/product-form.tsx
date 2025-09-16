@@ -128,7 +128,13 @@ const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) =
     }
 };
 
-const VariantItem = ({ control, index, removeVariant, sensors }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; sensors: any; }) => {
+const VariantItem = ({ control, index, removeVariant }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; }) => {
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
     const { fields: variantImageFields, append: appendVariantImage, remove: removeVariantImage, move: moveVariantImage } = useFieldArray({
         control,
         name: `variants.${index}.images`,
@@ -612,7 +618,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {variantFields.map((field, index) => (
-                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} sensors={sensors} />
+                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} />
                         ))}
                          <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [] })}>
                             <PlusCircle className="mr-2" />
@@ -790,5 +796,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
