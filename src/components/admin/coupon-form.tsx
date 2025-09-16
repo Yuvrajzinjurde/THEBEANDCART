@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -55,15 +55,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   });
 
   const discountType = form.watch('type');
-  
-  // This effect ensures that if the user switches to "Free Shipping",
-  // the value field is cleared to prevent validation errors.
-  useEffect(() => {
-    if (discountType === 'free-shipping') {
-      form.setValue('value', undefined, { shouldValidate: true });
-    }
-  }, [discountType, form]);
-
 
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -73,6 +64,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
+    // For free shipping, ensure value is not sent
+    const submissionData = { ...data };
+    if (submissionData.type === 'free-shipping') {
+        delete (submissionData as any).value;
+    }
+
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -80,7 +77,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(submissionData),
       });
 
       const result = await response.json();
@@ -156,6 +153,9 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                         <RadioGroup
                         onValueChange={(value: 'percentage' | 'fixed' | 'free-shipping') => {
                             field.onChange(value);
+                             if (value === 'free-shipping') {
+                                form.setValue('value', undefined, { shouldValidate: true });
+                            }
                         }}
                         value={field.value}
                         className="flex items-center gap-4"
