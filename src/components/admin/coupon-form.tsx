@@ -1,7 +1,8 @@
 
+
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -144,10 +145,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormLabel>Discount Type</FormLabel>
                     <FormControl>
                         <RadioGroup
-                        onValueChange={(value) => {
+                        onValueChange={(value: 'percentage' | 'fixed' | 'free-shipping') => {
                             field.onChange(value);
-                            // When changing type, clear the value to avoid validation errors
-                            form.setValue('value', undefined, { shouldValidate: true });
+                            if (value === 'free-shipping') {
+                                form.setValue('value', undefined, { shouldValidate: true });
+                            }
                         }}
                         value={field.value}
                         className="flex items-center gap-4"
@@ -187,7 +189,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                          <div className="relative">
                             {discountType === 'fixed' && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>}
                             <FormControl>
-                                <Input type="number" {...field} value={field.value ?? ''} className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')} />
+                                <Input 
+                                  type="number" 
+                                  {...field} 
+                                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                                  value={field.value ?? ''} 
+                                  className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')}
+                                />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}
                         </div>
@@ -207,7 +215,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                      <div className="relative">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
                         <FormControl>
-                            <Input type="number" {...field} className="pl-7" />
+                            <Input 
+                              type="number"
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                              value={field.value}
+                              className="pl-7"
+                            />
                         </FormControl>
                     </div>
                     <FormDescription>The minimum amount a customer must spend to use this coupon.</FormDescription>
