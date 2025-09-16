@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -249,38 +250,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const [isFormDisabled, setIsFormDisabled] = React.useState(mode === 'edit');
   const [isCancelAlertOpen, setIsCancelAlertOpen] = React.useState(false);
   
-  const [availableCategories, setAvailableCategories] = React.useState<string[]>([]);
   const [productCategories, setProductCategories] = React.useState<string[]>([]);
-
-
+  
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
-  const selectedStorefront = useWatch({ control: form.control, name: 'storefront' });
-
-  React.useEffect(() => {
-    async function fetchBrandCategories() {
-        if (!selectedStorefront) return;
-        try {
-            const res = await fetch(`/api/brands/${selectedStorefront}`);
-            if (res.ok) {
-                const { brand } = await res.json();
-                setProductCategories(brand.categories || []);
-            }
-        } catch (error) {
-            console.error('Failed to fetch categories for brand', error);
-            setProductCategories([]);
-        }
-    }
-    fetchBrandCategories();
-  }, [selectedStorefront]);
-
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-        coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
@@ -313,6 +285,33 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   });
   
   const { control, formState: { isDirty } } = form;
+
+  const selectedStorefront = useWatch({ control: form.control, name: 'storefront' });
+
+  React.useEffect(() => {
+    async function fetchBrandCategories() {
+        if (!selectedStorefront) return;
+        try {
+            const res = await fetch(`/api/brands/${selectedStorefront}`);
+            if (res.ok) {
+                const { brand } = await res.json();
+                setProductCategories(brand.categories || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch categories for brand', error);
+            setProductCategories([]);
+        }
+    }
+    fetchBrandCategories();
+  }, [selectedStorefront]);
+
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const { fields: imageFields, append: appendImage, remove: removeImage, move: moveImage } = useFieldArray({
     control,
