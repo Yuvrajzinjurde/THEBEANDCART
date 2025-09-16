@@ -254,7 +254,7 @@ export default function ProductsPage() {
                 ) : (
                     <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
                         <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                        <p className="text-lg font-semibold">We're working to get these products on board for you, with a smile!</p>
+                        <p className="text-lg font-semibold">We're working to get these products on board for you!</p>
                         <p className="text-sm text-muted-foreground">Your filter combination yielded no results for now.</p>
                          <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
                     </div>
