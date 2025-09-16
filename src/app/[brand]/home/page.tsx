@@ -16,7 +16,6 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star } from 'lucide-react';
@@ -38,7 +37,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
     const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
-        if (!api || isHovered) return;
+        if (!api || !isHovered) return;
 
         const interval = setInterval(() => {
             if (api.canScrollNext()) {
@@ -326,7 +325,7 @@ export default function BrandHomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const plugin = useRef(
+  const mainCarouselPlugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
@@ -356,11 +355,9 @@ export default function BrandHomePage() {
             setAllProducts(fetchedProducts);
             
             // --- Sort products for different sections ---
-            // Use JSON.parse(JSON.stringify(...)) to create a deep copy for each sort operation
             const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
-
 
             // 1. Trending Products (by popularity score)
             const calculatePopularity = (p: IProduct) => {
@@ -427,9 +424,9 @@ export default function BrandHomePage() {
         <section className="w-full">
             <Carousel 
                 className="w-full"
-                plugins={[plugin.current]}
-                onMouseEnter={() => plugin.current?.stop()}
-                onMouseLeave={() => plugin.current?.reset()}
+                plugins={[mainCarouselPlugin.current]}
+                onMouseEnter={() => mainCarouselPlugin.current.stop()}
+                onMouseLeave={() => mainCarouselPlugin.current.reset()}
             >
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
