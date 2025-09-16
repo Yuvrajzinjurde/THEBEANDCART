@@ -16,6 +16,7 @@ import {
   HelpCircle,
   Sun,
   Briefcase,
+  TicketPercent,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -42,6 +43,7 @@ const navItems = [
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
+  { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
   { href: "/admin/brands", icon: Store, label: "Manage Brands" },
