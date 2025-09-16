@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -101,6 +101,112 @@ const SortableImage = ({ id, url, onRemove }: { id: any; url: string; onRemove: 
 };
 
 
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value: { value: string } | { value: string }[]) => void) => {
+    const files = e.target.files;
+    if (files) {
+      const filePromises = Array.from(files).map(file => {
+        return new Promise<{ value: string }>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve({ value: reader.result as string });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+      Promise.all(filePromises).then(newFiles => {
+        append(newFiles);
+      });
+    }
+};
+
+const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+    })
+);
+
+const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) => void) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+        const oldIndex = (active.data.current?.sortable.index) as number;
+        const newIndex = (over?.data.current?.sortable.index) as number;
+        moveFn(oldIndex, newIndex);
+    }
+};
+
+const VariantItem = ({ control, index, removeVariant }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; }) => {
+    const { fields: variantImageFields, append: appendVariantImage, remove: removeVariantImage, move: moveVariantImage } = useFieldArray({
+        control,
+        name: `variants.${index}.images`,
+    });
+
+    return (
+        <div className="space-y-4 p-4 border rounded-lg relative">
+            <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 text-muted-foreground" onClick={() => removeVariant(index)}>
+                <Trash className="h-4 w-4" />
+            </Button>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <FormField control={control} name={`variants.${index}.size`} render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Size</FormLabel>
+                        <FormControl><Input placeholder="e.g., M" {...field} /></FormControl>
+                    </FormItem>
+                )} />
+                <FormField control={control} name={`variants.${index}.color`} render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Color</FormLabel>
+                        <FormControl><Input placeholder="e.g., Blue" {...field} /></FormControl>
+                    </FormItem>
+                )} />
+                <FormField control={control} name={`variants.${index}.stock`} render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Stock</FormLabel>
+                        <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl>
+                    </FormItem>
+                )} />
+            </div>
+            <FormField control={control} name={`variants.${index}.images`} render={() => (
+                <FormItem>
+                    <FormLabel>Variant Images</FormLabel>
+                    <FormControl>
+                        <div>
+                            <Input 
+                                id={`variant-image-upload-${index}`}
+                                type="file" 
+                                accept="image/*"
+                                className="hidden"
+                                multiple
+                                onChange={(e) => handleFileChange(e, appendVariantImage)}
+                            />
+                             <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                <div className="flex flex-col items-center justify-center">
+                                    <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
+                                    <p className="text-xs text-muted-foreground">Upload images for this variant</p>
+                                </div>
+                            </label>
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    {variantImageFields.length > 0 && (
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, moveVariantImage)}>
+                            <SortableContext items={variantImageFields} strategy={rectSortingStrategy}>
+                                <div className="grid grid-cols-5 gap-2 mt-2">
+                                    {variantImageFields.map((imgField, imgIndex) => (
+                                       imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
+                    )}
+                </FormItem>
+            )} />
+        </div>
+    );
+};
+
+
+
 interface ProductFormProps {
     mode: 'create' | 'edit';
     existingProduct?: IProduct;
@@ -151,49 +257,33 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     defaultValues,
     mode: 'onChange',
   });
+  
+  const { control } = form;
 
   const { fields: imageFields, append: appendImage, remove: removeImage, move: moveImage } = useFieldArray({
-    control: form.control,
+    control,
     name: 'images',
   });
 
   const { fields: videoFields, append: appendVideo, remove: removeVideo } = useFieldArray({
-    control: form.control,
+    control,
     name: 'videos',
   });
   
   const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray({
-    control: form.control,
+    control,
     name: 'tags',
   });
 
   const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
-    control: form.control,
+    control,
     name: 'variants',
   });
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value: { value: string } | { value: string }[]) => void) => {
-    const files = e.target.files;
-    if (files) {
-      const filePromises = Array.from(files).map(file => {
-        return new Promise<{ value: string }>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve({ value: reader.result as string });
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-      Promise.all(filePromises).then(newFiles => {
-        append(newFiles);
-      });
-    }
-  };
+  const hasVariants = useWatch({ control, name: 'variants' }).length > 0;
+  const productName = useWatch({ control, name: 'name' });
+  const productDescription = useWatch({ control, name: 'description' });
 
-
-  const hasVariants = form.watch('variants').length > 0;
-  const productName = form.watch('name');
-  const productDescription = form.watch('description');
 
   const handleAIError = (error: any, context: string) => {
     const errorMessage = error.message || '';
@@ -325,22 +415,6 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     }
   }
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) => void) => {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-        const oldIndex = (active.data.current?.sortable.index) as number;
-        const newIndex = (over?.data.current?.sortable.index) as number;
-        moveFn(oldIndex, newIndex);
-    }
-  };
-
   const handlePreview = async () => {
     const isValid = await form.trigger();
     if (isValid) {
@@ -397,7 +471,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                  <Card>
                     <CardHeader><CardTitle>Product Details</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={control} name="name" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Product Name</FormLabel>
                                 <div className="flex gap-2 items-start">
@@ -415,7 +489,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
                         {aiError && <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded-md">{aiError}</p>}
 
-                        <FormField control={form.control} name="description" render={({ field }) => (
+                        <FormField control={control} name="description" render={({ field }) => (
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Description</FormLabel>
@@ -449,7 +523,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 <Card>
                     <CardHeader><CardTitle>Media</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
-                         <FormField control={form.control} name="images" render={() => (
+                         <FormField control={control} name="images" render={() => (
                             <FormItem>
                                 <div className="flex justify-between items-center">
                                     <FormLabel>Images</FormLabel>
@@ -489,7 +563,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             </FormItem>
                          )} />
 
-                        <FormField control={form.control} name="videos" render={() => (
+                        <FormField control={control} name="videos" render={() => (
                             <FormItem>
                                 <FormLabel>Videos</FormLabel>
                                 <FormControl>
@@ -537,80 +611,15 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         <CardTitle>Variants</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {variantFields.map((field, index) => {
-                            const { fields: variantImageFields, append: appendVariantImage, remove: removeVariantImage, move: moveVariantImage } = useFieldArray({
-                                control: form.control,
-                                name: `variants.${index}.images`,
-                            });
-
-                            return (
-                            <div key={field.id} className="space-y-4 p-4 border rounded-lg relative">
-                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 text-muted-foreground" onClick={() => removeVariant(index)}>
-                                    <Trash className="h-4 w-4" />
-                                </Button>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                                    <FormField control={form.control} name={`variants.${index}.size`} render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Size</FormLabel>
-                                            <FormControl><Input placeholder="e.g., M" {...field} /></FormControl>
-                                        </FormItem>
-                                    )} />
-                                    <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Color</FormLabel>
-                                            <FormControl><Input placeholder="e.g., Blue" {...field} /></FormControl>
-                                        </FormItem>
-                                    )} />
-                                    <FormField control={form.control} name={`variants.${index}.stock`} render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Stock</FormLabel>
-                                            <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl>
-                                        </FormItem>
-                                    )} />
-                                </div>
-                                <FormField control={form.control} name={`variants.${index}.images`} render={() => (
-                                    <FormItem>
-                                        <FormLabel>Variant Images</FormLabel>
-                                        <FormControl>
-                                            <div>
-                                                <Input 
-                                                    id={`variant-image-upload-${index}`}
-                                                    type="file" 
-                                                    accept="image/*"
-                                                    className="hidden"
-                                                    multiple
-                                                    onChange={(e) => handleFileChange(e, appendVariantImage)}
-                                                />
-                                                 <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                                    <div className="flex flex-col items-center justify-center">
-                                                        <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
-                                                        <p className="text-xs text-muted-foreground">Upload images for this variant</p>
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                        {variantImageFields.length > 0 && (
-                                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, moveVariantImage)}>
-                                                <SortableContext items={variantImageFields} strategy={rectSortingStrategy}>
-                                                    <div className="grid grid-cols-5 gap-2 mt-2">
-                                                        {variantImageFields.map((imgField, imgIndex) => (
-                                                           imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} />
-                                                        ))}
-                                                    </div>
-                                                </SortableContext>
-                                            </DndContext>
-                                        )}
-                                    </FormItem>
-                                )} />
-                            </div>
-                        )})}
+                        {variantFields.map((field, index) => (
+                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} />
+                        ))}
                          <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [] })}>
                             <PlusCircle className="mr-2" />
                             {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                         </Button>
                          {!hasVariants && (
-                            <FormField control={form.control} name="stock" render={({ field }) => (
+                            <FormField control={control} name="stock" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Stock</FormLabel>
                                     <FormControl><Input type="number" placeholder="Enter stock quantity" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
@@ -628,7 +637,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 <Card>
                     <CardHeader><CardTitle>Organization</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <FormField control={form.control} name="storefront" render={({ field }) => (
+                        <FormField control={control} name="storefront" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Storefront</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
@@ -645,7 +654,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <FormField control={form.control} name="brand" render={({ field }) => (
+                        <FormField control={control} name="brand" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Product Brand</FormLabel>
                                 <FormControl>
@@ -655,7 +664,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <FormField control={form.control} name="category" render={({ field }) => (
+                        <FormField control={control} name="category" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
@@ -671,7 +680,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                         <FormField control={form.control} name="tags" render={() => (
+                         <FormField control={control} name="tags" render={() => (
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Tags</FormLabel>
@@ -709,7 +718,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                  <Card>
                     <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-2 gap-4">
-                         <FormField control={form.control} name="mrp" render={({ field }) => (
+                         <FormField control={control} name="mrp" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>MRP</FormLabel>
                                 <div className="relative">
@@ -722,7 +731,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                          )} />
-                         <FormField control={form.control} name="sellingPrice" render={({ field }) => (
+                         <FormField control={control} name="sellingPrice" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Selling Price</FormLabel>
                                 <div className="relative">
@@ -781,3 +790,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
