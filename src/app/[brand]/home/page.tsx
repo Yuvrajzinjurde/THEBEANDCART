@@ -186,7 +186,7 @@ const PromoBannerSection = ({ brand }: { brand: IBrand | null }) => {
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="relative rounded-lg overflow-hidden h-[400px] bg-secondary text-foreground flex items-center">
+            <div className="relative rounded-lg overflow-hidden h-[320px] bg-secondary text-foreground flex items-center">
                  <Image
                     src={imageUrl}
                     alt={title}
