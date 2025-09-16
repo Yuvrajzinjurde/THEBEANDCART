@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -34,15 +34,15 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const defaultValues = React.useMemo(() => (existingCoupon ? {
       ...existingCoupon,
-      value: existingCoupon.value ?? undefined,
-      minPurchase: existingCoupon.minPurchase ?? 0,
+      value: existingCoupon.value ?? '',
+      minPurchase: existingCoupon.minPurchase ?? '',
       startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
       endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
   } : {
     code: '',
     type: 'percentage',
-    value: undefined,
-    minPurchase: 0,
+    value: '',
+    minPurchase: '',
     brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
     startDate: undefined,
     endDate: undefined
@@ -56,6 +56,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const discountType = form.watch('type');
 
+  useEffect(() => {
+    if (discountType === 'free-shipping') {
+      form.setValue('value', '');
+    }
+  }, [discountType, form]);
+
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
     form.setValue('code', `SALE${randomPart}`);
@@ -63,13 +69,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
-
-    const dataToSend: any = { ...data };
-     // Ensure value is not sent for free-shipping, as the schema will handle it
-    if (dataToSend.type === 'free-shipping') {
-      delete dataToSend.value;
-    }
-
+    
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -77,7 +77,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -151,12 +151,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormLabel>Discount Type</FormLabel>
                     <FormControl>
                         <RadioGroup
-                        onValueChange={(value) => {
-                            field.onChange(value);
-                            if (value === 'free-shipping') {
-                                form.setValue('value', undefined, { shouldValidate: true });
-                            }
-                        }}
+                        onValueChange={field.onChange}
                         value={field.value}
                         className="flex items-center gap-4"
                         >
@@ -197,10 +192,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             <FormControl>
                                 <Input 
                                   type="number"
-                                  step="0.01"
                                   placeholder="0"
                                   {...field}
-                                  className={cn(discountType === 'fixed' && "pl-7", discountType === 'percentage' && 'pr-8')}
                                 />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}

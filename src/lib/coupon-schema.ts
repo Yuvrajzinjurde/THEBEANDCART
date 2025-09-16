@@ -3,19 +3,17 @@ import { z } from 'zod';
 
 const emptyStringToUndefined = z.literal('').transform(() => undefined);
 
-// Preprocessor for numeric fields that might be empty strings
-const numericPreprocessor = z.preprocess((val) => {
-    if (typeof val === 'string' && val.trim() === '') return undefined;
-    if (val === null) return undefined;
-    return val;
-}, z.coerce.number().optional());
-
-
 export const CouponFormSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
   type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: numericPreprocessor,
-  minPurchase: numericPreprocessor.default(0),
+  value: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number({ invalid_type_error: 'Discount value must be a number.' }).optional()
+  ),
+  minPurchase: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? 0 : val),
+    z.coerce.number({ invalid_type_error: 'Minimum purchase must be a number.' })
+  ),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
@@ -36,18 +34,14 @@ export const CouponFormSchema = z.object({
     if (data.type === 'fixed') {
         return data.value !== undefined && data.value >= 0;
     }
-    if (data.type === 'free-shipping') {
-        // For free shipping, a value is not needed.
-        return true;
-    }
-    return false;
+    return true; 
 }, {
-    message: "A valid discount value is required for the selected discount type.",
+    message: "A valid discount value is required for this coupon type.",
     path: ["value"],
 })
 .refine(data => {
     if (data.type === 'free-shipping') {
-        return data.value === undefined || data.value === null;
+        return data.value === undefined;
     }
     return true;
 }, {
