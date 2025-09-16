@@ -288,8 +288,8 @@ export default function BrandHomePage() {
         {Object.keys(groupedProducts).length > 0 ? (
           Object.entries(groupedProducts).map(([category, items]) => (
             <section key={category} className="mb-12">
-              <div className="flex justify-between items-center border-b pb-2 mb-6">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{category}</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{category}</h2>
                  <Button variant="link" asChild>
                     <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
                         Discover All
@@ -297,6 +297,7 @@ export default function BrandHomePage() {
                     </Link>
                 </Button>
               </div>
+              <Separator className="mb-6" />
               <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {items.slice(0, 5).map((product) => (
                   <BrandProductCard key={product._id as string} product={product} />
