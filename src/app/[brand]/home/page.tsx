@@ -334,6 +334,11 @@ export default function BrandHomePage() {
             setAllProducts(fetchedProducts);
             
             // --- Sort products for different sections ---
+            // Use JSON.parse(JSON.stringify(...)) to create a deep copy for each sort operation
+            const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
+            const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
+            const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
+
 
             // 1. Trending Products (by popularity score)
             const calculatePopularity = (p: IProduct) => {
@@ -342,15 +347,15 @@ export default function BrandHomePage() {
                 const rating = p.rating || 0;
                 return (views * 0.2) + (clicks * 0.5) + (rating * 0.3);
             };
-            const sortedByPopularity = [...fetchedProducts].sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
+            const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
             setTrendingProducts(sortedByPopularity.slice(0, 12));
 
             // 2. People's Choice (by highest rating)
-            const sortedByRating = [...fetchedProducts].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
             setPeoplesChoiceProducts(sortedByRating.slice(0, 12));
             
             // 3. Newest Arrivals (by creation date)
-            const sortedByDate = [...fetchedProducts].sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+            const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
             setNewestProducts(sortedByDate.slice(0, 12));
 
 
