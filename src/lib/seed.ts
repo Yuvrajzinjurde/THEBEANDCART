@@ -140,7 +140,7 @@ export const seedDatabase = async () => {
                 rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 to 5.0
                 brand: `${storefront.charAt(0).toUpperCase() + storefront.slice(1)} Designs`,
                 storefront: storefront,
-                tags: [storefront, category.split(' ')[0]],
+                keywords: [storefront, category.split(' ')[0]],
                 styleId: new Types.ObjectId().toHexString(),
             };
             productsToCreate.push(product);

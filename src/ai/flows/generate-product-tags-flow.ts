@@ -22,8 +22,8 @@ const generateTagsPrompt = ai.definePrompt({
   input: {schema: GenerateTagsInputSchema},
   output: {schema: GenerateTagsOutputSchema},
   model: 'googleai/gemini-1.5-flash-latest',
-  prompt: `You are an e-commerce expert who is great at creating relevant product tags.
-  Based on the product name and description below, generate an array of 5 to 7 relevant, single-word tags that can be used to find similar products.
+  prompt: `You are an e-commerce expert who is great at creating relevant product keywords.
+  Based on the product name and description below, generate an array of 5 to 7 relevant, single-word keywords that can be used to find similar products.
   Do not use generic tags like "product" or "item". Focus on specific attributes, materials, use cases, or styles.
 
   Product Name: {{{productName}}}

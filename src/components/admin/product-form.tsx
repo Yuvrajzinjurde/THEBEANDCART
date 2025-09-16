@@ -297,7 +297,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     ...existingProduct,
     images: existingProduct.images.map(img => ({value: img})),
     videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
-    tags: (existingProduct.tags || []).map(tag => ({ value: tag })),
+    keywords: (existingProduct.keywords || []).map(keyword => ({ value: keyword })),
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
@@ -312,7 +312,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     storefront: selectedBrand === 'All Brands' ? (storefronts[0] || '') : selectedBrand,
     images: [],
     videos: [],
-    tags: [],
+    keywords: [],
     variants: [],
     stock: 0,
   };
@@ -335,9 +335,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     name: 'videos',
   });
   
-  const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray({
+  const { fields: keywordFields, append: appendKeyword, remove: removeKeyword } = useFieldArray({
     control,
-    name: 'tags',
+    name: 'keywords',
   });
 
   const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
@@ -395,10 +395,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     try {
       const result = await generateProductTags({ productName, description: productDescription });
       const tagsAsObjects = result.tags.map(tag => ({ value: tag }));
-      form.setValue('tags', tagsAsObjects, { shouldValidate: true, shouldDirty: true });
-      toast.success("AI tags generated!");
+      form.setValue('keywords', tagsAsObjects, { shouldValidate: true, shouldDirty: true });
+      toast.success("AI keywords generated!");
     } catch (error) {
-        const displayMessage = handleAIError(error, "tag generation");
+        const displayMessage = handleAIError(error, "keyword generation");
         toast.error(displayMessage);
     } finally {
       setIsGeneratingTags(false);
@@ -435,8 +435,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
       const newTag = tagInput.trim();
-      if (newTag && !tagFields.some(field => field.value === newTag)) {
-        appendTag({ value: newTag });
+      if (newTag && !keywordFields.some(field => field.value === newTag)) {
+        appendKeyword({ value: newTag });
         setTagInput('');
       }
     }
@@ -449,7 +449,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       ...data,
       images: hasVariants ? [] : data.images.map(img => img.value), // Use top-level images only if no variants
       videos: data.videos?.map(vid => vid.value),
-      tags: data.tags?.map(tag => tag.value),
+      keywords: data.keywords?.map(tag => tag.value),
       variants: data.variants.map(variant => ({
         ...variant,
         images: variant.images.map(img => img.value),
@@ -797,30 +797,30 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                         <FormField control={control} name="tags" render={() => (
+                         <FormField control={control} name="keywords" render={() => (
                             <FormItem>
                                  <div className="flex items-center justify-between">
-                                    <FormLabel>Tags</FormLabel>
+                                    <FormLabel>Keywords</FormLabel>
                                      <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !productName || !productDescription || isFormDisabled}>
                                         {isGeneratingTags ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
-                                        Generate Tags
+                                        Generate Keywords
                                     </Button>
                                 </div>
                                  <FormControl>
                                     <div>
                                         <Input
-                                            placeholder="Add a tag and press Enter"
+                                            placeholder="Add a keyword and press Enter"
                                             value={tagInput}
                                             onChange={(e) => setTagInput(e.target.value)}
                                             onKeyDown={handleTagKeyDown}
                                             disabled={isFormDisabled}
                                         />
                                         <div className="flex flex-wrap gap-2 mt-2">
-                                            {tagFields.map((tagField, index) => (
-                                                <Badge key={tagField.id} variant="secondary" className="flex items-center gap-1">
-                                                    {tagField.value}
+                                            {keywordFields.map((keywordField, index) => (
+                                                <Badge key={keywordField.id} variant="secondary" className="flex items-center gap-1">
+                                                    {keywordField.value}
                                                     {!isFormDisabled && (
-                                                        <button type="button" onClick={() => removeTag(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                        <button type="button" onClick={() => removeKeyword(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
                                                             <X className="h-3 w-3" />
                                                         </button>
                                                     )}
@@ -829,7 +829,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         </div>
                                     </div>
                                 </FormControl>
-                                 <FormDescription>Product tags for search and filtering.</FormDescription>
+                                 <FormDescription>Product keywords for search and filtering.</FormDescription>
                                 <FormMessage />
                             </FormItem>
                          )} />
@@ -924,5 +924,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    

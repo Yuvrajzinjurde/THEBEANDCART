@@ -40,7 +40,7 @@ const BaseProductFormSchema = z.object({
   storefront: z.string().min(1, "Storefront is required"),
   images: z.array(z.string().url()).optional(),
   videos: z.array(z.string().url()).optional(),
-  tags: z.array(z.string()).optional(),
+  keywords: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
   variants: z.array(ServerVariantSchema),
 });
@@ -50,7 +50,7 @@ const BaseProductFormSchema = z.object({
 export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
   images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
-  tags: z.array(z.object({ value: z.string() })).optional(),
+  keywords: z.array(z.object({ value: z.string() })).optional(),
   variants: z.array(VariantSchema),
 }))
 .refine(data => {
