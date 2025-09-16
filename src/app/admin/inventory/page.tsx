@@ -269,25 +269,36 @@ export default function InventoryPage() {
 
     if (error) {
         return (
-            <div className="text-center text-destructive">
-                <p>{error}</p>
-            </div>
+            <Card>
+                <CardContent className="flex flex-col items-center justify-center text-center p-12 gap-4">
+                    <CardTitle className="text-destructive">An Error Occurred</CardTitle>
+                    <CardDescription>
+                        There was a problem fetching product data, which may be due to corrupted data in the database.
+                        <br/>
+                        Click the button below to clear old data and seed fresh products. This usually fixes the issue.
+                    </CardDescription>
+                    <Button onClick={handleSeed} disabled={isSeeding} size="lg">
+                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
+                        {isSeeding ? 'Seeding Database...' : 'Seed Database'}
+                    </Button>
+                </CardContent>
+            </Card>
         );
     }
     
-    if (allProducts.length === 0) {
+    if (allProducts.length === 0 && !isSeeding) {
         return (
             <Card>
                 <CardContent className="flex flex-col items-center justify-center text-center p-12 gap-4">
                     <CardTitle>No Products Found</CardTitle>
                     <CardDescription>
-                        It looks like there is corrupted or no product data in the database.
+                        It looks like there are no products in the database.
                         <br/>
-                        Click the button below to clear old data and seed fresh products.
+                        Click the button below to seed it with fresh product data.
                     </CardDescription>
                     <Button onClick={handleSeed} disabled={isSeeding} size="lg">
                         {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
-                        {isSeeding ? 'Seeding Database...' : 'Seed Products'}
+                        {isSeeding ? 'Seeding Database...' : 'Seed Database'}
                     </Button>
                 </CardContent>
             </Card>
@@ -329,7 +340,7 @@ export default function InventoryPage() {
                     </Button>
                     <Button onClick={handleSeed} disabled={isSeeding}>
                         {isSeeding && <Loader className="mr-2 h-4 w-4" />}
-                        Seed Products
+                        Re-Seed Products
                     </Button>
                      <Button asChild>
                         <Link href="/admin/inventory/new">
@@ -407,3 +418,5 @@ export default function InventoryPage() {
 
     
 }
+
+    
