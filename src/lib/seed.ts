@@ -159,3 +159,5 @@ export const seedDatabase = async () => {
     throw new Error('Error seeding database: ' + error.message);
   }
 };
+
+    
