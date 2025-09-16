@@ -114,8 +114,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       href={`/products/${product._id}`} 
       onClick={handleCardClick} 
       className={cn("group block", className)}
-      onMouseEnter={() => plugin.current.play()}
-      onMouseLeave={() => plugin.current.stop()}
+      onMouseEnter={() => plugin.current && plugin.current.play()}
+      onMouseLeave={() => plugin.current && plugin.current.stop()}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
         <Carousel
