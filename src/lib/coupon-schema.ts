@@ -1,26 +1,35 @@
 
 import { z } from 'zod';
 
-export const CouponFormSchema = z.object({
+const BaseCouponSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
-  type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.coerce.number().min(0, "Value cannot be negative.").optional(),
   minPurchase: z.coerce.number().min(0, "Minimum purchase cannot be negative."),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
-}).refine(data => {
-    if (data.type === 'percentage') {
-        return data.value !== undefined && data.value >= 0 && data.value <= 100;
-    }
-    if (data.type === 'fixed') {
-        return data.value !== undefined && data.value >= 0;
-    }
-    return true;
-}, {
-    message: "A valid discount value is required for this coupon type.",
-    path: ["value"],
-}).refine(data => {
+});
+
+const PercentageCouponSchema = BaseCouponSchema.extend({
+  type: z.literal('percentage'),
+  value: z.coerce.number().min(0, "Percentage must be positive.").max(100, "Percentage cannot exceed 100."),
+});
+
+const FixedCouponSchema = BaseCouponSchema.extend({
+  type: z.literal('fixed'),
+  value: z.coerce.number().min(0, "Fixed amount must be a positive number."),
+});
+
+const FreeShippingCouponSchema = BaseCouponSchema.extend({
+  type: z.literal('free-shipping'),
+  value: z.undefined().optional(), // Ensure value is not present
+});
+
+
+export const CouponFormSchema = z.discriminatedUnion('type', [
+  PercentageCouponSchema,
+  FixedCouponSchema,
+  FreeShippingCouponSchema,
+]).refine(data => {
     if (data.startDate && data.endDate) {
         return data.endDate > data.startDate;
     }
@@ -32,5 +41,3 @@ export const CouponFormSchema = z.object({
 
 
 export type CouponFormValues = z.infer<typeof CouponFormSchema>;
-
-    
