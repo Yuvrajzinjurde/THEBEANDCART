@@ -24,7 +24,7 @@ const CATEGORIES = [
 export const seedDatabase = async () => {
   await dbConnect();
 
-  try:
+  try {
     console.log('Starting database seed...');
 
     // --- Clean up old data ---
