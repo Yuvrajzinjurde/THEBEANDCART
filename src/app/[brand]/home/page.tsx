@@ -420,7 +420,7 @@ export default function BrandHomePage() {
   const productSections = Object.entries(groupedProducts).filter(([_, items]) => {
     if (items.length <= 2) return false;
     const topTwoProducts = items.slice(0, 2);
-    return topTwoProducts.every(p => p.rating > 3);
+    return topTwoProducts.every(p => p.rating >= 3);
   });
 
   return (
@@ -494,7 +494,7 @@ export default function BrandHomePage() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className="text-lg text-muted-foreground">No products found for this brand yet.</p>
+            <p className="text-lg text-muted-foreground">No featured product categories available.</p>
           </div>
         )}
       </div>
