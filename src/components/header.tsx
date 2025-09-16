@@ -29,13 +29,6 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import useUserStore from "@/stores/user-store";
 
-const secondaryNavItems = [
-    { href: "#", icon: Gift, label: "Gifts" },
-    { href: "#", icon: Shirt, label: "Fashion Finds" },
-    { href: "#", icon: HomeIcon, label: "Home Favourites" },
-];
-
-
 export default function Header() {
   const { user, loading } = useAuth();
   const params = useParams();
@@ -49,6 +42,12 @@ export default function Header() {
 
   const cartCount = cart?.totalItems ?? 0;
   const wishlistCount = wishlist?.totalItems ?? 0;
+  
+  const secondaryNavItems = [
+    { href: `/${brandName}/products?keyword=gift`, icon: Gift, label: "Gifts" },
+    { href: `/${brandName}/products?keyword=fashion`, icon: Shirt, label: "Fashion Finds" },
+    { href: `/${brandName}/products?keyword=home`, icon: HomeIcon, label: "Home Favourites" },
+  ];
 
 
   useEffect(() => {

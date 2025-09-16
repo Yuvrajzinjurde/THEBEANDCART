@@ -13,6 +13,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const storefront = searchParams.get('storefront');
     const category = searchParams.get('category');
+    const keyword = searchParams.get('keyword');
     
     let query: any = {};
 
@@ -22,6 +23,10 @@ export async function GET(req: Request) {
     
     if (category) {
         query.category = category;
+    }
+
+    if (keyword) {
+        query.keywords = { $in: [new RegExp(keyword, 'i')] };
     }
 
     const products = await Product.find(query)

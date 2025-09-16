@@ -29,6 +29,7 @@ export type ActiveFilters = {
   brands: string[];
   genders: string[];
   colors: string[];
+  keywords: string[];
 };
 
 const SORT_OPTIONS: { [key: string]: string } = {
@@ -45,6 +46,7 @@ export default function ProductsPage() {
   const searchParams = useSearchParams();
   const brandName = params.brand as string;
   const initialCategory = searchParams.get('category');
+  const initialKeyword = searchParams.get('keyword');
 
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
@@ -57,6 +59,7 @@ export default function ProductsPage() {
     brands: [],
     genders: [],
     colors: [],
+    keywords: initialKeyword ? [initialKeyword] : [],
   });
   const [sortOption, setSortOption] = useState<string>('relevance');
 
@@ -93,13 +96,20 @@ export default function ProductsPage() {
 
         // Apply filters
         if (activeFilters.categories.length > 0) {
-        productsToFilter = productsToFilter.filter(p => activeFilters.categories.includes(p.category));
+            productsToFilter = productsToFilter.filter(p => activeFilters.categories.includes(p.category));
         }
         if (activeFilters.brands.length > 0) {
-        productsToFilter = productsToFilter.filter(p => p.brand && activeFilters.brands.includes(p.brand));
+            productsToFilter = productsToFilter.filter(p => p.brand && activeFilters.brands.includes(p.brand));
         }
         if (activeFilters.colors.length > 0) {
             productsToFilter = productsToFilter.filter(p => p.color && activeFilters.colors.includes(p.color));
+        }
+        if (activeFilters.keywords.length > 0) {
+            productsToFilter = productsToFilter.filter(p => 
+                p.keywords && activeFilters.keywords.some(filterKeyword => 
+                    p.keywords.some(productKeyword => productKeyword.toLowerCase().includes(filterKeyword.toLowerCase()))
+                )
+            );
         }
 
         // Apply sorting
@@ -138,7 +148,7 @@ export default function ProductsPage() {
   };
 
   const clearAllFilters = () => {
-    setActiveFilters({ categories: [], brands: [], genders: [], colors: [] });
+    setActiveFilters({ categories: [], brands: [], genders: [], colors: [], keywords: [] });
     // Also clear the URL query param if needed
     const newUrl = `/${brandName}/products`;
     window.history.pushState({}, '', newUrl);
