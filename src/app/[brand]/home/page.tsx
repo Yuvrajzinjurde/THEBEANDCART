@@ -114,6 +114,10 @@ const OffersSection = ({ brand }: { brand: IBrand | null }) => {
                             </div>
                             <h3 className="text-xl font-bold text-gray-900">{offer.title}</h3>
                             <p className="mt-2 text-gray-500">{offer.description}</p>
+                             <div className="mt-4">
+                                <p className="text-sm text-muted-foreground">Use code:</p>
+                                <span className="font-mono text-base font-semibold bg-primary/10 text-primary px-3 py-1 rounded-md">{offer.code}</span>
+                            </div>
                         </div>
                     ))}
                 </div>
