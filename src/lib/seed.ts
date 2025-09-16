@@ -19,6 +19,20 @@ export const seedDatabase = async () => {
         await dbConnect();
         console.log('Connected to the database, checking for brands to update...');
 
+        const brandreeva = await Brand.findById("68c6abc757b323aaf9876730")
+        if (brandreeva && (!brandreeva.categories || brandreeva.categories.length === 0)) {
+            brandreeva.categories.push(...staticCategories)
+            await brandreeva.save()
+            console.log('Updating reeva brand categories...');
+        }
+
+        const brandNeverMore = await Brand.findById("68c6c83657b323aaf9876787")
+        if (brandNeverMore && (!brandNeverMore.categories || brandNeverMore.categories.length === 0)) {
+            brandNeverMore.categories.push(...staticCategories)
+            await brandNeverMore.save()
+            console.log('Updating nevermore brand categories...');
+        }
+        
         const brandsToUpdate = await Brand.find({
             $or: [
                 { categories: { $exists: false } },
