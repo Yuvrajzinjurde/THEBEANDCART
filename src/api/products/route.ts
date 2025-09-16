@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         const styleId = new Types.ObjectId().toHexString();
 
         if (variants.length === 0) {
-            // This is a single product, not a catalog
+            // This is a single product without variants
             const productData = { ...commonData, styleId };
             const newProduct = new Product(productData);
             await newProduct.save();
@@ -63,6 +63,8 @@ export async function POST(req: Request) {
             ...variant,
             styleId,
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+            // Ensure top-level images are not passed to variant products
+            images: variant.images,
         }));
 
         const newProducts = await Product.insertMany(productDocs);

@@ -14,12 +14,18 @@ const CATEGORIES = [
     "Eye Utility", "Bags, Luggage & Travel Accessories", "Mens Personal Care & Grooming"
 ];
 
+const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
   size: z.string().optional(),
   color: z.string().optional(),
   stock: z.coerce.number().min(0, "Stock must be 0 or more"),
+  images: z.array(FileValueSchema).min(1, "Each variant must have at least one image."),
 });
+
+const ServerVariantSchema = VariantSchema.extend({
+    images: z.array(z.string().url()).min(1, "Each variant must have at least one image.")
+})
 
 // Base schema for server-side validation, expecting image URLs as strings
 export const ProductFormSchema = z.object({
@@ -30,19 +36,28 @@ export const ProductFormSchema = z.object({
   category: z.string().min(1, "Category is required"),
   brand: z.string().min(1, "Product brand is required"),
   storefront: z.string().min(1, "Storefront is required"),
-  images: z.array(z.string().url()).min(1, "At least one image is required"),
+  images: z.array(z.string().url()).optional(), // Optional now for variant-based products
   videos: z.array(z.string().url()).optional(),
   tags: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
-  variants: z.array(VariantSchema),
+  variants: z.array(ServerVariantSchema),
+}).refine(data => {
+    // If there are no variants, there must be top-level images.
+    if (data.variants.length === 0) {
+        return Array.isArray(data.images) && data.images.length > 0;
+    }
+    return true;
+}, {
+    message: "A product must have at least one image.",
+    path: ["images"],
 });
 
 // Schema for client-side form which uses { value: string } for images/videos
-const FileValueSchema = z.object({ value: z.string().url() });
-
 export const ProductFormSchemaForClient = ProductFormSchema.extend({
-  images: z.array(FileValueSchema).min(1, "At least one image is required"),
+  images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
+  tags: z.array(z.object({ value: z.string() })).optional(),
+  variants: z.array(VariantSchema),
 }).refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
     return data.sellingPrice <= data.mrp;

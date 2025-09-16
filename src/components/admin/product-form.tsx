@@ -172,16 +172,21 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     name: 'variants',
   });
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value: { value: string }) => void) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value: { value: string } | { value: string }[]) => void) => {
     const files = e.target.files;
     if (files) {
-      for (const file of Array.from(files)) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          append({ value: reader.result as string });
-        };
-        reader.readAsDataURL(file);
-      }
+      const filePromises = Array.from(files).map(file => {
+        return new Promise<{ value: string }>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve({ value: reader.result as string });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+      Promise.all(filePromises).then(newFiles => {
+        append(newFiles);
+      });
     }
   };
 
@@ -230,7 +235,6 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setIsGeneratingTags(true);
     try {
       const result = await generateProductTags({ productName, description: productDescription });
-      // The AI returns an array of strings, but our form uses an array of objects
       const tagsAsObjects = result.tags.map(tag => ({ value: tag }));
       form.setValue('tags', tagsAsObjects, { shouldValidate: true });
       toast.success("AI tags generated!");
@@ -280,12 +284,15 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   async function onSubmit(data: ProductFormValues) {
     setIsSubmitting(true);
-    // Before submitting, we need to flatten the images/videos/tags array
     const dataToSubmit = {
       ...data,
-      images: data.images.map(img => img.value),
+      images: hasVariants ? [] : data.images.map(img => img.value), // Use top-level images only if no variants
       videos: data.videos?.map(vid => vid.value),
       tags: data.tags?.map(tag => tag.value),
+      variants: data.variants.map(variant => ({
+        ...variant,
+        images: variant.images.map(img => img.value),
+      })),
     };
 
 
@@ -325,12 +332,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) => void) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
-        const oldIndex = imageFields.findIndex(field => field.id === active.id);
-        const newIndex = imageFields.findIndex(field => field.id === over!.id);
-        moveImage(oldIndex, newIndex);
+        const oldIndex = (active.data.current?.sortable.index) as number;
+        const newIndex = (over?.data.current?.sortable.index) as number;
+        moveFn(oldIndex, newIndex);
     }
   };
 
@@ -438,7 +445,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardContent>
                 </Card>
 
-                 <Card>
+                {!hasVariants && (
+                <Card>
                     <CardHeader><CardTitle>Media</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                          <FormField control={form.control} name="images" render={() => (
@@ -468,7 +476,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 </FormControl>
                                 <FormMessage />
                                 {imageFields.length > 0 && (
-                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, moveImage)}>
                                         <SortableContext items={imageFields} strategy={rectSortingStrategy}>
                                             <div className="grid grid-cols-4 gap-4 mt-4">
                                                 {imageFields.map((field, index) => (
@@ -522,38 +530,82 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                          )} />
                     </CardContent>
                 </Card>
+                )}
 
                 <Card>
                     <CardHeader>
                         <CardTitle>Variants</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {variantFields.map((field, index) => (
-                            <div key={field.id} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end p-4 border rounded-lg relative">
+                        {variantFields.map((field, index) => {
+                            const { fields: variantImageFields, append: appendVariantImage, remove: removeVariantImage, move: moveVariantImage } = useFieldArray({
+                                control: form.control,
+                                name: `variants.${index}.images`,
+                            });
+
+                            return (
+                            <div key={field.id} className="space-y-4 p-4 border rounded-lg relative">
                                 <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 text-muted-foreground" onClick={() => removeVariant(index)}>
                                     <Trash className="h-4 w-4" />
                                 </Button>
-                                 <FormField control={form.control} name={`variants.${index}.size`} render={({ field }) => (
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                                    <FormField control={form.control} name={`variants.${index}.size`} render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Size</FormLabel>
+                                            <FormControl><Input placeholder="e.g., M" {...field} /></FormControl>
+                                        </FormItem>
+                                    )} />
+                                    <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Color</FormLabel>
+                                            <FormControl><Input placeholder="e.g., Blue" {...field} /></FormControl>
+                                        </FormItem>
+                                    )} />
+                                    <FormField control={form.control} name={`variants.${index}.stock`} render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Stock</FormLabel>
+                                            <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl>
+                                        </FormItem>
+                                    )} />
+                                </div>
+                                <FormField control={form.control} name={`variants.${index}.images`} render={() => (
                                     <FormItem>
-                                        <FormLabel>Size</FormLabel>
-                                        <FormControl><Input placeholder="e.g., M" {...field} /></FormControl>
-                                    </FormItem>
-                                 )} />
-                                <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Color</FormLabel>
-                                        <FormControl><Input placeholder="e.g., Blue" {...field} /></FormControl>
-                                    </FormItem>
-                                )} />
-                                <FormField control={form.control} name={`variants.${index}.stock`} render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Stock</FormLabel>
-                                        <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)}/></FormControl>
+                                        <FormLabel>Variant Images</FormLabel>
+                                        <FormControl>
+                                            <div>
+                                                <Input 
+                                                    id={`variant-image-upload-${index}`}
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    multiple
+                                                    onChange={(e) => handleFileChange(e, appendVariantImage)}
+                                                />
+                                                 <label htmlFor={`variant-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                    <div className="flex flex-col items-center justify-center">
+                                                        <UploadCloud className="w-6 h-6 mb-2 text-muted-foreground" />
+                                                        <p className="text-xs text-muted-foreground">Upload images for this variant</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                        {variantImageFields.length > 0 && (
+                                            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, moveVariantImage)}>
+                                                <SortableContext items={variantImageFields} strategy={rectSortingStrategy}>
+                                                    <div className="grid grid-cols-5 gap-2 mt-2">
+                                                        {variantImageFields.map((imgField, imgIndex) => (
+                                                           imgField.value && <SortableImage key={imgField.id} id={imgField.id} url={imgField.value} onRemove={() => removeVariantImage(imgIndex)} />
+                                                        ))}
+                                                    </div>
+                                                </SortableContext>
+                                            </DndContext>
+                                        )}
                                     </FormItem>
                                 )} />
                             </div>
-                        ))}
-                         <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0 })}>
+                        )})}
+                         <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [] })}>
                             <PlusCircle className="mr-2" />
                             {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                         </Button>
@@ -619,7 +671,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                         <FormField control={form.control} name="tags" render={({ field }) => (
+                         <FormField control={form.control} name="tags" render={() => (
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Tags</FormLabel>
@@ -729,5 +781,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
