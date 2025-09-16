@@ -43,10 +43,10 @@ export interface IBrand extends Document {
   logoUrl: string;
   banners: IBanner[];
   themeName: string;
-  offers?: IOffer[];
-  reviews?: IReview[];
-  promoBanner?: IPromoBanner;
-  categoryBanners?: ICategoryBanner[];
+  offers: IOffer[];
+  reviews: IReview[];
+  promoBanner: IPromoBanner;
+  categoryBanners: ICategoryBanner[];
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -91,10 +91,10 @@ const BrandSchema: Schema<IBrand> = new Schema({
   logoUrl: { type: String, required: true },
   banners: [BannerSchema],
   themeName: { type: String, required: true },
-  offers: { type: [OfferSchema], required: false },
-  reviews: { type: [ReviewSchema], required: false },
-  promoBanner: { type: PromoBannerSchema, required: false },
-  categoryBanners: { type: [CategoryBannerSchema], required: false },
+  offers: [OfferSchema],
+  reviews: [ReviewSchema],
+  promoBanner: PromoBannerSchema,
+  categoryBanners: [CategoryBannerSchema],
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);
