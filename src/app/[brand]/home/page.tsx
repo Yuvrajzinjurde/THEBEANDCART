@@ -396,8 +396,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-
-    
-
-    
