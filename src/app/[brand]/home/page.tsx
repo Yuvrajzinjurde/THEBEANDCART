@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import type { IBrand, IReview } from '@/models/brand.model';
@@ -402,5 +402,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-    
