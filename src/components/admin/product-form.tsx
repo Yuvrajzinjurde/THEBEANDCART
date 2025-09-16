@@ -119,13 +119,6 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value
     }
 };
 
-const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-        coordinateGetter: sortableKeyboardCoordinates,
-    })
-);
-
 const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) => void) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
@@ -135,7 +128,7 @@ const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) =
     }
 };
 
-const VariantItem = ({ control, index, removeVariant }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; }) => {
+const VariantItem = ({ control, index, removeVariant, sensors }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; sensors: any; }) => {
     const { fields: variantImageFields, append: appendVariantImage, remove: removeVariantImage, move: moveVariantImage } = useFieldArray({
         control,
         name: `variants.${index}.images`,
@@ -226,6 +219,13 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const [previewProduct, setPreviewProduct] = React.useState<Partial<IProduct> | null>(null);
 
   const storefronts = allStorefronts.filter(b => b !== 'All Brands');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
 
   const defaultValues: ProductFormValues = existingProduct ? {
@@ -612,7 +612,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {variantFields.map((field, index) => (
-                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} />
+                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} sensors={sensors} />
                         ))}
                          <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [] })}>
                             <PlusCircle className="mr-2" />
