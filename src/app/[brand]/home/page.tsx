@@ -109,14 +109,6 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
 
     return (
         <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8">
-             <div className="text-center mb-10">
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-                    Shop by Category
-                </h2>
-                <p className="mt-3 max-w-xl mx-auto text-lg text-muted-foreground">
-                    Find what you're looking for from our curated selection of categories.
-                </p>
-            </div>
             <div className="container mx-auto p-4 md:p-8 rounded-2xl">
                  <div className="max-w-3xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
@@ -466,9 +458,9 @@ export default function BrandHomePage() {
       <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
-
-      <CategoryBannerGrid brand={brand} />
       
+      <CategoryBannerGrid brand={brand} />
+
       <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
