@@ -6,11 +6,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'react-toastify';
 
 
 const LandingHeader = () => (
@@ -79,6 +80,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingBrand, setLoadingBrand] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
     async function fetchBrands() {
@@ -97,20 +99,49 @@ export default function LandingPage() {
     }
     fetchBrands();
   }, []);
+
+  const handleSeed = async () => {
+    setIsSeeding(true);
+    toast.info("Clearing old products and seeding new data... This might take a moment.");
+    try {
+      const response = await fetch('/api/seed', { method: 'POST' });
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message);
+      } else {
+        throw new Error(result.message);
+      }
+      // Refresh the page to reflect changes
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to seed database.');
+      console.error(error);
+    } finally {
+      setIsSeeding(false);
+    }
+  };
   
 
   return (
     <>
     <LandingHeader />
     <main className="flex-1 flex flex-col items-center bg-background">
-        
-        <section className="w-full bg-secondary text-center py-10 sm:py-16">
-            <div className="container mx-auto px-4">
-                <p className="font-semibold text-primary">LIMITED TIME OFFER</p>
-                <h2 className="text-2xl sm:text-3xl font-bold mt-2">Get 20% Off Your First Order from Any Brand!</h2>
-                <p className="text-muted-foreground mt-2">Use code <span className="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md">WELCOME20</span> at checkout.</p>
-                <Button size="lg" className="mt-6">Explore Brands</Button>
-            </div>
+
+        <section className="w-full bg-destructive/10 text-center py-10 sm:py-16 border-b border-destructive/20">
+            <Card className="max-w-2xl mx-auto bg-transparent border-destructive/50">
+                <CardHeader>
+                    <CardTitle className="text-destructive">Database Fix Required</CardTitle>
+                    <CardDescription className="text-destructive/80">
+                        It looks like there's corrupted product data in the database causing application errors. Click the button below to clear the old data and seed fresh, clean products.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Button onClick={handleSeed} disabled={isSeeding} size="lg" variant="destructive">
+                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
+                        {isSeeding ? 'Seeding Database...' : 'Fix and Seed Database'}
+                    </Button>
+                </CardContent>
+            </Card>
         </section>
 
         <section id="brands" className="w-full py-12 sm:py-20 px-4 sm:px-8">
@@ -171,3 +202,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+    
