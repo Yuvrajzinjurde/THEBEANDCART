@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -36,6 +36,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       ...existingCoupon,
       startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
       endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
+      value: existingCoupon.type === 'free-shipping' ? undefined : existingCoupon.value,
   } : {
     code: '',
     type: 'percentage',
@@ -52,6 +53,14 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     mode: 'onChange',
   });
 
+  const discountType = form.watch('type');
+
+  useEffect(() => {
+    if (discountType === 'free-shipping') {
+      form.setValue('value', undefined);
+    }
+  }, [discountType, form]);
+
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
     form.setValue('code', `SALE${randomPart}`);
@@ -62,20 +71,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
-    // Create a mutable copy of the data to submit
-    const dataToSubmit: Record<string, any> = { ...data };
-
-    // Conditionally remove value for free-shipping coupons
-    if (dataToSubmit.type === 'free-shipping') {
-      delete dataToSubmit.value;
-    }
-
-
     try {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSubmit),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -95,8 +95,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       setIsSubmitting(false);
     }
   }
-  
-  const discountType = form.watch('type');
 
   return (
     <Form {...form}>
@@ -319,3 +317,5 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     </Form>
   );
 }
+
+    
