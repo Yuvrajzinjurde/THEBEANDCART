@@ -8,6 +8,15 @@ import bcrypt from 'bcryptjs';
 
 const CATEGORIES = ['Electronics', 'Apparel', 'Books', 'Home Goods', 'Health'];
 
+const tagOptions: { [key: string]: string[] } = {
+    'Electronics': ['gadget', 'tech', 'smart', 'device', 'portable'],
+    'Apparel': ['fashion', 'clothing', 'style', 'wear', 'outfit'],
+    'Books': ['reading', 'literature', 'novel', 'hardcover', 'pages'],
+    'Home Goods': ['decor', 'living', 'kitchen', 'furniture', 'utility'],
+    'Health': ['wellness', 'care', 'personal', 'supplement', 'vitamin']
+};
+
+
 export const seedDatabase = async () => {
   await dbConnect();
 
@@ -144,23 +153,15 @@ export const seedDatabase = async () => {
 
 
     // --- Check for existing products for the 'reeva' storefront ---
-    const existingProducts = await Product.countDocuments({ storefront: 'reeva' });
+    const existingProductsCount = await Product.countDocuments({ storefront: 'reeva' });
     
-    if (existingProducts === 0) {
+    if (existingProductsCount === 0) {
         console.log("No products found for storefront 'reeva'. Seeding new products.");
         const products = [];
         for (let i = 1; i <= 50; i++) {
             const category = CATEGORIES[i % CATEGORIES.length];
             const mrp = parseFloat((Math.random() * 200 + 50).toFixed(2));
             const sellingPrice = parseFloat((mrp - (mrp * Math.random() * 0.4)).toFixed(2));
-
-            const tagOptions: { [key: string]: string[] } = {
-                'Electronics': ['gadget', 'tech', 'smart', 'device', 'portable'],
-                'Apparel': ['fashion', 'clothing', 'style', 'wear', 'outfit'],
-                'Books': ['reading', 'literature', 'novel', 'hardcover', 'pages'],
-                'Home Goods': ['decor', 'living', 'kitchen', 'furniture', 'utility'],
-                'Health': ['wellness', 'care', 'personal', 'supplement', 'vitamin']
-            };
 
             products.push({
                 name: `${category} Product ${i}`,
@@ -177,15 +178,45 @@ export const seedDatabase = async () => {
                     `https://picsum.photos/seed/${i}_4/600/600`,
                 ],
                 stock: Math.floor(Math.random() * 100),
-                rating: parseFloat((Math.random() * 4 + 1).toFixed(1)), // Rating between 1.0 and 5.0
+                rating: parseFloat((Math.random() * 4 + 1).toFixed(1)),
                 tags: [
                     category.toLowerCase(), 
-                    ...tagOptions[category].sort(() => 0.5 - Math.random()).slice(0, 3) // Get 3 random tags
+                    ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
                 ],
             });
         }
         await Product.insertMany(products);
         console.log(`Created ${products.length} products for storefront 'reeva'.`);
+    } else {
+        console.log("Existing products found. Checking if any need tags.");
+        const productsToUpdate = await Product.find({ 
+            storefront: 'reeva', 
+            $or: [
+                { tags: { $exists: false } }, 
+                { tags: { $size: 0 } }
+            ]
+        });
+
+        if (productsToUpdate.length > 0) {
+            console.log(`Found ${productsToUpdate.length} products without tags. Adding tags now.`);
+            const bulkOps = productsToUpdate.map(product => {
+                const category = product.category;
+                const newTags = [
+                    category.toLowerCase(),
+                    ...(tagOptions[category] || []).sort(() => 0.5 - Math.random()).slice(0, 3)
+                ];
+                return {
+                    updateOne: {
+                        filter: { _id: product._id },
+                        update: { $set: { tags: newTags } }
+                    }
+                };
+            });
+            await Product.bulkWrite(bulkOps);
+            console.log(`Updated ${productsToUpdate.length} products with new tags.`);
+        } else {
+            console.log("All existing products already have tags. No updates needed.");
+        }
     }
 
     return { success: true, message: 'Database seed/update completed successfully!' };
