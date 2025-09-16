@@ -24,13 +24,13 @@ const CATEGORIES = [
 export const seedDatabase = async () => {
   await dbConnect();
 
-  try {
+  try:
     console.log('Starting database seed...');
 
     // --- Clean up old data ---
     console.log('Clearing old products and reviews for seeded brands...');
     await Product.deleteMany({ storefront: { $in: ['reeva', 'nevermore'] } });
-    await Review.deleteMany({});
+    await Review.deleteMany({}); // Clearing all reviews
     console.log('Old data cleared.');
     
 
