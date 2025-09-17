@@ -11,30 +11,30 @@ import Legal, { legalDocTypes } from '@/models/legal.model';
 
 const brandsData = [
     {
-        displayName: "Aura",
-        permanentName: "aura",
-        logoUrl: "https://picsum.photos/seed/aura-logo/200/200",
+        displayName: "Reeva",
+        permanentName: "reeva",
+        logoUrl: "https://picsum.photos/seed/reeva-logo/200/200",
         themeName: "Rose",
     },
     {
-        displayName: "Stylo",
-        permanentName: "stylo",
-        logoUrl: "https://picsum.photos/seed/stylo-logo/200/200",
-        themeName: "Blue",
+        displayName: "Nevermore",
+        permanentName: "nevermore",
+        logoUrl: "https://picsum.photos/seed/nevermore-logo/200/200",
+        themeName: "Slate (Dark)",
     }
 ];
 
 const productsData = [
-  { name: 'Radiant Glow Serum', category: 'Skincare', brand: 'Aura', storefront: 'aura', rating: 4.8 },
-  { name: 'Matte Velvet Lipstick', category: 'Makeup', brand: 'Aura', storefront: 'aura', rating: 4.5 },
-  { name: 'Hydrating Face Cream', category: 'Skincare', brand: 'Aura', storefront: 'aura', rating: 4.9 },
-  { name: 'Classic Blue Jeans', category: 'Jeans', brand: 'Stylo', storefront: 'stylo', rating: 4.4 },
-  { name: 'Striped Cotton Shirt', category: 'Shirts', brand: 'Stylo', storefront: 'stylo', rating: 4.6 },
-  { name: 'Leather Ankle Boots', category: 'Boots', brand: 'Stylo', storefront: 'stylo', rating: 4.7 },
-  { name: 'Floral Maxi Dress', category: 'Dresses', brand: 'Aura', storefront: 'aura', rating: 4.6 },
-  { name: 'Men\'s Graphic Tee', category: 'T-Shirts', brand: 'Stylo', storefront: 'stylo', rating: 4.3 },
-  { name: 'Nourishing Hair Oil', category: 'Haircare', brand: 'Aura', storefront: 'aura', rating: 4.8 },
-  { name: 'Casual White Sneakers', category: 'Sneakers', brand: 'Stylo', storefront: 'stylo', rating: 4.9 },
+  { name: 'Radiant Glow Serum', category: 'Skincare', brand: 'Reeva', storefront: 'reeva', rating: 4.8 },
+  { name: 'Matte Velvet Lipstick', category: 'Makeup', brand: 'Reeva', storefront: 'reeva', rating: 4.5 },
+  { name: 'Hydrating Face Cream', category: 'Skincare', brand: 'Reeva', storefront: 'reeva', rating: 4.9 },
+  { name: 'Gothic Print Hoodie', category: 'Hoodies', brand: 'Nevermore', storefront: 'nevermore', rating: 4.7 },
+  { name: 'Distressed Black Jeans', category: 'Jeans', brand: 'Nevermore', storefront: 'nevermore', rating: 4.6 },
+  { name: 'Platform Combat Boots', category: 'Boots', brand: 'Nevermore', storefront: 'nevermore', rating: 4.8 },
+  { name: 'Floral Maxi Dress', category: 'Dresses', brand: 'Reeva', storefront: 'reeva', rating: 4.6 },
+  { name: 'Vintage Band Tee', category: 'T-Shirts', brand: 'Nevermore', storefront: 'nevermore', rating: 4.5 },
+  { name: 'Nourishing Hair Oil', category: 'Haircare', brand: 'Reeva', storefront: 'reeva', rating: 4.8 },
+  { name: 'Chain-Detail Choker', category: 'Accessories', brand: 'Nevermore', storefront: 'nevermore', rating: 4.4 },
 ];
 
 const staticCategories = [
@@ -43,7 +43,7 @@ const staticCategories = [
     'Belts', 'Sunglasses', 'Watches', 'Rings', 'Earrings', 'Necklaces', 
     'Bracelets', 'Moisturizers', 'Sunscreens', 'Face Washes', 'Serums', 
     'Lipsticks', 'Foundations', 'Eyeshadows', 'Combos', 'Corrugated Boxes',
-    'Skincare', 'Makeup', 'Haircare'
+    'Skincare', 'Makeup', 'Haircare', 'Hoodies', 'Accessories'
 ];
 
 const getLegalDocTitle = (docType: typeof legalDocTypes[number]): string => {
