@@ -54,6 +54,7 @@ const LandingFooter = () => (
                 <ul className="mt-4 space-y-2">
                     <li><Link href="/legal/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
                     <li><Link href="/legal/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</Link></li>
+                    <li><Link href="/legal/refund-policy" className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
                 </ul>
             </div>
             <div>
@@ -182,3 +183,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+    
