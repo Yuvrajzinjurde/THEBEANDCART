@@ -1,5 +1,6 @@
 
 import mongoose, { Document, Schema, Model } from 'mongoose';
+import { z } from 'zod';
 
 // Re-using the banner schema from brand model to ensure consistency
 const HeroBannerSchema: Schema = new Schema({
@@ -30,9 +31,7 @@ const PlatformSettings: Model<IPlatformSettings> = mongoose.models.PlatformSetti
 export default PlatformSettings;
 
 // Zod schema for form validation
-import { z } from 'zod';
-
-export const PlatformSettingsSchema = z.object({
+export const PlatformSettingsValidationSchema = z.object({
   heroBanners: z.array(z.object({
       title: z.string().min(1, "Title is required"),
       description: z.string().min(1, "Description is required"),
@@ -42,4 +41,4 @@ export const PlatformSettingsSchema = z.object({
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
 });
 
-export type PlatformSettingsValues = z.infer<typeof PlatformSettingsSchema>;
+export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;

@@ -11,7 +11,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Trash, UploadCloud, X, Home, Save } from 'lucide-react';
 import type { IPlatformSettings } from '@/models/platform.model';
-import { PlatformSettingsSchema, type PlatformSettingsValues } from '@/models/platform.model';
+import { PlatformSettingsValidationSchema, type PlatformSettingsValues } from '@/models/platform.model';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -36,7 +36,7 @@ export default function PlatformSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
 
   const form = useForm<PlatformSettingsValues>({
-    resolver: zodResolver(PlatformSettingsSchema),
+    resolver: zodResolver(PlatformSettingsValidationSchema),
     defaultValues: {
         heroBanners: [],
         featuredCategories: [],
