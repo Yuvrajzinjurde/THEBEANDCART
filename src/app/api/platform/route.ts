@@ -12,6 +12,19 @@ const FormSchema = z.object({
       imageHint: z.string(),
   })),
   featuredCategories: z.array(z.string()),
+  promoBanner: z.object({
+      title: z.string(),
+      description: z.string(),
+      imageUrl: z.string(),
+      imageHint: z.string(),
+      buttonText: z.string(),
+      buttonLink: z.string(),
+  }).optional(),
+  offers: z.array(z.object({
+      title: z.string(),
+      description: z.string(),
+      code: z.string(),
+  })).optional(),
 });
 
 // GET the platform settings

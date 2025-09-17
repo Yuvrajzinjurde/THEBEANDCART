@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -114,6 +115,44 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
         </section>
     );
 };
+
+const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => {
+    if (!settings?.offers || settings.offers.length === 0) return null;
+    
+    const offerIcons = [
+        <svg key="0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>,
+        <svg key="1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>,
+        <svg key="2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>,
+    ];
+
+    return (
+        <section className="w-full py-16">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
+                <div className="text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Today's Top Offers</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {settings.offers.map((offer, index) => (
+                        <div key={index} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-100 to-blue-200 p-1">
+                                <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-blue-500">
+                                    {offerIcons[index % offerIcons.length]}
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">{offer.title}</h3>
+                            <p className="mt-2 text-gray-500">{offer.description}</p>
+                             <div className="mt-4">
+                                <p className="text-sm text-muted-foreground">Use code:</p>
+                                <span className="font-mono text-base font-semibold bg-primary/10 text-primary px-3 py-1 rounded-md">{offer.code}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 
 const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }) => {
     if (!settings?.promoBanner?.imageUrl) return null;
@@ -281,6 +320,8 @@ export default function LandingPage() {
                 
                 <PromoBannerSection settings={platformSettings} />
                 
+                <OffersSection settings={platformSettings} />
+                
                 <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} />
                 <ProductCarouselSection title="Newest Arrivals" products={newestProducts} />
                 
@@ -311,3 +352,4 @@ export default function LandingPage() {
     </>
   );
 }
+

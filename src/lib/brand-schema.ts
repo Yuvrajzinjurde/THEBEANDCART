@@ -82,6 +82,7 @@ export const PlatformSettingsValidationSchema = z.object({
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required"),
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
   promoBanner: promoBannerSchema.optional(),
+  offers: z.array(offerSchema).optional(),
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;

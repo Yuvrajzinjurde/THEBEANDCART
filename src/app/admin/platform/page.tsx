@@ -16,16 +16,6 @@ import { PlatformSettingsValidationSchema, type PlatformSettingsValues } from '@
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Badge } from '@/components/ui/badge';
 
 const staticDefaultValues: PlatformSettingsValues = {
@@ -57,6 +47,23 @@ const staticDefaultValues: PlatformSettingsValues = {
     buttonText: "Shop Now",
     buttonLink: "#",
   },
+  offers: [
+    {
+      title: "Flat 20% Off",
+      description: "On your first order above ₹1000",
+      code: "NEWBIE20",
+    },
+    {
+      title: "Student Discount",
+      description: "Verify your student ID and get 15% off",
+      code: "STUDENT15",
+    },
+    {
+      title: "Free Shipping",
+      description: "On all pre-paid orders, no minimum value",
+      code: "PREPAID",
+    },
+  ]
 };
 
 
@@ -71,6 +78,7 @@ export default function PlatformSettingsPage() {
         heroBanners: [],
         featuredCategories: [],
         promoBanner: { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' },
+        offers: [],
     },
     mode: 'onChange',
   });
@@ -82,7 +90,7 @@ export default function PlatformSettingsPage() {
             const response = await fetch('/api/platform');
             if (response.ok) {
                 const settings = await response.json();
-                if (settings && settings.heroBanners?.length > 0) {
+                if (settings && (settings.heroBanners?.length > 0 || settings.offers?.length > 0)) {
                     // If settings exist in DB, use them
                     form.reset({
                         ...settings,
@@ -114,6 +122,11 @@ export default function PlatformSettingsPage() {
   const { fields: categoryFields, append: appendCategory, remove: removeCategory } = useFieldArray({
     control: form.control,
     name: 'featuredCategories',
+  });
+
+  const { fields: offerFields, append: appendOffer, remove: removeOffer } = useFieldArray({
+    control: form.control,
+    name: 'offers',
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
@@ -331,6 +344,31 @@ export default function PlatformSettingsPage() {
             </CardContent>
         </Card>
 
+        <Card>
+            <CardHeader>
+                <CardTitle>Featured Offers</CardTitle>
+                <CardDescription>Add special offers to display on the main landing page.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {offerFields.map((field, index) => (
+                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeOffer(index)}>
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                        <FormField control={form.control} name={`offers.${index}.title`} render={({ field }) => (
+                            <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name={`offers.${index}.description`} render={({ field }) => (
+                            <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name={`offers.${index}.code`} render={({ field }) => (
+                            <FormItem><FormLabel>Coupon Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                    </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => appendOffer({ title: '', description: '', code: '' })}>Add Offer</Button>
+            </CardContent>
+        </Card>
 
         <Card>
             <CardHeader>
