@@ -24,15 +24,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 
 export default function PlatformSettingsPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
-  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const form = useForm<PlatformSettingsValues>({
@@ -40,6 +37,7 @@ export default function PlatformSettingsPage() {
     defaultValues: {
         heroBanners: [],
         featuredCategories: [],
+        promoBanner: { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' },
     },
     mode: 'onChange',
   });
@@ -121,7 +119,12 @@ export default function PlatformSettingsPage() {
       }
 
       toast.success(`Platform settings saved successfully!`);
-      form.reset(data); // Re-set form with the saved data to clear dirty state
+      // Re-set form with the potentially transformed data to clear dirty state
+      const newDefaults = {
+          ...result,
+          featuredCategories: result.featuredCategories.map((cat: string) => ({ name: cat })),
+      };
+      form.reset(newDefaults);
 
     } catch (error: any) {
       console.error("Submission Error:", error);
@@ -138,7 +141,7 @@ export default function PlatformSettingsPage() {
                 <CardTitle className="flex items-center gap-2"><Home /> Platform Settings</CardTitle>
                 <CardDescription>Manage the content and appearance of the main public-facing landing page.</CardDescription>
             </CardHeader>
-            <CardContent><Loader /></CardContent>
+            <CardContent className="flex justify-center items-center h-64"><Loader /></CardContent>
         </Card>
       )
   }
@@ -239,6 +242,55 @@ export default function PlatformSettingsPage() {
                 <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Promotional Banner</CardTitle>
+                <CardDescription>A large banner to highlight a special campaign or collection. Recommended size: 1200x600px.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
+                    <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.description" render={({ field }) => (
+                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Image</FormLabel>
+                         <FormControl>
+                           <div className="w-full">
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange)} />
+                                {field.value ? (
+                                    <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
+                                        <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
+                                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
+                                    </div>
+                                ) : (
+                                    <label htmlFor="promo-banner-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                        <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                    </label>
+                                )}
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
+                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                 <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
+                        <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
+                        <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                </div>
+            </CardContent>
+        </Card>
+
 
         <Card>
             <CardHeader>
@@ -283,3 +335,5 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
+
+    

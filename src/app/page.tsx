@@ -114,6 +114,33 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
     );
 };
 
+const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }) => {
+    if (!settings?.promoBanner?.imageUrl) return null;
+    const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
+    return (
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="relative rounded-lg overflow-hidden h-[320px] bg-secondary text-foreground flex items-center">
+                 <Image
+                    src={imageUrl}
+                    alt={title}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={imageHint}
+                />
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative z-10 p-8 md:p-16 max-w-2xl">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white">{title}</h2>
+                    <p className="text-lg text-white/90 mt-4">{description}</p>
+                    <Button asChild size="lg" className="mt-6">
+                        <Link href={buttonLink}>
+                            {buttonText} <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+    )
+}
 
 export default function LandingPage() {
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
@@ -162,8 +189,8 @@ export default function LandingPage() {
         setNewestProducts(sortedByDate.slice(0, 12));
 
         // Use featured categories from settings, or derive from products as a fallback
-        if (settingsData && settingsData.featuredCategories.length > 0) {
-            setUniqueCategories(settingsData.featuredCategories);
+        if (platformSettings && platformSettings.featuredCategories.length > 0) {
+            setUniqueCategories(platformSettings.featuredCategories);
         } else {
             const categories = new Set(fetchedProducts.map(p => p.category));
             setUniqueCategories(Array.from(categories).slice(0, 12));
@@ -176,7 +203,7 @@ export default function LandingPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [platformSettings]);
 
   const heroBanners = platformSettings?.heroBanners;
 
@@ -240,6 +267,9 @@ export default function LandingPage() {
         ) : (
             <>
                 <ProductCarouselSection title="Trending Now" products={trendingProducts} />
+                
+                <PromoBannerSection settings={platformSettings} />
+                
                 <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} />
                 <ProductCarouselSection title="Newest Arrivals" products={newestProducts} />
                 
@@ -270,3 +300,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+    
