@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
@@ -18,11 +19,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { Loader } from "@/components/ui/loader";
-import { legalDocTypes, type ILegal } from "@/models/legal.model";
 import { Landmark, Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
-const docTypeLabels: Record<typeof legalDocTypes[number], string> = {
+// Define types and constants directly in the client component
+const legalDocTypes = [
+    'about-us', 
+    'contact-us', 
+    'privacy-policy', 
+    'terms-and-conditions', 
+    'refund-policy', 
+    'shipping-policy'
+] as const;
+
+type LegalDocType = typeof legalDocTypes[number];
+
+interface ILegal {
+  _id: string;
+  docType: LegalDocType;
+  title: string;
+  content: string;
+}
+
+const docTypeLabels: Record<LegalDocType, string> = {
     'about-us': 'About Us',
     'contact-us': 'Contact Us',
     'privacy-policy': 'Privacy Policy',
@@ -32,7 +51,7 @@ const docTypeLabels: Record<typeof legalDocTypes[number], string> = {
 };
 
 export default function LegalsPage() {
-  const [activeDocType, setActiveDocType] = useState<typeof legalDocTypes[number]>('about-us');
+  const [activeDocType, setActiveDocType] = useState<LegalDocType>('about-us');
   const [documents, setDocuments] = useState<Record<string, Partial<ILegal>>>({});
   const [loading, setLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
