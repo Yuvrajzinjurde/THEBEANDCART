@@ -5,7 +5,6 @@ import Legal, { legalDocTypes, type ILegal } from '@/models/legal.model';
 import { z } from 'zod';
 
 const LegalFormSchema = z.object({
-  brand: z.string().min(1),
   docType: z.enum(legalDocTypes),
   title: z.string().min(1),
   content: z.string().min(1),
@@ -16,12 +15,12 @@ export async function GET(req: Request) {
     await dbConnect();
     
     const { searchParams } = new URL(req.url);
-    const brand = searchParams.get('brand');
     const docType = searchParams.get('docType');
 
     let query: any = {};
-    if (brand && brand !== 'All Brands') query.brand = brand;
-    if (docType) query.docType = docType;
+    if (docType) {
+        query.docType = docType;
+    }
 
     const documents = await Legal.find(query);
 
@@ -42,11 +41,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { brand, docType, title, content } = validation.data;
+    const { docType, title, content } = validation.data;
 
-    // Use findOneAndUpdate with upsert:true to create or update the document
+    // Use findOneAndUpdate with upsert:true to create or update the document based on its type
     const updatedDocument = await Legal.findOneAndUpdate(
-        { brand, docType },
+        { docType },
         { title, content },
         { new: true, upsert: true, runValidators: true }
     );

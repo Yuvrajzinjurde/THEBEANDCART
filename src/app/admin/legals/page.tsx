@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-import useBrandStore from "@/stores/brand-store";
 import { Loader } from "@/components/ui/loader";
 import { legalDocTypes, type ILegal } from "@/models/legal.model";
 import { Landmark, Save } from "lucide-react";
@@ -33,20 +32,15 @@ const docTypeLabels: Record<typeof legalDocTypes[number], string> = {
 };
 
 export default function LegalsPage() {
-  const { selectedBrand } = useBrandStore();
   const [activeDocType, setActiveDocType] = useState<typeof legalDocTypes[number]>('about-us');
   const [documents, setDocuments] = useState<Record<string, Partial<ILegal>>>({});
   const [loading, setLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const fetchDocuments = async () => {
-    if (selectedBrand === 'All Brands') {
-        setDocuments({});
-        return;
-    };
     setLoading(true);
     try {
-      const response = await fetch(`/api/legals?brand=${selectedBrand}`);
+      const response = await fetch(`/api/legals`);
       if (!response.ok) throw new Error("Failed to fetch documents");
       const { documents: fetchedDocs } = await response.json();
       
@@ -65,19 +59,18 @@ export default function LegalsPage() {
 
   useEffect(() => {
     fetchDocuments();
-  }, [selectedBrand]);
+  }, []);
 
   const handleSave = () => {
     const currentDoc = documents[activeDocType];
-    if (!currentDoc || !currentDoc.content || selectedBrand === 'All Brands') {
-        toast.warn("No content to save or no brand selected.");
+    if (!currentDoc || !currentDoc.content) {
+        toast.warn("No content to save.");
         return;
     }
 
     startTransition(async () => {
         try {
             const payload = {
-                brand: selectedBrand,
                 docType: activeDocType,
                 title: docTypeLabels[activeDocType],
                 content: currentDoc.content,
@@ -122,8 +115,7 @@ export default function LegalsPage() {
             Legal Documents
         </CardTitle>
         <CardDescription>
-          Manage legal pages for <strong>{selectedBrand}</strong>.
-          Changes are saved per document type.
+          Manage the global legal pages for the entire platform.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -143,17 +135,13 @@ export default function LegalsPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSave} disabled={isPending || selectedBrand === 'All Brands'}>
+          <Button onClick={handleSave} disabled={isPending}>
             {isPending && <Loader className="mr-2" />}
             <Save className="mr-2 h-4 w-4" /> Save Document
           </Button>
         </div>
-
-        {selectedBrand === 'All Brands' ? (
-             <div className="text-center py-16 text-muted-foreground">
-                <p>Please select a specific brand to manage its legal documents.</p>
-            </div>
-        ) : loading ? (
+        
+        {loading ? (
             <div className="flex justify-center items-center h-64">
                 <Loader className="h-8 w-8 text-primary" />
             </div>

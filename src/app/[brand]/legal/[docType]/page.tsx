@@ -24,13 +24,14 @@ export default function LegalPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!brandName || !docType) return;
+    if (!docType) return;
 
     const fetchDocument = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/legals?brand=${brandName}&docType=${docType}`);
+        // Fetch the global document by its type, ignoring the brand
+        const response = await fetch(`/api/legals?docType=${docType}`);
         if (!response.ok) {
           throw new Error('Failed to fetch legal document');
         }
@@ -47,7 +48,7 @@ export default function LegalPage() {
     };
 
     fetchDocument();
-  }, [brandName, docType]);
+  }, [docType]);
 
   if (loading) {
     return (
@@ -61,7 +62,7 @@ export default function LegalPage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center">
         <h1 className="text-2xl font-bold">Document Not Found</h1>
-        <p className="text-muted-foreground">{error || `The requested document could not be found for ${brandName}.`}</p>
+        <p className="text-muted-foreground">{error || `The requested document could not be found.`}</p>
       </main>
     );
   }
@@ -73,7 +74,7 @@ export default function LegalPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
+                  <BreadcrumbLink href={brandName ? `/${brandName}/home` : '/'}>Home</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>

@@ -18,7 +18,7 @@ const LandingHeader = () => (
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center space-x-2">
                 <Logo className="h-8 w-8 text-primary" />
-                <span className="font-bold sm:inline-block">Storefront Platform</span>
+                <span className="font-bold sm:inline-block">Brandify</span>
             </Link>
             <nav className="flex items-center gap-4">
                 <Link href="#brands" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
@@ -38,24 +38,22 @@ const LandingFooter = () => (
             <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">About</h3>
                 <ul className="mt-4 space-y-2">
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Our Story</Link></li>
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Careers</Link></li>
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Press</Link></li>
+                    <li><Link href="/legal/about-us" className="text-sm text-muted-foreground hover:text-primary">Our Story</Link></li>
+                    <li><Link href="/legal/contact-us" className="text-sm text-muted-foreground hover:text-primary">Contact</Link></li>
                 </ul>
             </div>
              <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Support</h3>
                 <ul className="mt-4 space-y-2">
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">FAQ</Link></li>
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Shipping & Returns</Link></li>
+                    <li><Link href="/legal/contact-us" className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
+                    <li><Link href="/legal/shipping-policy" className="text-sm text-muted-foreground hover:text-primary">Shipping & Returns</Link></li>
                 </ul>
             </div>
              <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Legal</h3>
                 <ul className="mt-4 space-y-2">
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                    <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</Link></li>
+                    <li><Link href="/legal/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+                    <li><Link href="/legal/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</Link></li>
                 </ul>
             </div>
             <div>
@@ -69,7 +67,7 @@ const LandingFooter = () => (
             </div>
         </div>
         <div className="border-t py-4">
-             <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Storefront Platform, Inc. All rights reserved.</p>
+             <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Brandify, Inc. All rights reserved.</p>
         </div>
     </footer>
 );
@@ -129,7 +127,7 @@ export default function LandingPage() {
         <section id="brands" className="w-full py-12 sm:py-20 px-4 sm:px-8">
             <div className="text-center mb-10">
                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                    Welcome to Our Storefront Platform
+                    Welcome to Brandify
                 </h1>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
                     Explore our collection of unique brands. Select a brand below to start shopping.
