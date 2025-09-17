@@ -9,6 +9,7 @@ import Role from '@/models/role.model';
 import User from '@/models/user.model';
 import Order from '@/models/order.model';
 import Legal, { legalDocTypes } from '@/models/legal.model';
+import bcrypt from 'bcryptjs';
 
 const brandsData = [
     {
@@ -166,6 +167,34 @@ const getLegalDocPlaceholder = (docType: typeof legalDocTypes[number]): string =
     `;
 };
 
+const seedAdminUser = async () => {
+    const adminEmail = 'admin@brandify.com';
+    const existingAdmin = await User.findOne({ email: adminEmail });
+
+    if (!existingAdmin) {
+        const roles = await Role.find({ name: 'admin' });
+        if (roles.length === 0) {
+            console.log('Admin role not found, cannot create admin user.');
+            return;
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash('password', salt);
+        
+        await new User({
+            email: adminEmail,
+            password: hashedPassword,
+            firstName: 'Admin',
+            lastName: 'User',
+            roles: roles.map(r => r._id),
+            brand: 'All Brands',
+            address: { street: '', city: '', state: '', zip: '', country: '' }
+        }).save();
+        console.log('Created default admin user (admin@brandify.com).');
+    } else {
+        console.log('Admin user already exists.');
+    }
+};
+
 
 export const seedDatabase = async () => {
     try {
@@ -177,6 +206,8 @@ export const seedDatabase = async () => {
         console.log('Cleared existing Brand collection.');
         await Product.deleteMany({});
         console.log('Cleared existing Product collection.');
+        await Order.deleteMany({});
+        console.log('Cleared existing Order collection.');
         
         // Seed Roles if they don't exist
         const rolesCount = await Role.countDocuments();
@@ -184,6 +215,9 @@ export const seedDatabase = async () => {
             await Role.insertMany([{ name: 'user' }, { name: 'admin' }]);
             console.log('Seeded Roles.');
         }
+
+        // Seed Admin User
+        await seedAdminUser();
 
         // Seed Brands
         await Brand.insertMany(brandsData);
@@ -211,7 +245,7 @@ export const seedDatabase = async () => {
             console.log(`Seeded ${legalDocTypes.length} legal documents.`);
         }
         
-        const message = 'Database seeded successfully with fresh data. User data was not affected.';
+        const message = 'Database seeded successfully with fresh data. User and Role data were preserved or created if absent.';
         console.log(message);
         return { success: true, message };
 

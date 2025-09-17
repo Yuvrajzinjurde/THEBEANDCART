@@ -21,7 +21,7 @@ const withAuth = <P extends object>(
 
       if (!user) {
         // If not logged in, redirect to login page
-        router.replace('/login');
+        router.replace('/admin/login');
         return;
       }
 
