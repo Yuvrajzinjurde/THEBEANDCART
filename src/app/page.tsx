@@ -173,8 +173,9 @@ export default function LandingPage() {
         const fetchedProducts: IProduct[] = productData.products;
         setAllProducts(fetchedProducts);
 
+        let settingsData: IPlatformSettings | null = null;
         if (settingsResponse.ok) {
-            const settingsData = await settingsResponse.json();
+            settingsData = await settingsResponse.json();
             setPlatformSettings(settingsData);
         }
 
@@ -194,8 +195,8 @@ export default function LandingPage() {
         setNewestProducts(sortedByDate.slice(0, 12));
 
         // Use featured categories from settings, or derive from products as a fallback
-        if (platformSettings && platformSettings.featuredCategories.length > 0) {
-            setUniqueCategories(platformSettings.featuredCategories);
+        if (settingsData && settingsData.featuredCategories.length > 0) {
+            setUniqueCategories(settingsData.featuredCategories);
         } else {
             const categories = new Set(fetchedProducts.map(p => p.category));
             setUniqueCategories(Array.from(categories).slice(0, 12));
@@ -208,7 +209,7 @@ export default function LandingPage() {
       }
     }
     fetchData();
-  }, [platformSettings]);
+  }, []);
 
   const heroBanners = platformSettings?.heroBanners;
 
