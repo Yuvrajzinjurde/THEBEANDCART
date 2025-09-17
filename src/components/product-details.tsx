@@ -205,7 +205,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     <div className="max-w-6xl mx-auto">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
         {/* Left Column: Image Gallery & Actions */}
-        <div className="flex flex-col gap-4">
+        <div className="space-y-4">
             <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
               {/* Vertical Thumbnails */}
               <div className="flex flex-col items-center">
@@ -246,7 +246,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </div>
               
               {/* Main Image Viewer */}
-              <div className="relative overflow-hidden aspect-square group">
+              <div className="relative overflow-hidden aspect-[4/5] group">
                 <Carousel
                     opts={{ loop: true }}
                     ref={mainRef}
@@ -255,7 +255,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <CarouselContent className="-ml-0 h-full">
                         {mediaItems.map((media, index) => (
                             <CarouselItem key={index} className="pl-0">
-                                <div className="min-w-0 h-full relative bg-muted">
+                                <div className="min-w-0 h-full relative bg-muted rounded-lg overflow-hidden">
                                     {media.type === 'image' ? (
                                         <Image
                                             src={media.url}
