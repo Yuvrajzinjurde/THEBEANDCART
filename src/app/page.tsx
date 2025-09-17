@@ -34,7 +34,14 @@ const LandingHeader = () => (
 
 const LandingFooter = () => (
     <footer className="w-full border-t bg-background">
-        <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-4 py-12 sm:px-6 lg:px-8">
+        <div className="container mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 px-4 py-12 sm:px-6 lg:px-8">
+            <div className="md:col-span-2">
+                <div className="flex items-center gap-2">
+                    <Logo className="h-8 w-8 text-primary" />
+                    <span className="font-bold">Brandify</span>
+                </div>
+                <p className="mt-4 text-sm text-muted-foreground">The best place to find your new favorite brands.</p>
+            </div>
             <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">About</h3>
                 <ul className="mt-4 space-y-2">
