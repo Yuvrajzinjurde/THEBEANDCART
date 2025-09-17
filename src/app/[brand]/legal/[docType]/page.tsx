@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ILegal } from '@/models/legal.model';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +12,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+
+// This is defined here to avoid importing server-side code from the model
+interface ILegal {
+  _id: string;
+  docType: string;
+  title: string;
+  content: string;
+}
 
 export default function LegalPage() {
   const params = useParams();
@@ -86,7 +93,7 @@ export default function LegalPage() {
         </CardHeader>
         <CardContent>
             <div 
-                className="prose prose-sm sm:prose-base lg:prose-lg max-w-none"
+                className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: document.content }}
             />
         </CardContent>
