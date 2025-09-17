@@ -41,6 +41,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
     existingBrand ? {
@@ -121,8 +122,13 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     }
   };
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsAlertOpen(true);
+  }
 
   async function onSubmit(data: BrandFormValues) {
+    setIsAlertOpen(false);
     setIsSubmitting(true);
     const url = mode === 'create' ? '/api/brands' : `/api/brands/${existingBrand?.permanentName}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
@@ -156,7 +162,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleFormSubmit} className="space-y-8">
         <Card>
           <CardHeader><CardTitle>Brand Identity</CardTitle></CardHeader>
           <CardContent className="space-y-6">
@@ -597,32 +603,29 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardContent>
         </Card>
         
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button type="button" disabled={isSubmitting || (mode === 'edit' && !isFormDirty)}>
-                {mode === 'create' ? 'Create Brand' : 'Save Changes'}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                      This will {mode === 'create' ? 'create a new brand' : 'save the changes'}.
-                      {mode === 'create' && " The permanent name cannot be changed after creation."}
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-                      {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
-                      Continue
-                  </AlertDialogAction>
-              </AlertDialogFooter>
-          </AlertDialogContent>
+        <Button type="submit" disabled={isSubmitting || (mode === 'edit' && !isFormDirty)}>
+            {mode === 'create' ? 'Create Brand' : 'Save Changes'}
+        </Button>
+
+         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will {mode === 'create' ? 'create a new brand' : 'save the changes'}.
+                        {mode === 'create' && " The permanent name cannot be changed after creation."}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                        {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : null}
+                        Continue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
         </AlertDialog>
       </form>
     </Form>
   );
 }
-
-    
