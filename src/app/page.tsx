@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
@@ -18,6 +18,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
 
@@ -153,6 +154,10 @@ export default function LandingPage() {
   const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
   const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
   
+  const mainCarouselPlugin = useRef(
+    Autoplay({ delay: 4000, stopOnInteraction: true })
+  );
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -214,7 +219,12 @@ export default function LandingPage() {
 
         {heroBanners && heroBanners.length > 0 ? (
              <section className="w-full">
-                <Carousel className="w-full" plugins={[require('embla-carousel-autoplay').default()]}>
+                <Carousel 
+                    className="w-full" 
+                    plugins={[mainCarouselPlugin.current]}
+                    onMouseEnter={() => mainCarouselPlugin.current.stop()}
+                    onMouseLeave={() => mainCarouselPlugin.current.reset()}
+                >
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
@@ -300,5 +310,3 @@ export default function LandingPage() {
     </>
   );
 }
-
-    
