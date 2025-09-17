@@ -56,15 +56,44 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       categoryBanners: existingBrand.categoryBanners,
       categories: existingBrand.categories || [],
     } : {
-      displayName: '',
-      permanentName: '',
-      logoUrl: '',
-      banners: [{ title: '', description: '', imageUrl: '', imageHint: '' }],
-      themeName: undefined,
-      offers: [],
-      reviews: [],
-      categoryBanners: [],
-      categories: [],
+      displayName: "Aura",
+      permanentName: "aura",
+      logoUrl: "https://picsum.photos/seed/aurora-logo/200/200",
+      themeName: "Rose",
+      categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
+      banners: [
+        { title: "Discover Your Natural Glow", description: "Pure ingredients, powerful results. Shop our new arrivals.", imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model" },
+        { title: "Summer Radiance Collection", description: "Lightweight formulas for a sun-kissed look. Limited edition.", imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach" },
+      ],
+      categoryBanners: [
+        { categoryName: "Skincare", imageUrl: "https://picsum.photos/seed/cat-skincare/400/600", imageHint: "face serum" },
+        { categoryName: "Makeup", imageUrl: "https://picsum.photos/seed/cat-makeup/400/400", imageHint: "lipstick palette" },
+        { categoryName: "Haircare", imageUrl: "https://picsum.photos/seed/cat-haircare/400/600", imageHint: "hair oil" },
+        { categoryName: "Body Care", imageUrl: "https://picsum.photos/seed/cat-bodycare/400/400", imageHint: "body lotion" },
+        { categoryName: "Fragrance", imageUrl: "https://picsum.photos/seed/cat-fragrance/400/400", imageHint: "perfume bottle" },
+        { categoryName: "Men's Grooming", imageUrl: "https://picsum.photos/seed/cat-men/400/600", imageHint: "shaving kit" },
+        { categoryName: "Beauty Tools", imageUrl: "https://picsum.photos/seed/cat-tools/400/400", imageHint: "makeup brushes" },
+        { categoryName: "Wellness", imageUrl: "https://picsum.photos/seed/cat-wellness/400/400", imageHint: "yoga meditation" },
+        { categoryName: "Combos", imageUrl: "https://picsum.photos/seed/cat-combos/400/400", imageHint: "gift set" },
+      ],
+      promoBanner: {
+        title: "Exclusive Online Offer",
+        description: "Join our community and receive 20% off your first order. Plus, get a free gift at checkout!",
+        imageUrl: "https://picsum.photos/seed/promo-offer/1200/600",
+        imageHint: "beauty products",
+        buttonText: "Shop Now",
+        buttonLink: "#",
+      },
+      offers: [
+        { title: "First Purchase Bonus", description: "Get 15% off your first order with us.", code: "AURA15" },
+        { title: "Free Shipping", description: "Enjoy free shipping on all orders over ₹499.", code: "FREESHIP" },
+        { title: "Skincare Special", description: "Buy any 2 serums and get a free face mask.", code: "GLOWUP" },
+      ],
+      reviews: [
+        { customerName: "Priya S.", rating: 5, reviewText: "The Vitamin C serum is a game changer! My skin has never felt brighter.", customerAvatarUrl: "https://picsum.photos/seed/priya/100/100" },
+        { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
+        { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
+      ],
     }
   ), [existingBrand]);
 
