@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -17,6 +18,7 @@ import {
   Briefcase,
   TicketPercent,
   Landmark,
+  Home,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -50,6 +52,7 @@ const navItems = [
   { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
   { href: "/admin/brands", icon: Store, label: "Manage Brands" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
+  { href: "/admin/platform", icon: Home, label: "Platform" },
 ];
 
 export function AdminSidebar() {
