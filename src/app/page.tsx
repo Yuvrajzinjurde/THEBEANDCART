@@ -203,11 +203,11 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                             const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
                             
                             return (
-                                <CarouselItem key={brand.permanentName} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
-                                    <Link href={`/${brand.permanentName}/home`} className="block group">
-                                        <div className="flex flex-col items-center gap-4">
+                                <CarouselItem key={brand.permanentName} className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6">
+                                    <Link href={`/${brand.permanentName}/home`} className="block group p-4">
+                                        <div className="flex flex-col items-center justify-center gap-4">
                                             <div 
-                                                className="w-28 h-28 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
+                                                className="w-36 h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
                                                 style={{ 
                                                     borderColor: primaryColor,
                                                     boxShadow: `0 0 12px 2px ${primaryColor}66` 
