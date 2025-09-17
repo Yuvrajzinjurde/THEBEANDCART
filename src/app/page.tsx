@@ -23,6 +23,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
+import { themeColors } from '@/lib/brand-schema';
 
 
 const LandingHeader = () => (
@@ -189,9 +190,6 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                 <div className="text-center mb-10">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shop by Brand</h2>
-                </div>
                 <Carousel
                     opts={{
                         align: "start",
@@ -200,23 +198,33 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                     className="w-full"
                 >
                     <CarouselContent>
-                        {brands.map((brand) => (
-                            <CarouselItem key={brand.permanentName} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
-                                 <Link href={`/${brand.permanentName}/home`} className="block group">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <div className="w-24 h-24 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all duration-300">
-                                            <Image
-                                                src={brand.logoUrl}
-                                                alt={`${brand.displayName} Logo`}
-                                                fill
-                                                className="object-cover"
-                                            />
+                        {brands.map((brand) => {
+                            const theme = themeColors.find(t => t.name === brand.themeName);
+                            const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
+                            
+                            return (
+                                <CarouselItem key={brand.permanentName} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
+                                    <Link href={`/${brand.permanentName}/home`} className="block group">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <div 
+                                                className="w-28 h-28 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
+                                                style={{ 
+                                                    borderColor: primaryColor,
+                                                    boxShadow: `0 0 12px 2px ${primaryColor}66` 
+                                                }}
+                                            >
+                                                <Image
+                                                    src={brand.logoUrl}
+                                                    alt={`${brand.displayName} Logo`}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
                                         </div>
-                                        <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
-                                    </div>
-                                </Link>
-                            </CarouselItem>
-                        ))}
+                                    </Link>
+                                </CarouselItem>
+                            );
+                        })}
                     </CarouselContent>
                     <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
                     <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
@@ -406,4 +414,3 @@ export default function LandingPage() {
     </>
   );
 }
-
