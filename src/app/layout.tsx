@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/header';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { IBrand } from '@/models/brand.model';
 import { themeColors } from '@/lib/brand-schema';
@@ -73,6 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
@@ -80,24 +81,32 @@ export default function RootLayout({
   
   const showHeader = !isAdminRoute && !isAuthRoute && !isLandingPage;
 
-  const getBrandNameFromPath = () => {
+  const getBrandName = () => {
     if (isAdminRoute || isLandingPage) {
       return null;
     }
+    
+    // First, try to get from the path, e.g., /reeva/home
     const pathParts = pathname.split('/');
-    // e.g., /reeva/home -> parts are ['', 'reeva', 'home']
-    if (pathParts.length > 1 && pathParts[1]) {
+    if (pathParts.length > 1 && pathParts[1] && pathParts[1] !== 'products' && pathParts[1] !== 'legal') {
       return pathParts[1];
     }
+
+    // If not in path, try to get from query param, e.g., /products/123?storefront=reeva
+    const storefrontQuery = searchParams.get('storefront');
+    if (storefrontQuery) {
+        return storefrontQuery;
+    }
+
     return null;
   }
   
-  const brandNameFromPath = getBrandNameFromPath();
+  const brandName = getBrandName();
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <ThemeInjector brandName={brandNameFromPath} />
+        <ThemeInjector brandName={brandName} />
       </head>
       <body className="flex min-h-screen flex-col font-body antialiased">
         <AuthProvider>
