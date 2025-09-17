@@ -71,24 +71,23 @@ export const seedDatabase = async () => {
         await dbConnect();
         console.log('Database connected, starting seed process...');
 
-        // Clear existing data
-        await Promise.all([
-            Product.deleteMany({}),
-            Brand.deleteMany({}),
-            Role.deleteMany({}),
-            User.deleteMany({}),
-            Order.deleteMany({}),
-            Legal.deleteMany({}),
-        ]);
-        console.log('Cleared existing collections.');
-
-        // Seed Roles
-        await Role.insertMany([{ name: 'user' }, { name: 'admin' }]);
-        console.log('Seeded Roles.');
+        // Clear only product data to avoid wiping users and brands
+        await Product.deleteMany({});
+        console.log('Cleared existing product collection.');
         
-        // Seed Brands
-        await Brand.insertMany(brandsData.map(b => ({ ...b, categories: staticCategories })));
-        console.log('Seeded Brands with categories.');
+        // Check if roles exist, if not, seed them
+        const rolesCount = await Role.countDocuments();
+        if (rolesCount === 0) {
+            await Role.insertMany([{ name: 'user' }, { name: 'admin' }]);
+            console.log('Seeded Roles.');
+        }
+
+        // Check if brands exist, if not, seed them
+        const brandsCount = await Brand.countDocuments();
+        if (brandsCount === 0) {
+            await Brand.insertMany(brandsData.map(b => ({ ...b, categories: staticCategories })));
+            console.log('Seeded Brands with categories.');
+        }
 
         // Seed Products
         const createdProducts = await Product.insertMany(
@@ -109,15 +108,18 @@ export const seedDatabase = async () => {
         );
         console.log(`Seeded ${createdProducts.length} products.`);
 
-        // Seed Legal Docs
-        for (const docType of legalDocTypes) {
-            await new Legal({
-                docType: docType,
-                title: getLegalDocTitle(docType),
-                content: getLegalDocPlaceholder(docType),
-            }).save();
+        // Check if legal docs exist, if not, seed them
+        const legalsCount = await Legal.countDocuments();
+        if (legalsCount === 0) {
+            for (const docType of legalDocTypes) {
+                await new Legal({
+                    docType: docType,
+                    title: getLegalDocTitle(docType),
+                    content: getLegalDocPlaceholder(docType),
+                }).save();
+            }
+            console.log(`Seeded ${legalDocTypes.length} legal documents.`);
         }
-        console.log(`Seeded ${legalDocTypes.length} legal documents.`);
         
         const message = 'Database seeded successfully with fresh data.';
         console.log(message);
