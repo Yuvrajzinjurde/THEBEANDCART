@@ -206,64 +206,15 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   return (
     <div className="max-w-6xl mx-auto">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
-        {/* Left Column: Image Gallery & Actions */}
-        <div className="space-y-4">
-            <div className="grid grid-cols-[80px_1fr] gap-4 items-start">
-              {/* Vertical Thumbnails */}
-              <div className="flex flex-col items-center">
-                  <Button
-                      variant="ghost" size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      onClick={thumbScrollPrev}
-                  ><ChevronUp className="h-5 w-5" /></Button>
-                  <Carousel
-                    setApi={setThumbApi}
-                    opts={{
-                      axis: 'y',
-                      align: 'start',
-                      containScroll: 'keepSnaps',
-                      dragFree: false,
-                    }}
-                    className="w-full max-h-[350px] my-2"
-                  >
-                    <CarouselContent className="h-auto -mt-3">
-                       {mediaItems.map((media, index) => (
-                          <CarouselItem key={index} className="pt-3 basis-1/4">
-                              <ThumbsButton
-                                  onClick={() => onThumbClick(index)}
-                                  selected={index === selectedIndex}
-                              >
-                                  <Image
-                                    src={media.url}
-                                    alt={`${product.name} thumbnail ${index + 1}`}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                  {media.type === 'video' && (
-                                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                          <PlayCircle className="w-8 h-8 text-white" />
-                                      </div>
-                                  )}
-                              </ThumbsButton>
-                          </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                  </Carousel>
-                  <Button
-                      variant="ghost" size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      onClick={thumbScrollNext}
-                  ><ChevronDown className="h-5 w-5" /></Button>
-              </div>
-              
-              {/* Main Image Viewer */}
-              <div className="relative overflow-hidden aspect-[4/5] group">
+        {/* Left Column: Image Gallery */}
+        <div className="grid gap-4">
+            <div className="relative overflow-hidden group">
                 <Carousel
                     setApi={setMainApi}
                     opts={{ loop: true }}
-                    className="w-full h-full"
+                    className="w-full h-full rounded-lg"
                 >
-                    <CarouselContent className="h-full">
+                    <CarouselContent className="h-[500px]">
                         {mediaItems.map((media, index) => (
                             <CarouselItem key={index} className="h-full">
                                 <div className="min-w-0 h-full relative bg-muted rounded-lg overflow-hidden">
@@ -301,30 +252,64 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     </Button>
                 </div>
             </div>
-            </div>
-           {/* Action Buttons */}
-           <div className='space-y-4'>
-            <div className="flex items-center gap-4">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-              <div className="flex items-center gap-1 rounded-lg border p-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                      <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-semibold">{quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                      <Plus className="h-4 w-4" />
-                  </Button>
+
+            {/* Thumbnails */}
+             <Carousel
+                setApi={setThumbApi}
+                opts={{
+                    align: 'start',
+                    containScroll: 'keepSnaps',
+                    dragFree: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-2">
+                    {mediaItems.map((media, index) => (
+                      <CarouselItem key={index} className="pl-2 basis-1/4 md:basis-1/5">
+                          <ThumbsButton
+                              onClick={() => onThumbClick(index)}
+                              selected={index === selectedIndex}
+                          >
+                              <Image
+                                src={media.url}
+                                alt={`${product.name} thumbnail ${index + 1}`}
+                                fill
+                                className="object-cover"
+                              />
+                              {media.type === 'video' && (
+                                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                      <PlayCircle className="w-6 h-6 text-white" />
+                                  </div>
+                              )}
+                          </ThumbsButton>
+                      </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+
+              {/* Action Buttons */}
+              <div className='space-y-4 pt-4'>
+                <div className="flex items-center gap-4">
+                  <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                  <div className="flex items-center gap-1 rounded-lg border p-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                          <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center font-semibold">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                          <Plus className="h-4 w-4" />
+                      </Button>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
+                        <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                    </Button>
+                    <Button size="lg" variant="secondary" className="h-12 text-base">
+                        Buy Now
+                    </Button>
+                </div>
               </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-                <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                </Button>
-                <Button size="lg" variant="secondary" className="h-12 text-base">
-                    Buy Now
-                </Button>
-            </div>
-           </div>
         </div>
 
 
