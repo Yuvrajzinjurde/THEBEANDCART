@@ -128,6 +128,7 @@ const generateProducts = (baseProducts: any[], brand: string, count: number) => 
         const productName = `${baseProduct.name} #${i + 1}`;
         const mrp = Math.floor(Math.random() * 2000) + 1000;
         const sellingPrice = mrp - Math.floor(Math.random() * 500);
+        const encodedProductName = encodeURIComponent(productName);
 
         products.push({
             name: productName,
@@ -139,7 +140,7 @@ const generateProducts = (baseProducts: any[], brand: string, count: number) => 
             mrp: mrp,
             sellingPrice: sellingPrice,
             stock: Math.floor(Math.random() * 100),
-            images: Array.from({ length: 5 }, (_, j) => `https://picsum.photos/seed/${productName.replace(/\s/g, '-')}-${j}/600/600`),
+            images: Array.from({ length: 5 }, (_, j) => `https://picsum.photos/seed/${encodedProductName}-${j}/600/600`),
             keywords: [baseProduct.category, brand, baseProduct.name.split(' ')[0]],
             styleId: `style-${productName.replace(/\s/g, '-').toLowerCase()}`
         });
