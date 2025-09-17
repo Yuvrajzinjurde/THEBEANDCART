@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -27,6 +28,38 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from '@/components/ui/badge';
 
+const staticDefaultValues: PlatformSettingsValues = {
+  heroBanners: [
+    {
+      title: "Summer Collection is Here",
+      description: "Discover the latest trends and refresh your wardrobe for the sunny days ahead.",
+      imageUrl: "https://picsum.photos/seed/summer-fashion/1600/400",
+      imageHint: "summer fashion",
+    },
+    {
+      title: "Electronics Fest",
+      description: "Get the best deals on the latest gadgets and accessories.",
+      imageUrl: "https://picsum.photos/seed/gadgets-sale/1600/400",
+      imageHint: "tech gadgets",
+    },
+  ],
+  featuredCategories: [
+    { name: "T-Shirts" },
+    { name: "Sneakers" },
+    { name: "Handbags" },
+    { name: "Watches" },
+  ],
+  promoBanner: {
+    title: "Exclusive Web-Only Offer",
+    description: "Shop now and get up to 40% off on selected items. This is a limited time offer, don't miss out!",
+    imageUrl: "https://picsum.photos/seed/exclusive-offer/1200/600",
+    imageHint: "shopping sale",
+    buttonText: "Shop Now",
+    buttonLink: "#",
+  },
+};
+
+
 export default function PlatformSettingsPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
@@ -49,16 +82,23 @@ export default function PlatformSettingsPage() {
             const response = await fetch('/api/platform');
             if (response.ok) {
                 const settings = await response.json();
-                if (settings) {
+                if (settings && settings.heroBanners?.length > 0) {
+                    // If settings exist in DB, use them
                     form.reset({
                         ...settings,
                         featuredCategories: settings.featuredCategories.map((cat: string) => ({name: cat})),
                     });
+                } else {
+                    // Otherwise, populate with static defaults
+                    form.reset(staticDefaultValues);
                 }
+            } else {
+                 form.reset(staticDefaultValues);
             }
         } catch (error) {
             console.error("Failed to fetch platform settings", error);
-            toast.error("Could not load platform settings.");
+            toast.error("Could not load platform settings. Displaying default values.");
+            form.reset(staticDefaultValues);
         } finally {
             setIsLoading(false);
         }
