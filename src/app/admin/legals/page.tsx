@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -19,8 +19,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { Loader } from "@/components/ui/loader";
-import { Landmark, Save } from "lucide-react";
+import { Landmark, Save, UploadCloud } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { parseLegalDocument } from "@/ai/flows/parse-legal-doc-flow";
 
 // Define types and constants directly in the client component
 const legalDocTypes = [
@@ -54,7 +55,9 @@ export default function LegalsPage() {
   const [activeDocType, setActiveDocType] = useState<LegalDocType>('about-us');
   const [documents, setDocuments] = useState<Record<string, Partial<ILegal>>>({});
   const [loading, setLoading] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -124,6 +127,55 @@ export default function LegalsPage() {
     }));
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // We only support plain text files for now for simplicity
+    if (file.type !== 'text/plain') {
+        toast.error("Please upload a plain text file (.txt).");
+        return;
+    }
+
+    setIsParsing(true);
+    toast.info("Parsing document with AI...");
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const textContent = e.target?.result as string;
+            if (!textContent) {
+                throw new Error("Could not read file content.");
+            }
+
+            const result = await parseLegalDocument({
+                documentContent: textContent,
+                documentType: docTypeLabels[activeDocType],
+            });
+            
+            setDocuments(prev => ({
+                ...prev,
+                [activeDocType]: {
+                    ...prev[activeDocType],
+                    content: result.htmlContent,
+                }
+            }));
+            
+            toast.success("Document parsed successfully!");
+
+        } catch (error: any) {
+            console.error("Parsing Error:", error);
+            toast.error(error.message || "Failed to parse document.");
+        } finally {
+            setIsParsing(false);
+            if(fileInputRef.current) {
+                fileInputRef.current.value = ''; // Reset file input
+            }
+        }
+    };
+    reader.readAsText(file);
+  };
+
   const currentContent = documents[activeDocType]?.content || '';
 
   return (
@@ -154,10 +206,24 @@ export default function LegalsPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSave} disabled={isPending}>
-            {isPending && <Loader className="mr-2" />}
-            <Save className="mr-2 h-4 w-4" /> Save Document
-          </Button>
+          <div className="flex items-center gap-2">
+              <Button onClick={() => fileInputRef.current?.click()} variant="outline" disabled={isParsing}>
+                {(isParsing || isPending) && <Loader className="mr-2" />}
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Upload & Parse
+              </Button>
+               <input 
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  accept=".txt" // For now, only accept text files.
+               />
+              <Button onClick={handleSave} disabled={isPending || isParsing}>
+                {(isPending || isParsing) && <Loader className="mr-2" />}
+                <Save className="mr-2 h-4 w-4" /> Save Document
+              </Button>
+          </div>
         </div>
         
         {loading ? (
@@ -175,6 +241,7 @@ export default function LegalsPage() {
                     onChange={handleContentChange}
                     placeholder={`Enter content for ${docTypeLabels[activeDocType]}...`}
                     className="mt-2 h-96 font-mono text-sm"
+                    disabled={isParsing}
                 />
             </div>
         )}
