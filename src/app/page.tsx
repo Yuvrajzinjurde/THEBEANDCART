@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
+import type { IPlatformSettings } from '@/models/platform.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
@@ -116,6 +117,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
 
 export default function LandingPage() {
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
+  const [platformSettings, setPlatformSettings] = useState<IPlatformSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -123,41 +125,49 @@ export default function LandingPage() {
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
   const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
   const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
-
+  
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchData() {
       try {
         setLoading(true);
-        // Fetch all products from all brands
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
-        const fetchedProducts: IProduct[] = data.products;
+        // Fetch all products and platform settings in parallel
+        const [productResponse, settingsResponse] = await Promise.all([
+            fetch('/api/products'),
+            fetch('/api/platform')
+        ]);
+        
+        if (!productResponse.ok) throw new Error('Failed to fetch products');
+        const productData = await productResponse.json();
+        const fetchedProducts: IProduct[] = productData.products;
         setAllProducts(fetchedProducts);
+
+        if (settingsResponse.ok) {
+            const settingsData = await settingsResponse.json();
+            setPlatformSettings(settingsData);
+        }
 
         // --- Sort and Slice Products for Carousels ---
         const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
         const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
         const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
 
-        // 1. Trending Products (by a simple popularity score for now)
         const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
         const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
         setTrendingProducts(sortedByPopularity.slice(0, 12));
 
-        // 2. Top Rated Products
         const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
         setTopRatedProducts(sortedByRating.slice(0, 12));
 
-        // 3. Newest Arrivals (already sorted by API, just slice)
         const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
         setNewestProducts(sortedByDate.slice(0, 12));
 
-        // 4. Get Unique Categories
-        const categories = new Set(fetchedProducts.map(p => p.category));
-        setUniqueCategories(Array.from(categories).slice(0, 12)); // Limit for display
+        // Use featured categories from settings, or derive from products as a fallback
+        if (settingsData && settingsData.featuredCategories.length > 0) {
+            setUniqueCategories(settingsData.featuredCategories);
+        } else {
+            const categories = new Set(fetchedProducts.map(p => p.category));
+            setUniqueCategories(Array.from(categories).slice(0, 12));
+        }
 
       } catch (err: any) {
         setError(err.message);
@@ -165,22 +175,58 @@ export default function LandingPage() {
         setLoading(false);
       }
     }
-    fetchProducts();
+    fetchData();
   }, []);
+
+  const heroBanners = platformSettings?.heroBanners;
 
   return (
     <>
     <LandingHeader />
     <main className="flex-1 flex flex-col items-center bg-background">
 
-        <section className="w-full py-12 sm:py-20 px-4 sm:px-8 text-center">
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                Your Universe of Brands
-            </h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                Discover curated products from a constellation of unique brands, all in one place.
-            </p>
-        </section>
+        {heroBanners && heroBanners.length > 0 ? (
+             <section className="w-full">
+                <Carousel className="w-full" plugins={[require('embla-carousel-autoplay').default()]}>
+                    <CarouselContent>
+                    {heroBanners.map((banner, index) => (
+                        <CarouselItem key={index}>
+                            <div className="relative w-full h-[250px] md:h-[400px] bg-secondary text-foreground">
+                                <Image
+                                    src={banner.imageUrl}
+                                    alt={banner.title}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint={banner.imageHint}
+                                    priority={index === 0}
+                                />
+                                <div className="absolute inset-0 bg-black/50" />
+                                <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
+                                    <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight">
+                                        {banner.title}
+                                    </h1>
+                                    <p className="mt-4 text-base md:text-lg max-w-2xl">
+                                        {banner.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </CarouselItem>
+                    ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                    <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                </Carousel>
+            </section>
+        ) : (
+            <section className="w-full py-12 sm:py-20 px-4 sm:px-8 text-center">
+                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+                    Your Universe of Brands
+                </h1>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                    Discover curated products from a constellation of unique brands, all in one place.
+                </p>
+            </section>
+        )}
 
         {loading ? (
             <div className="flex flex-col items-center justify-center text-center py-16">
@@ -197,23 +243,25 @@ export default function LandingPage() {
                 <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} />
                 <ProductCarouselSection title="Newest Arrivals" products={newestProducts} />
                 
-                <section className="container mx-auto px-4 pt-16 sm:px-6 lg:px-8">
-                    <div className="text-center mb-10">
-                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {uniqueCategories.map(category => (
-                            <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
-                                <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                    <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                                         <span className="text-3xl mb-2">🛍️</span>
-                                         <h3 className="text-sm font-semibold truncate w-full">{category}</h3>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
+                {uniqueCategories.length > 0 && (
+                    <section className="container mx-auto px-4 pt-16 sm:px-6 lg:px-8">
+                        <div className="text-center mb-10">
+                            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            {uniqueCategories.map(category => (
+                                <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
+                                    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                        <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                                             <span className="text-3xl mb-2">🛍️</span>
+                                             <h3 className="text-sm font-semibold truncate w-full">{category}</h3>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </>
         )}
 
