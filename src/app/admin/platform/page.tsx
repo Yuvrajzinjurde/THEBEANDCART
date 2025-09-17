@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Trash, UploadCloud, X, Home, Save } from 'lucide-react';
-import type { IPlatformSettings, PlatformSettingsValues } from '@/models/platform.model';
-import { PlatformSettingsValidationSchema } from '@/models/platform.model';
+import type { IPlatformSettings } from '@/models/platform.model';
+import { PlatformSettingsValidationSchema, type PlatformSettingsValues } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -104,7 +104,7 @@ export default function PlatformSettingsPage() {
     setIsSubmitting(true);
     const dataToSubmit = {
         ...data,
-        featuredCategories: data.featuredCategories.map(cat => cat.name),
+        featuredCategories: data.featuredCategories?.map(cat => cat.name),
     };
 
     try {

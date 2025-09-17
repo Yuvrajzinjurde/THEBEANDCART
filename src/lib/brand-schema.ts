@@ -64,3 +64,16 @@ export const BrandFormSchema = z.object({
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;
+
+// Zod schema for Platform Settings form validation
+export const PlatformSettingsValidationSchema = z.object({
+  heroBanners: z.array(z.object({
+      title: z.string().min(1, "Title is required"),
+      description: z.string().min(1, "Description is required"),
+      imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
+      imageHint: z.string().min(1, "Image hint is required"),
+  })).min(1, "At least one hero banner is required"),
+  featuredCategories: z.array(z.object({ name: z.string() })).optional(),
+});
+
+export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;
