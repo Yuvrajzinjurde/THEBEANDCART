@@ -95,22 +95,15 @@ export default function ProductsPage() {
         let productsToFilter = [...allProducts];
 
         // Apply filters
-        if (activeFilters.categories.length > 0) {
-            productsToFilter = productsToFilter.filter(p => activeFilters.categories.includes(p.category));
-        }
-        if (activeFilters.brands.length > 0) {
-            productsToFilter = productsToFilter.filter(p => p.brand && activeFilters.brands.includes(p.brand));
-        }
-        if (activeFilters.colors.length > 0) {
-            productsToFilter = productsToFilter.filter(p => p.color && activeFilters.colors.includes(p.color));
-        }
-        if (activeFilters.keywords.length > 0) {
-            productsToFilter = productsToFilter.filter(p => 
-                p.keywords && activeFilters.keywords.some(filterKeyword => 
-                    p.keywords.some(productKeyword => productKeyword.toLowerCase().includes(filterKeyword.toLowerCase()))
-                )
-            );
-        }
+        productsToFilter = productsToFilter.filter(p => {
+            const categoryMatch = activeFilters.categories.length === 0 || activeFilters.categories.includes(p.category);
+            const brandMatch = activeFilters.brands.length === 0 || (p.brand && activeFilters.brands.includes(p.brand));
+            const colorMatch = activeFilters.colors.length === 0 || (p.color && activeFilters.colors.includes(p.color));
+            const keywordMatch = activeFilters.keywords.length === 0 || (p.keywords && activeFilters.keywords.some(filterKeyword => 
+                p.keywords.some(productKeyword => productKeyword.toLowerCase().includes(filterKeyword.toLowerCase()))
+            ));
+            return categoryMatch && brandMatch && colorMatch && keywordMatch;
+        });
 
         // Apply sorting
         switch(sortOption) {
