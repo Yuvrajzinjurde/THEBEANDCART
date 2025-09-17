@@ -15,25 +15,57 @@ export async function GET(req: Request) {
     const category = searchParams.get('category');
     const keyword = searchParams.get('keyword');
     
-    let query: any = {};
+    // If a specific storefront, category, or keyword is provided, use the existing query logic.
+    if (storefront || category || keyword) {
+        let query: any = {};
 
-    if (storefront) {
-      query.storefront = storefront;
-    }
-    
-    if (category) {
-        query.category = category;
+        if (storefront) {
+        query.storefront = storefront;
+        }
+        
+        if (category) {
+            query.category = category;
+        }
+
+        if (keyword) {
+            query.keywords = { $in: [new RegExp(keyword, 'i')] };
+        }
+
+        const products = await Product.find(query)
+            .sort({ createdAt: -1 })
+            .lean();
+        
+        return NextResponse.json({ products }, { status: 200 });
     }
 
-    if (keyword) {
-        query.keywords = { $in: [new RegExp(keyword, 'i')] };
-    }
+    // If no specific filter, fetch a few products from each brand for the main landing page.
+    const products = await Product.aggregate([
+      // Sort all products by creation date to get the newest ones first
+      { $sort: { createdAt: -1 } },
+      // Group by storefront and collect the products for each
+      {
+        $group: {
+          _id: '$storefront',
+          products: { $push: '$$ROOT' }
+        }
+      },
+      // For each group (brand), take the first 10 products from the collected array
+      {
+        $project: {
+          _id: 0,
+          storefront: '$_id',
+          products: { $slice: ['$products', 10] }
+        }
+      },
+      // Unwind the products array to create a single stream of product documents
+      { $unwind: '$products' },
+      // Replace the root to have the product document at the top level
+      { $replaceRoot: { newRoot: '$products' } }
+    ]);
 
-    const products = await Product.find(query)
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .lean(); // Use .lean() to get plain JS objects
 
     return NextResponse.json({ products }, { status: 200 });
+
   } catch (error) {
     console.error('Failed to fetch products:', error);
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
