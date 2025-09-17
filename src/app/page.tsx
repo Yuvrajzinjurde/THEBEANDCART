@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
 import type { IPlatformSettings } from '@/models/platform.model';
+import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
@@ -180,11 +181,56 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
             </div>
         </section>
     )
-}
+};
+
+const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
+    if (!brands || brands.length === 0) return null;
+
+    return (
+        <section className="w-full py-12">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                 <div className="text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shop by Brand</h2>
+                </div>
+                <Carousel
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                    className="w-full"
+                >
+                    <CarouselContent>
+                        {brands.map((brand) => (
+                            <CarouselItem key={brand.permanentName} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
+                                 <Link href={`/${brand.permanentName}/home`} className="block group">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-24 h-24 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all duration-300">
+                                            <Image
+                                                src={brand.logoUrl}
+                                                alt={`${brand.displayName} Logo`}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                        <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
+                                    </div>
+                                </Link>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                    <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                </Carousel>
+            </div>
+        </section>
+    );
+};
+
 
 export default function LandingPage() {
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [platformSettings, setPlatformSettings] = useState<IPlatformSettings | null>(null);
+  const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -201,16 +247,22 @@ export default function LandingPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        // Fetch all products and platform settings in parallel
-        const [productResponse, settingsResponse] = await Promise.all([
+        // Fetch all products, platform settings, and brands in parallel
+        const [productResponse, settingsResponse, brandResponse] = await Promise.all([
             fetch('/api/products'),
-            fetch('/api/platform')
+            fetch('/api/platform'),
+            fetch('/api/brands'),
         ]);
         
         if (!productResponse.ok) throw new Error('Failed to fetch products');
+        if (!brandResponse.ok) throw new Error('Failed to fetch brands');
+        
         const productData = await productResponse.json();
         const fetchedProducts: IProduct[] = productData.products;
         setAllProducts(fetchedProducts);
+        
+        const brandData = await brandResponse.json();
+        setBrands(brandData.brands);
 
         let settingsData: IPlatformSettings | null = null;
         if (settingsResponse.ok) {
@@ -225,13 +277,13 @@ export default function LandingPage() {
 
         const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
         const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
-        setTrendingProducts(sortedByPopularity.slice(0, 12));
+        setTrendingProducts(sortedByPopularity.slice(0, 8));
 
         const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
-        setTopRatedProducts(sortedByRating.slice(0, 12));
+        setTopRatedProducts(sortedByRating.slice(0, 8));
 
         const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-        setNewestProducts(sortedByDate.slice(0, 12));
+        setNewestProducts(sortedByDate.slice(0, 8));
 
         // Use featured categories from settings, or derive from products as a fallback
         if (settingsData && settingsData.featuredCategories.length > 0) {
@@ -304,6 +356,8 @@ export default function LandingPage() {
                 </p>
             </section>
         )}
+        
+        <ShopByBrandSection brands={brands} />
 
         {loading ? (
             <div className="flex flex-col items-center justify-center text-center py-16">
