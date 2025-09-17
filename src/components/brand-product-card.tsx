@@ -94,7 +94,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         body: JSON.stringify({ metric: 'clicks' }),
       }).catch(err => console.error("Failed to track click:", err));
     } finally {
-      router.push(`/products/${product._id}`);
+      // Construct the correct URL with storefront query parameter
+      router.push(`/products/${product._id}?storefront=${product.storefront}`);
     }
   };
   
@@ -106,7 +107,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
   return (
     <Link 
-      href={`/products/${product._id}`} 
+      href={`/products/${product._id}?storefront=${product.storefront}`} 
       onClick={handleCardClick} 
       className={cn("group block", className)}
     >

@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import type { IBrand } from "@/models/brand.model";
 import {
   Sheet,
@@ -33,7 +33,12 @@ export default function Header() {
   const { user, loading } = useAuth();
   const params = useParams();
   const pathname = usePathname();
-  const brandName = (params.brand as string) || 'reeva';
+  const searchParams = useSearchParams();
+  
+  const pathBrand = params.brand as string;
+  const queryBrand = searchParams.get('storefront');
+  const brandName = pathBrand || queryBrand || 'reeva';
+
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   

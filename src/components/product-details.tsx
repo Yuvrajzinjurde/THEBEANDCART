@@ -27,6 +27,7 @@ import useUserStore from '@/stores/user-store';
 interface ProductDetailsProps {
   product: IProduct;
   variants: IProduct[];
+  storefront: string;
 }
 
 const ThumbsButton: React.FC<React.PropsWithChildren<{
@@ -50,7 +51,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product: initialProduct, variants }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, variants, storefront }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
@@ -101,15 +102,15 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
     const variant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
     if (variant && variant._id !== product._id) {
         // Use replace to avoid polluting browser history for variant selection
-        router.replace(`/products/${variant._id}`);
+        router.replace(`/products/${variant._id}?storefront=${storefront}`);
     } else if (!variant && selectedColor) {
       // If a color is selected but not a size yet, find the first available size for that color
       const firstVariantOfColor = variants.find(v => v.color === selectedColor);
       if (firstVariantOfColor && firstVariantOfColor._id !== product._id) {
-        router.replace(`/products/${firstVariantOfColor._id}`);
+        router.replace(`/products/${firstVariantOfColor._id}?storefront=${storefront}`);
       }
     }
-  }, [selectedColor, selectedSize, variants, product._id, router]);
+  }, [selectedColor, selectedSize, variants, product._id, router, storefront]);
 
 
   const onThumbClick = useCallback(
@@ -152,7 +153,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
   const handleAddToCart = async () => {
     if (!user) {
         toast.info("Please log in to add items to your cart.");
-        router.push(`/${product.storefront}/login`);
+        router.push(`/${storefront}/login`);
         return;
     }
     toast.info("Adding to cart...");
@@ -177,7 +178,7 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
   const handleAddToWishlist = async () => {
      if (!user) {
         toast.info("Please log in to add items to your wishlist.");
-        router.push(`/${product.storefront}/login`);
+        router.push(`/${storefront}/login`);
         return;
     }
     toast.info("Updating wishlist...");
@@ -321,11 +322,11 @@ export default function ProductDetails({ product: initialProduct, variants }: Pr
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={`/${product.storefront}/home`}>Home</BreadcrumbLink>
+                  <BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href={`/${product.storefront}/products?category=${product.category}`}>{product.category}</BreadcrumbLink>
+                  <BreadcrumbLink href={`/${storefront}/products?category=${product.category}`}>{product.category}</BreadcrumbLink>
                 </BreadcrumbItem>
                  <BreadcrumbSeparator />
                 <BreadcrumbItem>

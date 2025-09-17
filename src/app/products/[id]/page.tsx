@@ -1,15 +1,18 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import ProductDetails from '@/components/product-details';
 import { Loader } from '@/components/ui/loader';
 
 export default function ProductPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const { id } = params;
+  
   const [product, setProduct] = useState<IProduct | null>(null);
   const [variants, setVariants] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,10 +74,12 @@ export default function ProductPage() {
   if (!product) {
     return <div className="text-center text-muted-foreground"><p>Product not found.</p></div>;
   }
+  
+  const storefront = searchParams.get('storefront') || product.storefront;
 
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <ProductDetails product={product} variants={variants.length > 0 ? variants : [product]} />
+      <ProductDetails product={product} variants={variants.length > 0 ? variants : [product]} storefront={storefront} />
     </div>
   );
 }
