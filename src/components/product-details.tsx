@@ -13,12 +13,12 @@ import { cn } from '@/lib/utils';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import useEmblaCarousel, { type EmblaCarouselType } from 'embla-carousel-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './ui/breadcrumb';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'react-toastify';
@@ -57,17 +57,14 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const { setCart, setWishlist } = useUserStore();
   const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
-  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.color);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.size);
 
-  const [mainRef, mainApi] = useEmblaCarousel({ loop: true });
-  const [thumbRef, thumbApi] = useEmblaCarousel({
-    containScroll: 'keepSnaps',
-    dragFree: false,
-    axis: 'y',
-  });
+  const [mainApi, setMainApi] = useState<CarouselApi>()
+  const [thumbApi, setThumbApi] = useState<CarouselApi>()
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
 
   // Update product when initialProduct changes
   useEffect(() => {
@@ -115,23 +112,28 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   const onThumbClick = useCallback(
     (index: number) => {
-      mainApi?.scrollTo(index)
+      if (!mainApi) return
+      mainApi.scrollTo(index)
     },
     [mainApi]
-  );
-  
+  )
+
   const onSelect = useCallback(() => {
     if (!mainApi || !thumbApi) return
-    setSelectedIndex(mainApi.selectedScrollSnap())
-    thumbApi.scrollTo(mainApi.selectedScrollSnap())
-  }, [mainApi, thumbApi, setSelectedIndex]);
+    const newIndex = mainApi.selectedScrollSnap();
+    setSelectedIndex(newIndex);
+    thumbApi.scrollTo(newIndex);
+  }, [mainApi, thumbApi])
+
 
   useEffect(() => {
-    if (!mainApi) return
+    if (!mainApi) {
+      return
+    }
     onSelect()
     mainApi.on('select', onSelect)
     mainApi.on('reInit', onSelect)
-  }, [mainApi, onSelect]);
+  }, [mainApi, onSelect])
 
 
   const thumbScrollPrev = useCallback(() => thumbApi?.scrollPrev(), [thumbApi]);
@@ -214,30 +216,39 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                       className="h-8 w-8 flex-shrink-0"
                       onClick={thumbScrollPrev}
                   ><ChevronUp className="h-5 w-5" /></Button>
-                  <div className="overflow-hidden w-full max-h-[350px] my-2" ref={thumbRef}>
-                      <div className="flex flex-col gap-3 h-full">
-                          {mediaItems.map((media, index) => (
-                              <div key={index} className="flex-[0_0_80px] min-w-0">
-                                  <ThumbsButton
-                                      onClick={() => onThumbClick(index)}
-                                      selected={index === selectedIndex}
-                                  >
-                                      <Image
-                                        src={media.url}
-                                        alt={`${product.name} thumbnail ${index + 1}`}
-                                        fill
-                                        className="object-cover"
-                                      />
-                                      {media.type === 'video' && (
-                                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                              <PlayCircle className="w-8 h-8 text-white" />
-                                          </div>
-                                      )}
-                                  </ThumbsButton>
-                              </div>
-                          ))}
-                      </div>
-                  </div>
+                  <Carousel
+                    setApi={setThumbApi}
+                    opts={{
+                      axis: 'y',
+                      align: 'start',
+                      containScroll: 'keepSnaps',
+                      dragFree: false,
+                    }}
+                    className="w-full max-h-[350px] my-2"
+                  >
+                    <CarouselContent className="h-auto -mt-3">
+                       {mediaItems.map((media, index) => (
+                          <CarouselItem key={index} className="pt-3 basis-1/4">
+                              <ThumbsButton
+                                  onClick={() => onThumbClick(index)}
+                                  selected={index === selectedIndex}
+                              >
+                                  <Image
+                                    src={media.url}
+                                    alt={`${product.name} thumbnail ${index + 1}`}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                  {media.type === 'video' && (
+                                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                          <PlayCircle className="w-8 h-8 text-white" />
+                                      </div>
+                                  )}
+                              </ThumbsButton>
+                          </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                  </Carousel>
                   <Button
                       variant="ghost" size="icon"
                       className="h-8 w-8 flex-shrink-0"
@@ -248,13 +259,13 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               {/* Main Image Viewer */}
               <div className="relative overflow-hidden aspect-[4/5] group">
                 <Carousel
+                    setApi={setMainApi}
                     opts={{ loop: true }}
-                    ref={mainRef}
                     className="w-full h-full"
                 >
-                    <CarouselContent className="-ml-0 h-full">
+                    <CarouselContent className="h-full">
                         {mediaItems.map((media, index) => (
-                            <CarouselItem key={index} className="pl-0">
+                            <CarouselItem key={index} className="h-full">
                                 <div className="min-w-0 h-full relative bg-muted rounded-lg overflow-hidden">
                                     {media.type === 'image' ? (
                                         <Image
