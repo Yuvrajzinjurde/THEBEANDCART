@@ -12,14 +12,60 @@ export async function GET(req: Request) {
     
     const { searchParams } = new URL(req.url);
     const storefront = searchParams.get('storefront');
+    const category = searchParams.get('category');
+    const keyword = searchParams.get('keyword');
+    
+    // If a specific storefront, category, or keyword is provided, use the existing query logic.
+    if (storefront || category || keyword) {
+        let query: any = {};
 
-    const query = storefront ? { storefront } : {};
+        if (storefront) {
+        query.storefront = storefront;
+        }
+        
+        if (category) {
+            query.category = category;
+        }
 
-    const products = await Product.find(query)
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .limit(50); // Limit to 50 products
+        if (keyword) {
+            query.keywords = { $in: [new RegExp(keyword, 'i')] };
+        }
 
-    return NextResponse.json({ products: products }, { status: 200 });
+        const products = await Product.find(query)
+            .sort({ createdAt: -1 })
+            .lean();
+        
+        return NextResponse.json({ products }, { status: 200 });
+    }
+
+    // If no specific filter, fetch a few products from each brand for the main landing page.
+    const products = await Product.aggregate([
+      // Sort all products by creation date to get the newest ones first
+      { $sort: { createdAt: -1 } },
+      // Group by storefront and collect the products for each
+      {
+        $group: {
+          _id: '$storefront',
+          products: { $push: '$$ROOT' }
+        }
+      },
+      // For each group (brand), take the first 10 products from the collected array
+      {
+        $project: {
+          _id: 0,
+          storefront: '$_id',
+          products: { $slice: ['$products', 10] }
+        }
+      },
+      // Unwind the products array to create a single stream of product documents
+      { $unwind: '$products' },
+      // Replace the root to have the product document at the top level
+      { $replaceRoot: { newRoot: '$products' } }
+    ]);
+
+
+    return NextResponse.json({ products }, { status: 200 });
+
   } catch (error) {
     console.error('Failed to fetch products:', error);
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
@@ -40,7 +86,7 @@ export async function POST(req: Request) {
         const styleId = new Types.ObjectId().toHexString();
 
         if (variants.length === 0) {
-            // This is a single product, not a catalog
+            // This is a single product without variants
             const productData = { ...commonData, styleId };
             const newProduct = new Product(productData);
             await newProduct.save();
@@ -53,6 +99,8 @@ export async function POST(req: Request) {
             ...variant,
             styleId,
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+            // Ensure top-level images are not passed to variant products
+            images: variant.images,
         }));
 
         const newProducts = await Product.insertMany(productDocs);
