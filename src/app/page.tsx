@@ -4,13 +4,21 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { IBrand } from '@/models/brand.model';
+import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Separator } from '@/components/ui/separator';
+import { BrandProductCard } from '@/components/brand-product-card';
 
 
 const LandingHeader = () => (
@@ -21,11 +29,8 @@ const LandingHeader = () => (
                 <span className="font-bold sm:inline-block">Brandify</span>
             </Link>
             <nav className="flex items-center gap-4">
-                <Link href="#brands" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                    Brands
-                </Link>
-                 <Link href="#about" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                    About
+                 <Link href="/admin/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                    Admin
                 </Link>
             </nav>
         </div>
@@ -80,115 +85,140 @@ const LandingFooter = () => (
     </footer>
 );
 
+const ProductCarouselSection = ({ title, products }: { title: string, products: IProduct[] }) => {
+    if (!products || products.length === 0) return null;
+    return (
+        <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
+            </div>
+            <Separator className="mb-6" />
+            <Carousel
+                opts={{ align: "start", loop: true }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {products.map((product) => (
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                            <div className="p-1">
+                                <BrandProductCard product={product} />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+            </Carousel>
+        </section>
+    );
+};
+
+
 export default function LandingPage() {
-  const [brands, setBrands] = useState<IBrand[]>([]);
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loadingBrand, setLoadingBrand] = useState<string | null>(null);
-  const [isSeeding, setIsSeeding] = useState(false);
+
+  const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
+  const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
+  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    async function fetchBrands() {
+    async function fetchProducts() {
       try {
-        const response = await fetch('/api/brands');
+        setLoading(true);
+        // Fetch all products from all brands
+        const response = await fetch('/api/products');
         if (!response.ok) {
-          throw new Error('Failed to fetch brands');
+          throw new Error('Failed to fetch products');
         }
         const data = await response.json();
-        setBrands(data.brands);
+        const fetchedProducts: IProduct[] = data.products;
+        setAllProducts(fetchedProducts);
+
+        // --- Sort and Slice Products for Carousels ---
+        const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
+        const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
+        const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
+
+        // 1. Trending Products (by a simple popularity score for now)
+        const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
+        const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
+        setTrendingProducts(sortedByPopularity.slice(0, 12));
+
+        // 2. Top Rated Products
+        const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
+        setTopRatedProducts(sortedByRating.slice(0, 12));
+
+        // 3. Newest Arrivals (already sorted by API, just slice)
+        const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+        setNewestProducts(sortedByDate.slice(0, 12));
+
+        // 4. Get Unique Categories
+        const categories = new Set(fetchedProducts.map(p => p.category));
+        setUniqueCategories(Array.from(categories).slice(0, 12)); // Limit for display
+
       } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     }
-    fetchBrands();
+    fetchProducts();
   }, []);
-
-  const handleSeed = async () => {
-    setIsSeeding(true);
-    toast.info("Clearing old products and seeding new data... This might take a moment.");
-    try {
-      const response = await fetch('/api/seed', { method: 'POST' });
-      const result = await response.json();
-      if (response.ok) {
-        toast.success(result.message);
-      } else {
-        throw new Error(result.message);
-      }
-      // Refresh the page to reflect changes
-      window.location.reload();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to seed database.');
-      console.error(error);
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-  
 
   return (
     <>
     <LandingHeader />
     <main className="flex-1 flex flex-col items-center bg-background">
 
-        <section id="brands" className="w-full py-12 sm:py-20 px-4 sm:px-8">
-            <div className="text-center mb-10">
-                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                    Welcome to Brandify
-                </h1>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                    Explore our collection of unique brands. Select a brand below to start shopping.
-                </p>
-            </div>
+        <section className="w-full py-12 sm:py-20 px-4 sm:px-8 text-center">
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+                Your Universe of Brands
+            </h1>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                Discover curated products from a constellation of unique brands, all in one place.
+            </p>
+        </section>
 
-            {loading ? (
-                <div className="flex flex-col items-center justify-center text-center">
-                    <Loader className="h-12 w-12" />
-                    <p className="mt-4 text-muted-foreground">Loading our brands...</p>
-                </div>
-            ) : error ? (
-                <div className="text-center text-destructive">
-                <p>Could not load brands. Please try again later.</p>
-                </div>
-            ) : (
-                <div className="w-full max-w-4xl mx-auto">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        {brands.map((brand) => (
-                           <Card key={brand.permanentName} className="relative overflow-hidden rounded-lg shadow-sm transition-all duration-300 group hover:shadow-xl hover:-translate-y-1">
-                                <Link href={`/${brand.permanentName}/home`} className="block" onClick={() => setLoadingBrand(brand.permanentName)}>
-                                    <CardContent className="p-0">
-                                        <div className="aspect-square relative bg-muted flex items-center justify-center">
-                                            <Image
-                                                src={brand.logoUrl}
-                                                alt={`${brand.displayName} Logo`}
-                                                width={120}
-                                                height={120}
-                                                className="object-contain transition-transform duration-300 group-hover:scale-105"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-50"></div>
-                                        </div>
-                                        <div className="p-4 border-t">
-                                            <h2 className="text-center text-lg font-bold text-foreground">{brand.displayName}</h2>
-                                        </div>
+        {loading ? (
+            <div className="flex flex-col items-center justify-center text-center py-16">
+                <Loader className="h-12 w-12" />
+                <p className="mt-4 text-muted-foreground">Loading products...</p>
+            </div>
+        ) : error ? (
+            <div className="text-center text-destructive py-16">
+                <p>Could not load products. Please try again later.</p>
+            </div>
+        ) : (
+            <>
+                <ProductCarouselSection title="Trending Now" products={trendingProducts} />
+                <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} />
+                <ProductCarouselSection title="Newest Arrivals" products={newestProducts} />
+                
+                <section className="container mx-auto px-4 pt-16 sm:px-6 lg:px-8">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {uniqueCategories.map(category => (
+                            <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
+                                <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                    <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                                         <span className="text-3xl mb-2">🛍️</span>
+                                         <h3 className="text-sm font-semibold truncate w-full">{category}</h3>
                                     </CardContent>
-                                </Link>
-                                {loadingBrand === brand.permanentName && (
-                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
-                                        <Loader className="h-10 w-10" />
-                                    </div>
-                                )}
-                            </Card>
+                                </Card>
+                            </Link>
                         ))}
                     </div>
-                </div>
-            )}
-        </section>
+                </section>
+            </>
+        )}
 
     </main>
     <LandingFooter />
     </>
   );
 }
-
-    
