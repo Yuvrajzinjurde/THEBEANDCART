@@ -2,7 +2,7 @@
 'use server';
 
 import dbConnect from './mongodb';
-import Product, { IProduct } from '@/models/product.model';
+import Product from '@/models/product.model';
 import { Types } from 'mongoose';
 import Review from '@/models/review.model';
 import User from '@/models/user.model';
@@ -140,11 +140,10 @@ export async function seedReviews() {
     console.log('Cleared existing reviews.');
 
     const products = await Product.find({}).limit(50);
-    const users = await User.find({ roles: { $ne: 'admin' } }).limit(20);
-    const brands = await Brand.find({});
+    const users = await User.find({}).limit(20);
 
     if (products.length === 0 || users.length === 0) {
-        throw new Error('Need at least one product and one non-admin user to seed reviews.');
+        throw new Error('Need at least one product and one user to seed reviews.');
     }
 
     const reviewsToCreate = [];

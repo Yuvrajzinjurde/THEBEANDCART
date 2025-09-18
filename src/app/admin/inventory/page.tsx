@@ -60,7 +60,7 @@ export default function InventoryPage() {
     const { stockCounts, uniqueCategories } = useMemo(() => {
         const outOfStock = allProducts.filter(p => p.stock === 0).length;
         const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length;
-        const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
+        const categories = new Set(allProducts.flatMap(p => Array.isArray(p.category) ? p.category : [p.category]));
         return {
             stockCounts: {
                 all: allProducts.length,
@@ -83,7 +83,7 @@ export default function InventoryPage() {
 
         // Category filter
         if (categoryFilter !== 'all') {
-            productsToDisplay = productsToDisplay.filter(p => p.category === categoryFilter);
+            productsToDisplay = productsToDisplay.filter(p => Array.isArray(p.category) ? p.category.includes(categoryFilter) : p.category === categoryFilter);
         }
 
         // Sorting
@@ -107,11 +107,12 @@ export default function InventoryPage() {
             toast.success(result.message);
             await fetchProducts(); // Re-fetch products after seeding
           } else {
-            toast.error(result.message || 'An unknown error occurred during seeding.');
+            // Use the detailed error message from the API response
+            throw new Error(result.error || result.message || 'An unknown error occurred during seeding.');
           }
         } catch (error: any) {
-          toast.error(error.message || 'Failed to seed data.');
-          console.error(error);
+          toast.error(error.message);
+          console.error("Seeding Error:", error);
         } finally {
           setIsSeeding(false);
         }
