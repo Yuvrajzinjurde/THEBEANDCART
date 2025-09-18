@@ -17,7 +17,7 @@ export async function GET(
             return NextResponse.json({ message: 'Invalid Product ID' }, { status: 400 });
         }
 
-        const reviews = await Review.find({ productId }).sort({ createdAt: -1 });
+        const reviews = await Review.find({ productId }).sort({ likes: -1 }).limit(10);
 
         return NextResponse.json({ reviews }, { status: 200 });
 
@@ -26,5 +26,3 @@ export async function GET(
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
-
-    

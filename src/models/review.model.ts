@@ -9,6 +9,7 @@ export interface IReview extends Document {
   review: string;
   reviewText: string;
   images?: string[];
+  likes: number;
   createdAt: string | Date;
   updatedAt: string | Date;
 }
@@ -47,6 +48,10 @@ const ReviewSchema: Schema<IReview> = new Schema({
   images: [{ 
     type: String 
   }],
+  likes: {
+    type: Number,
+    default: 0
+  }
 }, { timestamps: true });
 
 const Review: Model<IReview> = mongoose.models.Review || mongoose.model<IReview>('Review', ReviewSchema);

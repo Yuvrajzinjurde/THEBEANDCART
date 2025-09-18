@@ -7,7 +7,7 @@ import { z } from 'zod';
 import dbConnect from '@/lib/mongodb';
 import Review from '@/models/review.model';
 import Product from '@/models/product.model';
-import User from '@/models/user.model';
+import Order from '@/models/order.model';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
@@ -45,30 +45,37 @@ export async function POST(req: Request) {
     const { productId, rating, reviewText, images } = validation.data;
     const productObjectId = new Types.ObjectId(productId);
     
-    // Check if product exists
     const product = await Product.findById(productObjectId);
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    // Check if user has already reviewed this product
     const existingReview = await Review.findOne({ productId: productObjectId, userId });
     if (existingReview) {
         return NextResponse.json({ message: 'You have already reviewed this product.' }, { status: 409 });
     }
     
+    const hasPurchased = await Order.findOne({
+      userId,
+      'products.productId': productObjectId,
+      status: 'delivered'
+    });
+
+    if (!hasPurchased) {
+      return NextResponse.json({ message: "You can only review products you've purchased and received." }, { status: 403 });
+    }
+
     const newReview = new Review({
         productId: productObjectId,
         userId,
         userName,
         rating,
-        review: reviewText, // 'review' is the field name in the schema
+        review: reviewText,
         images,
     });
 
     await newReview.save();
 
-    // Update product's average rating
     const stats = await Review.aggregate([
         { $match: { productId: productObjectId } },
         { $group: { _id: '$productId', avgRating: { $avg: '$rating' } } }

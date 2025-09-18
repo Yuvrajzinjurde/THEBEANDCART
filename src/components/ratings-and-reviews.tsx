@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Star, ThumbsUp, ThumbsDown, MoreVertical, Smile, CheckCircle2, UploadCloud, X } from 'lucide-react';
+import { Star, ThumbsUp, MoreVertical, Smile, CheckCircle2, UploadCloud, X } from 'lucide-react';
 import type { IReview } from '@/models/review.model';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Separator } from './ui/separator';
 import { format, parseISO } from 'date-fns';
-import { Progress } from './ui/progress';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { cn } from '@/lib/utils';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader } from './ui/loader';
+import { cn } from '@/lib/utils';
 
 
 const ASPECT_TAGS = ['Look', 'Colour', 'Comfort', 'Material Quality', 'Light Weight', 'True to Specs'];
@@ -173,10 +172,24 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     const [reviewStats, setReviewStats] = useState(initialReviewStats);
     
     const allReviewImages = reviews.flatMap(r => r.images || []);
+    
+    const handleLike = async (reviewId: string) => {
+        try {
+            const response = await fetch(`/api/reviews/${reviewId}/like`, { method: 'POST' });
+            if (!response.ok) throw new Error('Failed to like review');
+            const updatedReview = await response.json();
+            setReviews(prev =>
+                prev.map(r => r._id === reviewId ? updatedReview.review : r)
+            );
+        } catch (error) {
+            console.error(error);
+            toast.error("Could not update like.");
+        }
+    };
+
 
     const handleReviewSubmit = (newReview: IReview) => {
-        // Add the new review to the top of the list and update stats
-        setReviews(prev => [newReview, ...prev]);
+        setReviews(prev => [newReview, ...prev].sort((a, b) => b.likes - a.likes).slice(0, 10));
         setReviewStats(prev => ({
             totalRatings: prev.totalRatings + 1,
             totalReviews: newReview.review ? prev.totalReviews + 1 : prev.totalReviews,
@@ -286,8 +299,7 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <button className="flex items-center gap-1 text-muted-foreground hover:text-primary"><ThumbsUp className="h-4 w-4" /> {Math.floor(Math.random() * 500)}</button>
-                                    <button className="flex items-center gap-1 text-muted-foreground hover:text-primary"><ThumbsDown className="h-4 w-4" /> {Math.floor(Math.random() * 200)}</button>
+                                     <button className="flex items-center gap-1 text-muted-foreground hover:text-primary" onClick={() => handleLike(review._id as string)}><ThumbsUp className="h-4 w-4" /> {review.likes > 0 ? review.likes : ''}</button>
                                     <button className="text-muted-foreground hover:text-primary"><MoreVertical className="h-4 w-4" /></button>
                                 </div>
                             </div>
