@@ -2,7 +2,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Star } from 'lucide-react';
+import { Trash, UploadCloud, X, Star, Crop } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -31,17 +31,89 @@ import {
 import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
 import { Separator } from '../ui/separator';
 import { Badge } from '../ui/badge';
+import Cropper, { type Point, type Area } from 'react-easy-crop';
+import { getCroppedImg } from '@/lib/crop-image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
+import { Slider } from '../ui/slider';
 
 interface BrandFormProps {
   mode: 'create' | 'edit';
   existingBrand?: IBrand;
 }
 
+const ImageCropDialog = ({
+  imageUrl,
+  onCropComplete,
+  onClose,
+}: {
+  imageUrl: string;
+  onCropComplete: (croppedImageUrl: string) => void;
+  onClose: () => void;
+}) => {
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  const handleCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleSaveCrop = useCallback(async () => {
+    if (!croppedAreaPixels || !imageUrl) return;
+    try {
+      const croppedImage = await getCroppedImg(imageUrl, croppedAreaPixels);
+      onCropComplete(croppedImage);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to crop image. Please try again.");
+    }
+  }, [croppedAreaPixels, imageUrl, onCropComplete]);
+
+  return (
+    <Dialog open={!!imageUrl} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="max-w-md">
+            <DialogHeader>
+                <DialogTitle>Adjust Logo</DialogTitle>
+            </DialogHeader>
+            <div className="relative w-full h-80 bg-muted rounded-md">
+                <Cropper
+                    image={imageUrl}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={handleCropComplete}
+                    cropShape="round"
+                    showGrid={false}
+                />
+            </div>
+            <div className="flex items-center gap-4">
+                <span className="text-sm">Zoom</span>
+                <Slider
+                    value={[zoom]}
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    onValueChange={(newZoom) => setZoom(newZoom[0])}
+                />
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={onClose}>Cancel</Button>
+                <Button onClick={handleSaveCrop}>Save</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+  );
+};
+
+
 export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [uncroppedLogo, setUncroppedLogo] = useState<string | null>(null);
 
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
     existingBrand ? {
@@ -140,6 +212,22 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     }
   };
   
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUncroppedLogo(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onCropComplete = (croppedImageUrl: string) => {
+    form.setValue('logoUrl', croppedImageUrl, { shouldDirty: true, shouldValidate: true });
+    setUncroppedLogo(null);
+  }
+  
   const handleCategoryKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
@@ -190,6 +278,14 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const isFormDirty = form.formState.isDirty;
 
   return (
+    <>
+    {uncroppedLogo && (
+        <ImageCropDialog 
+            imageUrl={uncroppedLogo}
+            onCropComplete={onCropComplete}
+            onClose={() => setUncroppedLogo(null)}
+        />
+    )}
     <Form {...form}>
       <form onSubmit={handleFormSubmit} className="space-y-8">
         <Card>
@@ -233,20 +329,31 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     type="file" 
                                     accept="image/png, image/jpeg"
                                     className="hidden"
-                                    onChange={(e) => handleFileChange(e, field.onChange)} 
+                                    onChange={handleLogoFileChange} 
                                 />
                                 {field.value ? (
-                                    <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
-                                        <Image src={field.value} alt="Logo preview" fill objectFit="contain" />
-                                        <Button
-                                            type="button"
-                                            variant="destructive"
-                                            size="icon"
-                                            className="absolute top-1 right-1 h-6 w-6"
-                                            onClick={() => field.onChange('')}
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
+                                    <div className="relative group w-48 h-48 rounded-full border-2 border-dashed p-1">
+                                        <Image src={field.value} alt="Logo preview" fill objectFit="cover" className="rounded-full" />
+                                        <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                           <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="icon"
+                                                className="h-9 w-9 rounded-full"
+                                                onClick={() => document.getElementById('logo-upload')?.click()}
+                                            >
+                                                <Crop className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                className="h-9 w-9 rounded-full"
+                                                onClick={() => field.onChange('')}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ) : (
                                     <label htmlFor="logo-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
@@ -656,5 +763,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         </AlertDialog>
       </form>
     </Form>
+    </>
   );
 }
+
