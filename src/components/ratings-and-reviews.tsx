@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState } from 'react';
@@ -177,9 +178,9 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
         try {
             const response = await fetch(`/api/reviews/${reviewId}/like`, { method: 'POST' });
             if (!response.ok) throw new Error('Failed to like review');
-            const updatedReview = await response.json();
+            const { review: updatedReview } = await response.json();
             setReviews(prev =>
-                prev.map(r => r._id === reviewId ? updatedReview.review : r)
+                prev.map(r => r._id === reviewId ? updatedReview : r)
             );
         } catch (error) {
             console.error(error);
@@ -189,7 +190,7 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
 
 
     const handleReviewSubmit = (newReview: IReview) => {
-        setReviews(prev => [newReview, ...prev].sort((a, b) => b.likes - a.likes).slice(0, 10));
+        setReviews(prev => [newReview, ...prev].sort((a, b) => (b.likes || 0) - (a.likes || 0)).slice(0, 10));
         setReviewStats(prev => ({
             totalRatings: prev.totalRatings + 1,
             totalReviews: newReview.review ? prev.totalReviews + 1 : prev.totalReviews,
