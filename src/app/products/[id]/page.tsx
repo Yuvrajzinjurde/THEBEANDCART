@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import type { IBrand } from '@/models/brand.model';
@@ -262,4 +262,3 @@ export default function ProductPage() {
     </>
   );
 }
-
