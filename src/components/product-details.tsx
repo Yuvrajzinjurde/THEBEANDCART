@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -282,6 +281,20 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         ))}
                     </CarouselContent>
                 </Carousel>
+                 <div className="mt-4 p-4 border rounded-lg space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                        <div className="flex items-center gap-1 rounded-lg border p-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
+                            <span className="w-8 text-center font-semibold">{quantity}</span>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
+                        </div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                        <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
+                    </div>
+                </div>
             </div>
 
             {/* Right Column: Product Info */}
@@ -391,26 +404,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
 
                 {children}
-                
-                <div className="flex-grow"></div>
-
-                {/* Sticky Action Card */}
-                <Card className="sticky bottom-4 mt-8 shadow-2xl">
-                    <CardContent className="p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                            <div className="flex items-center gap-1 rounded-lg border p-1">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
-                                <span className="w-8 text-center font-semibold">{quantity}</span>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
-                            </div>
-                        </div>
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                            <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </div>
 
