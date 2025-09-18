@@ -51,6 +51,11 @@ ProductSchema.virtual('price').get(function() {
 // Compound index to quickly find variants of a style
 ProductSchema.index({ styleId: 1, storefront: 1 });
 
-const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+// Delete the model from the cache to avoid issues in development
+if (mongoose.models.Product) {
+  delete mongoose.models.Product;
+}
+
+const Product: Model<IProduct> = mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;
