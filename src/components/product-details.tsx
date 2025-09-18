@@ -22,6 +22,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'react-toastify';
 import useUserStore from '@/stores/user-store';
+import { Badge } from './ui/badge';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -214,20 +215,22 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-8 lg:gap-12 relative">
+    <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-8 lg:gap-12">
       {/* Left Column: Image Gallery */}
-       <div className="md:col-span-2 md:sticky top-24 self-start">
-        <div className="space-y-4 relative">
-            <div className="relative overflow-hidden group max-h-[350px]">
+      <div className="md:col-span-2 relative">
+         <div className="md:sticky top-24 self-start">
+            <div 
+              className="relative overflow-hidden group max-h-[350px]"
+              onMouseEnter={() => setIsZooming(true)}
+              onMouseLeave={() => setIsZooming(false)}
+              onMouseMove={handleMouseMove}
+            >
                 <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg">
                 <CarouselContent>
                     {mediaItems.map((media, index) => (
                     <CarouselItem key={index}>
                         <div 
                           className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden cursor-crosshair"
-                          onMouseEnter={() => setIsZooming(true)}
-                          onMouseLeave={() => setIsZooming(false)}
-                          onMouseMove={handleMouseMove}
                         >
                         {media.type === 'image' ? (
                             <Image src={media.url} alt={product.name} fill className="object-cover" />
@@ -245,7 +248,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                 </div>
             </div>
-            <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
+            <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full mt-4">
                 <CarouselContent className="-ml-2">
                 {mediaItems.map((media, index) => (
                     <CarouselItem key={index} className="pl-2 basis-1/4 md:basis-1/5">
@@ -261,7 +264,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 ))}
                 </CarouselContent>
             </Carousel>
-
              <div className='space-y-4 pt-4 border-t mt-4'>
                 <div className="flex items-center gap-4">
                 <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
@@ -284,24 +286,24 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     </Button>
                 </div>
             </div>
+             {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+                <div
+                    className="absolute top-0 left-[105%] h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                >
+                <Image
+                    src={mediaItems[selectedIndex].url}
+                    alt={`${product.name} zoomed`}
+                    fill
+                    className="object-cover transition-transform duration-200 ease-out"
+                    style={{
+                    transform: 'scale(2.5)',
+                    transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
+                    }}
+                />
+                </div>
+            )}
         </div>
       </div>
-       {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-            <div
-                className="absolute top-0 left-1/2 ml-4 h-[500px] w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
-            >
-            <Image
-                src={mediaItems[selectedIndex].url}
-                alt={`${product.name} zoomed`}
-                fill
-                className="object-cover transition-transform duration-200 ease-out"
-                style={{
-                transform: 'scale(2.5)',
-                transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
-                }}
-            />
-            </div>
-        )}
 
         {/* Right Column: Product Info */}
         <div className="md:col-span-3 flex flex-col gap-6">
@@ -340,6 +342,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               {hasDiscount && (
                   <>
                       <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                      <Badge variant="outline" className="text-green-600 border-green-600">Special Price</Badge>
                       <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
                       <TooltipProvider>
                           <Tooltip>
