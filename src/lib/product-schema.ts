@@ -23,7 +23,7 @@ const BaseProductFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
-  category: z.string().min(1, "Category is required"),
+  category: z.string().min(1, "Category is required"), // Main category for simplicity in form
   brand: z.string().min(1, "Product brand is required"),
   storefront: z.string().min(1, "Storefront is required"),
   images: z.array(z.string().url()).optional(),

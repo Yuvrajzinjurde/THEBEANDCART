@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -103,6 +104,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
   const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
+  const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
   return (
     <Link 
@@ -154,7 +156,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         <div className="p-3 space-y-1.5">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="truncate">{product.category}</span>
+              <span className="truncate">{categoryDisplay}</span>
               <span className="h-1 w-1 rounded-full bg-muted-foreground/50"></span>
               <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />

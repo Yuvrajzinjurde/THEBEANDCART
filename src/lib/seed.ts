@@ -3,166 +3,121 @@
 'use server';
 
 import dbConnect from './mongodb';
-import Product from '@/models/product.model';
-import Review, { IReview } from '@/models/review.model';
-import User from '@/models/user.model';
-import Role from '@/models/role.model';
-import Coupon from '@/models/coupon.model';
-import Brand from '@/models/brand.model';
+import Product, { IProduct } from '@/models/product.model';
 import { Types } from 'mongoose';
-import bcrypt from 'bcryptjs';
 
-const dummyReviews = [
-    {
-        rating: 5,
-        review: "Absolutely love this product! The quality is outstanding and it exceeded all my expectations. Highly recommend to anyone on the fence.",
-        userName: "Priya S."
-    },
-    {
-        rating: 4,
-        review: "Really good item, works as described. The packaging was great and it arrived on time. Only reason for 4 stars is I wish it came in more colors.",
-        userName: "Rahul M."
-    },
-    {
-        rating: 5,
-        review: "A game-changer! I've been using this for a few weeks now and the difference is noticeable. Worth every penny.",
-        userName: "Anjali K."
-    },
-    {
-        rating: 3,
-        review: "It's a decent product, but a bit overpriced for what it is. It does the job, but I've seen similar items for less.",
-        userName: "Vikram S."
-    },
-    {
-        rating: 5,
-        review: "Perfect! Exactly what I was looking for. The customer service was also excellent when I had a question.",
-        userName: "Sunita M."
-    },
-];
+// Dummy data for variants
+const variantColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Silver', 'Gold'];
+const variantSizes = ['S', 'M', 'L', 'XL'];
 
+/**
+ * Updates all existing products to have multiple variants and categories.
+ * This script is designed to be idempotent and non-destructive to other collections.
+ */
 export const seedDatabase = async () => {
     try {
         await dbConnect();
-        console.log('Database connected, starting seeding process...');
+        console.log('Database connected, starting product update process...');
 
-        // 1. Clear existing Review, non-admin User, and Coupon collections
-        await Review.deleteMany({});
-        console.log('Cleared existing Review collection.');
+        const products = await Product.find({});
         
-        await Coupon.deleteMany({});
-        console.log('Cleared existing Coupon collection.');
-
-        const adminRole = await Role.findOne({ name: 'admin' });
-        if (adminRole) {
-            await User.deleteMany({ roles: { $ne: adminRole._id } });
-            console.log('Cleared existing non-admin User collection.');
-        } else {
-            console.log('Admin role not found, skipping user cleanup.');
-        }
-
-        // 2. Fetch all products and brands
-        const products = await Product.find({}).select('_id storefront');
         if (products.length === 0) {
-            const message = "No products found. Cannot seed reviews, users, or coupons.";
+            const message = "No products found. Nothing to update.";
             console.log(message);
             return { success: true, message };
         }
-        const brands = await Brand.find({}).select('permanentName');
-        const brandNames = brands.map(b => b.permanentName);
 
-        const reviewsToCreate: Omit<IReview, keyof Document>[] = [];
-        const usersToCreate = new Map<string, any>();
-        const userRole = await Role.findOne({ name: 'user' });
-        
-        if (!userRole) {
-            throw new Error("User role not found in database.");
-        }
-        
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash('password123', salt);
+        const bulkOps = [];
+        let updatedCount = 0;
 
-        // 3. Create dummy reviews and prepare user data
         for (const product of products) {
-            const reviewCount = Math.floor(Math.random() * 5) + 1;
-            for (let i = 0; i < reviewCount; i++) {
-                const dummyReview = dummyReviews[Math.floor(Math.random() * dummyReviews.length)];
-                
-                const [firstName, lastName] = dummyReview.userName.split(' ');
-                const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace('.', '')}@example.com`;
+            // Check if the product already has a styleId, indicating it's part of a variant group.
+            // If so, we'll skip it to avoid re-processing and creating duplicates.
+            if (product.styleId) {
+                continue;
+            }
 
-                // If user doesn't exist yet, prepare their document
-                if (!usersToCreate.has(email)) {
-                     usersToCreate.set(email, {
-                         firstName,
-                         lastName,
-                         email,
-                         password: hashedPassword,
-                         brand: product.storefront, // Assign brand from the first product they review
-                         roles: [userRole._id],
-                         status: 'active',
-                         address: { street: '', city: '', state: '', zip: '', country: '' }
-                     });
-                }
-                
-                reviewsToCreate.push({
-                    productId: product._id,
-                    userId: new Types.ObjectId(), // Placeholder, can be linked after users are created
-                    userName: dummyReview.userName,
-                    rating: dummyReview.rating,
-                    review: dummyReview.review,
+            // This is a new product or a standalone one, let's make it a "master" and create variants for it.
+            const styleId = new Types.ObjectId().toHexString();
+            const variantsToCreate = [];
+
+            // Generate 3 to 5 variants
+            const variantCount = Math.floor(Math.random() * 3) + 3;
+            const usedColors = new Set<string>();
+
+            for (let i = 0; i < variantCount; i++) {
+                // Generate unique color for the variant
+                let color: string;
+                do {
+                    color = variantColors[Math.floor(Math.random() * variantColors.length)];
+                } while (usedColors.has(color));
+                usedColors.add(color);
+
+                const size = variantSizes[Math.floor(Math.random() * variantSizes.length)];
+                const stock = Math.floor(Math.random() * 100);
+
+                // Generate 5 unique placeholder images for each variant
+                const images = Array.from({ length: 5 }, (_, j) => `https://picsum.photos/seed/${styleId}-${color}-${j}/600/600`);
+
+                const variantName = `${product.name} - ${color}, ${size}`;
+
+                // Convert existing single category to an array and add more
+                const baseCategory = (Array.isArray(product.category) ? product.category[0] : product.category) as string;
+                const newCategories = new Set([baseCategory, 'Featured', color]);
+
+                variantsToCreate.push({
+                    name: variantName,
+                    description: product.description,
+                    mrp: product.mrp,
+                    sellingPrice: product.sellingPrice,
+                    category: Array.from(newCategories),
+                    images: images,
+                    stock: stock,
+                    rating: product.rating,
+                    brand: product.brand,
+                    storefront: product.storefront,
+                    keywords: product.keywords,
+                    returnPeriod: product.returnPeriod,
+                    styleId: styleId,
+                    color: color,
+                    size: size,
                 });
+            }
+
+            if (variantsToCreate.length > 0) {
+                // Delete the original standalone product
+                bulkOps.push({
+                    deleteOne: {
+                        filter: { _id: product._id }
+                    }
+                });
+
+                // Insert the new variants
+                for (const variant of variantsToCreate) {
+                    bulkOps.push({
+                        insertOne: {
+                            document: variant
+                        }
+                    });
+                }
+                updatedCount++;
             }
         }
         
-        // 4. Create dummy coupons
-        const couponsToCreate = [];
-        for (const brandName of brandNames) {
-            couponsToCreate.push({
-                code: `${brandName.toUpperCase()}SAVE10`,
-                type: 'percentage',
-                value: 10,
-                minPurchase: 500,
-                brand: brandName,
-            });
-            couponsToCreate.push({
-                code: `FLAT150-${brandName.toUpperCase()}`, // Make code unique
-                type: 'fixed',
-                value: 150,
-                minPurchase: 1000,
-                brand: brandName,
-            });
-        }
-         couponsToCreate.push({
-            code: 'GLOBALFREESHIP',
-            type: 'free-shipping',
-            minPurchase: 750,
-            brand: 'All Brands',
-        });
-
-
-        // 5. Insert all data
-        if (usersToCreate.size > 0) {
-            const userDocs = Array.from(usersToCreate.values());
-            await User.insertMany(userDocs);
-            console.log(`Seeded ${usersToCreate.size} users.`);
-        }
-        
-        if (reviewsToCreate.length > 0) {
-            await Review.insertMany(reviewsToCreate);
-            console.log(`Seeded ${reviewsToCreate.length} reviews.`);
-        }
-        
-        if (couponsToCreate.length > 0) {
-            await Coupon.insertMany(couponsToCreate);
-            console.log(`Seeded ${couponsToCreate.length} coupons.`);
+        if (bulkOps.length > 0) {
+             await Product.bulkWrite(bulkOps);
+             const message = `Successfully updated ${updatedCount} product groups with variants.`;
+             console.log(message);
+             return { success: true, message };
+        } else {
+            const message = "All products are already in variant groups. No updates needed.";
+            console.log(message);
+            return { success: true, message };
         }
 
-        const message = `Successfully seeded ${reviewsToCreate.length} reviews, ${usersToCreate.size} users, and ${couponsToCreate.length} coupons.`;
-        console.log(message);
-        return { success: true, message };
 
     } catch (error: any) {
-        console.error('Error during database seeding:', error);
-        throw new Error(`Failed to seed database: ${error.message}`);
+        console.error('Error during product seeding process:', error);
+        throw new Error(`Failed to seed product variants: ${error.message}`);
     }
 };

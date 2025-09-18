@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -395,7 +396,7 @@ export default function BrandHomePage() {
 
             // 4. Group products by category for main sections
             const grouped = fetchedProducts.reduce((acc: GroupedProducts, product: IProduct) => {
-                const category = product.category;
+                const category = Array.isArray(product.category) ? product.category[0] : product.category;
                 if (!acc[category]) {
                     acc[category] = [];
                 }

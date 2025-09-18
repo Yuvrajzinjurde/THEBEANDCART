@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -51,6 +52,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const mrp = typeof product.mrp === 'number' ? product.mrp : 0;
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
+  const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
   return (
     <Link href={`/products/${product._id}`} onClick={handleCardClick} className={cn("group block", className)}>
@@ -86,7 +88,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
         <div className="p-3">
           <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">{product.category}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{categoryDisplay}</p>
           <div className="mt-2 flex items-baseline gap-2">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toFixed(2)}

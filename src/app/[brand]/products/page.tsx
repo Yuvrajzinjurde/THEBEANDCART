@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useTransition } from 'react';
@@ -96,7 +97,7 @@ export default function ProductsPage() {
 
         // Apply filters
         productsToFilter = productsToFilter.filter(p => {
-            const categoryMatch = activeFilters.categories.length === 0 || activeFilters.categories.includes(p.category);
+            const categoryMatch = activeFilters.categories.length === 0 || (Array.isArray(p.category) ? activeFilters.categories.some(c => p.category.includes(c)) : activeFilters.categories.includes(p.category));
             const brandMatch = activeFilters.brands.length === 0 || (p.brand && activeFilters.brands.includes(p.brand));
             const colorMatch = activeFilters.colors.length === 0 || (p.color && activeFilters.colors.includes(p.color));
             const keywordMatch = activeFilters.keywords.length === 0 || (p.keywords && activeFilters.keywords.some(filterKeyword => 

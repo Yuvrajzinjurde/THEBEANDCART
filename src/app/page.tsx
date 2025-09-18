@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -293,7 +294,7 @@ export default function LandingPage() {
             if (settingsData && settingsData.featuredCategories.length > 0) {
                 setUniqueCategories(settingsData.featuredCategories);
             } else {
-                const categories = new Set(fetchedProducts.map(p => p.category));
+                const categories = new Set(fetchedProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
                 setUniqueCategories(Array.from(categories).slice(0, 12));
             }
 
