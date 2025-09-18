@@ -6,7 +6,8 @@ export const legalDocTypes = [
     'privacy-policy', 
     'terms-and-conditions', 
     'refund-policy', 
-    'shipping-policy'
+    'shipping-policy',
+    'return-policy'
 ] as const;
 
 export type LegalDocType = typeof legalDocTypes[number];

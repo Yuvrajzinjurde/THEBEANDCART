@@ -30,6 +30,7 @@ const BaseProductFormSchema = z.object({
   videos: z.array(z.string().url()).optional(),
   keywords: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
+  returnPeriod: z.coerce.number().min(0).optional(),
   variants: z.array(ServerVariantSchema),
 });
 

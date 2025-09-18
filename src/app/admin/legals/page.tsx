@@ -30,7 +30,8 @@ const legalDocTypes = [
     'privacy-policy', 
     'terms-and-conditions', 
     'refund-policy', 
-    'shipping-policy'
+    'shipping-policy',
+    'return-policy'
 ] as const;
 
 type LegalDocType = typeof legalDocTypes[number];
@@ -48,7 +49,8 @@ const docTypeLabels: Record<LegalDocType, string> = {
     'privacy-policy': 'Privacy Policy',
     'terms-and-conditions': 'Terms & Conditions',
     'refund-policy': 'Refund / Cancellation Policy',
-    'shipping-policy': 'Shipping / Delivery Policy'
+    'shipping-policy': 'Shipping / Delivery Policy',
+    'return-policy': 'Return Policy'
 };
 
 export default function LegalsPage() {

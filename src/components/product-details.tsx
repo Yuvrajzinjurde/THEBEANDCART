@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import type { ICoupon } from '@/models/coupon.model';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,8 @@ import { toast } from 'react-toastify';
 import useUserStore from '@/stores/user-store';
 import { Badge } from './ui/badge';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
+import Link from 'next/link';
+import { Loader } from './ui/loader';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -57,12 +59,18 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
+interface ILegal {
+  content: string;
+}
+
 export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
+  const [returnPolicy, setReturnPolicy] = useState<ILegal | null>(null);
+  const [loadingReturnPolicy, setLoadingReturnPolicy] = useState(true);
 
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.color);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.size);
@@ -88,6 +96,26 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       setSelectedColor(initialProduct.color);
       setSelectedSize(initialProduct.size);
   }, [initialProduct]);
+  
+  useEffect(() => {
+    const fetchReturnPolicy = async () => {
+      setLoadingReturnPolicy(true);
+      try {
+        const response = await fetch(`/api/legals?docType=return-policy`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.documents.length > 0) {
+            setReturnPolicy(data.documents[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch return policy", error);
+      } finally {
+        setLoadingReturnPolicy(false);
+      }
+    };
+    fetchReturnPolicy();
+  }, []);
 
   const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
     const colorMap = new Map<string, string>(); // color -> image
@@ -220,261 +248,321 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="grid md:grid-cols-3 gap-8 lg:gap-12 relative">
-      {/* Left Column: Image Gallery */}
-       <div className="md:col-span-1 relative">
-            <div className="md:sticky top-24 self-start">
-                <div
-                    className="relative group"
-                    onMouseEnter={() => setIsZooming(true)}
-                    onMouseLeave={() => setIsZooming(false)}
-                    onMouseMove={handleMouseMove}
-                >
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-h-72">
-                        <CarouselContent>
-                            {mediaItems.map((media, index) => (
-                                <CarouselItem key={index}>
-                                    <div className="w-full aspect-square relative bg-muted rounded-lg">
-                                        {media.type === 'image' ? (
-                                            <Image src={media.url} alt={product.name} fill className="object-cover rounded-lg" />
-                                        ) : (
-                                            <video src={media.url} controls className="w-full h-full object-cover rounded-lg" />
-                                        )}
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="absolute left-[-24px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
-                        <CarouselNext className="absolute right-[-24px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
-                    </Carousel>
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                        <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
-                    </div>
-                </div>
-
-                <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full mt-4">
-                    <CarouselContent className="-ml-2">
-                        {mediaItems.map((media, index) => (
-                            <CarouselItem key={index} className="pl-2 basis-[16.66%]">
-                                <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
-                                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
-                                    {media.type === 'video' && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                            <PlayCircle className="w-6 h-6 text-white" />
-                                        </div>
-                                    )}
-                                </ThumbsButton>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-                
-                <div className='space-y-4 pt-4 border-t mt-4'>
-                    <div className="flex items-center gap-4">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                        <div className="flex items-center gap-1 rounded-lg border p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                                <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="w-8 text-center font-semibold">{quantity}</span>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                                <Plus className="h-4 w-4" />
-                            </Button>
+    <div className="relative">
+        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+            <div className="md:col-span-1 relative">
+                <div className="md:sticky top-24 self-start">
+                    <div
+                        className="relative group"
+                        onMouseEnter={() => setIsZooming(true)}
+                        onMouseLeave={() => setIsZooming(false)}
+                        onMouseMove={handleMouseMove}
+                    >
+                        <div className="flex flex-col gap-2">
+                           <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-h-72">
+                                <CarouselContent>
+                                    {mediaItems.map((media, index) => (
+                                        <CarouselItem key={index}>
+                                            <div className="w-full aspect-square relative bg-muted rounded-lg">
+                                                {media.type === 'image' ? (
+                                                    <Image src={media.url} alt={product.name} fill className="object-cover rounded-lg" />
+                                                ) : (
+                                                    <video src={media.url} controls className="w-full h-full object-cover rounded-lg" />
+                                                )}
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious className="absolute left-[-24px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
+                                <CarouselNext className="absolute right-[-24px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
+                            </Carousel>
+                             <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
+                                <CarouselContent className="-ml-2">
+                                    {mediaItems.map((media, index) => (
+                                        <CarouselItem key={index} className="pl-2 basis-[16.66%]">
+                                            <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
+                                                <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
+                                                {media.type === 'video' && (
+                                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                        <PlayCircle className="w-6 h-6 text-white" />
+                                                    </div>
+                                                )}
+                                            </ThumbsButton>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                            </Carousel>
+                        </div>
+                        <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+                            <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                         </div>
                     </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
-                            <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                        </Button>
-                        <Button size="lg" variant="secondary" className="h-12 text-base">
-                            Buy Now
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                <div
-                    className="absolute top-0 left-full ml-4 h-[60%] w-[500px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20"
-                >
-                    <Image
-                        src={mediaItems[selectedIndex].url}
-                        alt={`${product.name} zoomed`}
-                        fill
-                        className="object-cover transition-transform duration-200 ease-out"
-                        style={{
-                            transform: 'scale(2.5)',
-                            transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
-                        }}
-                    />
-                </div>
-            )}
-      </div>
 
-        {/* Right Column: Product Info */}
-        <div className="md:col-span-2 flex flex-col">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href={`/${storefront}/products?category=${product.category}`}>{product.category}</BreadcrumbLink>
-                </BreadcrumbItem>
-                 <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{product.name}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            
-          <div className="space-y-4 mt-4">
-             <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-                <div className='space-y-2'>
-                    <p className="text-muted-foreground">{product.brand}</p>
-                    {hasDiscount && (
-                        <Badge variant="outline" className="text-green-600 border-green-600">Special Price</Badge>
-                    )}
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
-                      {hasDiscount && (
-                          <>
-                              <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
-                              <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
-                              <TooltipProvider>
-                                  <Tooltip>
-                                      <TooltipTrigger asChild>
-                                          <button className="cursor-pointer">
-                                              <Info className="h-4 w-4 text-muted-foreground" />
-                                          </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="p-4 w-64">
-                                          <div className="space-y-3">
-                                              <p className="font-bold text-base">Price details</p>
-                                              <div className="flex justify-between text-sm">
-                                                  <div>
-                                                      <p>Maximum Retail Price</p>
-                                                      <p className="text-xs text-muted-foreground">(incl. of all taxes)</p>
-                                                  </div>
-                                                  <p>₹{product.mrp!.toFixed(2)}</p>
-                                              </div>
-                                              <div className="flex justify-between text-sm">
-                                                  <p>Selling Price</p>
-                                                  <p>₹{product.sellingPrice.toFixed(2)}</p>
-                                              </div>
-                                              <Separator />
-                                              <div className="flex justify-between text-sm font-semibold text-green-600">
-                                                <p>Overall you save ₹{amountSaved.toFixed(2)} ({discountPercentage}%) on this product</p>
-                                              </div>
-                                          </div>
-                                      </TooltipContent>
-                                  </Tooltip>
-                              </TooltipProvider>
-                          </>
-                      )}
-                    </div>
-                     <div className="flex items-center gap-2">
-                        <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
-                            <span>{reviewStats.averageRating.toFixed(1)}</span>
-                            <Star className="w-3 h-3 fill-white" />
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                            {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
-                        </span>
-                    </div>
-                </div>
-          </div>
-          
-            <Separator className="my-6" />
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Coupons for you</h3>
-                <div className="space-y-2">
-                    {coupons.map(coupon => (
-                        <div key={coupon._id as string} className="flex items-start gap-2">
-                            <Tag className="h-5 w-5 mt-0.5 text-green-600" />
-                            <div className="text-sm">
-                                <span className="font-semibold">
-                                    {coupon.type === 'percentage' && `${coupon.value}% off`}
-                                    {coupon.type === 'fixed' && `₹${coupon.value} off`}
-                                    {coupon.type === 'free-shipping' && 'Free Shipping'}
-                                </span>
-                                <p className="text-xs text-muted-foreground">
-                                    {coupon.minPurchase > 0 ? `On orders above ₹${coupon.minPurchase}.` : 'No minimum purchase.'}
-                                    <Button variant="link" className="text-xs h-auto p-0 ml-1">T&C</Button>
-                                </p>
+                    
+                    <div className='space-y-4 pt-4 border-t mt-4'>
+                        <div className="flex items-center gap-4">
+                            <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                            <div className="flex items-center gap-1 rounded-lg border p-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                                    <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="w-8 text-center font-semibold">{quantity}</span>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
                             </div>
                         </div>
-                    ))}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Available offers</h3>
-                 <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                        <Tag className="h-5 w-5 mt-0.5 text-green-600" />
-                        <div className="text-sm">
-                            <span className="font-semibold">Bank Offer</span> 10% Off on Supermoney UPI. Max discount of ₹50. Minimum order value of ₹250.
-                            <Button variant="link" className="text-xs h-auto p-0 ml-1">T&C</Button>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
+                                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                            </Button>
+                            <Button size="lg" variant="secondary" className="h-12 text-base">
+                                Buy Now
+                            </Button>
                         </div>
                     </div>
-                 </div>
-              </div>
-            </div>
-
-          <Separator className="my-6" />
-            
-          {uniqueColors.length > 0 && (
-            <div className="space-y-2">
-                <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
-                <div className="flex flex-wrap gap-2">
-                    {uniqueColors.map(({ color }) => (
-                         <Button 
-                            key={color} 
-                            variant="outline"
-                            onClick={() => setSelectedColor(color)}
-                            className={cn(
-                                "capitalize",
-                                selectedColor === color && "ring-2 ring-primary"
-                            )}
-                         >{color}</Button>
-                    ))}
                 </div>
             </div>
-          )}
 
-          {sizesForSelectedColor.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
-              <div className="flex flex-wrap gap-2">
-                {sizesForSelectedColor.map((size) => (
-                   <Button 
-                        key={size}
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => setSelectedSize(size)}
-                        className={cn(
-                            "w-12 h-12",
-                            selectedSize === size && "ring-2 ring-primary"
+            {/* Right Column: Product Info */}
+            <div className="md:col-span-2 flex flex-col">
+                <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href={`/${storefront}/products?category=${product.category}`}>{product.category}</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbPage>{product.name}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+                </Breadcrumb>
+                
+            <div className="space-y-4 mt-4">
+                <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
+                    <div className='space-y-2'>
+                        <p className="text-muted-foreground">{product.brand}</p>
+                        {hasDiscount && (
+                            <Badge variant="outline" className="text-green-600 border-green-600">Special Price</Badge>
                         )}
-                    >{size}</Button>
-                ))}
-              </div>
+                        <div className="flex items-baseline gap-3">
+                        <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
+                        {hasDiscount && (
+                            <>
+                                <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                                <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button className="cursor-pointer">
+                                                <Info className="h-4 w-4 text-muted-foreground" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="p-4 w-64">
+                                            <div className="space-y-3">
+                                                <p className="font-bold text-base">Price details</p>
+                                                <div className="flex justify-between text-sm">
+                                                    <div>
+                                                        <p>Maximum Retail Price</p>
+                                                        <p className="text-xs text-muted-foreground">(incl. of all taxes)</p>
+                                                    </div>
+                                                    <p>₹{product.mrp!.toFixed(2)}</p>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <p>Selling Price</p>
+                                                    <p>₹{product.sellingPrice.toFixed(2)}</p>
+                                                </div>
+                                                <Separator />
+                                                <div className="flex justify-between text-sm font-semibold text-green-600">
+                                                    <p>Overall you save ₹{amountSaved.toFixed(2)} ({discountPercentage}%) on this product</p>
+                                                </div>
+                                            </div>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </>
+                        )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                                <span>{reviewStats.averageRating.toFixed(1)}</span>
+                                <Star className="w-3 h-3 fill-white" />
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                                {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
+                            </span>
+                        </div>
+                    </div>
             </div>
-          )}
-          
-          <Separator className="my-6" />
+            
+                <Separator className="my-6" />
+                
+                <div className="space-y-6">
+                <div>
+                    <h3 className="text-lg font-semibold mb-3">Coupons for you</h3>
+                    <div className="space-y-2">
+                        {coupons.map(coupon => (
+                            <div key={coupon._id as string} className="flex items-start gap-2">
+                                <Tag className="h-5 w-5 mt-0.5 text-green-600" />
+                                <div className="text-sm">
+                                    <span className="font-semibold">
+                                        {coupon.type === 'percentage' && `${coupon.value}% off`}
+                                        {coupon.type === 'fixed' && `₹${coupon.value} off`}
+                                        {coupon.type === 'free-shipping' && 'Free Shipping'}
+                                    </span>
+                                    <p className="text-xs text-muted-foreground">
+                                        {coupon.minPurchase > 0 ? `On orders above ₹${coupon.minPurchase}.` : 'No minimum purchase.'}
+                                        <Button variant="link" className="text-xs h-auto p-0 ml-1">T&C</Button>
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 className="text-lg font-semibold mb-3">Available offers</h3>
+                    <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                            <Tag className="h-5 w-5 mt-0.5 text-green-600" />
+                            <div className="text-sm">
+                                <span className="font-semibold">Bank Offer</span> 10% Off on Supermoney UPI. Max discount of ₹50. Minimum order value of ₹250.
+                                <Button variant="link" className="text-xs h-auto p-0 ml-1">T&C</Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Description</h3>
-            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-          </div>
-          {children}
+                <Separator className="my-6" />
+
+                <div className="border rounded-lg p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="font-semibold">{product.brand}</p>
+                            <div className="flex items-center gap-2 text-sm">
+                                <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                                    <span>{product.rating.toFixed(1)}</span>
+                                    <Star className="w-3 h-3 fill-white" />
+                                </Badge>
+                                <span className="text-muted-foreground">{reviewStats.totalRatings} Ratings</span>
+                            </div>
+                        </div>
+                        <div className="text-sm">
+                            <div className="flex items-center gap-2">
+                                <p>{product.returnPeriod} days return policy</p>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="p-4 max-w-sm">
+                                            {loadingReturnPolicy ? (
+                                                <Loader />
+                                            ) : returnPolicy ? (
+                                                <div className="prose prose-sm">
+                                                  <div dangerouslySetInnerHTML={{ __html: returnPolicy.content }} />
+                                                   <p>Know more about the Return Policy <Link href={`/${storefront}/legal/return-policy`} className="text-primary underline">here</Link></p>
+                                                </div>
+                                            ) : (
+                                                <p>Return policy details not available.</p>
+                                            )}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                        </div>
+                    </div>
+                    {variants.length > 1 && (
+                        <>
+                            <Separator className="my-4" />
+                            <h4 className="text-sm font-semibold mb-2">Available Variants</h4>
+                             <div className="flex flex-wrap gap-2">
+                                {uniqueColors.map(({ color, imageUrl }) => (
+                                    <button
+                                        key={color}
+                                        onClick={() => setSelectedColor(color)}
+                                        className={cn(
+                                            "relative h-16 w-16 rounded-md border-2 overflow-hidden",
+                                            selectedColor === color ? 'border-primary' : 'border-transparent'
+                                        )}
+                                    >
+                                        <Image src={imageUrl} alt={color} fill className="object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <Separator className="my-6" />
+                
+                {uniqueColors.length > 0 && (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {uniqueColors.map(({ color }) => (
+                            <Button 
+                                key={color} 
+                                variant="outline"
+                                onClick={() => setSelectedColor(color)}
+                                className={cn(
+                                    "capitalize",
+                                    selectedColor === color && "ring-2 ring-primary"
+                                )}
+                            >{color}</Button>
+                        ))}
+                    </div>
+                </div>
+                )}
+
+                {sizesForSelectedColor.length > 0 && (
+                <div className="space-y-2">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
+                <div className="flex flex-wrap gap-2">
+                    {sizesForSelectedColor.map((size) => (
+                    <Button 
+                            key={size}
+                            variant="outline" 
+                            size="icon"
+                            onClick={() => setSelectedSize(size)}
+                            className={cn(
+                                "w-12 h-12",
+                                selectedSize === size && "ring-2 ring-primary"
+                            )}
+                        >{size}</Button>
+                    ))}
+                </div>
+                </div>
+                )}
+                
+                <Separator className="my-6" />
+
+                <div>
+                    <h3 className="text-lg font-semibold mb-2">Description</h3>
+                    <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+                </div>
+                {children}
+            </div>
         </div>
+        {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+            <div className="absolute top-0 left-full ml-4 h-[60%] w-[500px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+                <Image
+                    src={mediaItems[selectedIndex].url}
+                    alt={`${product.name} zoomed`}
+                    fill
+                    className="object-cover transition-transform duration-200 ease-out"
+                    style={{
+                        transform: 'scale(2.5)',
+                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
+                    }}
+                />
+            </div>
+        )}
     </div>
   );
 }
-
-    

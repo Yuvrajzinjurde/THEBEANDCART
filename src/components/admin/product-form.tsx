@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Edit, Lock, Unlock } from 'lucide-react';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Edit, Lock, Unlock, ShieldCheck } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -262,6 +262,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
     storefront: existingProduct.storefront,
+    returnPeriod: existingProduct.returnPeriod || 10,
     variants: [], // TODO: Populate variants for editing
   } : {
     name: '',
@@ -274,6 +275,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     images: [],
     videos: [],
     keywords: [],
+    returnPeriod: 10,
     variants: [],
     stock: 0,
   };
@@ -823,7 +825,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Pricing & Policy</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-2 gap-4">
                          <FormField control={control} name="mrp" render={({ field }) => (
                             <FormItem>
@@ -848,6 +850,19 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     </FormControl>
                                 </div>
                                  <FormDescription>The price it will be sold at.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                         )} />
+                         <FormField control={control} name="returnPeriod" render={({ field }) => (
+                            <FormItem className="col-span-2">
+                                <FormLabel>Return Period (Days)</FormLabel>
+                                <div className="relative">
+                                    <FormControl>
+                                        <Input type="number" placeholder="e.g., 10" {...field} />
+                                    </FormControl>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">days</span>
+                                </div>
+                                <FormDescription>Number of days customer has to return the product.</FormDescription>
                                 <FormMessage />
                             </FormItem>
                          )} />

@@ -15,6 +15,7 @@ export interface IProduct extends Document {
   views: number;
   clicks: number;
   keywords: string[]; // New keywords field
+  returnPeriod: number; // Number of days for return
   // New fields for variants
   styleId?: string; // Groups variants together
   color?: string;
@@ -35,6 +36,7 @@ const ProductSchema: Schema<IProduct> = new Schema({
   views: { type: Number, default: 0 },
   clicks: { type: Number, default: 0 },
   keywords: { type: [String], default: [] },
+  returnPeriod: { type: Number, default: 10 },
   styleId: { type: String, index: true },
   color: { type: String },
   size: { type: String },
