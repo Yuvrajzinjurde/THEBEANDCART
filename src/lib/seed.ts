@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import dbConnect from './mongodb';
@@ -255,3 +254,4 @@ export const seedDatabase = async () => {
         throw new Error('Failed to seed database.');
     }
 };
+    

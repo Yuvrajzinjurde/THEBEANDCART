@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -24,6 +23,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { themeColors } from '@/lib/brand-schema';
+import { toast } from 'react-toastify';
 
 
 const LandingHeader = () => (
@@ -239,6 +239,7 @@ export default function LandingPage() {
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
@@ -249,9 +250,8 @@ export default function LandingPage() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
+  const fetchData = async () => {
+    try {
         setLoading(true);
         // Fetch all products, platform settings, and brands in parallel
         const [productResponse, settingsResponse, brandResponse] = await Promise.all([
@@ -304,11 +304,53 @@ export default function LandingPage() {
       } finally {
         setLoading(false);
       }
-    }
-    fetchData();
+  };
+
+  useEffect(() => {
+    // This effect runs only on the client side
+    const runSeed = async () => {
+      const hasSeeded = localStorage.getItem('db_seeded_v1');
+      if (!hasSeeded) {
+        setIsSeeding(true);
+        toast.info("Setting up the database with sample data. This may take a moment...");
+        try {
+          const response = await fetch('/api/seed', { method: 'POST' });
+          const result = await response.json();
+          if (response.ok) {
+            toast.success(result.message);
+            localStorage.setItem('db_seeded_v1', 'true');
+            // Data has been seeded, now fetch it to display
+            await fetchData();
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to seed database.');
+          console.error(error);
+          // Still try to fetch any existing data
+          await fetchData();
+        } finally {
+          setIsSeeding(false);
+        }
+      } else {
+        // If already seeded, just fetch the data
+        fetchData();
+      }
+    };
+    
+    runSeed();
   }, []);
 
   const heroBanners = platformSettings?.heroBanners;
+
+  if (isSeeding) {
+    return (
+        <div className="flex flex-col items-center justify-center h-screen bg-background">
+            <Loader className="h-16 w-16" />
+            <p className="mt-4 text-lg text-muted-foreground animate-pulse">Populating the universe with new brands...</p>
+        </div>
+    );
+  }
 
   return (
     <>
@@ -365,7 +407,7 @@ export default function LandingPage() {
         
         <ShopByBrandSection brands={brands} />
 
-        {loading ? (
+        {loading && !isSeeding ? (
             <div className="flex flex-col items-center justify-center text-center py-16">
                 <Loader className="h-12 w-12" />
                 <p className="mt-4 text-muted-foreground">Loading products...</p>
@@ -412,3 +454,4 @@ export default function LandingPage() {
     </>
   );
 }
+    
