@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import type { ICoupon } from '@/models/coupon.model';
+import type { IReview } from '@/models/review.model';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
 import { summarizeLegalDocument } from '@/ai/flows/summarize-legal-doc-flow';
+import RatingsAndReviews from './ratings-and-reviews';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -66,6 +68,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const { setCart, setWishlist } = useUserStore();
   
   const [product, setProduct] = useState(initialProduct);
+  const [reviews, setReviews] = useState<IReview[]>([]);
   
   const [returnPolicySummary, setReturnPolicySummary] = useState<string | null>(null);
   const [loadingReturnPolicy, setLoadingReturnPolicy] = useState(true);
@@ -110,6 +113,24 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     };
     fetchReturnPolicy();
   }, []);
+
+  // Fetch reviews when product changes
+  useEffect(() => {
+      if (!product?._id) return;
+      const fetchReviews = async () => {
+          try {
+              const response = await fetch(`/api/reviews/${product._id}`);
+              if(response.ok) {
+                  const data = await response.json();
+                  setReviews(data.reviews);
+              }
+          } catch (error) {
+              console.error("Failed to fetch reviews", error);
+          }
+      };
+      fetchReviews();
+  }, [product?._id]);
+
 
   // Memoize variant options
   const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
@@ -231,7 +252,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid md:grid-cols-2">
+    <div className="grid md:grid-cols-2 lg:gap-x-4">
         {/* Left Column: Media Gallery */}
         <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
             <div
@@ -433,17 +454,19 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
             <Separator className="my-6" />
 
-            <div>
-                <h3 className="text-base font-semibold mb-2">Description</h3>
-                <div
-                    className="prose prose-sm sm:prose-base max-w-none text-muted-foreground"
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-            </div>
+            <div className='prose prose-sm sm:prose-base max-w-none text-muted-foreground' dangerouslySetInnerHTML={{ __html: product.description }} />
 
             {children}
+
+            <Separator className="my-8" />
+            
+            <RatingsAndReviews 
+                productId={product._id} 
+                reviewStats={reviewStats} 
+                reviews={reviews}
+            />
+
         </div>
     </div>
   );
 }
-
