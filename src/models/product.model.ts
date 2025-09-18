@@ -1,4 +1,5 @@
 
+
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 export interface IProduct extends Document {
@@ -6,7 +7,7 @@ export interface IProduct extends Document {
   description: string;
   mrp?: number; // Original Price (Maximum Retail Price)
   sellingPrice: number; // Discounted/Selling Price
-  category:  string[]; // Can be single or multiple categories
+  category:  string; // Can be single or multiple categories
   images: string[];
   stock: number;
   rating: number;
@@ -27,7 +28,7 @@ const ProductSchema: Schema<IProduct> = new Schema({
   description: { type: String, required: true },
   mrp: { type: Number, min: 0 },
   sellingPrice: { type: Number, required: true, min: 0 },
-  category:  [{ type: String, required: true }],
+  category:  { type: String, required: true },
   images: [{ type: String, required: true }],
   stock: { type: Number, required: true, min: 0, default: 0 },
   rating: { type: Number, min: 0, max: 5, default: 0 },

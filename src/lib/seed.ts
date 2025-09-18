@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import dbConnect from './mongodb';
@@ -253,13 +254,13 @@ export async function seedDatabase() {
           description: template.description,
           mrp: template.mrp,
           sellingPrice: template.sellingPrice,
-          category: [template.baseCategory, color, template.brand, ...template.keywords.slice(0,2)],
+          category: template.baseCategory,
           images,
           stock,
           rating,
           brand: template.brand,
           storefront: template.storefront,
-          keywords: template.keywords,
+          keywords: [...template.keywords, color],
           returnPeriod: 15,
           styleId,
           color,
@@ -285,5 +286,3 @@ export async function seedDatabase() {
     throw new Error(`Failed to seed database: ${error.message}`);
   }
 }
-
-    
