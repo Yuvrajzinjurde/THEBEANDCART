@@ -382,7 +382,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             <h3 className="text-lg font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
-          <div className='space-y-4 pt-4 border-t mt-4'>
+           <div className='space-y-4 pt-4 border-t mt-4'>
             <div className="flex items-center gap-4">
             <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
             <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -409,7 +409,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       {/* Zoom Pane */}
       {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
         <div 
-            className="absolute top-0 left-full ml-8 h-[500px] w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+            className="absolute top-0 left-1/2 ml-4 h-[500px] w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
         >
           <Image
             src={mediaItems[selectedIndex].url}
