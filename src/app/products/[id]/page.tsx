@@ -17,6 +17,7 @@ import { Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
@@ -143,6 +144,7 @@ export default function ProductPage() {
   const [variants, setVariants] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({ totalRatings: 0, totalReviews: 0, averageRating: 0 });
 
   const [similarProducts, setSimilarProducts] = useState<IProduct[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
@@ -157,8 +159,12 @@ export default function ProductPage() {
     async function fetchProductAndVariants() {
       try {
         setLoading(true);
-        // Fetch main product data
-        const productResponse = await fetch(`/api/products/${id}`);
+        // Fetch main product data and review stats in parallel
+        const [productResponse, reviewStatsResponse] = await Promise.all([
+            fetch(`/api/products/${id}`),
+            fetch(`/api/reviews/${id}/stats`)
+        ]);
+
         if (!productResponse.ok) {
           throw new Error('Failed to fetch product');
         }
@@ -166,6 +172,11 @@ export default function ProductPage() {
         const mainProduct: IProduct = data.product;
         setProduct(mainProduct);
         addProduct(mainProduct); // Add to recently viewed
+
+        if(reviewStatsResponse.ok) {
+            const stats = await reviewStatsResponse.json();
+            setReviewStats(stats);
+        }
 
         // Fetch brand data for the footer
         if (mainProduct.storefront) {
@@ -243,6 +254,7 @@ export default function ProductPage() {
           product={product} 
           variants={variants.length > 0 ? variants : [product]} 
           storefront={storefront} 
+          reviewStats={reviewStats}
         >
            <BoughtTogetherSection products={boughtTogether} />
         </ProductDetails>

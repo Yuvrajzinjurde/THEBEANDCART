@@ -24,11 +24,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'react-toastify';
 import useUserStore from '@/stores/user-store';
 import { Badge } from './ui/badge';
+import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 
 interface ProductDetailsProps {
   product: IProduct;
   variants: IProduct[];
   storefront: string;
+  reviewStats: ReviewStats;
   children?: React.ReactNode;
 }
 
@@ -53,7 +55,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product: initialProduct, variants, storefront, children }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, children }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
@@ -216,9 +218,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-8 lg:gap-12 relative">
+    <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Left Column: Image Gallery */}
-      <div className="md:col-span-2 relative">
+      <div className="relative">
          <div className="md:sticky top-24 self-start">
             <div 
               className="relative overflow-hidden group max-h-[350px]"
@@ -250,7 +252,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                  {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
                     <div
-                        className="absolute top-0 left-1/2 ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                        className="absolute top-0 left-full ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
                     >
                     <Image
                         src={mediaItems[selectedIndex].url}
@@ -281,7 +283,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 ))}
                 </CarouselContent>
             </Carousel>
-            <div className='space-y-4 pt-4 border-t mt-4'>
+             <div className='space-y-4 pt-4 border-t mt-4'>
                 <div className="flex items-center gap-4">
                 <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                 <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -307,7 +309,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-3 flex flex-col gap-6">
+        <div className="md:col-span-1 flex flex-col gap-6">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -327,15 +329,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
           <div>
               <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
               <p className="text-muted-foreground mt-1">{product.brand}</p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className={cn("w-5 h-5", i < Math.round(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30')} />
-              ))}
-            </div>
-            <span className="text-sm text-muted-foreground">({product.rating.toFixed(1)} Rating)</span>
           </div>
 
           <div>
@@ -382,6 +375,16 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             </div>
           </div>
           
+            <div className="flex items-center gap-2">
+                <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                    <span>{reviewStats.averageRating.toFixed(1)}</span>
+                    <Star className="w-3 h-3 fill-white" />
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                    {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
+                </span>
+            </div>
+
           <Separator />
             
           {uniqueColors.length > 0 && (
