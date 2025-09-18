@@ -60,7 +60,7 @@ export default function InventoryPage() {
     const { stockCounts, uniqueCategories } = useMemo(() => {
         const outOfStock = allProducts.filter(p => p.stock === 0).length;
         const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length;
-        const categories = new Set(allProducts.map(p => p.category));
+        const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
         return {
             stockCounts: {
                 all: allProducts.length,
@@ -97,19 +97,20 @@ export default function InventoryPage() {
         setFilteredProducts(productsToDisplay);
     }, [activeTab, categoryFilter, sortOption, allProducts]);
 
-    const handleSeedReviews = async () => {
+    const handleSeedData = async () => {
         setIsSeeding(true);
-        toast.info("Seeding product reviews... This might take a moment.");
+        toast.info("Seeding database... This might take a moment.");
         try {
           const response = await fetch('/api/seed', { method: 'POST' });
           const result = await response.json();
           if (response.ok) {
             toast.success(result.message);
+            await fetchProducts(); // Re-fetch products after seeding
           } else {
             toast.error(result.message || 'An unknown error occurred during seeding.');
           }
         } catch (error: any) {
-          toast.error(error.message || 'Failed to seed reviews.');
+          toast.error(error.message || 'Failed to seed data.');
           console.error(error);
         } finally {
           setIsSeeding(false);
@@ -286,14 +287,20 @@ export default function InventoryPage() {
                     <CardDescription>
                         It looks like there are no products in the database.
                         <br/>
-                        You can add products manually.
+                        You can seed some initial data or add products manually.
                     </CardDescription>
-                     <Button asChild>
-                        <Link href="/admin/inventory/new">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add Product
-                        </Link>
-                    </Button>
+                    <div className="flex gap-4">
+                        <Button onClick={handleSeedData} disabled={isSeeding}>
+                            {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                            Seed Products
+                        </Button>
+                         <Button asChild>
+                            <Link href="/admin/inventory/new">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add Product
+                            </Link>
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         )
@@ -338,9 +345,9 @@ export default function InventoryPage() {
                             Add Product
                         </Link>
                     </Button>
-                     <Button variant="secondary" onClick={handleSeedReviews} disabled={isSeeding}>
+                     <Button variant="secondary" onClick={handleSeedData} disabled={isSeeding}>
                         {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                        Seed Reviews
+                        Seed Products & Reviews
                     </Button>
                 </div>
             </CardHeader>
