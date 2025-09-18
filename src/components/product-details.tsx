@@ -66,7 +66,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const { setCart, setWishlist } = useUserStore();
   
   const [product, setProduct] = useState(initialProduct);
-  const [quantity, setQuantity] = useState(1);
   
   const [returnPolicySummary, setReturnPolicySummary] = useState<string | null>(null);
   const [loadingReturnPolicy, setLoadingReturnPolicy] = useState(true);
@@ -187,8 +186,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
 
   // Action Handlers
-  const handleQuantityChange = (amount: number) => setQuantity((prev) => Math.max(1, prev + amount));
-
   const handleAddToCart = async () => {
     if (!user) {
         toast.info("Please log in to add items to your cart.");
@@ -200,7 +197,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         const response = await fetch('/api/cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ productId: product._id, quantity }),
+            body: JSON.stringify({ productId: product._id, quantity: 1 }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
@@ -265,7 +262,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                 {/* Zoom Pane */}
                 {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                    <div className="absolute top-0 left-0 -translate-x-full mr-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+                    <div className="absolute top-0 left-full ml-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
                         <Image
                             src={mediaItems[selectedIndex].url}
                             alt={`${product.name} zoomed`}
@@ -296,9 +293,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                     <div className="flex items-center gap-1 rounded-lg border p-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
-                        <span className="w-8 text-center font-semibold">{quantity}</span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-8 text-center font-semibold">1</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Plus className="h-4 w-4" /></Button>
                     </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -349,10 +346,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <p className="text-muted-foreground">Selling Price</p>
-                                                <p>₹{(product.sellingPrice + amountSaved * 0.2).toFixed(2)}</p>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <p className="text-muted-foreground">Special Price</p>
                                                 <p>₹{product.sellingPrice.toFixed(2)}</p>
                                             </div>
                                             <Separator />
@@ -453,3 +446,4 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
+
