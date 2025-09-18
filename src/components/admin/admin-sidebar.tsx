@@ -110,7 +110,7 @@ export function AdminSidebar() {
 
   return (
     <aside className={cn(
-        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background border-r",
+        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background border-r h-screen sticky top-0",
         isCollapsed ? "w-16" : "w-64",
     )}>
         <div className="flex h-full max-h-screen flex-col">
