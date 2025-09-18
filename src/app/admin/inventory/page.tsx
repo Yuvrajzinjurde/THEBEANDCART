@@ -106,7 +106,8 @@ export default function InventoryPage() {
           if (response.ok) {
             toast.success(result.message);
           } else {
-            throw new Error(result.message);
+            // Throw the actual error message from the API
+            throw new Error(result.message || 'An unknown error occurred during seeding.');
           }
           // After seeding, you might want to refresh data that depends on reviews
         } catch (error: any) {
