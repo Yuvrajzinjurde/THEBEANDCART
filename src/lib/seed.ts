@@ -1,13 +1,9 @@
 
-
 'use server';
 
 import dbConnect from './mongodb';
 import Product from '@/models/product.model';
 import { Types } from 'mongoose';
-import Review from '@/models/review.model';
-import User from '@/models/user.model';
-import Brand from '@/models/brand.model';
 
 const reevaTemplates = [
     {
@@ -221,135 +217,73 @@ const productTemplates = [...reevaTemplates, ...auraTemplates];
 const variantColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Silver', 'Gold', 'Rose Gold', 'Platinum', 'Titanium'];
 const variantSizes = ['S', 'M', 'L', 'XL', 'One Size'];
 
-export async function seedProducts() {
+export async function seedDatabase() {
   await dbConnect();
   console.log('Starting product seeding process...');
 
-  // This will delete ALL products. Be careful in production.
-  await Product.deleteMany({});
-  console.log('Cleared existing products.');
+  try {
+    // This will delete ALL products. Be careful in production.
+    await Product.deleteMany({});
+    console.log('Cleared existing products.');
 
-  const productsToCreate = [];
-  for (const template of productTemplates) {
-    const styleId = new Types.ObjectId().toHexString();
-    const variantCount = Math.floor(Math.random() * 3) + 3; // 3 to 5 variants
-    const usedColors = new Set<string>();
+    const productsToCreate = [];
+    for (const template of productTemplates) {
+      const styleId = new Types.ObjectId().toHexString();
+      const variantCount = Math.floor(Math.random() * 3) + 3; // 3 to 5 variants
+      const usedColors = new Set<string>();
 
-    for (let i = 0; i < variantCount; i++) {
-      let color: string;
-      do {
-        color = variantColors[Math.floor(Math.random() * variantColors.length)];
-      } while (usedColors.has(color));
-      usedColors.add(color);
+      for (let i = 0; i < variantCount; i++) {
+        let color: string;
+        do {
+          color = variantColors[Math.floor(Math.random() * variantColors.length)];
+        } while (usedColors.has(color));
+        usedColors.add(color);
 
-      const size = template.baseCategory === 'Apparel' 
-        ? variantSizes[Math.floor(Math.random() * 4)] // S, M, L, XL
-        : 'One Size';
-      
-      const stock = Math.floor(Math.random() * 100) + 10;
-      const rating = parseFloat((3.5 + Math.random() * 1.5).toFixed(1));
-      
-      const images = Array.from({ length: 5 }, (_, j) => `https://picsum.photos/seed/${styleId}-${color}-${j}/600/600`);
-      
-      productsToCreate.push({
-        name: `${template.name} - ${color}, ${size}`,
-        description: template.description,
-        mrp: template.mrp,
-        sellingPrice: template.sellingPrice,
-        category: [template.baseCategory, color, template.brand, ...template.keywords.slice(0,2)],
-        images,
-        stock,
-        rating,
-        brand: template.brand,
-        storefront: template.storefront,
-        keywords: template.keywords,
-        returnPeriod: 15,
-        styleId,
-        color,
-        size,
-        views: Math.floor(Math.random() * 500),
-        clicks: Math.floor(Math.random() * 50),
-      });
+        const size = template.baseCategory === 'Apparel' 
+          ? variantSizes[Math.floor(Math.random() * 4)] // S, M, L, XL
+          : 'One Size';
+        
+        const stock = Math.floor(Math.random() * 100) + 10;
+        const rating = parseFloat((3.5 + Math.random() * 1.5).toFixed(1));
+        
+        const images = Array.from({ length: 5 }, (_, j) => `https://picsum.photos/seed/${styleId}-${color}-${j}/600/600`);
+        
+        productsToCreate.push({
+          name: `${template.name} - ${color}, ${size}`,
+          description: template.description,
+          mrp: template.mrp,
+          sellingPrice: template.sellingPrice,
+          category: [template.baseCategory, color, template.brand, ...template.keywords.slice(0,2)],
+          images,
+          stock,
+          rating,
+          brand: template.brand,
+          storefront: template.storefront,
+          keywords: template.keywords,
+          returnPeriod: 15,
+          styleId,
+          color,
+          size,
+          views: Math.floor(Math.random() * 500),
+          clicks: Math.floor(Math.random() * 50),
+        });
+      }
     }
+
+    if (productsToCreate.length > 0) {
+      await Product.insertMany(productsToCreate);
+      const message = `Successfully seeded database with ${productsToCreate.length} new product variants.`;
+      console.log(message);
+      return { success: true, message };
+    } else {
+      const message = "No products were generated to seed.";
+      console.log(message);
+      return { success: false, message };
+    }
+  } catch(error: any) {
+    console.error('Error during database seeding process:', error);
+    throw new Error(`Failed to seed database: ${error.message}`);
   }
-
-  if (productsToCreate.length > 0) {
-    await Product.insertMany(productsToCreate);
-    const message = `Successfully seeded database with ${productsToCreate.length} new product variants.`;
-    console.log(message);
-    return { success: true, message };
-  } else {
-    const message = "No products were generated to seed.";
-    console.log(message);
-    return { success: false, message };
-  }
-}
-
-const reviewTemplates = [
-    { rating: 5, review: "Absolutely love this product! The quality is outstanding and it exceeded all my expectations. Highly recommended!" },
-    { rating: 4, review: "Very good product. It works as described and I'm happy with my purchase. The color is slightly different than the picture, but still nice." },
-    { rating: 5, review: "Five stars! This is exactly what I was looking for. The shipping was fast and the item was well-packaged. Will buy from this brand again." },
-    { rating: 3, review: "It's an okay product. It does the job, but I feel like it could be better for the price. The material feels a bit cheap." },
-    { rating: 5, review: "A fantastic purchase! I've been using it for a week now and I'm very impressed. The build quality is excellent." }
-];
-
-export async function seedReviews() {
-    await dbConnect();
-    console.log('Starting review seeding...');
-
-    await Review.deleteMany({});
-    console.log('Cleared existing reviews.');
-
-    const products = await Product.find({}).limit(200); // Look at more products
-    const users = await User.find({ roles: { $ne: 'admin' } }).limit(50);
-
-    if (products.length === 0) {
-        throw new Error('No products found in the database. Please seed products first.');
-    }
-    if (users.length === 0) {
-        throw new Error('No non-admin users found in the database to create reviews.');
-    }
-
-    const reviewsToCreate = [];
-    for (const product of products) {
-        const reviewCount = Math.floor(Math.random() * 4); // 0 to 3 reviews per product
-        for (let i = 0; i < reviewCount; i++) {
-            const randomUser = users[Math.floor(Math.random() * users.length)];
-            const randomReview = reviewTemplates[Math.floor(Math.random() * reviewTemplates.length)];
-
-            reviewsToCreate.push({
-                productId: product._id,
-                userId: randomUser._id,
-                userName: `${randomUser.firstName} ${randomUser.lastName.charAt(0)}.`,
-                rating: randomReview.rating,
-                review: randomReview.review,
-            });
-        }
-    }
-    
-    let resultMessage = "No reviews were generated to seed.";
-    if (reviewsToCreate.length > 0) {
-        await Review.insertMany(reviewsToCreate);
-        resultMessage = `Successfully seeded ${reviewsToCreate.length} reviews.`;
-    }
-
-    console.log(resultMessage);
-    return { success: true, message: resultMessage };
-}
-
-
-export async function seedDatabase() {
-    try {
-        const productsResult = await seedProducts();
-        const reviewsResult = await seedReviews();
-        return {
-            success: true,
-            message: `${productsResult.message} ${reviewsResult.message}`
-        }
-    } catch(error: any) {
-        console.error('Error during database seeding process:', error);
-        throw new Error(`Failed to seed database: ${error.message}`);
-    }
 }
 
     
