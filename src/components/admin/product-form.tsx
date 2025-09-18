@@ -256,6 +256,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
+    category: Array.isArray(existingProduct.category) ? existingProduct.category[0] : existingProduct.category,
     images: existingProduct.images.map(img => ({value: img})),
     videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
     keywords: (existingProduct.keywords || []).map(keyword => ({ value: keyword })),
@@ -926,3 +927,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
