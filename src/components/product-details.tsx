@@ -265,7 +265,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                 {/* Zoom Pane */}
                 {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                    <div className="absolute top-0 left-full ml-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+                    <div className="absolute top-0 right-full mr-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
                         <Image
                             src={mediaItems[selectedIndex].url}
                             alt={`${product.name} zoomed`}
@@ -292,6 +292,20 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     ))}
                 </CarouselContent>
             </Carousel>
+            <div className="mt-8 space-y-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                    <div className="flex items-center gap-1 rounded-lg border p-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-8 text-center font-semibold">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
+                    </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
+                </div>
+            </div>
         </div>
 
         {/* Right Column: Product Info */}
@@ -312,7 +326,16 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             </div>
             
             <div className='space-y-2 mt-4'>
-                <div className="flex items-center gap-2">
+                 <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
+                    {hasDiscount && (
+                        <>
+                            <span className="text-lg text-muted-foreground line-through">MRP ₹{product.mrp!.toLocaleString('en-IN')}</span>
+                            <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                        </>
+                    )}
+                </div>
+                 <div className="flex items-center gap-2">
                     <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
                         <span>{reviewStats.averageRating.toFixed(1)}</span>
                         <Star className="w-3 h-3 fill-white" />
@@ -320,17 +343,10 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <span className="text-sm text-muted-foreground">
                         {reviewStats.totalRatings.toLocaleString()} ratings & {reviewStats.totalReviews.toLocaleString()} reviews
                     </span>
-                </div>
-                <div className="flex items-baseline gap-3 flex-wrap">
-                    <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
-                    {hasDiscount && (
-                        <>
-                            <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
-                            <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
-                        </>
-                    )}
+                    <Image src="https://picsum.photos/seed/assured/100/25" alt="Assured" width={77} height={20} />
                 </div>
                 {hasDiscount && <p className="text-sm text-green-600">You save ₹{amountSaved.toLocaleString('en-IN')}</p>}
+                <p className="text-xs text-muted-foreground">Special price</p>
             </div>
         
             <Separator className="my-6" />
@@ -398,21 +414,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             <div>
                 <h3 className="text-base font-semibold mb-2">Description</h3>
                 <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-            </div>
-
-            <div className="mt-8 space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                    <div className="flex items-center gap-1 rounded-lg border p-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
-                        <span className="w-8 text-center font-semibold">{quantity}</span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
-                    </div>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
-                </div>
             </div>
 
             {children}
