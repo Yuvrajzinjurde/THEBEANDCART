@@ -32,6 +32,7 @@ const summarizeLegalDocPrompt = ai.definePrompt({
   name: 'summarizeLegalDocPrompt',
   input: {schema: SummarizeLegalDocInputSchema},
   output: {schema: SummarizeLegalDocOutputSchema},
+  model: 'googleai/gemini-1.5-flash-preview',
   prompt: `You are an expert legal assistant. Your task is to summarize a legal document into its most important points for a customer.
 
   Extract the key information regarding:
