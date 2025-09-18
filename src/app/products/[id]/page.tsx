@@ -19,6 +19,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
+import type { IReview } from '@/models/review.model';
 
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
@@ -147,6 +148,7 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [reviewStats, setReviewStats] = useState<ReviewStats>({ totalRatings: 0, totalReviews: 0, averageRating: 0 });
   const [coupons, setCoupons] = useState<ICoupon[]>([]);
+  const [reviews, setReviews] = useState<IReview[]>([]);
 
   const [similarProducts, setSimilarProducts] = useState<IProduct[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
@@ -162,9 +164,10 @@ export default function ProductPage() {
       try {
         setLoading(true);
         // Fetch main product data and review stats in parallel
-        const [productResponse, reviewStatsResponse] = await Promise.all([
+        const [productResponse, reviewStatsResponse, reviewsResponse] = await Promise.all([
             fetch(`/api/products/${id}`),
-            fetch(`/api/reviews/${id}/stats`)
+            fetch(`/api/reviews/${id}/stats`),
+            fetch(`/api/reviews/${id}`)
         ]);
 
         if (!productResponse.ok) {
@@ -178,6 +181,11 @@ export default function ProductPage() {
         if(reviewStatsResponse.ok) {
             const stats = await reviewStatsResponse.json();
             setReviewStats(stats);
+        }
+        
+        if (reviewsResponse.ok) {
+            const reviewsData = await reviewsResponse.json();
+            setReviews(reviewsData.reviews);
         }
 
         // Fetch brand data and coupons in parallel
@@ -265,6 +273,7 @@ export default function ProductPage() {
           variants={variants.length > 0 ? variants : [product]} 
           storefront={storefront} 
           reviewStats={reviewStats}
+          reviews={reviews}
           coupons={coupons}
         >
            <BoughtTogetherSection products={boughtTogether} />

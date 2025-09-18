@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -36,6 +37,7 @@ interface ProductDetailsProps {
   variants: IProduct[];
   storefront: string;
   reviewStats: ReviewStats;
+  reviews: IReview[];
   coupons: ICoupon[];
   children?: React.ReactNode;
 }
@@ -61,13 +63,12 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, coupons, children }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, reviews, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   
   const [product, setProduct] = useState(initialProduct);
-  const [reviews, setReviews] = useState<IReview[]>([]);
   
   const [returnPolicySummary, setReturnPolicySummary] = useState<string | null>(null);
   const [loadingReturnPolicy, setLoadingReturnPolicy] = useState(true);
@@ -112,24 +113,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     };
     fetchReturnPolicy();
   }, []);
-
-  // Fetch reviews when product changes
-  useEffect(() => {
-      if (!product?._id) return;
-      const fetchReviews = async () => {
-          try {
-              const response = await fetch(`/api/reviews/${product._id}`);
-              if(response.ok) {
-                  const data = await response.json();
-                  setReviews(data.reviews);
-              }
-          } catch (error) {
-              console.error("Failed to fetch reviews", error);
-          }
-      };
-      fetchReviews();
-  }, [product?._id]);
-
 
   // Memoize variant options
   const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
@@ -469,5 +452,3 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
-
-    
