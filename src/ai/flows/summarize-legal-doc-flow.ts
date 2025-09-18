@@ -6,7 +6,7 @@
  *
  * - summarizeLegalDocument - Converts document text into a concise summary.
  * - SummarizeLegalDocInput - Input type for the summarizeLegalDocument function.
- * - SummarizeLegalDocOutput - Return type for the summarizeLegalDocument function.
+ * - SummarizeLegalDocOutput - Return type for the summarizeLegalDocOutput function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -32,7 +32,7 @@ const summarizeLegalDocPrompt = ai.definePrompt({
   name: 'summarizeLegalDocPrompt',
   input: {schema: SummarizeLegalDocInputSchema},
   output: {schema: SummarizeLegalDocOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-pro',
   prompt: `You are an expert legal assistant. Your task is to summarize a legal document into its most important points for a customer.
 
   Extract the key information regarding:
