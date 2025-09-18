@@ -168,6 +168,7 @@ interface RatingsAndReviewsProps {
 }
 
 export default function RatingsAndReviews({ productId, reviewStats: initialReviewStats, reviews: initialReviews }: RatingsAndReviewsProps) {
+    const { token } = useAuth();
     const [isWritingReview, setIsWritingReview] = useState(false);
     const [reviews, setReviews] = useState(initialReviews);
     const [reviewStats, setReviewStats] = useState(initialReviewStats);
@@ -176,7 +177,10 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     
     const handleLike = async (reviewId: string) => {
         try {
-            const response = await fetch(`/api/reviews/${reviewId}/like`, { method: 'POST' });
+            const response = await fetch(`/api/reviews/${reviewId}/like`, { 
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
             if (!response.ok) throw new Error('Failed to like review');
             const { review: updatedReview } = await response.json();
             setReviews(prev =>
