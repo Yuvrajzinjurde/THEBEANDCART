@@ -29,6 +29,7 @@ import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
 import { summarizeLegalDocument } from '@/ai/flows/summarize-legal-doc-flow';
+import { Card, CardContent } from './ui/card';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -171,7 +172,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     if (!mainApi || !thumbApi) return
     const newIndex = mainApi.selectedScrollSnap();
     setSelectedIndex(newIndex);
-    thumbApi.scrollTo(newIndex);
+    if (thumbApi.scrollSnapList().length > newIndex) {
+        thumbApi.scrollTo(newIndex);
+    }
   }, [mainApi, thumbApi])
 
 
@@ -258,7 +261,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             <div className="md:col-span-1 relative">
                 <div
-                    className="md:sticky top-24 self-start"
+                    className="md:sticky top-24 self-start max-h-[500px]"
                     onMouseEnter={() => setIsZooming(true)}
                     onMouseLeave={() => setIsZooming(false)}
                     onMouseMove={handleMouseMove}
@@ -526,33 +529,38 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <h3 className="text-lg font-semibold mb-2">Description</h3>
                     <p className="text-muted-foreground leading-relaxed">{product.description}</p>
                 </div>
-                <div className='space-y-4 pt-4 border-t mt-4'>
-                    <div className="flex items-center gap-4">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                        <div className="flex items-center gap-1 rounded-lg border p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                                <Minus className="h-4 w-4" />
+                {children}
+                
+                <div className="flex-grow"></div>
+
+                <Card className="sticky bottom-4 mt-auto">
+                    <CardContent className="p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                            <div className="flex items-center gap-1 rounded-lg border p-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                                    <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="w-8 text-center font-semibold">{quantity}</span>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
+                                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
                             </Button>
-                            <span className="w-8 text-center font-semibold">{quantity}</span>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                                <Plus className="h-4 w-4" />
+                            <Button size="lg" variant="secondary" className="h-12 text-base">
+                                Buy Now
                             </Button>
                         </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
-                            <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                        </Button>
-                        <Button size="lg" variant="secondary" className="h-12 text-base">
-                            Buy Now
-                        </Button>
-                    </div>
-                </div>
-                {children}
+                    </CardContent>
+                </Card>
             </div>
         </div>
         {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-            <div className="absolute top-0 left-full ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+            <div className="absolute top-0 left-full ml-4 h-full w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
                 <Image
                     src={mediaItems[selectedIndex].url}
                     alt={`${product.name} zoomed`}

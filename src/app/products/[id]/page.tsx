@@ -40,13 +40,13 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
             <Carousel
                 opts={{
                     align: "start",
-                    loop: products.length > 5,
+                    loop: products.length > 6,
                 }}
                 className="w-full"
             >
                 <CarouselContent>
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
