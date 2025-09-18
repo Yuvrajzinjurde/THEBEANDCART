@@ -224,23 +224,23 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       {/* Left Column: Image Gallery */}
        <div className="md:col-span-1 relative">
             <div
-                className="relative group"
+                className="relative group p-4"
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
                 onMouseMove={handleMouseMove}
             >
                 <div className="md:sticky top-24 self-start">
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg max-h-[450px]">
+                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-h-80">
                     <CarouselContent>
                         {mediaItems.map((media, index) => (
                         <CarouselItem key={index}>
                             <div 
-                            className="w-full aspect-square relative bg-muted rounded-lg cursor-crosshair"
+                            className="w-full aspect-square relative bg-muted rounded-lg"
                             >
                             {media.type === 'image' ? (
-                                <Image src={media.url} alt={product.name} fill className="object-cover" />
+                                <Image src={media.url} alt={product.name} fill className="object-cover rounded-lg" />
                             ) : (
-                                <video src={media.url} controls className="w-full h-full object-cover" />
+                                <video src={media.url} controls className="w-full h-full object-cover rounded-lg" />
                             )}
                             </div>
                         </CarouselItem>
@@ -329,11 +329,11 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </BreadcrumbList>
             </Breadcrumb>
             
-          <div className="space-y-2 mt-4">
+          <div className="space-y-4 mt-4">
             <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
             <div className="space-y-4">
-                <p className="text-muted-foreground">{product.brand}</p>
-                 <div className='space-y-2'>
+                <div className='space-y-2'>
+                    <p className="text-muted-foreground">{product.brand}</p>
                     {hasDiscount && (
                         <Badge variant="outline" className="text-green-600 border-green-600">Special Price</Badge>
                     )}
