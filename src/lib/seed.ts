@@ -77,6 +77,9 @@ export const seedDatabase = async () => {
         if (!userRole) {
             throw new Error("User role not found in database.");
         }
+        
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash('password123', salt);
 
         // 3. Create dummy reviews and prepare user data
         for (const product of products) {
@@ -84,31 +87,30 @@ export const seedDatabase = async () => {
             for (let i = 0; i < reviewCount; i++) {
                 const dummyReview = dummyReviews[Math.floor(Math.random() * dummyReviews.length)];
                 
-                reviewsToCreate.push({
-                    productId: product._id,
-                    userId: new Types.ObjectId(), // Placeholder
-                    userName: dummyReview.userName,
-                    rating: dummyReview.rating,
-                    review: dummyReview.review,
-                });
-                
-                if (!usersToCreate.has(dummyReview.userName)) {
-                     const [firstName, lastName] = dummyReview.userName.split(' ');
-                     const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace('.', '')}@example.com`;
-                     const salt = await bcrypt.genSalt(10);
-                     const hashedPassword = await bcrypt.hash('password123', salt);
+                const [firstName, lastName] = dummyReview.userName.split(' ');
+                const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace('.', '')}@example.com`;
 
-                     usersToCreate.set(dummyReview.userName, {
+                // If user doesn't exist yet, prepare their document
+                if (!usersToCreate.has(email)) {
+                     usersToCreate.set(email, {
                          firstName,
                          lastName,
                          email,
                          password: hashedPassword,
-                         brand: product.storefront,
+                         brand: product.storefront, // Assign brand from the first product they review
                          roles: [userRole._id],
                          status: 'active',
                          address: { street: '', city: '', state: '', zip: '', country: '' }
                      });
                 }
+                
+                reviewsToCreate.push({
+                    productId: product._id,
+                    userId: new Types.ObjectId(), // Placeholder, can be linked after users are created
+                    userName: dummyReview.userName,
+                    rating: dummyReview.rating,
+                    review: dummyReview.review,
+                });
             }
         }
         
@@ -123,7 +125,7 @@ export const seedDatabase = async () => {
                 brand: brandName,
             });
             couponsToCreate.push({
-                code: 'FLAT150',
+                code: `FLAT150-${brandName.toUpperCase()}`, // Make code unique
                 type: 'fixed',
                 value: 150,
                 minPurchase: 1000,
@@ -139,15 +141,15 @@ export const seedDatabase = async () => {
 
 
         // 5. Insert all data
-        if (reviewsToCreate.length > 0) {
-            await Review.insertMany(reviewsToCreate);
-            console.log(`Seeded ${reviewsToCreate.length} reviews.`);
-        }
-        
         if (usersToCreate.size > 0) {
             const userDocs = Array.from(usersToCreate.values());
             await User.insertMany(userDocs);
             console.log(`Seeded ${usersToCreate.size} users.`);
+        }
+        
+        if (reviewsToCreate.length > 0) {
+            await Review.insertMany(reviewsToCreate);
+            console.log(`Seeded ${reviewsToCreate.length} reviews.`);
         }
         
         if (couponsToCreate.length > 0) {
