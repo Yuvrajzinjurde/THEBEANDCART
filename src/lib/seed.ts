@@ -1,10 +1,14 @@
 
+
 'use server';
 
 import dbConnect from './mongodb';
 import Product from '@/models/product.model';
-import Review from '@/models/review.model';
+import Review, { IReview } from '@/models/review.model';
+import User from '@/models/user.model';
+import Role from '@/models/role.model';
 import { Types } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const dummyReviews = [
     {
@@ -37,51 +41,89 @@ const dummyReviews = [
 export const seedDatabase = async () => {
     try {
         await dbConnect();
-        console.log('Database connected, starting review seeding process...');
+        console.log('Database connected, starting seeding process...');
 
-        // 1. Clear only the Review collection
+        // 1. Clear existing Review and non-admin User collections
         await Review.deleteMany({});
         console.log('Cleared existing Review collection.');
 
+        const adminRole = await Role.findOne({ name: 'admin' });
+        if (adminRole) {
+            await User.deleteMany({ roles: { $ne: adminRole._id } });
+            console.log('Cleared existing non-admin User collection.');
+        } else {
+            console.log('Admin role not found, skipping user cleanup.');
+        }
+
         // 2. Fetch all products
-        const products = await Product.find({}).select('_id');
+        const products = await Product.find({}).select('_id storefront');
         if (products.length === 0) {
-            const message = "No products found in the database. Cannot seed reviews.";
+            const message = "No products found in the database. Cannot seed reviews or users.";
             console.log(message);
             return { success: true, message };
         }
         
-        const reviewsToCreate = [];
+        const reviewsToCreate: Omit<IReview, keyof Document>[] = [];
+        const usersToCreate = new Map<string, any>();
+        const userRole = await Role.findOne({ name: 'user' });
+        
+        if (!userRole) {
+            throw new Error("User role not found in database.");
+        }
 
-        // 3. Create dummy reviews for each product
+        // 3. Create dummy reviews and prepare user data
         for (const product of products) {
-            // Create a random number of reviews for each product (1 to 5)
             const reviewCount = Math.floor(Math.random() * 5) + 1;
             for (let i = 0; i < reviewCount; i++) {
                 const dummyReview = dummyReviews[Math.floor(Math.random() * dummyReviews.length)];
+                
                 reviewsToCreate.push({
                     productId: product._id,
-                    userId: new Types.ObjectId(), // Dummy user ID
+                    userId: new Types.ObjectId(), // Placeholder, will not match a real user
                     userName: dummyReview.userName,
                     rating: dummyReview.rating,
                     review: dummyReview.review,
                 });
+                
+                // Prepare user for creation if not already in our map
+                if (!usersToCreate.has(dummyReview.userName)) {
+                     const [firstName, lastName] = dummyReview.userName.split(' ');
+                     const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace('.', '')}@example.com`;
+                     const salt = await bcrypt.genSalt(10);
+                     const hashedPassword = await bcrypt.hash('password123', salt);
+
+                     usersToCreate.set(dummyReview.userName, {
+                         firstName,
+                         lastName,
+                         email,
+                         password: hashedPassword,
+                         brand: product.storefront, // Assign brand from product
+                         roles: [userRole._id],
+                         address: { street: '', city: '', state: '', zip: '', country: '' }
+                     });
+                }
             }
         }
         
-        // 4. Insert all reviews in one go
+        // 4. Insert all reviews and users
         if (reviewsToCreate.length > 0) {
             await Review.insertMany(reviewsToCreate);
             console.log(`Seeded ${reviewsToCreate.length} reviews across ${products.length} products.`);
         }
+        
+        if (usersToCreate.size > 0) {
+            const userDocs = Array.from(usersToCreate.values());
+            await User.insertMany(userDocs);
+            console.log(`Seeded ${usersToCreate.size} users.`);
+        }
 
-        const message = `Successfully seeded reviews for ${products.length} products.`;
+        const message = `Successfully seeded ${reviewsToCreate.length} reviews and ${usersToCreate.size} users.`;
         console.log(message);
         return { success: true, message };
 
     } catch (error: any) {
-        console.error('Error during database review seeding:', error);
-        throw new Error('Failed to seed reviews.');
+        console.error('Error during database seeding:', error);
+        throw new Error(`Failed to seed database: ${error.message}`);
     }
 };
     
