@@ -205,91 +205,49 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   return (
     <div className="grid md:grid-cols-5 gap-8 lg:gap-12 max-w-7xl mx-auto">
-        {/* Left Column: Image Gallery */}
-        <div className="md:col-span-2 md:sticky top-24 h-max">
-            <div className="grid gap-4 max-h-[500px]">
-                <div className="relative overflow-hidden group">
-                    <Carousel
-                        setApi={setMainApi}
-                        opts={{ loop: true }}
-                        className="w-full rounded-lg"
-                    >
-                        <CarouselContent>
-                            {mediaItems.map((media, index) => (
-                                <CarouselItem key={index}>
-                                    <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
-                                        {media.type === 'image' ? (
-                                            <Image
-                                                src={media.url}
-                                                alt={product.name}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        ) : (
-                                            <video
-                                                src={media.url}
-                                                controls
-                                                className="w-full h-full object-cover"
-                                            />
-                                        )}
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ArrowLeft />
-                        </CarouselPrevious>
-                        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ArrowRight />
-                        </CarouselNext>
-                    </Carousel>
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                        <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}>
-                            <Heart />
-                        </Button>
-                        <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background">
-                            <ZoomIn />
-                        </Button>
+      {/* Left Column: Image Gallery */}
+      <div className="md:col-span-2 md:sticky top-24 h-max">
+        <div className="space-y-4">
+          <div className="relative overflow-hidden group">
+            <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg">
+              <CarouselContent>
+                {mediaItems.map((media, index) => (
+                  <CarouselItem key={index}>
+                    <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden max-h-[500px]">
+                      {media.type === 'image' ? (
+                        <Image src={media.url} alt={product.name} fill className="object-cover" />
+                      ) : (
+                        <video src={media.url} controls className="w-full h-full object-cover" />
+                      )}
                     </div>
-                </div>
-
-                {/* Thumbnails */}
-                <Carousel
-                    setApi={setThumbApi}
-                    opts={{
-                        align: 'start',
-                        containScroll: 'keepSnaps',
-                        dragFree: true,
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent className="-ml-2">
-                        {mediaItems.map((media, index) => (
-                        <CarouselItem key={index} className="pl-2 basis-1/4 md:basis-1/5">
-                            <ThumbsButton
-                                onClick={() => onThumbClick(index)}
-                                selected={index === selectedIndex}
-                            >
-                                <Image
-                                    src={media.url}
-                                    alt={`${product.name} thumbnail ${index + 1}`}
-                                    fill
-                                    className="object-cover"
-                                />
-                                {media.type === 'video' && (
-                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                        <PlayCircle className="w-6 h-6 text-white" />
-                                    </div>
-                                )}
-                            </ThumbsButton>
-                        </CarouselItem>
-                    ))}
-                    </CarouselContent>
-                </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
+              <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
+            </Carousel>
+            <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+              <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
+              <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background"><ZoomIn /></Button>
             </div>
-
-            {/* Action Buttons */}
-            <div className='space-y-4 pt-4 border-t mt-4'>
+          </div>
+          <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
+            <CarouselContent className="-ml-2">
+              {mediaItems.map((media, index) => (
+                <CarouselItem key={index} className="pl-2 basis-1/4 md:basis-1/5">
+                  <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
+                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
+                    {media.type === 'video' && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <PlayCircle className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                  </ThumbsButton>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+           <div className='space-y-4 pt-4 border-t mt-4'>
                 <div className="flex items-center gap-4">
                 <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                 <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -312,6 +270,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
             </div>
         </div>
+      </div>
 
         {/* Right Column: Product Info */}
         <div className="md:col-span-3 flex flex-col gap-6">
