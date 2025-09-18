@@ -234,7 +234,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid md:grid-cols-2 lg:ml-6">
+    <div className="grid md:grid-cols-2">
         {/* Left Column: Media Gallery */}
         <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
             <div
@@ -442,7 +442,10 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
             <div>
                 <h3 className="text-base font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+                <div
+                    className="prose prose-sm sm:prose-base max-w-none text-muted-foreground"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                />
             </div>
 
             {children}

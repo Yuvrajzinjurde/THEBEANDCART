@@ -596,19 +596,11 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     </Button>
                                 </div>
                                 <FormControl>
-                                  <div className="rounded-md border border-input">
-                                      <div className="border-b px-3 py-2 flex items-center gap-2">
-                                          <Button type="button" variant="ghost" size="sm" disabled={isFormDisabled}>Normal</Button>
-                                          <Button type="button" variant="ghost" size="sm" className="font-bold" disabled={isFormDisabled}>B</Button>
-                                          <Button type="button" variant="ghost" size="sm" className="italic" disabled={isFormDisabled}>I</Button>
-                                          <Button type="button" variant="ghost" size="sm" className="underline" disabled={isFormDisabled}>U</Button>
-                                      </div>
-                                      <Textarea 
-                                          placeholder="Describe the product..." 
-                                          {...field} 
-                                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[150px]"
-                                      />
-                                  </div>
+                                    <Textarea 
+                                        placeholder="Describe the product... You can use HTML for styling." 
+                                        {...field} 
+                                        className="min-h-[150px]"
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -927,5 +919,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    
