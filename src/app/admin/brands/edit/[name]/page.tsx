@@ -2,14 +2,17 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { BrandForm } from '@/components/admin/brand-form';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function EditBrandPage() {
   const params = useParams();
+  const router = useRouter();
   const brandName = params.name as string;
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,16 +57,25 @@ export default function EditBrandPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Edit Brand</CardTitle>
-        <CardDescription>
-          Update the details for <strong>{brand.displayName}</strong>. The permanent name cannot be changed.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <BrandForm mode="edit" existingBrand={brand} />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+        <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+            </Button>
+            <h1 className="text-xl font-bold">Edit Brand</h1>
+        </div>
+        <Card>
+        <CardHeader>
+            <CardTitle>Update Brand</CardTitle>
+            <CardDescription>
+            Update the details for <strong>{brand.displayName}</strong>. The permanent name cannot be changed.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <BrandForm mode="edit" existingBrand={brand} />
+        </CardContent>
+        </Card>
+    </div>
   );
 }

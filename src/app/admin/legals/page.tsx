@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useTransition, useRef } from "react";
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -19,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { Loader } from "@/components/ui/loader";
-import { Landmark, Save, UploadCloud } from "lucide-react";
+import { Landmark, Save, UploadCloud, ArrowLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { parseLegalDocument } from "@/ai/flows/parse-legal-doc-flow";
 
@@ -54,6 +55,7 @@ const docTypeLabels: Record<LegalDocType, string> = {
 };
 
 export default function LegalsPage() {
+  const router = useRouter();
   const [activeDocType, setActiveDocType] = useState<LegalDocType>('about-us');
   const [documents, setDocuments] = useState<Record<string, Partial<ILegal>>>({});
   const [loading, setLoading] = useState(false);
@@ -181,73 +183,79 @@ export default function LegalsPage() {
   const currentContent = documents[activeDocType]?.content || '';
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-            <Landmark />
-            Legal Documents
-        </CardTitle>
-        <CardDescription>
-          Manage the global legal pages for the entire platform.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Document Type:</span>
-            <Select value={activeDocType} onValueChange={(val) => setActiveDocType(val as any)}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select a document type" />
-              </SelectTrigger>
-              <SelectContent>
-                {legalDocTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {docTypeLabels[type]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-              <Button onClick={() => fileInputRef.current?.click()} variant="outline" disabled={isParsing}>
-                {(isParsing || isPending) && <Loader className="mr-2" />}
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Upload & Parse
-              </Button>
-               <input 
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  accept=".txt" // For now, only accept text files.
-               />
-              <Button onClick={handleSave} disabled={isPending || isParsing}>
-                {(isPending || isParsing) && <Loader className="mr-2" />}
-                <Save className="mr-2 h-4 w-4" /> Save Document
-              </Button>
-          </div>
+    <div className="space-y-4">
+        <div className="flex items-center gap-4">
+             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+            </Button>
+            <h1 className="text-xl font-bold flex items-center gap-2"><Landmark /> Legal Documents</h1>
         </div>
-        
-        {loading ? (
-            <div className="flex justify-center items-center h-64">
-                <Loader className="h-8 w-8 text-primary" />
+        <Card>
+        <CardHeader>
+            <CardTitle>Manage Legal Pages</CardTitle>
+            <CardDescription>
+            Manage the global legal pages for the entire platform.
+            </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Document Type:</span>
+                <Select value={activeDocType} onValueChange={(val) => setActiveDocType(val as any)}>
+                <SelectTrigger className="w-[280px]">
+                    <SelectValue placeholder="Select a document type" />
+                </SelectTrigger>
+                <SelectContent>
+                    {legalDocTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                        {docTypeLabels[type]}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+                </Select>
             </div>
-        ) : (
-            <div>
-                <label htmlFor="content-editor" className="text-sm font-medium">
-                    Content (HTML is supported)
-                </label>
-                <Textarea
-                    id="content-editor"
-                    value={currentContent}
-                    onChange={handleContentChange}
-                    placeholder={`Enter content for ${docTypeLabels[activeDocType]}...`}
-                    className="mt-2 h-96 font-mono text-sm"
-                    disabled={isParsing}
+            <div className="flex items-center gap-2">
+                <Button onClick={() => fileInputRef.current?.click()} variant="outline" disabled={isParsing}>
+                    {(isParsing || isPending) && <Loader className="mr-2" />}
+                    <UploadCloud className="mr-2 h-4 w-4" />
+                    Upload & Parse
+                </Button>
+                <input 
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    accept=".txt" // For now, only accept text files.
                 />
+                <Button onClick={handleSave} disabled={isPending || isParsing}>
+                    {(isPending || isParsing) && <Loader className="mr-2" />}
+                    <Save className="mr-2 h-4 w-4" /> Save Document
+                </Button>
             </div>
-        )}
-      </CardContent>
-    </Card>
+            </div>
+            
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <Loader className="h-8 w-8 text-primary" />
+                </div>
+            ) : (
+                <div>
+                    <label htmlFor="content-editor" className="text-sm font-medium">
+                        Content (HTML is supported)
+                    </label>
+                    <Textarea
+                        id="content-editor"
+                        value={currentContent}
+                        onChange={handleContentChange}
+                        placeholder={`Enter content for ${docTypeLabels[activeDocType]}...`}
+                        className="mt-2 h-96 font-mono text-sm"
+                        disabled={isParsing}
+                    />
+                </div>
+            )}
+        </CardContent>
+        </Card>
+    </div>
   );
 }

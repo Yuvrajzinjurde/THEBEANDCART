@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, Home, ShoppingCart, XCircle } from 'lucide-react';
+import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, ShoppingCart, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import * as XLSX from "xlsx";
@@ -18,7 +18,6 @@ import { getUserDetails } from './actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 
 export default function UserDetailsPage() {
     const params = useParams();
@@ -253,12 +252,4 @@ export default function UserDetailsPage() {
             </Card>
         </div>
     );
-
-    
-
-    
-
-
-
-
-    
+}

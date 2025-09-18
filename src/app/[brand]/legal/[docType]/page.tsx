@@ -1,9 +1,11 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,6 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { ArrowLeft } from 'lucide-react';
 
 // This is defined here to avoid importing server-side code from the model
 interface ILegal {
@@ -23,6 +26,7 @@ interface ILegal {
 
 export default function LegalPage() {
   const params = useParams();
+  const router = useRouter();
   const brandName = params.brand as string;
   const docType = params.docType as string;
 
@@ -70,15 +74,19 @@ export default function LegalPage() {
       <main className="flex min-h-screen flex-col items-center justify-center">
         <h1 className="text-2xl font-bold">Document Not Found</h1>
         <p className="text-muted-foreground">{error || `The requested document could not be found.`}</p>
+         <Button variant="link" onClick={() => router.back()}>Go Back</Button>
       </main>
     );
   }
 
   return (
     <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-       <Card>
-        <CardHeader>
-            <Breadcrumb>
+        <div className="flex items-center gap-4 mb-4">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+            </Button>
+             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink href={brandName ? `/${brandName}/home` : '/'}>Home</BreadcrumbLink>
@@ -89,7 +97,10 @@ export default function LegalPage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-             <CardTitle className="mt-4">{document.title}</CardTitle>
+        </div>
+       <Card>
+        <CardHeader>
+             <CardTitle>{document.title}</CardTitle>
         </CardHeader>
         <CardContent>
             <div 
