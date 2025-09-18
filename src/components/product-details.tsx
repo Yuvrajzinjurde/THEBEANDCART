@@ -236,14 +236,14 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   return (
     <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
         {/* Left Column: Media Gallery */}
-        <div className="md:sticky top-24 self-start flex flex-col gap-4">
+        <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-md">
             <div
-                className="relative group w-full max-w-md mx-auto"
+                className="relative group w-full"
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
                 onMouseMove={handleMouseMove}
             >
-                <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-w-md mx-auto">
+                <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
                     <CarouselContent>
                         {mediaItems.map((media, index) => (
                             <CarouselItem key={index}>
@@ -265,7 +265,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                 {/* Zoom Pane */}
                 {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                    <div className="absolute top-0 right-full mr-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+                    <div className="absolute top-0 left-full ml-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
                         <Image
                             src={mediaItems[selectedIndex].url}
                             alt={`${product.name} zoomed`}
@@ -276,7 +276,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     </div>
                 )}
             </div>
-             <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full max-w-md mx-auto">
+             <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
                 <CarouselContent className="-ml-2">
                     {mediaItems.map((media, index) => (
                         <CarouselItem key={index} className="pl-2 basis-[16.66%]">
