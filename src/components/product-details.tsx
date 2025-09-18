@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -233,191 +234,189 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="relative">
-        <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
-            {/* Left Column: Media Gallery */}
-            <div className="md:sticky top-24 self-start flex flex-col gap-4">
-                <div
-                    className="relative group w-full max-w-md mx-auto"
-                    onMouseEnter={() => setIsZooming(true)}
-                    onMouseLeave={() => setIsZooming(false)}
-                    onMouseMove={handleMouseMove}
-                >
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
-                        <CarouselContent>
-                            {mediaItems.map((media, index) => (
-                                <CarouselItem key={index}>
-                                    <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
-                                        {media.type === 'image' ? (
-                                            <Image src={media.url} alt={product.name} fill className="object-cover" />
-                                        ) : (
-                                            <video src={media.url} controls className="w-full h-full object-cover" />
-                                        )}
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                         <CarouselPrevious className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
-                         <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
-                    </Carousel>
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                        <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
-                    </div>
-                </div>
-                 <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full max-w-md mx-auto">
-                    <CarouselContent className="-ml-2">
+    <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
+        {/* Left Column: Media Gallery */}
+        <div className="md:sticky top-24 self-start flex flex-col gap-4">
+            <div
+                className="relative group w-full max-w-md mx-auto"
+                onMouseEnter={() => setIsZooming(true)}
+                onMouseLeave={() => setIsZooming(false)}
+                onMouseMove={handleMouseMove}
+            >
+                <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-w-md mx-auto">
+                    <CarouselContent>
                         {mediaItems.map((media, index) => (
-                            <CarouselItem key={index} className="pl-2 basis-[16.66%]">
-                                <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
-                                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
-                                    {media.type === 'video' && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                            <PlayCircle className="w-6 h-6 text-white" />
-                                        </div>
+                            <CarouselItem key={index}>
+                                <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
+                                    {media.type === 'image' ? (
+                                        <Image src={media.url} alt={product.name} fill className="object-cover" />
+                                    ) : (
+                                        <video src={media.url} controls className="w-full h-full object-cover" />
                                     )}
-                                </ThumbsButton>
+                                </div>
                             </CarouselItem>
                         ))}
                     </CarouselContent>
+                     <CarouselPrevious className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
+                     <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
                 </Carousel>
-                 <div className="mt-4 space-y-4 max-w-md mx-auto">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                        <div className="flex items-center gap-1 rounded-lg border p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
-                            <span className="w-8 text-center font-semibold">{quantity}</span>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
-                        </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                        <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
-                    </div>
+                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                 </div>
-            </div>
-
-            {/* Right Column: Product Info */}
-            <div className="md:col-span-1 flex flex-col">
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/products?category=${categoryDisplay}`}>{categoryDisplay}</BreadcrumbLink></BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem><BreadcrumbPage>{product.name}</BreadcrumbPage></BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-                
-                <div className="mt-4">
-                    <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-                    <p className="text-muted-foreground mt-1">{product.brand}</p>
-                </div>
-                
-                <div className='space-y-2 mt-4'>
-                    <div className="flex items-center gap-2">
-                        <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
-                            <span>{reviewStats.averageRating.toFixed(1)}</span>
-                            <Star className="w-3 h-3 fill-white" />
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                            {reviewStats.totalRatings.toLocaleString()} ratings & {reviewStats.totalReviews.toLocaleString()} reviews
-                        </span>
-                    </div>
-                    <div className="flex items-baseline gap-3 flex-wrap">
-                        <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
-                        {hasDiscount && (
-                            <>
-                                <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
-                                <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
-                            </>
-                        )}
-                    </div>
-                    {hasDiscount && <p className="text-sm text-green-600">You save ₹{amountSaved.toLocaleString('en-IN')}</p>}
-                </div>
-            
-                <Separator className="my-6" />
-                
-                {/* Variant Selectors */}
-                {uniqueColors.length > 0 && (
-                    <div className="space-y-2 mb-4">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {uniqueColors.map(({ color }) => (
-                                <Button key={color} variant="outline" onClick={() => setSelectedColor(color)} className={cn("capitalize", selectedColor === color && "ring-2 ring-primary")}>{color}</Button>
-                            ))}
-                        </div>
+                {/* Zoom Pane */}
+                {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+                    <div className="absolute top-0 right-full mr-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+                        <Image
+                            src={mediaItems[selectedIndex].url}
+                            alt={`${product.name} zoomed`}
+                            fill
+                            className="object-cover transition-transform duration-200 ease-out"
+                            style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
+                        />
                     </div>
                 )}
-
-                {sizesForSelectedColor.length > 0 && (
-                    <div className="space-y-2 mb-4">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {sizesForSelectedColor.map((size) => (
-                                <Button key={size} variant="outline" size="icon" onClick={() => setSelectedSize(size)} className={cn("w-12 h-12", selectedSize === size && "ring-2 ring-primary")}>{size}</Button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-                {(uniqueColors.length > 0 || sizesForSelectedColor.length > 0) && <Separator className="my-6" />}
-                
-                {/* Offers and Policy */}
-                <div className="space-y-4">
-                    {coupons.length > 0 && (
-                        <div className="space-y-2">
-                            <h3 className="text-base font-semibold">Coupons for you</h3>
-                            {coupons.slice(0,2).map(coupon => (
-                                <div key={coupon._id as string} className="flex items-start gap-2">
-                                    <Tag className="h-5 w-5 mt-0.5 text-primary" />
-                                    <p className="text-sm text-muted-foreground">
-                                        <span className="font-semibold text-foreground">
-                                            {coupon.type === 'percentage' && `${coupon.value}% off`}
-                                            {coupon.type === 'fixed' && `₹${coupon.value} off`}
-                                            {coupon.type === 'free-shipping' && 'Free Shipping'}
-                                        </span> on orders {coupon.minPurchase > 0 ? `above ₹${coupon.minPurchase}` : ''}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm">
-                        <p>{product.returnPeriod} days return policy</p>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger>
-                                <TooltipContent className="p-4 max-w-sm">
-                                    {loadingReturnPolicy ? <Loader /> : returnPolicySummary ? (
-                                        <div className="prose prose-sm"><div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} /></div>
-                                    ) : <p>Return policy not available.</p>}
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                <div>
-                    <h3 className="text-base font-semibold mb-2">Description</h3>
-                    <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-                </div>
-
-                {children}
             </div>
+             <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full max-w-md mx-auto">
+                <CarouselContent className="-ml-2">
+                    {mediaItems.map((media, index) => (
+                        <CarouselItem key={index} className="pl-2 basis-[16.66%]">
+                            <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
+                                <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
+                                {media.type === 'video' && (
+                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                        <PlayCircle className="w-6 h-6 text-white" />
+                                    </div>
+                                )}
+                            </ThumbsButton>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+            </Carousel>
         </div>
 
-        {/* Zoom Pane */}
-        {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-            <div className="absolute top-0 left-full ml-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
-                <Image
-                    src={mediaItems[selectedIndex].url}
-                    alt={`${product.name} zoomed`}
-                    fill
-                    className="object-cover transition-transform duration-200 ease-out"
-                    style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
-                />
+        {/* Right Column: Product Info */}
+        <div className="md:col-span-1 flex flex-col">
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/products?category=${categoryDisplay}`}>{categoryDisplay}</BreadcrumbLink></BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem><BreadcrumbPage>{product.name}</BreadcrumbPage></BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
+            
+            <div className="mt-4">
+                <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
+                <p className="text-muted-foreground mt-1">{product.brand}</p>
             </div>
-        )}
+            
+            <div className='space-y-2 mt-4'>
+                <div className="flex items-center gap-2">
+                    <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                        <span>{reviewStats.averageRating.toFixed(1)}</span>
+                        <Star className="w-3 h-3 fill-white" />
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                        {reviewStats.totalRatings.toLocaleString()} ratings & {reviewStats.totalReviews.toLocaleString()} reviews
+                    </span>
+                </div>
+                <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
+                    {hasDiscount && (
+                        <>
+                            <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                            <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                        </>
+                    )}
+                </div>
+                {hasDiscount && <p className="text-sm text-green-600">You save ₹{amountSaved.toLocaleString('en-IN')}</p>}
+            </div>
+        
+            <Separator className="my-6" />
+            
+            {/* Variant Selectors */}
+            {uniqueColors.length > 0 && (
+                <div className="space-y-2 mb-4">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {uniqueColors.map(({ color }) => (
+                            <Button key={color} variant="outline" onClick={() => setSelectedColor(color)} className={cn("capitalize", selectedColor === color && "ring-2 ring-primary")}>{color}</Button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {sizesForSelectedColor.length > 0 && (
+                <div className="space-y-2 mb-4">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {sizesForSelectedColor.map((size) => (
+                            <Button key={size} variant="outline" size="icon" onClick={() => setSelectedSize(size)} className={cn("w-12 h-12", selectedSize === size && "ring-2 ring-primary")}>{size}</Button>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {(uniqueColors.length > 0 || sizesForSelectedColor.length > 0) && <Separator className="my-6" />}
+            
+            {/* Offers and Policy */}
+            <div className="space-y-4">
+                {coupons.length > 0 && (
+                    <div className="space-y-2">
+                        <h3 className="text-base font-semibold">Coupons for you</h3>
+                        {coupons.slice(0,2).map(coupon => (
+                            <div key={coupon._id as string} className="flex items-start gap-2">
+                                <Tag className="h-5 w-5 mt-0.5 text-primary" />
+                                <p className="text-sm text-muted-foreground">
+                                    <span className="font-semibold text-foreground">
+                                        {coupon.type === 'percentage' && `${coupon.value}% off`}
+                                        {coupon.type === 'fixed' && `₹${coupon.value} off`}
+                                        {coupon.type === 'free-shipping' && 'Free Shipping'}
+                                    </span> on orders {coupon.minPurchase > 0 ? `above ₹${coupon.minPurchase}` : ''}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <div className="flex items-center gap-2 text-sm">
+                    <p>{product.returnPeriod} days return policy</p>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger>
+                            <TooltipContent className="p-4 max-w-sm">
+                                {loadingReturnPolicy ? <Loader /> : returnPolicySummary ? (
+                                    <div className="prose prose-sm"><div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} /></div>
+                                ) : <p>Return policy not available.</p>}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            </div>
+
+            <Separator className="my-6" />
+
+            <div>
+                <h3 className="text-base font-semibold mb-2">Description</h3>
+                <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+            </div>
+
+            <div className="mt-8 space-y-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                    <div className="flex items-center gap-1 rounded-lg border p-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-8 text-center font-semibold">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}><Plus className="h-4 w-4" /></Button>
+                    </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
+                </div>
+            </div>
+
+            {children}
+        </div>
     </div>
   );
 }
