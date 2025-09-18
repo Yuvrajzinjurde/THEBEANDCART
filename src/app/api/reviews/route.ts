@@ -45,19 +45,24 @@ export async function POST(req: Request) {
     const { productId, rating, reviewText, images } = validation.data;
     const productObjectId = new Types.ObjectId(productId);
     
-    const product = await Product.findById(productObjectId);
+    const product = await Product.findById(productObjectId, 'styleId');
     if (!product) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    const existingReview = await Review.findOne({ productId: productObjectId, userId });
+    // Find all variants to check for existing reviews and for purchase validation
+    const variantIds = product.styleId 
+        ? (await Product.find({ styleId: product.styleId }, '_id')).map(p => p._id)
+        : [productObjectId];
+
+    const existingReview = await Review.findOne({ productId: { $in: variantIds }, userId });
     if (existingReview) {
         return NextResponse.json({ message: 'You have already reviewed this product.' }, { status: 409 });
     }
     
     const hasPurchased = await Order.findOne({
       userId,
-      'products.productId': productObjectId,
+      'products.productId': { $in: variantIds },
       status: 'delivered'
     });
 
@@ -66,7 +71,7 @@ export async function POST(req: Request) {
     }
 
     const newReview = new Review({
-        productId: productObjectId,
+        productId: productObjectId, // Associate review with the specific variant purchased
         userId,
         userName,
         rating,
@@ -76,13 +81,19 @@ export async function POST(req: Request) {
 
     await newReview.save();
 
+    // After saving, recalculate average rating for all variants
     const stats = await Review.aggregate([
-        { $match: { productId: productObjectId } },
-        { $group: { _id: '$productId', avgRating: { $avg: '$rating' } } }
+        { $match: { productId: { $in: variantIds } } },
+        { $group: { _id: null, avgRating: { $avg: '$rating' } } }
     ]);
 
     if (stats.length > 0) {
-        await Product.findByIdAndUpdate(productObjectId, { rating: stats[0].avgRating });
+        const newAverageRating = stats[0].avgRating;
+        // Update all variants with the new average rating
+        await Product.updateMany(
+            { _id: { $in: variantIds } },
+            { $set: { rating: newAverageRating } }
+        );
     }
 
     return NextResponse.json({ message: 'Review submitted successfully', review: newReview }, { status: 201 });
