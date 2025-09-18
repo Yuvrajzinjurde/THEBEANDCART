@@ -254,7 +254,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                  {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
                     <div
-                        className="absolute top-0 left-1/2 ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                        className="absolute top-0 left-full ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
                     >
                     <Image
                         src={mediaItems[selectedIndex].url}
@@ -311,7 +311,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-3 flex flex-col gap-4">
+        <div className="md:col-span-3 flex flex-col">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -328,13 +328,15 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </BreadcrumbList>
             </Breadcrumb>
             
-          <div className="space-y-1">
+          <div className="space-y-2 mt-4">
               <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
               <div className="space-y-2">
-                <p className="text-muted-foreground">{product.brand}</p>
-                {hasDiscount && (
-                    <Badge variant="outline" className="text-green-600 border-green-600 mt-2">Special Price</Badge>
-                )}
+                 <div className="space-y-1">
+                  <p className="text-muted-foreground">{product.brand}</p>
+                    {hasDiscount && (
+                        <Badge variant="outline" className="text-green-600 border-green-600 mt-2">Special Price</Badge>
+                    )}
+                </div>
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
                   {hasDiscount && (
@@ -385,9 +387,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </div>
           </div>
           
-            <Separator />
+            <Separator className="my-6" />
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-3">Coupons for you</h3>
                 <div className="space-y-2">
@@ -424,7 +426,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </div>
             </div>
 
-          <Separator />
+          <Separator className="my-6" />
             
           {uniqueColors.length > 0 && (
             <div className="space-y-2">
@@ -465,7 +467,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             </div>
           )}
           
-          <Separator />
+          <Separator className="my-6" />
 
           <div>
             <h3 className="text-lg font-semibold mb-2">Description</h3>
@@ -476,3 +478,4 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
+
