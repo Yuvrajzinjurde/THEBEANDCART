@@ -265,7 +265,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                 {/* Zoom Pane */}
                 {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                    <div className="absolute top-0 right-full mr-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
+                    <div className="absolute top-0 left-0 -translate-x-full mr-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
                         <Image
                             src={mediaItems[selectedIndex].url}
                             alt={`${product.name} zoomed`}
@@ -331,8 +331,39 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
                     {hasDiscount && (
                         <>
-                            <span className="text-lg text-muted-foreground line-through">MRP ₹{product.mrp!.toLocaleString('en-IN')}</span>
+                            <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
                             <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button className="cursor-pointer" onClick={(e) => e.preventDefault()}>
+                                            <Info className="h-4 w-4 text-muted-foreground" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="p-3 w-64">
+                                        <div className="space-y-2">
+                                            <p className="font-bold text-base">Price details</p>
+                                            <div className="flex justify-between text-sm">
+                                                <p className="text-muted-foreground">Maximum Retail Price</p>
+                                                <p>₹{product.mrp!.toFixed(2)}</p>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <p className="text-muted-foreground">Selling Price</p>
+                                                <p>₹{(product.sellingPrice + amountSaved * 0.2).toFixed(2)}</p>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <p className="text-muted-foreground">Special Price</p>
+                                                <p>₹{product.sellingPrice.toFixed(2)}</p>
+                                            </div>
+                                            <Separator />
+                                            <div className="flex justify-between text-sm font-semibold text-green-600">
+                                               <p>Overall you save</p>
+                                               <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
+                                            </div>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </>
                     )}
                 </div>
@@ -344,9 +375,8 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <span className="text-sm text-muted-foreground">
                         {reviewStats.totalRatings.toLocaleString()} ratings & {reviewStats.totalReviews.toLocaleString()} reviews
                     </span>
-                    <Image src="https://picsum.photos/seed/assured/100/25" alt="Assured" width={77} height={20} />
+                    <Image src="https://picsum.photos/seed/assured/100/25" alt="Assured" width={77} height={20} data-ai-hint="logo brand" />
                 </div>
-                {hasDiscount && <p className="text-sm font-medium text-foreground">You save ₹{amountSaved.toLocaleString('en-IN')}</p>}
             </div>
         
             <Separator className="my-6" />
