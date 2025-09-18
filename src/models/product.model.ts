@@ -1,5 +1,4 @@
 
-
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 export interface IProduct extends Document {
