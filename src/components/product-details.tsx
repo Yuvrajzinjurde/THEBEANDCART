@@ -204,9 +204,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="grid md:grid-cols-2 gap-8 lg:gap-16 max-w-6xl mx-auto">
+    <div className="grid md:grid-cols-5 gap-8 lg:gap-12 max-w-7xl mx-auto">
         {/* Left Column: Image Gallery */}
-        <div className="md:sticky top-24 h-max">
+        <div className="md:col-span-2 md:sticky top-24 h-max">
             <div className="grid gap-4">
                 <div className="relative overflow-hidden group">
                     <Carousel
@@ -314,7 +314,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         </div>
 
         {/* Right Column: Product Info */}
-        <div className="flex flex-col gap-6">
+        <div className="md:col-span-3 flex flex-col gap-6">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
