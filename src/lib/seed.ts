@@ -7,6 +7,8 @@ import Product from '@/models/product.model';
 import Review, { IReview } from '@/models/review.model';
 import User from '@/models/user.model';
 import Role from '@/models/role.model';
+import Coupon from '@/models/coupon.model';
+import Brand from '@/models/brand.model';
 import { Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -43,9 +45,12 @@ export const seedDatabase = async () => {
         await dbConnect();
         console.log('Database connected, starting seeding process...');
 
-        // 1. Clear existing Review and non-admin User collections
+        // 1. Clear existing Review, non-admin User, and Coupon collections
         await Review.deleteMany({});
         console.log('Cleared existing Review collection.');
+        
+        await Coupon.deleteMany({});
+        console.log('Cleared existing Coupon collection.');
 
         const adminRole = await Role.findOne({ name: 'admin' });
         if (adminRole) {
@@ -55,14 +60,16 @@ export const seedDatabase = async () => {
             console.log('Admin role not found, skipping user cleanup.');
         }
 
-        // 2. Fetch all products
+        // 2. Fetch all products and brands
         const products = await Product.find({}).select('_id storefront');
         if (products.length === 0) {
-            const message = "No products found in the database. Cannot seed reviews or users.";
+            const message = "No products found. Cannot seed reviews, users, or coupons.";
             console.log(message);
             return { success: true, message };
         }
-        
+        const brands = await Brand.find({}).select('permanentName');
+        const brandNames = brands.map(b => b.permanentName);
+
         const reviewsToCreate: Omit<IReview, keyof Document>[] = [];
         const usersToCreate = new Map<string, any>();
         const userRole = await Role.findOne({ name: 'user' });
@@ -79,13 +86,12 @@ export const seedDatabase = async () => {
                 
                 reviewsToCreate.push({
                     productId: product._id,
-                    userId: new Types.ObjectId(), // Placeholder, will not match a real user
+                    userId: new Types.ObjectId(), // Placeholder
                     userName: dummyReview.userName,
                     rating: dummyReview.rating,
                     review: dummyReview.review,
                 });
                 
-                // Prepare user for creation if not already in our map
                 if (!usersToCreate.has(dummyReview.userName)) {
                      const [firstName, lastName] = dummyReview.userName.split(' ');
                      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace('.', '')}@example.com`;
@@ -97,18 +103,45 @@ export const seedDatabase = async () => {
                          lastName,
                          email,
                          password: hashedPassword,
-                         brand: product.storefront, // Assign brand from product
+                         brand: product.storefront,
                          roles: [userRole._id],
+                         status: 'active',
                          address: { street: '', city: '', state: '', zip: '', country: '' }
                      });
                 }
             }
         }
         
-        // 4. Insert all reviews and users
+        // 4. Create dummy coupons
+        const couponsToCreate = [];
+        for (const brandName of brandNames) {
+            couponsToCreate.push({
+                code: `${brandName.toUpperCase()}SAVE10`,
+                type: 'percentage',
+                value: 10,
+                minPurchase: 500,
+                brand: brandName,
+            });
+            couponsToCreate.push({
+                code: 'FLAT150',
+                type: 'fixed',
+                value: 150,
+                minPurchase: 1000,
+                brand: brandName,
+            });
+        }
+         couponsToCreate.push({
+            code: 'GLOBALFREESHIP',
+            type: 'free-shipping',
+            minPurchase: 750,
+            brand: 'All Brands',
+        });
+
+
+        // 5. Insert all data
         if (reviewsToCreate.length > 0) {
             await Review.insertMany(reviewsToCreate);
-            console.log(`Seeded ${reviewsToCreate.length} reviews across ${products.length} products.`);
+            console.log(`Seeded ${reviewsToCreate.length} reviews.`);
         }
         
         if (usersToCreate.size > 0) {
@@ -116,8 +149,13 @@ export const seedDatabase = async () => {
             await User.insertMany(userDocs);
             console.log(`Seeded ${usersToCreate.size} users.`);
         }
+        
+        if (couponsToCreate.length > 0) {
+            await Coupon.insertMany(couponsToCreate);
+            console.log(`Seeded ${couponsToCreate.length} coupons.`);
+        }
 
-        const message = `Successfully seeded ${reviewsToCreate.length} reviews and ${usersToCreate.size} users.`;
+        const message = `Successfully seeded ${reviewsToCreate.length} reviews, ${usersToCreate.size} users, and ${couponsToCreate.length} coupons.`;
         console.log(message);
         return { success: true, message };
 
@@ -126,4 +164,3 @@ export const seedDatabase = async () => {
         throw new Error(`Failed to seed database: ${error.message}`);
     }
 };
-    

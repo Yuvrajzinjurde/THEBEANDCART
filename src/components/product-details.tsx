@@ -5,8 +5,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
+import type { ICoupon } from '@/models/coupon.model';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ interface ProductDetailsProps {
   variants: IProduct[];
   storefront: string;
   reviewStats: ReviewStats;
+  coupons: ICoupon[];
   children?: React.ReactNode;
 }
 
@@ -55,7 +57,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, children }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
@@ -252,7 +254,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
                  {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
                     <div
-                        className="absolute top-0 left-full ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                        className="absolute top-0 left-1/2 ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
                     >
                     <Image
                         src={mediaItems[selectedIndex].url}
@@ -309,7 +311,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-3 flex flex-col gap-6">
+        <div className="md:col-span-3 flex flex-col gap-4">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -326,14 +328,14 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </BreadcrumbList>
             </Breadcrumb>
             
-          <div className="space-y-2">
+          <div className="space-y-1">
               <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-              <div>
+              <div className="space-y-2">
                 <p className="text-muted-foreground">{product.brand}</p>
                 {hasDiscount && (
                     <Badge variant="outline" className="text-green-600 border-green-600 mt-2">Special Price</Badge>
                 )}
-                <div className="flex items-baseline gap-3 mt-1">
+                <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
                   {hasDiscount && (
                       <>
@@ -371,7 +373,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                       </>
                   )}
                 </div>
-                 <div className="flex items-center gap-2 mt-2">
+                 <div className="flex items-center gap-2">
                     <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
                         <span>{reviewStats.averageRating.toFixed(1)}</span>
                         <Star className="w-3 h-3 fill-white" />
@@ -383,6 +385,45 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </div>
           </div>
           
+            <Separator />
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Coupons for you</h3>
+                <div className="space-y-2">
+                    {coupons.map(coupon => (
+                        <div key={coupon._id as string} className="flex items-start gap-2">
+                            <Tag className="h-5 w-5 mt-0.5 text-green-600" />
+                            <div className="text-sm">
+                                <span className="font-semibold">
+                                    {coupon.type === 'percentage' && `${coupon.value}% off`}
+                                    {coupon.type === 'fixed' && `₹${coupon.value} off`}
+                                    {coupon.type === 'free-shipping' && 'Free Shipping'}
+                                </span>
+                                <p className="text-xs text-muted-foreground">
+                                    {coupon.minPurchase > 0 ? `On orders above ₹${coupon.minPurchase}.` : 'No minimum purchase.'}
+                                    <Button variant="link" className="text-xs h-auto p-0 ml-1">T&C</Button>
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Available offers</h3>
+                 <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                        <Tag className="h-5 w-5 mt-0.5 text-green-600" />
+                        <div className="text-sm">
+                            <span className="font-semibold">Bank Offer</span> 10% Off on Supermoney UPI. Max discount of ₹50. Minimum order value of ₹250.
+                            <Button variant="link" className="text-xs h-auto p-0 ml-1">T&C</Button>
+                        </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
+
           <Separator />
             
           {uniqueColors.length > 0 && (

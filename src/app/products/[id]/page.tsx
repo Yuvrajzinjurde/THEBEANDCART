@@ -6,6 +6,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import type { IBrand } from '@/models/brand.model';
+import type { ICoupon } from '@/models/coupon.model';
 import ProductDetails from '@/components/product-details';
 import { Loader } from '@/components/ui/loader';
 import useRecentlyViewedStore from '@/stores/recently-viewed-store';
@@ -145,6 +146,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reviewStats, setReviewStats] = useState<ReviewStats>({ totalRatings: 0, totalReviews: 0, averageRating: 0 });
+  const [coupons, setCoupons] = useState<ICoupon[]>([]);
 
   const [similarProducts, setSimilarProducts] = useState<IProduct[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
@@ -178,12 +180,20 @@ export default function ProductPage() {
             setReviewStats(stats);
         }
 
-        // Fetch brand data for the footer
+        // Fetch brand data and coupons in parallel
         if (mainProduct.storefront) {
-          const brandResponse = await fetch(`/api/brands/${mainProduct.storefront}`);
+          const [brandResponse, couponResponse] = await Promise.all([
+            fetch(`/api/brands/${mainProduct.storefront}`),
+            fetch(`/api/coupons?brand=${mainProduct.storefront}`)
+          ]);
+
           if (brandResponse.ok) {
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
+          }
+          if (couponResponse.ok) {
+              const couponData = await couponResponse.json();
+              setCoupons(couponData.coupons);
           }
         }
 
@@ -255,6 +265,7 @@ export default function ProductPage() {
           variants={variants.length > 0 ? variants : [product]} 
           storefront={storefront} 
           reviewStats={reviewStats}
+          coupons={coupons}
         >
            <BoughtTogetherSection products={boughtTogether} />
         </ProductDetails>
