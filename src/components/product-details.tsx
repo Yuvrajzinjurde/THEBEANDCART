@@ -207,7 +207,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     <div className="max-w-6xl mx-auto">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
         {/* Left Column: Image Gallery */}
-        <div className="md:sticky md:top-24">
+        <div className="md:sticky md:top-24 max-w-[75%] mx-auto">
             <div className="grid gap-4">
                 <div className="relative overflow-hidden group">
                     <Carousel
@@ -215,7 +215,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         opts={{ loop: true }}
                         className="w-full rounded-lg"
                     >
-                        <CarouselContent className="h-auto aspect-square max-h-[500px]">
+                        <CarouselContent className="h-auto aspect-square">
                             {mediaItems.map((media, index) => (
                                 <CarouselItem key={index} className="h-full">
                                     <div className="min-w-0 h-full relative bg-muted rounded-lg overflow-hidden">
