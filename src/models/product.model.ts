@@ -7,7 +7,7 @@ export interface IProduct extends Document {
   description: string;
   mrp?: number; // Original Price (Maximum Retail Price)
   sellingPrice: number; // Discounted/Selling Price
-  category: string | string[]; // Can be single or multiple categories
+  category: string[]; // Can be single or multiple categories
   images: string[];
   stock: number;
   rating: number;
