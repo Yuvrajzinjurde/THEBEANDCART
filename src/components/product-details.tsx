@@ -234,7 +234,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid md:grid-cols-2">
+    <div className="grid md:grid-cols-2 lg:ml-6">
         {/* Left Column: Media Gallery */}
         <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
             <div
@@ -375,7 +375,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <span className="text-sm text-muted-foreground">
                         {reviewStats.totalRatings.toLocaleString()} ratings & {reviewStats.totalReviews.toLocaleString()} reviews
                     </span>
-                    <Image src="https://picsum.photos/seed/assured/100/25" alt="Assured" width={77} height={20} data-ai-hint="logo brand" />
                 </div>
             </div>
         
