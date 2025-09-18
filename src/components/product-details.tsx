@@ -224,13 +224,13 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       {/* Left Column: Image Gallery */}
        <div className="md:col-span-1 relative">
             <div
-                className="relative group p-4"
+                className="relative group"
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
                 onMouseMove={handleMouseMove}
             >
-                <div className="md:sticky top-24 self-start">
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-h-80">
+                <div className="md:sticky top-24 self-start flex flex-col">
+                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-h-72">
                     <CarouselContent>
                         {mediaItems.map((media, index) => (
                         <CarouselItem key={index}>
@@ -249,7 +249,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <CarouselPrevious className="absolute left-[-24px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
                     <CarouselNext className="absolute right-[-24px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
                     </Carousel>
-                    <div className="absolute top-6 right-6 flex flex-col gap-2 z-10">
+                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                         <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                     </div>
                     
@@ -329,9 +329,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </BreadcrumbList>
             </Breadcrumb>
             
-          <div className="space-y-4 mt-4">
+          <div className="space-y-2 mt-4">
             <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-            <div className="space-y-4">
+             <div className="space-y-4">
                 <div className='space-y-2'>
                     <p className="text-muted-foreground">{product.brand}</p>
                     {hasDiscount && (
@@ -479,3 +479,4 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
+
