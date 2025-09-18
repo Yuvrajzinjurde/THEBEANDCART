@@ -326,66 +326,63 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               </BreadcrumbList>
             </Breadcrumb>
             
-          <div>
+          <div className="space-y-2">
               <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-          </div>
-
-          <div>
-            <p className="text-muted-foreground">{product.brand}</p>
-             {hasDiscount && (
-                <Badge variant="outline" className="text-green-600 border-green-600 my-2">Special Price</Badge>
-             )}
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
-              {hasDiscount && (
-                  <>
-                      <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
-                      <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
-                      <TooltipProvider>
-                          <Tooltip>
-                              <TooltipTrigger asChild>
-                                  <button className="cursor-pointer">
-                                      <Info className="h-4 w-4 text-muted-foreground" />
-                                  </button>
-                              </TooltipTrigger>
-                              <TooltipContent className="p-4 w-64">
-                                  <div className="space-y-3">
-                                      <p className="font-bold text-base">Price details</p>
-                                      <div className="flex justify-between text-sm">
-                                          <div>
-                                              <p>Maximum Retail Price</p>
-                                              <p className="text-xs text-muted-foreground">(incl. of all taxes)</p>
+              <div>
+                <p className="text-muted-foreground">{product.brand}</p>
+                {hasDiscount && (
+                    <Badge variant="outline" className="text-green-600 border-green-600 mt-2">Special Price</Badge>
+                )}
+                <div className="flex items-baseline gap-3 mt-1">
+                  <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
+                  {hasDiscount && (
+                      <>
+                          <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                          <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                          <TooltipProvider>
+                              <Tooltip>
+                                  <TooltipTrigger asChild>
+                                      <button className="cursor-pointer">
+                                          <Info className="h-4 w-4 text-muted-foreground" />
+                                      </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="p-4 w-64">
+                                      <div className="space-y-3">
+                                          <p className="font-bold text-base">Price details</p>
+                                          <div className="flex justify-between text-sm">
+                                              <div>
+                                                  <p>Maximum Retail Price</p>
+                                                  <p className="text-xs text-muted-foreground">(incl. of all taxes)</p>
+                                              </div>
+                                              <p>₹{product.mrp!.toFixed(2)}</p>
                                           </div>
-                                          <p>₹{product.mrp!.toFixed(2)}</p>
+                                          <div className="flex justify-between text-sm">
+                                              <p>Selling Price</p>
+                                              <p>₹{product.sellingPrice.toFixed(2)}</p>
+                                          </div>
+                                          <Separator />
+                                          <div className="flex justify-between text-sm font-semibold text-green-600">
+                                            <p>Overall you save ₹{amountSaved.toFixed(2)} ({discountPercentage}%) on this product</p>
+                                          </div>
                                       </div>
-                                      <div className="flex justify-between text-sm">
-                                          <p>Selling Price</p>
-                                          <p>₹{product.sellingPrice.toFixed(2)}</p>
-                                      </div>
-                                      <Separator />
-                                      <div className="flex justify-between text-sm font-semibold text-green-600">
-                                         <p>Overall you save ₹{amountSaved.toFixed(2)} ({discountPercentage}%) on this product</p>
-                                      </div>
-                                  </div>
-                              </TooltipContent>
-                          </Tooltip>
-                      </TooltipProvider>
-                  </>
-              )}
-            </div>
-             <div className="flex items-center gap-2 mt-2">
-                <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
-                    <span>{reviewStats.averageRating.toFixed(1)}</span>
-                    <Star className="w-3 h-3 fill-white" />
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                    {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
-                </span>
-            </div>
+                                  </TooltipContent>
+                              </Tooltip>
+                          </TooltipProvider>
+                      </>
+                  )}
+                </div>
+                 <div className="flex items-center gap-2 mt-2">
+                    <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                        <span>{reviewStats.averageRating.toFixed(1)}</span>
+                        <Star className="w-3 h-3 fill-white" />
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                        {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
+                    </span>
+                </div>
+              </div>
           </div>
           
-          
-
           <Separator />
             
           {uniqueColors.length > 0 && (
