@@ -15,19 +15,21 @@ import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { cn } from '@/lib/utils';
+import { toast } from 'react-toastify';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import { Loader } from './ui/loader';
 
-interface RatingsAndReviewsProps {
-  productId: string;
-  reviewStats: ReviewStats;
-  reviews: IReview[];
-}
 
 const ASPECT_TAGS = ['Look', 'Colour', 'Comfort', 'Material Quality', 'Light Weight', 'True to Specs'];
 
-const ReviewForm = ({ productId, onCancel }: { productId: string, onCancel: () => void }) => {
+const ReviewForm = ({ productId, onCancel, onSubmitSuccess }: { productId: string, onCancel: () => void, onSubmitSuccess: (newReview: IReview) => void }) => {
+    const { user, token } = useAuth();
+    const router = useRouter();
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState("");
     const [images, setImages] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -51,8 +53,54 @@ const ReviewForm = ({ productId, onCancel }: { productId: string, onCancel: () =
         setImages(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user) {
+            toast.error("You must be logged in to submit a review.");
+            router.push('/login');
+            return;
+        }
+        if (rating === 0) {
+            toast.warn("Please select a rating.");
+            return;
+        }
+        if (!reviewText.trim()) {
+            toast.warn("Please write a review.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    productId,
+                    rating,
+                    reviewText,
+                    images,
+                }),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to submit review.');
+            }
+            toast.success("Review submitted successfully!");
+            onSubmitSuccess(result.review);
+
+        } catch (error: any) {
+            console.error("Review submission error:", error);
+            toast.error(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
-        <div className="mt-6 border-t pt-6">
+        <form onSubmit={handleSubmit} className="mt-6 border-t pt-6">
             <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
             <div className="space-y-6">
                 <div>
@@ -76,6 +124,7 @@ const ReviewForm = ({ productId, onCancel }: { productId: string, onCancel: () =
                         onChange={(e) => setReviewText(e.target.value)}
                         placeholder="Share your thoughts on the product..."
                         className="mt-2"
+                        required
                     />
                 </div>
 
@@ -101,18 +150,40 @@ const ReviewForm = ({ productId, onCancel }: { productId: string, onCancel: () =
                 </div>
                 
                 <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={onCancel}>Cancel</Button>
-                    <Button>Submit Review</Button>
+                    <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Loader className="mr-2" />}
+                        Submit Review
+                    </Button>
                 </div>
             </div>
-        </div>
+        </form>
     );
 };
 
+interface RatingsAndReviewsProps {
+  productId: string;
+  reviewStats: ReviewStats;
+  reviews: IReview[];
+}
 
-export default function RatingsAndReviews({ productId, reviewStats, reviews }: RatingsAndReviewsProps) {
+export default function RatingsAndReviews({ productId, reviewStats: initialReviewStats, reviews: initialReviews }: RatingsAndReviewsProps) {
     const [isWritingReview, setIsWritingReview] = useState(false);
+    const [reviews, setReviews] = useState(initialReviews);
+    const [reviewStats, setReviewStats] = useState(initialReviewStats);
+    
     const allReviewImages = reviews.flatMap(r => r.images || []);
+
+    const handleReviewSubmit = (newReview: IReview) => {
+        // Add the new review to the top of the list and update stats
+        setReviews(prev => [newReview, ...prev]);
+        setReviewStats(prev => ({
+            totalRatings: prev.totalRatings + 1,
+            totalReviews: newReview.review ? prev.totalReviews + 1 : prev.totalReviews,
+            averageRating: (prev.averageRating * prev.totalRatings + newReview.rating) / (prev.totalRatings + 1),
+        }));
+        setIsWritingReview(false);
+    };
 
     return (
     <div className="w-full">
@@ -137,10 +208,14 @@ export default function RatingsAndReviews({ productId, reviewStats, reviews }: R
         </div>
         
         {isWritingReview && (
-            <ReviewForm productId={productId} onCancel={() => setIsWritingReview(false)} />
+            <ReviewForm 
+                productId={productId} 
+                onCancel={() => setIsWritingReview(false)} 
+                onSubmitSuccess={handleReviewSubmit}
+            />
         )}
 
-        {reviewStats.totalRatings > 0 && !isWritingReview && (
+        {reviews.length > 0 && !isWritingReview && (
             <>
                 <Separator className='my-6'/>
 
@@ -225,5 +300,3 @@ export default function RatingsAndReviews({ productId, reviewStats, reviews }: R
     </div>
   );
 }
-
-    

@@ -7,6 +7,7 @@ export interface IReview extends Document {
   userName: string;
   rating: number;
   review: string;
+  reviewText: string;
   images?: string[];
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -38,6 +39,10 @@ const ReviewSchema: Schema<IReview> = new Schema({
   review: { 
     type: String, 
     required: true 
+  },
+  reviewText: { 
+    type: String, 
+    required: false
   },
   images: [{ 
     type: String 
