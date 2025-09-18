@@ -14,6 +14,7 @@ import { Progress } from './ui/progress';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { cn } from '@/lib/utils';
 
 interface RatingsAndReviewsProps {
   productId: string;
@@ -224,3 +225,5 @@ export default function RatingsAndReviews({ productId, reviewStats, reviews }: R
     </div>
   );
 }
+
+    
