@@ -273,14 +273,8 @@ export default function InventoryPage() {
                 <CardContent className="flex flex-col items-center justify-center text-center p-12 gap-4">
                     <CardTitle className="text-destructive">An Error Occurred</CardTitle>
                     <CardDescription>
-                        There was a problem fetching product data, which may be due to corrupted data in the database.
-                        <br/>
-                        Click the button below to clear old data and seed fresh products. This usually fixes the issue.
+                        There was a problem fetching product data. Please try again later.
                     </CardDescription>
-                    <Button onClick={handleSeed} disabled={isSeeding} size="lg">
-                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
-                        {isSeeding ? 'Seeding Database...' : 'Seed Database'}
-                    </Button>
                 </CardContent>
             </Card>
         );
@@ -294,11 +288,13 @@ export default function InventoryPage() {
                     <CardDescription>
                         It looks like there are no products in the database.
                         <br/>
-                        Click the button below to seed it with fresh product data.
+                        You can add products manually.
                     </CardDescription>
-                    <Button onClick={handleSeed} disabled={isSeeding} size="lg">
-                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : null}
-                        {isSeeding ? 'Seeding Database...' : 'Seed Database'}
+                     <Button asChild>
+                        <Link href="/admin/inventory/new">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Product
+                        </Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -337,10 +333,6 @@ export default function InventoryPage() {
                                 disabled={isUpdating}
                             />
                         </div>
-                    </Button>
-                    <Button onClick={handleSeed} disabled={isSeeding}>
-                        {isSeeding && <Loader className="mr-2 h-4 w-4" />}
-                        Re-Seed Products
                     </Button>
                      <Button asChild>
                         <Link href="/admin/inventory/new">
@@ -418,5 +410,3 @@ export default function InventoryPage() {
 
     
 }
-
-    

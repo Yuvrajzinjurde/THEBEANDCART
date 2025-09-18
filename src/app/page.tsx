@@ -23,8 +23,6 @@ import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { themeColors } from '@/lib/brand-schema';
-import { toast } from 'react-toastify';
-
 
 const LandingHeader = () => (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -239,7 +237,6 @@ export default function LandingPage() {
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSeeding, setIsSeeding] = useState(false);
 
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
@@ -250,106 +247,74 @@ export default function LandingPage() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
-  const fetchData = async () => {
-    try {
-        setLoading(true);
-        // Fetch all products, platform settings, and brands in parallel
-        const [productResponse, settingsResponse, brandResponse] = await Promise.all([
-            fetch('/api/products'),
-            fetch('/api/platform'),
-            fetch('/api/brands'),
-        ]);
-        
-        if (!productResponse.ok) throw new Error('Failed to fetch products');
-        if (!brandResponse.ok) throw new Error('Failed to fetch brands');
-        
-        const productData = await productResponse.json();
-        const fetchedProducts: IProduct[] = productData.products;
-        setAllProducts(fetchedProducts);
-        
-        const brandData = await brandResponse.json();
-        setBrands(brandData.brands);
-
-        let settingsData: IPlatformSettings | null = null;
-        if (settingsResponse.ok) {
-            settingsData = await settingsResponse.json();
-            setPlatformSettings(settingsData);
-        }
-
-        // --- Sort and Slice Products for Carousels ---
-        const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
-        const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
-        const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
-
-        const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
-        const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
-        setTrendingProducts(sortedByPopularity.slice(0, 8));
-
-        const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
-        setTopRatedProducts(sortedByRating.slice(0, 8));
-
-        const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-        setNewestProducts(sortedByDate.slice(0, 8));
-
-        // Use featured categories from settings, or derive from products as a fallback
-        if (settingsData && settingsData.featuredCategories.length > 0) {
-            setUniqueCategories(settingsData.featuredCategories);
-        } else {
-            const categories = new Set(fetchedProducts.map(p => p.category));
-            setUniqueCategories(Array.from(categories).slice(0, 12));
-        }
-
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-  };
-
   useEffect(() => {
-    // This effect runs only on the client side
-    const runSeed = async () => {
-      const hasSeeded = localStorage.getItem('db_seeded_v1');
-      if (!hasSeeded) {
-        setIsSeeding(true);
-        toast.info("Setting up the database with sample data. This may take a moment...");
+    async function fetchData() {
         try {
-          const response = await fetch('/api/seed', { method: 'POST' });
-          const result = await response.json();
-          if (response.ok) {
-            toast.success(result.message);
-            localStorage.setItem('db_seeded_v1', 'true');
-            // Data has been seeded, now fetch it to display
-            await fetchData();
-          } else {
-            throw new Error(result.message);
+            setLoading(true);
+            // Fetch all products, platform settings, and brands in parallel
+            const [productResponse, settingsResponse, brandResponse] = await Promise.all([
+                fetch('/api/products'),
+                fetch('/api/platform'),
+                fetch('/api/brands'),
+            ]);
+            
+            if (!productResponse.ok) throw new Error('Failed to fetch products');
+            if (!brandResponse.ok) throw new Error('Failed to fetch brands');
+            
+            const productData = await productResponse.json();
+            const fetchedProducts: IProduct[] = productData.products;
+            setAllProducts(fetchedProducts);
+            
+            const brandData = await brandResponse.json();
+            setBrands(brandData.brands);
+
+            let settingsData: IPlatformSettings | null = null;
+            if (settingsResponse.ok) {
+                settingsData = await settingsResponse.json();
+                setPlatformSettings(settingsData);
+            }
+
+            // --- Sort and Slice Products for Carousels ---
+            const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
+            const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
+            const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
+
+            const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
+            const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
+            setTrendingProducts(sortedByPopularity.slice(0, 8));
+
+            const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
+            setTopRatedProducts(sortedByRating.slice(0, 8));
+
+            const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+            setNewestProducts(sortedByDate.slice(0, 8));
+
+            // Use featured categories from settings, or derive from products as a fallback
+            if (settingsData && settingsData.featuredCategories.length > 0) {
+                setUniqueCategories(settingsData.featuredCategories);
+            } else {
+                const categories = new Set(fetchedProducts.map(p => p.category));
+                setUniqueCategories(Array.from(categories).slice(0, 12));
+            }
+
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
           }
-        } catch (error: any) {
-          toast.error(error.message || 'Failed to seed database.');
-          console.error(error);
-          // Still try to fetch any existing data
-          await fetchData();
-        } finally {
-          setIsSeeding(false);
-        }
-      } else {
-        // If already seeded, just fetch the data
-        fetchData();
-      }
-    };
-    
-    runSeed();
+    }
+    fetchData();
   }, []);
 
   const heroBanners = platformSettings?.heroBanners;
 
-  if (isSeeding) {
-    return (
+  if (loading) {
+      return (
         <div className="flex flex-col items-center justify-center h-screen bg-background">
             <Loader className="h-16 w-16" />
-            <p className="mt-4 text-lg text-muted-foreground animate-pulse">Populating the universe with new brands...</p>
+            <p className="mt-4 text-lg text-muted-foreground animate-pulse">Loading universe of brands...</p>
         </div>
-    );
+      );
   }
 
   return (
@@ -407,7 +372,7 @@ export default function LandingPage() {
         
         <ShopByBrandSection brands={brands} />
 
-        {loading && !isSeeding ? (
+        {loading ? (
             <div className="flex flex-col items-center justify-center text-center py-16">
                 <Loader className="h-12 w-12" />
                 <p className="mt-4 text-muted-foreground">Loading products...</p>
