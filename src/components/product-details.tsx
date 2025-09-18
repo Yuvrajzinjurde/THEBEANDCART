@@ -216,9 +216,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   return (
     <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-8 lg:gap-12 relative">
       {/* Left Column: Image Gallery */}
-      <div className="md:col-span-2 md:sticky top-24 self-start">
-            <div className="space-y-4 relative">
-            <div className="relative overflow-hidden group">
+       <div className="md:col-span-2 md:sticky top-24 self-start">
+        <div className="space-y-4 relative">
+            <div className="relative overflow-hidden group max-h-[350px]">
                 <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg">
                 <CarouselContent>
                     {mediaItems.map((media, index) => (
@@ -261,7 +261,30 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 ))}
                 </CarouselContent>
             </Carousel>
+
+             <div className='space-y-4 pt-4 border-t mt-4'>
+                <div className="flex items-center gap-4">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                <div className="flex items-center gap-1 rounded-lg border p-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="w-8 text-center font-semibold">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
+                        <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                    </Button>
+                    <Button size="lg" variant="secondary" className="h-12 text-base">
+                        Buy Now
+                    </Button>
+                </div>
             </div>
+        </div>
       </div>
        {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
             <div
@@ -397,28 +420,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
           <div>
             <h3 className="text-lg font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-          </div>
-           <div className='space-y-4 pt-4 border-t mt-4'>
-            <div className="flex items-center gap-4">
-            <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-            <div className="flex items-center gap-1 rounded-lg border p-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                    <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center font-semibold">{quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                    <Plus className="h-4 w-4" />
-                </Button>
-            </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-                <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
-                    <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                </Button>
-                <Button size="lg" variant="secondary" className="h-12 text-base">
-                    Buy Now
-                </Button>
-            </div>
           </div>
           {children}
         </div>
