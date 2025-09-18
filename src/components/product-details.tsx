@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -387,7 +386,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         <Star className="w-3 h-3 fill-white" />
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                        {reviewStats.totalRatings.toLocaleString()} ratings & {reviewStats.totalReviews.toLocaleString()} reviews
+                        {reviewStats.totalRatings.toLocaleString()} ratings &amp; {reviewStats.totalReviews.toLocaleString()} reviews
                     </span>
                 </div>
             </div>
@@ -470,3 +469,5 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
+
+    

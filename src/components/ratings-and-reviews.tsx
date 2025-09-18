@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -29,7 +28,7 @@ export default function RatingsAndReviews({ productId, reviewStats, reviews }: R
     <div className="w-full">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div className='flex items-center gap-4'>
-                <h2 className="text-xl font-bold">Ratings & Reviews</h2>
+                <h2 className="text-xl font-bold">Ratings &amp; Reviews</h2>
                 <div className="flex items-center gap-2">
                     <Badge className="flex items-center gap-1 text-base bg-green-600 hover:bg-green-700">
                         <span>{reviewStats.averageRating.toFixed(1)}</span>
@@ -124,3 +123,5 @@ export default function RatingsAndReviews({ productId, reviewStats, reviews }: R
     </div>
   );
 }
+
+    
