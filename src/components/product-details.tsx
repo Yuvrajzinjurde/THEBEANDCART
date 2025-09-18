@@ -214,17 +214,17 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="relative grid md:grid-cols-2 gap-8 lg:gap-12 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Left Column: Image Gallery */}
       <div className="md:col-span-1 space-y-4 md:sticky top-24 self-start">
-            <div className="space-y-4">
+            <div className="space-y-4 relative">
             <div className="relative overflow-hidden group">
                 <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg">
                 <CarouselContent>
                     {mediaItems.map((media, index) => (
                     <CarouselItem key={index}>
                         <div 
-                          className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden max-h-[450px] cursor-crosshair"
+                          className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden cursor-crosshair"
                           onMouseEnter={() => setIsZooming(true)}
                           onMouseLeave={() => setIsZooming(false)}
                           onMouseMove={handleMouseMove}
@@ -261,6 +261,22 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 ))}
                 </CarouselContent>
             </Carousel>
+             {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+                <div 
+                    className="absolute top-0 left-full ml-4 h-[500px] w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                >
+                <Image
+                    src={mediaItems[selectedIndex].url}
+                    alt={`${product.name} zoomed`}
+                    fill
+                    className="object-cover transition-transform duration-200 ease-out"
+                    style={{
+                    transform: 'scale(2.5)',
+                    transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
+                    }}
+                />
+                </div>
+            )}
             </div>
       </div>
 
@@ -406,23 +422,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
           </div>
           {children}
         </div>
-      {/* Zoom Pane */}
-      {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-        <div 
-            className="absolute top-0 left-1/2 ml-4 h-[500px] w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
-        >
-          <Image
-            src={mediaItems[selectedIndex].url}
-            alt={`${product.name} zoomed`}
-            fill
-            className="object-cover transition-transform duration-200 ease-out"
-            style={{
-              transform: 'scale(2.5)',
-              transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }
