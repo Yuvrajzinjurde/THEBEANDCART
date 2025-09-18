@@ -110,13 +110,13 @@ export function AdminSidebar() {
 
   return (
     <aside className={cn(
-        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background",
+        "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background border-r",
         isCollapsed ? "w-16" : "w-64",
     )}>
-        <div className="flex h-full max-h-screen flex-col border-r">
+        <div className="flex h-full max-h-screen flex-col">
             {/* Sidebar Header */}
             <div className={cn(
-                "flex items-center h-16 border-b px-4",
+                "flex items-center h-16 border-b px-4 shrink-0",
                 isCollapsed ? "justify-center" : "justify-between",
             )}>
                 <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
@@ -18,9 +17,9 @@ export default function AdminLayout({
   }, []);
 
   return (
-    <div className="flex w-full bg-muted/40">
+    <div className="flex h-screen w-full bg-muted/40 overflow-hidden">
       <AdminSidebar />
-      <main className="flex-1 p-4 sm:p-6 min-h-screen">
+      <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
         {children}
       </main>
     </div>
