@@ -366,7 +366,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                  <div className="flex items-center gap-2">
                     <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
                         <span>{reviewStats.averageRating.toFixed(1)}</span>
-                        <Star className="w-3 h-3 fill-white" />
+                        <Star className="w-3.5 h-3.5 fill-white" />
                     </Badge>
                     <span className="text-sm text-muted-foreground">
                         {reviewStats.totalRatings.toLocaleString()} ratings &amp; {reviewStats.totalReviews.toLocaleString()} reviews
@@ -378,26 +378,59 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             
             {/* Variant Selectors */}
             {uniqueColors.length > 0 && (
-                <div className="space-y-2 mb-4">
+                <div className="space-y-4 mb-4">
                     <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {uniqueColors.map(({ color }) => (
-                            <Button key={color} variant="outline" onClick={() => setSelectedColor(color)} className={cn("capitalize", selectedColor === color && "ring-2 ring-primary")}>{color}</Button>
+                    <div className="flex flex-wrap gap-3">
+                        {uniqueColors.map(({ color, imageUrl }) => (
+                            <TooltipProvider key={color}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={() => setSelectedColor(color)}
+                                            className={cn(
+                                                "relative h-10 w-10 rounded-full border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                                                selectedColor === color ? "border-primary" : "border-muted"
+                                            )}
+                                        >
+                                            <Image
+                                                src={imageUrl}
+                                                alt={color}
+                                                fill
+                                                className="object-cover rounded-full"
+                                            />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{color}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         ))}
                     </div>
                 </div>
             )}
 
             {sizesForSelectedColor.length > 0 && (
-                <div className="space-y-2 mb-4">
+                <div className="space-y-4 mb-4">
                     <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
                     <div className="flex flex-wrap gap-2">
                         {sizesForSelectedColor.map((size) => (
-                            <Button key={size} variant="outline" size="icon" onClick={() => setSelectedSize(size)} className={cn("w-12 h-12", selectedSize === size && "ring-2 ring-primary")}>{size}</Button>
+                             <Button 
+                                key={size} 
+                                variant={selectedSize === size ? "default" : "outline"}
+                                onClick={() => setSelectedSize(size)} 
+                                className={cn(
+                                    "w-16 h-12 text-base",
+                                    selectedSize === size && "shadow-md"
+                                )}
+                            >
+                                {size}
+                            </Button>
                         ))}
                     </div>
                 </div>
             )}
+
             {(uniqueColors.length > 0 || sizesForSelectedColor.length > 0) && <Separator className="my-6" />}
             
             {/* Offers and Policy */}
