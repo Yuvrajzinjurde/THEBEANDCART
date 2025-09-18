@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Star, ThumbsUp, MoreVertical, Smile, CheckCircle2, UploadCloud, X } from 'lucide-react';
+import { Star, ThumbsUp, MoreVertical, Smile, CheckCircle2, UploadCloud, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import type { IReview } from '@/models/review.model';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader } from './ui/loader';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent } from './ui/dialog';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 
 
 const ASPECT_TAGS = ['Look', 'Colour', 'Comfort', 'Material Quality', 'Light Weight', 'True to Specs'];
@@ -174,7 +176,18 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     const [reviews, setReviews] = useState(initialReviews);
     const [reviewStats, setReviewStats] = useState(initialReviewStats);
     
+    // State for image viewer
+    const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+    const [viewerImages, setViewerImages] = useState<string[]>([]);
+
     const allReviewImages = reviews.flatMap(r => r.images || []);
+
+    const openImageViewer = (images: string[]) => {
+        if (images && images.length > 0) {
+            setViewerImages(images);
+            setIsImageViewerOpen(true);
+        }
+    };
     
     const handleLike = async (reviewId: string) => {
         if (!token || !user) {
@@ -211,6 +224,27 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
 
     return (
     <div className="w-full">
+        <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
+            <DialogContent className="max-w-3xl p-2 bg-transparent border-none shadow-none">
+                <Carousel>
+                    <CarouselContent>
+                        {viewerImages.map((img, index) => (
+                            <CarouselItem key={index}>
+                                <div className="aspect-video relative">
+                                    <Image src={img} alt={`Review image ${index + 1}`} fill className="object-contain" />
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                     {viewerImages.length > 1 && (
+                        <>
+                            <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2 z-10"><ArrowLeft /></CarouselPrevious>
+                            <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2 z-10"><ArrowRight /></CarouselNext>
+                        </>
+                    )}
+                </Carousel>
+            </DialogContent>
+        </Dialog>
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div className='flex items-center gap-4'>
                 <h2 className="text-xl font-bold">Ratings &amp; Reviews</h2>
@@ -261,14 +295,14 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
                         {allReviewImages.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                                 {allReviewImages.slice(0, 4).map((img, index) => (
-                                    <div key={index} className="relative w-20 h-20 rounded-md overflow-hidden">
+                                    <button key={index} className="relative w-20 h-20 rounded-md overflow-hidden cursor-pointer group" onClick={() => openImageViewer([img])}>
                                         <Image src={img} alt={`Customer image ${index+1}`} fill className="object-cover" />
-                                    </div>
+                                    </button>
                                 ))}
                                 {allReviewImages.length > 4 && (
-                                    <div className="w-20 h-20 rounded-md bg-muted flex items-center justify-center text-lg font-bold">
+                                    <button className="w-20 h-20 rounded-md bg-muted flex items-center justify-center text-lg font-bold cursor-pointer" onClick={() => openImageViewer(allReviewImages)}>
                                         +{allReviewImages.length - 4}
-                                    </div>
+                                    </button>
                                 )}
                             </div>
                         ) : (
@@ -293,9 +327,9 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
                             {review.images && review.images.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-3 pl-10">
                                     {review.images.map((img, index) => (
-                                        <div key={index} className="relative w-20 h-20 rounded-md overflow-hidden">
+                                        <button key={index} className="relative w-20 h-20 rounded-md overflow-hidden cursor-pointer group" onClick={() => openImageViewer(review.images || [])}>
                                             <Image src={img} alt={`Review image ${index+1}`} fill className="object-cover" />
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
                             )}
@@ -323,4 +357,3 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     </div>
   );
 }
-
