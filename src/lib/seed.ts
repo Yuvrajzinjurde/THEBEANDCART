@@ -16,40 +16,40 @@ const brandsData = [
         displayName: "Reeva",
         permanentName: "reeva",
         logoUrl: "https://picsum.photos/seed/reeva-logo/200/200",
-        themeName: "Rose",
-        categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
+        themeName: "Jewelry",
+        categories: ["Necklaces", "Rings", "Earrings", "Bracelets", "Pendants", "Anklets", "Bridal Sets", "Men's Jewelry"],
         banners: [
-            { title: "Discover Your Natural Glow", description: "Pure ingredients, powerful results. Shop our new arrivals.", imageUrl: "https://picsum.photos/seed/reeva-glow/1600/400", imageHint: "skincare model" },
-            { title: "Summer Radiance Collection", description: "Lightweight formulas for a sun-kissed look. Limited edition.", imageUrl: "https://picsum.photos/seed/reeva-summer/1600/400", imageHint: "summer beach" },
+            { title: "Timeless Elegance, Redefined", description: "Discover exquisite jewelry crafted to last a lifetime.", imageUrl: "https://picsum.photos/seed/reeva-elegance/1600/400", imageHint: "diamond necklace" },
+            { title: "The Art of Adornment", description: "From classic designs to modern statements, find your signature piece.", imageUrl: "https://picsum.photos/seed/reeva-adornment/1600/400", imageHint: "jewelry collection" },
         ],
         categoryBanners: [
-            { categoryName: "Skincare", imageUrl: "https://picsum.photos/seed/reeva-cat-skincare/400/600", imageHint: "face serum" },
-            { categoryName: "Makeup", imageUrl: "https://picsum.photos/seed/reeva-cat-makeup/400/400", imageHint: "lipstick palette" },
-            { categoryName: "Haircare", imageUrl: "https://picsum.photos/seed/reeva-cat-haircare/400/600", imageHint: "hair oil" },
-            { categoryName: "Body Care", imageUrl: "https://picsum.photos/seed/reeva-cat-bodycare/400/400", imageHint: "body lotion" },
-            { categoryName: "Fragrance", imageUrl: "https://picsum.photos/seed/reeva-cat-fragrance/400/400", imageHint: "perfume bottle" },
-            { categoryName: "Men's Grooming", imageUrl: "https://picsum.photos/seed/reeva-cat-men/400/600", imageHint: "shaving kit" },
-            { categoryName: "Beauty Tools", imageUrl: "https://picsum.photos/seed/reeva-cat-tools/400/400", imageHint: "makeup brushes" },
-            { categoryName: "Wellness", imageUrl: "https://picsum.photos/seed/reeva-cat-wellness/400/400", imageHint: "yoga meditation" },
-            { categoryName: "Combos", imageUrl: "https://picsum.photos/seed/reeva-cat-combos/400/400", imageHint: "gift set" },
+            { categoryName: "Necklaces", imageUrl: "https://picsum.photos/seed/reeva-cat-necklaces/400/600", imageHint: "gold necklace" },
+            { categoryName: "Rings", imageUrl: "https://picsum.photos/seed/reeva-cat-rings/400/400", imageHint: "diamond ring" },
+            { categoryName: "Earrings", imageUrl: "https://picsum.photos/seed/reeva-cat-earrings/400/600", imageHint: "pearl earrings" },
+            { categoryName: "Bracelets", imageUrl: "https://picsum.photos/seed/reeva-cat-bracelets/400/400", imageHint: "silver bracelet" },
+            { categoryName: "Pendants", imageUrl: "https://picsum.photos/seed/reeva-cat-pendants/400/400", imageHint: "gemstone pendant" },
+            { categoryName: "Men's Jewelry", imageUrl: "https://picsum.photos/seed/reeva-cat-men/400/600", imageHint: "men's watch" },
+            { categoryName: "Bridal Sets", imageUrl: "https://picsum.photos/seed/reeva-cat-bridal/400/400", imageHint: "wedding rings" },
+            { categoryName: "Anklets", imageUrl: "https://picsum.photos/seed/reeva-cat-anklets/400/400", imageHint: "gold anklet" },
+            { categoryName: "New Arrivals", imageUrl: "https://picsum.photos/seed/reeva-cat-new/400/400", imageHint: "jewelry box" },
         ],
         promoBanner: {
-            title: "Exclusive Online Offer",
-            description: "Join our community and receive 20% off your first order. Plus, get a free gift at checkout!",
+            title: "The Radiance Collection",
+            description: "Celebrate every moment with our new collection of brilliant-cut diamonds and precious gems. Get 10% off your first order.",
             imageUrl: "https://picsum.photos/seed/reeva-promo/1200/600",
-            imageHint: "beauty products",
-            buttonText: "Shop Now",
+            imageHint: "luxury jewelry",
+            buttonText: "Discover Now",
             buttonLink: "/reeva/products",
         },
         offers: [
-            { title: "First Purchase Bonus", description: "Get 15% off your first order with us.", code: "REEVA15" },
-            { title: "Free Shipping", description: "Enjoy free shipping on all orders over ₹499.", code: "FREESHIP" },
-            { title: "Skincare Special", description: "Buy any 2 serums and get a free face mask.", code: "GLOWUP" },
+            { title: "First Shine", description: "Enjoy 10% off your first jewelry purchase.", code: "SHINE10" },
+            { title: "Free Insured Shipping", description: "Free, secure shipping on all orders over ₹5,000.", code: "SAFE" },
+            { title: "Anniversary Special", description: "Get a surprise gift with every purchase from our Bridal Collection.", code: "FOREVER" },
         ],
         reviews: [
-            { customerName: "Priya S.", rating: 5, reviewText: "The Vitamin C serum is a game changer! My skin has never felt brighter.", customerAvatarUrl: "https://picsum.photos/seed/priya/100/100" },
-            { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
-            { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
+            { customerName: "Aisha P.", rating: 5, reviewText: "The necklace I bought is absolutely breathtaking. The craftsmanship is superb!", customerAvatarUrl: "https://picsum.photos/seed/aisha/100/100" },
+            { customerName: "Vikram S.", rating: 5, reviewText: "I proposed with a ring from Reeva, and she said yes! The ring is stunning, thank you.", customerAvatarUrl: "https://picsum.photos/seed/vikram/100/100" },
+            { customerName: "Sunita M.", rating: 4, reviewText: "Beautiful earrings, though the delivery took a bit longer than expected. Worth the wait!", customerAvatarUrl: "https://picsum.photos/seed/sunita/100/100" },
         ],
     },
     {
@@ -95,16 +95,16 @@ const brandsData = [
 ];
 
 const reevaProducts = [
-    { name: 'Radiant Glow Serum', category: 'Skincare', rating: 4.8 },
-    { name: 'Matte Velvet Lipstick', category: 'Makeup', rating: 4.5 },
-    { name: 'Hydrating Face Cream', category: 'Skincare', rating: 4.9 },
-    { name: 'Nourishing Hair Oil', category: 'Haircare', rating: 4.8 },
-    { name: 'Dewy Finish Foundation', category: 'Makeup', rating: 4.6 },
-    { name: 'Rosewater Face Mist', category: 'Skincare', rating: 4.7 },
-    { name: 'Volumizing Hair Mousse', category: 'Haircare', rating: 4.4 },
-    { name: 'Jasmine Body Lotion', category: 'Body Care', rating: 4.8 },
-    { name: 'Midnight Oud Perfume', category: 'Fragrance', rating: 4.9 },
-    { name: 'Charcoal Face Wash', category: 'Men\'s Grooming', rating: 4.6 },
+    { name: 'Ethereal Diamond Necklace', category: 'Necklaces', rating: 4.9 },
+    { name: 'Opulent Ruby Ring', category: 'Rings', rating: 4.8 },
+    { name: 'Sapphire Drop Earrings', category: 'Earrings', rating: 4.7 },
+    { name: 'Classic Gold Bangle', category: 'Bracelets', rating: 4.9 },
+    { name: 'Emerald Isle Pendant', category: 'Pendants', rating: 4.6 },
+    { name: 'Pearl Strand Anklet', category: 'Anklets', rating: 4.5 },
+    { name: 'Eternity Wedding Band', category: 'Bridal Sets', rating: 5.0 },
+    { name: 'Titanium Link Bracelet', category: 'Men\'s Jewelry', rating: 4.7 },
+    { name: 'Solitaire Diamond Studs', category: 'Earrings', rating: 4.9 },
+    { name: 'Infinity Love Knot Ring', category: 'Rings', rating: 4.8 },
 ];
 
 const nevermoreProducts = [
@@ -126,8 +126,8 @@ const generateProducts = (baseProducts: any[], brand: string, count: number) => 
     for (let i = 0; i < count; i++) {
         const baseProduct = baseProducts[i % baseProducts.length];
         const productName = `${baseProduct.name} #${i + 1}`;
-        const mrp = Math.floor(Math.random() * 2000) + 1000;
-        const sellingPrice = mrp - Math.floor(Math.random() * 500);
+        const mrp = Math.floor(Math.random() * 20000) + 5000;
+        const sellingPrice = mrp - Math.floor(Math.random() * 2500);
         const encodedProductName = encodeURIComponent(productName);
 
         products.push({
