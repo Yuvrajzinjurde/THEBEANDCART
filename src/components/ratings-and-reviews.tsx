@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader } from './ui/loader';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent } from './ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from './ui/dialog';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 
 
@@ -226,6 +226,7 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     <div className="w-full">
         <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
             <DialogContent className="max-w-3xl p-2 bg-transparent border-none shadow-none">
+                <DialogTitle className="sr-only">Review Image Viewer</DialogTitle>
                 <Carousel>
                     <CarouselContent>
                         {viewerImages.map((img, index) => (
