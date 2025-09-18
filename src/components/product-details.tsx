@@ -28,7 +28,6 @@ import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
 import { summarizeLegalDocument } from '@/ai/flows/summarize-legal-doc-flow';
-import { Card, CardContent } from './ui/card';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -181,7 +180,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     // ...(product.videos?.map(url => ({ type: 'video', url })) || [])
   ], [product.images]);
 
-  const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
+  const categoryDisplay = product.category;
   const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
   const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
@@ -235,9 +234,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   return (
     <div className="relative">
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
             {/* Left Column: Media Gallery */}
-            <div className="md:sticky top-24 self-start flex flex-col gap-2 max-w-sm w-full">
+            <div className="md:sticky top-24 self-start flex flex-col gap-4 max-w-sm w-full">
                 <div
                     className="relative group"
                     onMouseEnter={() => setIsZooming(true)}
@@ -281,7 +280,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         ))}
                     </CarouselContent>
                 </Carousel>
-                 <div className="mt-4 p-4 border rounded-lg space-y-4">
+                 <div className="mt-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                         <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -422,7 +421,3 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
-
-    
-
-    
