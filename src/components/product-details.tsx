@@ -212,9 +212,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 <Carousel
                     setApi={setMainApi}
                     opts={{ loop: true }}
-                    className="w-full h-full rounded-lg"
+                    className="w-full rounded-lg"
                 >
-                    <CarouselContent className="h-[500px]">
+                    <CarouselContent className="h-auto aspect-square">
                         {mediaItems.map((media, index) => (
                             <CarouselItem key={index} className="h-full">
                                 <div className="min-w-0 h-full relative bg-muted rounded-lg overflow-hidden">
