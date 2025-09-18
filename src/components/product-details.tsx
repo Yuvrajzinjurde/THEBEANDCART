@@ -28,6 +28,7 @@ import { Badge } from './ui/badge';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
+import { summarizeLegalDocument } from '@/ai/flows/summarize-legal-doc-flow';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -69,7 +70,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const { setCart, setWishlist } = useUserStore();
   const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
-  const [returnPolicy, setReturnPolicy] = useState<ILegal | null>(null);
+  const [returnPolicySummary, setReturnPolicySummary] = useState<string | null>(null);
   const [loadingReturnPolicy, setLoadingReturnPolicy] = useState(true);
 
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.color);
@@ -105,11 +106,15 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         if (response.ok) {
           const data = await response.json();
           if (data.documents.length > 0) {
-            setReturnPolicy(data.documents[0]);
+            const policyContent = data.documents[0].content;
+            // Now, summarize it
+            const summaryResult = await summarizeLegalDocument({ documentContent: policyContent });
+            setReturnPolicySummary(summaryResult.summary);
           }
         }
       } catch (error) {
-        console.error("Failed to fetch return policy", error);
+        console.error("Failed to fetch or summarize return policy", error);
+        setReturnPolicySummary("Could not load return policy summary.");
       } finally {
         setLoadingReturnPolicy(false);
       }
@@ -258,7 +263,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         onMouseLeave={() => setIsZooming(false)}
                         onMouseMove={handleMouseMove}
                     >
-                        <div className="flex flex-col gap-2">
+                         <div className="flex flex-col gap-2">
                            <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-h-72">
                                 <CarouselContent>
                                     {mediaItems.map((media, index) => (
@@ -463,9 +468,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                                         <TooltipContent className="p-4 max-w-sm">
                                             {loadingReturnPolicy ? (
                                                 <Loader />
-                                            ) : returnPolicy ? (
+                                            ) : returnPolicySummary ? (
                                                 <div className="prose prose-sm">
-                                                  <div dangerouslySetInnerHTML={{ __html: returnPolicy.content }} />
+                                                  <div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} />
                                                    <p>Know more about the Return Policy <Link href={`/${storefront}/legal/return-policy`} className="text-primary underline">here</Link></p>
                                                 </div>
                                             ) : (
