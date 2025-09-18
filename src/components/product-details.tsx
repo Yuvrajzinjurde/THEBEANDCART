@@ -28,6 +28,7 @@ interface ProductDetailsProps {
   product: IProduct;
   variants: IProduct[];
   storefront: string;
+  children?: React.ReactNode;
 }
 
 const ThumbsButton: React.FC<React.PropsWithChildren<{
@@ -51,7 +52,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product: initialProduct, variants, storefront }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, variants, storefront, children }: ProductDetailsProps) {
   const router = useRouter();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
@@ -207,7 +208,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     <div className="max-w-6xl mx-auto">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
         {/* Left Column: Image Gallery */}
-        <div className="md:sticky md:top-24 max-w-[75%] mx-auto">
+        <div className="md:sticky md:top-24">
             <div className="grid gap-4">
                 <div className="relative overflow-hidden group">
                     <Carousel
@@ -215,9 +216,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         opts={{ loop: true }}
                         className="w-full rounded-lg"
                     >
-                        <CarouselContent className="h-auto aspect-square">
+                        <CarouselContent className="h-auto aspect-square -ml-0">
                             {mediaItems.map((media, index) => (
-                                <CarouselItem key={index} className="h-full">
+                                <CarouselItem key={index} className="h-full pl-0">
                                     <div className="min-w-0 h-full relative bg-muted rounded-lg overflow-hidden">
                                         {media.type === 'image' ? (
                                             <Image
@@ -433,6 +434,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             <h3 className="text-lg font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
+          {children}
         </div>
       </div>
     </div>

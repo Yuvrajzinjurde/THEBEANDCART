@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import type { IBrand } from '@/models/brand.model';
@@ -61,30 +61,20 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
 const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
   if (products.length < 2) return null;
 
-  const totalPrice = products.reduce((sum, product) => sum + product.sellingPrice, 0);
-
   return (
-    <section className="pt-16">
-      <h2 className="text-2xl font-bold tracking-tight">Frequently Bought Together</h2>
-      <Separator className="my-4" />
-      <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 bg-muted/50 p-8 rounded-lg">
-        <div className="flex items-center gap-4 overflow-x-auto">
-          {products.map((p, index) => (
-            <React.Fragment key={p._id as string}>
-              <div className="w-32 flex-shrink-0">
-                <BrandProductCard product={p} />
-              </div>
-              {index < products.length - 1 && <Plus className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
-            </React.Fragment>
-          ))}
-        </div>
-        <div className="flex-shrink-0 text-center md:text-left">
-          <p className="font-semibold">Total Price:</p>
-          <p className="text-2xl font-bold">₹{totalPrice.toLocaleString('en-IN')}</p>
-          <Button className="mt-2">Add all to cart</Button>
-        </div>
+    <div className="mt-8">
+      <h3 className="text-lg font-semibold mb-2">Frequently Bought Together</h3>
+      <div className="flex items-center gap-4 rounded-lg">
+        {products.map((p, index) => (
+          <React.Fragment key={p._id as string}>
+            <div className="w-32 flex-shrink-0">
+              <BrandProductCard product={p} />
+            </div>
+            {index < products.length - 1 && <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />}
+          </React.Fragment>
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
 
@@ -249,9 +239,13 @@ export default function ProductPage() {
   return (
     <>
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <ProductDetails product={product} variants={variants.length > 0 ? variants : [product]} storefront={storefront} />
-        
-        <BoughtTogetherSection products={boughtTogether} />
+        <ProductDetails 
+          product={product} 
+          variants={variants.length > 0 ? variants : [product]} 
+          storefront={storefront} 
+        >
+           <BoughtTogetherSection products={boughtTogether} />
+        </ProductDetails>
         
         <div className="mt-16">
           <ProductCarouselSection title="Similar Products" products={similarProducts} isLoading={loadingSimilar} />
