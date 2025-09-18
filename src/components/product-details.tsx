@@ -220,41 +220,43 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
+    <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Left Column: Image Gallery */}
-      <div className="md:col-span-2 relative">
+      <div className="md:col-span-1 relative">
          <div className="md:sticky top-24 self-start">
             <div 
-              className="relative overflow-hidden group max-h-[350px]"
+              className="relative group"
               onMouseEnter={() => setIsZooming(true)}
               onMouseLeave={() => setIsZooming(false)}
               onMouseMove={handleMouseMove}
             >
-                <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg">
-                <CarouselContent>
-                    {mediaItems.map((media, index) => (
-                    <CarouselItem key={index}>
-                        <div 
-                          className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden cursor-crosshair"
-                        >
-                        {media.type === 'image' ? (
-                            <Image src={media.url} alt={product.name} fill className="object-cover" />
-                        ) : (
-                            <video src={media.url} controls className="w-full h-full object-cover" />
-                        )}
-                        </div>
-                    </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
-                </Carousel>
+                <div className="overflow-hidden">
+                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg max-h-[350px]">
+                    <CarouselContent>
+                        {mediaItems.map((media, index) => (
+                        <CarouselItem key={index}>
+                            <div 
+                            className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden cursor-crosshair"
+                            >
+                            {media.type === 'image' ? (
+                                <Image src={media.url} alt={product.name} fill className="object-cover" />
+                            ) : (
+                                <video src={media.url} controls className="w-full h-full object-cover" />
+                            )}
+                            </div>
+                        </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
+                    </Carousel>
+                </div>
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
+                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                 </div>
                  {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
                     <div
-                        className="absolute top-0 left-full ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                        className="absolute top-0 left-full ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20"
                     >
                     <Image
                         src={mediaItems[selectedIndex].url}
@@ -311,7 +313,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-3 flex flex-col">
+        <div className="md:col-span-1 flex flex-col">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -329,14 +331,15 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             </Breadcrumb>
             
           <div className="space-y-2 mt-4">
-              <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-              <div className="space-y-2">
-                 <div className="space-y-1">
-                  <p className="text-muted-foreground">{product.brand}</p>
-                    {hasDiscount && (
-                        <Badge variant="outline" className="text-green-600 border-green-600 mt-2">Special Price</Badge>
-                    )}
-                </div>
+            <div className="space-y-1">
+                <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
+                <p className="text-muted-foreground">{product.brand}</p>
+            </div>
+            
+            <div className='space-y-2'>
+                {hasDiscount && (
+                    <Badge variant="outline" className="text-green-600 border-green-600">Special Price</Badge>
+                )}
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
                   {hasDiscount && (
@@ -384,7 +387,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
                     </span>
                 </div>
-              </div>
+            </div>
           </div>
           
             <Separator className="my-6" />
@@ -478,4 +481,3 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
-
