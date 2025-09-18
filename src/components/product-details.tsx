@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -215,7 +216,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-8 lg:gap-12">
+    <div className="max-w-7xl mx-auto grid md:grid-cols-5 gap-8 lg:gap-12 relative">
       {/* Left Column: Image Gallery */}
       <div className="md:col-span-2 relative">
          <div className="md:sticky top-24 self-start">
@@ -247,6 +248,22 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
                 <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                 </div>
+                 {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+                    <div
+                        className="absolute top-0 left-1/2 ml-4 h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
+                    >
+                    <Image
+                        src={mediaItems[selectedIndex].url}
+                        alt={`${product.name} zoomed`}
+                        fill
+                        className="object-cover transition-transform duration-200 ease-out"
+                        style={{
+                        transform: 'scale(2.5)',
+                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
+                        }}
+                    />
+                    </div>
+                )}
             </div>
             <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full mt-4">
                 <CarouselContent className="-ml-2">
@@ -264,7 +281,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 ))}
                 </CarouselContent>
             </Carousel>
-             <div className='space-y-4 pt-4 border-t mt-4'>
+            <div className='space-y-4 pt-4 border-t mt-4'>
                 <div className="flex items-center gap-4">
                 <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                 <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -286,22 +303,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     </Button>
                 </div>
             </div>
-             {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                <div
-                    className="absolute top-0 left-[105%] h-full w-[500px] bg-white border rounded-lg shadow-lg hidden md:block overflow-hidden pointer-events-none z-20"
-                >
-                <Image
-                    src={mediaItems[selectedIndex].url}
-                    alt={`${product.name} zoomed`}
-                    fill
-                    className="object-cover transition-transform duration-200 ease-out"
-                    style={{
-                    transform: 'scale(2.5)',
-                    transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
-                    }}
-                />
-                </div>
-            )}
         </div>
       </div>
 
@@ -337,12 +338,15 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             <span className="text-sm text-muted-foreground">({product.rating.toFixed(1)} Rating)</span>
           </div>
 
-          <div className="flex items-baseline gap-3">
+          <div>
+             {hasDiscount && (
+                <Badge variant="outline" className="text-green-600 border-green-600 mb-2">Special Price</Badge>
+             )}
+            <div className="flex items-baseline gap-3">
               <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
               {hasDiscount && (
                   <>
                       <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
-                      <Badge variant="outline" className="text-green-600 border-green-600">Special Price</Badge>
                       <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
                       <TooltipProvider>
                           <Tooltip>
@@ -375,6 +379,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                       </TooltipProvider>
                   </>
               )}
+            </div>
           </div>
           
           <Separator />
@@ -429,3 +434,4 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
+
