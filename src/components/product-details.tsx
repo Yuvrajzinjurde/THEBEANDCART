@@ -234,16 +234,16 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   return (
     <div className="relative">
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
             {/* Left Column: Media Gallery */}
-            <div className="md:sticky top-24 self-start flex flex-col gap-4 max-w-sm w-full">
+            <div className="md:sticky top-24 self-start flex flex-col gap-4">
                 <div
                     className="relative group"
                     onMouseEnter={() => setIsZooming(true)}
                     onMouseLeave={() => setIsZooming(false)}
                     onMouseMove={handleMouseMove}
                 >
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
+                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full max-w-sm mx-auto">
                         <CarouselContent>
                             {mediaItems.map((media, index) => (
                                 <CarouselItem key={index}>
@@ -264,7 +264,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
                     </div>
                 </div>
-                 <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
+                 <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full max-w-sm mx-auto">
                     <CarouselContent className="-ml-2">
                         {mediaItems.map((media, index) => (
                             <CarouselItem key={index} className="pl-2 basis-[16.66%]">
@@ -280,7 +280,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         ))}
                     </CarouselContent>
                 </Carousel>
-                 <div className="mt-4 space-y-4">
+                 <div className="mt-4 space-y-4 max-w-sm mx-auto">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                         <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -421,3 +421,5 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
+
+    
