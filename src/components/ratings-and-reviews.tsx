@@ -168,7 +168,8 @@ interface RatingsAndReviewsProps {
 }
 
 export default function RatingsAndReviews({ productId, reviewStats: initialReviewStats, reviews: initialReviews }: RatingsAndReviewsProps) {
-    const { token } = useAuth();
+    const { user, token } = useAuth();
+    const router = useRouter();
     const [isWritingReview, setIsWritingReview] = useState(false);
     const [reviews, setReviews] = useState(initialReviews);
     const [reviewStats, setReviewStats] = useState(initialReviewStats);
@@ -176,8 +177,13 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     const allReviewImages = reviews.flatMap(r => r.images || []);
     
     const handleLike = async (reviewId: string) => {
+        if (!token || !user) {
+            toast.info("Please log in to like a review.");
+            return;
+        }
+
         try {
-            const response = await fetch(`/api/reviews/${reviewId}/like`, { 
+            const response = await fetch(`/api/reviews/${reviewId}/like`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -317,3 +323,4 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
     </div>
   );
 }
+
