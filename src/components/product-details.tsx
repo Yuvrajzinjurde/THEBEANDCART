@@ -218,9 +218,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+    <div className="grid md:grid-cols-5 gap-8 lg:gap-12">
       {/* Left Column: Image Gallery */}
-      <div className="relative">
+      <div className="md:col-span-2 relative">
          <div className="md:sticky top-24 self-start">
             <div 
               className="relative overflow-hidden group max-h-[350px]"
@@ -309,7 +309,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-1 flex flex-col gap-6">
+        <div className="md:col-span-3 flex flex-col gap-6">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -328,12 +328,12 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             
           <div>
               <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-              <p className="text-muted-foreground mt-1">{product.brand}</p>
           </div>
 
           <div>
+            <p className="text-muted-foreground">{product.brand}</p>
              {hasDiscount && (
-                <Badge variant="outline" className="text-green-600 border-green-600 mb-2">Special Price</Badge>
+                <Badge variant="outline" className="text-green-600 border-green-600 my-2">Special Price</Badge>
              )}
             <div className="flex items-baseline gap-3">
               <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
@@ -373,9 +373,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                   </>
               )}
             </div>
-          </div>
-          
-            <div className="flex items-center gap-2">
+             <div className="flex items-center gap-2 mt-2">
                 <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
                     <span>{reviewStats.averageRating.toFixed(1)}</span>
                     <Star className="w-3 h-3 fill-white" />
@@ -384,6 +382,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     {reviewStats.totalRatings.toLocaleString()} ratings and {reviewStats.totalReviews.toLocaleString()} reviews
                 </span>
             </div>
+          </div>
+          
+          
 
           <Separator />
             
@@ -437,4 +438,3 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     </div>
   );
 }
-
