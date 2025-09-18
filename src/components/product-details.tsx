@@ -224,13 +224,13 @@ export default function ProductDetails({ product: initialProduct, variants, stor
       {/* Left Column: Image Gallery */}
        <div className="md:col-span-1 relative">
             <div
-                className="relative group p-4"
+                className="relative group"
                 onMouseEnter={() => setIsZooming(true)}
                 onMouseLeave={() => setIsZooming(false)}
                 onMouseMove={handleMouseMove}
             >
                 <div className="md:sticky top-24 self-start">
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg">
+                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full rounded-lg max-h-[450px]">
                     <CarouselContent>
                         {mediaItems.map((media, index) => (
                         <CarouselItem key={index}>
@@ -256,7 +256,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full mt-4">
                         <CarouselContent className="-ml-2">
                         {mediaItems.map((media, index) => (
-                            <CarouselItem key={index} className="pl-2 basis-1/5 md:basis-1/6">
+                            <CarouselItem key={index} className="pl-2 basis-[16.66%]">
                             <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
                                 <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
                                 {media.type === 'video' && (
@@ -331,7 +331,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             
           <div className="space-y-2 mt-4">
             <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-            <div className="space-y-2">
+            <div className="space-y-4">
                 <p className="text-muted-foreground">{product.brand}</p>
                  <div className='space-y-2'>
                     {hasDiscount && (
