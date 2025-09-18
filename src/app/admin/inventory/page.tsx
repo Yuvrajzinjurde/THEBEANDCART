@@ -16,7 +16,7 @@ import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Info, Download, Upload, PlusCircle, ImageIcon } from 'lucide-react';
+import { Info, Download, Upload, PlusCircle, ImageIcon, RefreshCw } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
@@ -97,9 +97,9 @@ export default function InventoryPage() {
         setFilteredProducts(productsToDisplay);
     }, [activeTab, categoryFilter, sortOption, allProducts]);
 
-    const handleSeed = async () => {
+    const handleSeedReviews = async () => {
         setIsSeeding(true);
-        toast.info("Clearing old products and seeding new data... This might take a moment.");
+        toast.info("Seeding product reviews... This might take a moment.");
         try {
           const response = await fetch('/api/seed', { method: 'POST' });
           const result = await response.json();
@@ -108,10 +108,9 @@ export default function InventoryPage() {
           } else {
             throw new Error(result.message);
           }
-          // After seeding, fetch the new products
-          await fetchProducts();
+          // After seeding, you might want to refresh data that depends on reviews
         } catch (error: any) {
-          toast.error(error.message || 'Failed to seed database.');
+          toast.error(error.message || 'Failed to seed reviews.');
           console.error(error);
         } finally {
           setIsSeeding(false);
@@ -339,6 +338,10 @@ export default function InventoryPage() {
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Product
                         </Link>
+                    </Button>
+                     <Button variant="secondary" onClick={handleSeedReviews} disabled={isSeeding}>
+                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                        Seed Reviews
                     </Button>
                 </div>
             </CardHeader>
