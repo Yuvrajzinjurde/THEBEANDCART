@@ -204,22 +204,21 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
+    <div className="grid md:grid-cols-2 gap-8 lg:gap-16 max-w-6xl mx-auto">
         {/* Left Column: Image Gallery */}
-        <div className="w-full">
-            <div className="md:sticky top-24">
-                 <div className="grid gap-4">
-                    <div className="relative overflow-hidden group">
+        <div className="md:sticky top-24 w-full h-[calc(100vh-7rem)]">
+            <div className="flex flex-col h-full">
+                <div className="grid gap-4 flex-1 min-h-0">
+                    <div className="relative overflow-hidden group h-full">
                         <Carousel
                             setApi={setMainApi}
                             opts={{ loop: true }}
-                            className="w-full rounded-lg"
+                            className="w-full h-full rounded-lg"
                         >
-                            <CarouselContent>
+                            <CarouselContent className="h-full">
                                 {mediaItems.map((media, index) => (
-                                    <CarouselItem key={index}>
-                                        <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
+                                    <CarouselItem key={index} className="h-full">
+                                        <div className="w-full h-full relative bg-muted rounded-lg overflow-hidden">
                                             {media.type === 'image' ? (
                                                 <Image
                                                     src={media.url}
@@ -288,37 +287,36 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         ))}
                         </CarouselContent>
                     </Carousel>
+                </div>
 
-                    {/* Action Buttons */}
-                    <div className='space-y-4 pt-4'>
-                        <div className="flex items-center gap-4">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                        <div className="flex items-center gap-1 rounded-lg border p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
-                                <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="w-8 text-center font-semibold">{quantity}</span>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        </div>
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
-                                <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
-                            </Button>
-                            <Button size="lg" variant="secondary" className="h-12 text-base">
-                                Buy Now
-                            </Button>
-                        </div>
+                {/* Action Buttons */}
+                <div className='space-y-4 pt-4 border-t mt-4'>
+                    <div className="flex items-center gap-4">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                    <div className="flex items-center gap-1 rounded-lg border p-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-1)}>
+                            <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center font-semibold">{quantity}</span>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(1)}>
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}>
+                            <ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart
+                        </Button>
+                        <Button size="lg" variant="secondary" className="h-12 text-base">
+                            Buy Now
+                        </Button>
                     </div>
                 </div>
             </div>
         </div>
 
-
         {/* Right Column: Product Info */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6 h-[calc(100vh-7rem)] overflow-y-auto pr-4">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -437,7 +435,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
           </div>
           {children}
         </div>
-      </div>
     </div>
   );
 }
