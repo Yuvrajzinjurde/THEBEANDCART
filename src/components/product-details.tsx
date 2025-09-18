@@ -234,7 +234,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
+    <div className="grid md:grid-cols-2">
         {/* Left Column: Media Gallery */}
         <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
             <div
@@ -309,7 +309,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-1 flex flex-col">
+        <div className="md:col-span-1 flex flex-col lg:ml-6">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
@@ -326,6 +326,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             </div>
             
             <div className='space-y-2 mt-4'>
+                 <p className="text-sm font-semibold text-primary">Special price</p>
                  <div className="flex items-baseline gap-3 flex-wrap">
                     <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
                     {hasDiscount && (
@@ -345,8 +346,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     </span>
                     <Image src="https://picsum.photos/seed/assured/100/25" alt="Assured" width={77} height={20} />
                 </div>
-                {hasDiscount && <p className="text-sm text-green-600">You save ₹{amountSaved.toLocaleString('en-IN')}</p>}
-                <p className="text-xs text-muted-foreground">Special price</p>
+                {hasDiscount && <p className="text-sm font-medium text-foreground">You save ₹{amountSaved.toLocaleString('en-IN')}</p>}
             </div>
         
             <Separator className="my-6" />
