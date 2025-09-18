@@ -207,7 +207,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     <div className="grid md:grid-cols-5 gap-8 lg:gap-12 max-w-7xl mx-auto">
         {/* Left Column: Image Gallery */}
         <div className="md:col-span-2 md:sticky top-24 h-max">
-            <div className="grid gap-4">
+            <div className="grid gap-4 max-h-[500px]">
                 <div className="relative overflow-hidden group">
                     <Carousel
                         setApi={setMainApi}
