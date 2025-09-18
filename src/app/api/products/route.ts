@@ -14,25 +14,37 @@ export async function GET(req: Request) {
     const storefront = searchParams.get('storefront');
     const category = searchParams.get('category');
     const keyword = searchParams.get('keyword');
+    const keywords = searchParams.get('keywords'); // For similar products
+    const exclude = searchParams.get('exclude'); // To exclude current product
     
-    // If a specific storefront, category, or keyword is provided, use the existing query logic.
-    if (storefront || category || keyword) {
-        let query: any = {};
+    let query: any = {};
 
-        if (storefront) {
-        query.storefront = storefront;
-        }
-        
-        if (category) {
-            query.category = category;
-        }
+    if (storefront) {
+      query.storefront = storefront;
+    }
+    
+    if (category) {
+        query.category = category;
+    }
 
-        if (keyword) {
-            query.keywords = { $in: [new RegExp(keyword, 'i')] };
-        }
+    if (keyword) {
+        query.keywords = { $in: [new RegExp(keyword, 'i')] };
+    }
 
+    if (keywords) {
+        const keywordArray = keywords.split(',');
+        query.keywords = { $in: keywordArray.map(k => new RegExp(k, 'i')) };
+    }
+    
+    if (exclude) {
+        query._id = { $ne: exclude };
+    }
+
+    // If any filter is provided, use the query.
+    if (storefront || category || keyword || keywords) {
         const products = await Product.find(query)
             .sort({ createdAt: -1 })
+            .limit(10) // Limit results for performance
             .lean();
         
         return NextResponse.json({ products }, { status: 200 });
