@@ -180,15 +180,15 @@ const Step2_Box = () => {
     useEffect(() => {
         async function fetchDataAndSuggestions() {
             setLoading(true);
-            const fetchedBoxes = await fetchAllBoxes();
+            const fetchedPackages = await fetchAllBoxes();
             
-            if (occasion && fetchedBoxes.length > 0) {
+            if (occasion && fetchedPackages.length > 0) {
                 try {
-                    const boxList = fetchedBoxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
+                    const packageList = fetchedPackages.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ occasion, boxes: boxList }),
+                        body: JSON.stringify({ occasion, boxes: packageList }),
                     });
                     if (suggestionRes.ok) {
                         const suggestionData = await suggestionRes.json();
@@ -230,30 +230,24 @@ const Step2_Box = () => {
 
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${(selectedBoxVariant as any)._id}` : undefined;
 
-    const suggestedItems = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
-    const suggestedBoxes = suggestedItems.filter(b => b.boxType === 'box');
-    const suggestedBags = suggestedItems.filter(b => b.boxType === 'bag');
-
-    const otherItems = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
-    const otherBoxes = otherItems.filter(b => b.boxType === 'box');
-    const otherBags = otherItems.filter(b => b.boxType === 'bag');
-
+    const onlyBoxes = allBoxes.filter(b => b.boxType === 'box');
+    const suggestedBoxes = onlyBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
+    const otherBoxes = onlyBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <CardHeader>
-                <CardTitle>Choose Your Packaging</CardTitle>
-                <CardDescription>Select the perfect vessel for your gifts. You can choose a box or a bag.</CardDescription>
+                <CardTitle>Choose Your Box</CardTitle>
+                <CardDescription>Select the perfect vessel for your gifts.</CardDescription>
             </CardHeader>
             <CardContent>
                 {loading ? <Loader /> : (
                     <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
                         
-                        {(suggestedBoxes.length > 0 || suggestedBags.length > 0) && (
+                        {suggestedBoxes.length > 0 && (
                             <section>
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
-                                {suggestedBoxes.length > 0 && <PackagingGrid items={suggestedBoxes} onLike={handleLike} />}
-                                {suggestedBags.length > 0 && <PackagingGrid items={suggestedBags} onLike={handleLike} />}
+                                <PackagingGrid items={suggestedBoxes} onLike={handleLike} />
                             </section>
                         )}
                         
@@ -262,10 +256,6 @@ const Step2_Box = () => {
                              <PackagingGrid items={otherBoxes} onLike={handleLike} />
                         </section>
 
-                        <section>
-                             <h3 className="font-bold text-lg mb-4">All Bags</h3>
-                             <PackagingGrid items={otherBags} onLike={handleLike} />
-                        </section>
                     </RadioGroup>
                 )}
             </CardContent>
