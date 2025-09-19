@@ -20,6 +20,10 @@ import {
   Truck,
   Gift,
   Store,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -76,6 +80,30 @@ const GiftBoxIcon = () => (
         <path d="M50 10C60 10 70 20 70 30H50V10Z" fill="currentColor"/>
     </svg>
 )
+
+const CartFooter = ({ brandName }: { brandName: string }) => (
+    <footer className="w-full border-t bg-background mt-16">
+        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href={`/${brandName}/legal/about-us`} className="hover:text-primary">About Us</Link>
+                    <Link href={`/${brandName}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
+                    <Link href={`/${brandName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
+                </div>
+                 <div className="flex space-x-4">
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
+                </div>
+            </div>
+             <div className="mt-4 border-t pt-4">
+                <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+);
+
 
 export default function CartPage() {
   const router = useRouter();
@@ -238,6 +266,7 @@ export default function CartPage() {
   
   if (cartItems.length === 0) {
       return (
+        <>
         <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
@@ -250,6 +279,8 @@ export default function CartPage() {
                 </Button>
             </div>
         </main>
+        <CartFooter brandName={brandName} />
+        </>
       );
   }
 
@@ -257,8 +288,8 @@ export default function CartPage() {
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
                     <Button
                     variant="outline"
                     size="icon"
@@ -439,8 +470,7 @@ export default function CartPage() {
         </div>
       </div>
     </main>
+    <CartFooter brandName={brandName} />
     </>
   );
 }
-
-    
