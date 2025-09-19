@@ -45,8 +45,8 @@ Occasion: {{{occasion}}}
 
 Products in the hamper:
 {{#each products}}
-- Name: {{name}}
-  Description: {{description}}
+- Name: {{{this.name}}}
+  Description: {{{this.description}}}
 {{/each}}
 
 Analyze the combination of the occasion and products to create a message that is thoughtful and relevant.
