@@ -245,21 +245,21 @@ export function AdminSidebar() {
             "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background border-r h-screen sticky top-0",
             isCollapsed ? "w-16" : "w-64",
         )}>
-            <div className="flex h-full max-h-screen flex-col">
-                <div className={cn("flex items-center h-16 border-b px-4 shrink-0", isCollapsed ? "justify-center" : "justify-between")}>
-                    <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                        <Store className="h-6 w-6 text-primary" />
-                        <span>Admin Panel</span>
-                    </Link>
-                    <Button variant="ghost" size="icon" onClick={toggleSidebar}>
-                        <PanelLeft className="h-5 w-5" />
-                        <span className="sr-only">Toggle Sidebar</span>
-                    </Button>
-                </div>
-                 <div className={cn("p-2", isCollapsed && "px-1.5 py-2 flex justify-center")}>
-                    <BrandSelector isCollapsed={isCollapsed} />
-                </div>
-                <TooltipProvider delayDuration={0}>
+             <TooltipProvider delayDuration={0}>
+                <div className="flex h-full max-h-screen flex-col">
+                    <div className={cn("flex items-center h-16 border-b px-4 shrink-0", isCollapsed ? "justify-center" : "justify-between")}>
+                        <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
+                            <Store className="h-6 w-6 text-primary" />
+                            <span>Admin Panel</span>
+                        </Link>
+                        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+                            <PanelLeft className="h-5 w-5" />
+                            <span className="sr-only">Toggle Sidebar</span>
+                        </Button>
+                    </div>
+                    <div className={cn("p-2", isCollapsed && "px-1.5 py-2 flex justify-center")}>
+                        <BrandSelector isCollapsed={isCollapsed} />
+                    </div>
                     <div className="flex-1 overflow-auto py-2 no-scrollbar">
                         <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
                             {navItems.sort((a, b) => a.label.localeCompare(b.label)).map(({ href, icon: Icon, label }) => (
@@ -278,27 +278,25 @@ export function AdminSidebar() {
                             ))}
                         </nav>
                     </div>
-                </TooltipProvider>
-                <div className="mt-auto border-t">
-                    <div className={cn("p-2", isCollapsed ? "py-2" : "p-2")}>
-                         <TooltipProvider delayDuration={0}>
-                            <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
-                                {!isCollapsed && <span className="text-xs text-muted-foreground">Settings</span>}
-                                <div className={cn("flex items-center gap-1", isCollapsed && "flex-col")}>
-                                     <Tooltip>
-                                        <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button></TooltipTrigger>
-                                        <TooltipContent side={isCollapsed ? "right" : "top"}>Settings</TooltipContent>
-                                    </Tooltip>
+                    <div className="mt-auto border-t">
+                        <div className={cn("p-2", isCollapsed ? "py-2" : "p-2")}>
+                                <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
+                                    {!isCollapsed && <span className="text-xs text-muted-foreground">Settings</span>}
+                                    <div className={cn("flex items-center gap-1", isCollapsed && "flex-col")}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button></TooltipTrigger>
+                                            <TooltipContent side={isCollapsed ? "right" : "top"}>Settings</TooltipContent>
+                                        </Tooltip>
+                                    </div>
                                 </div>
-                            </div>
-                        </TooltipProvider>
-                    </div>
-                    <Separator className="my-0" />
-                    <div className={cn("py-2", isCollapsed && "p-2 flex justify-center")}>
-                        <UserNav isCollapsed={isCollapsed} />
+                        </div>
+                        <Separator className="my-0" />
+                        <div className={cn("py-2", isCollapsed && "p-2 flex justify-center")}>
+                            <UserNav isCollapsed={isCollapsed} />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </TooltipProvider>
         </aside>
     );
 }
