@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import useHamperStore from "@/stores/hamper-store";
 import type { IBox, IBoxVariant } from "@/models/box.model";
@@ -134,17 +134,14 @@ const Step2_Box = () => {
 };
 
 const Step3_Products = () => {
-    const params = useParams();
-    const brandName = params.brand as string;
     const { products: hamperProducts, addProduct, removeProduct } = useHamperStore();
     const [allProducts, setAllProducts] = useState<IProduct[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchProducts() {
-            if (!brandName) return;
             try {
-                const productResponse = await fetch(`/api/products?storefront=${brandName}`);
+                const productResponse = await fetch(`/api/products`);
                 if (productResponse.ok) {
                     const productData = await productResponse.json();
                     setAllProducts(productData.products);
@@ -156,7 +153,7 @@ const Step3_Products = () => {
             }
         }
         fetchProducts();
-    }, [brandName]);
+    }, []);
     
     const hamperProductIds = hamperProducts.map(p => p._id);
     const availableProducts = allProducts.filter(p => !hamperProductIds.includes(p._id));
@@ -166,7 +163,7 @@ const Step3_Products = () => {
             <div className="md:col-span-2">
                 <CardHeader className="px-0">
                     <CardTitle>Fill Your Hamper</CardTitle>
-                    <CardDescription>Browse and select products to add to your hamper.</CardDescription>
+                    <CardDescription>Browse and select products from any brand to add to your hamper.</CardDescription>
                 </CardHeader>
                 <CardContent className="px-0">
                     {loading ? <Loader /> : (
@@ -293,8 +290,6 @@ const Step4_Notes = () => {
 
 export default function CreateHamperPage() {
     const router = useRouter();
-    const params = useParams();
-    const brandName = params.brand as string;
     const { user, loading: authLoading, token } = useAuth();
     
     const { step, setStep, reset: resetHamper, ...hamperState } = useHamperStore();
@@ -302,9 +297,9 @@ export default function CreateHamperPage() {
     useEffect(() => {
         if (!authLoading && !user) {
             toast.info("Please log in to create a hamper.");
-            router.replace(`/${brandName}/login`);
+            router.replace(`/reeva/login`); // Default to a brand login page
         }
-    }, [user, authLoading, router, brandName]);
+    }, [user, authLoading, router]);
     
     // Persist progress to backend on state change
     useEffect(() => {

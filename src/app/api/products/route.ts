@@ -45,36 +45,16 @@ export async function GET(req: Request) {
     if (storefront || category || keyword || keywords) {
         const products = await Product.find(query)
             .sort({ createdAt: -1 })
-            .limit(10) // Limit results for performance
+            .limit(20) // Limit results for performance
             .lean();
         
         return NextResponse.json({ products }, { status: 200 });
     }
 
-    // If no specific filter, fetch a few products from each brand for the main landing page.
-    const products = await Product.aggregate([
-      // Sort all products by creation date to get the newest ones first
-      { $sort: { createdAt: -1 } },
-      // Group by storefront and collect the products for each
-      {
-        $group: {
-          _id: '$storefront',
-          products: { $push: '$$ROOT' }
-        }
-      },
-      // For each group (brand), take the first 10 products from the collected array
-      {
-        $project: {
-          _id: 0,
-          storefront: '$_id',
-          products: { $slice: ['$products', 10] }
-        }
-      },
-      // Unwind the products array to create a single stream of product documents
-      { $unwind: '$products' },
-      // Replace the root to have the product document at the top level
-      { $replaceRoot: { newRoot: '$products' } }
-    ]);
+    // If no specific filter, fetch a few products from each brand for the main landing page or all products for hamper creation.
+    const products = await Product.find({})
+        .sort({ createdAt: -1 })
+        .lean();
 
 
     return NextResponse.json({ products }, { status: 200 });
