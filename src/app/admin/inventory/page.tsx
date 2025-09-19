@@ -201,70 +201,73 @@ export default function InventoryPage() {
 
 
     const renderTable = (products: IProduct[]) => (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead className="hidden w-[100px] sm:table-cell">
-                        <span className="sr-only">Image</span>
-                    </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead className="hidden md:table-cell">Stock</TableHead>
-                    <TableHead className="hidden md:table-cell">Rating</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {products.length > 0 ? (
-                    products.map((product) => (
-                        <TableRow 
-                            key={product._id as string} 
-                            onClick={() => handleRowClick(product._id as string)}
-                            className="cursor-pointer"
-                        >
-                            <TableCell className="hidden sm:table-cell">
-                                {product.images && product.images.length > 0 ? (
-                                    <Image
-                                        alt={product.name}
-                                        className="aspect-square rounded-md object-cover"
-                                        height="64"
-                                        src={product.images[0]}
-                                        width="64"
-                                    />
-                                ) : (
-                                    <div className="flex aspect-square h-full w-full items-center justify-center rounded-md bg-muted">
-                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell className="font-medium">{product.name}</TableCell>
-                            <TableCell>
-                                <Badge 
-                                    variant={product.stock > 0 ? "default" : "destructive"}
-                                    className={cn(
-                                        product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
-                                        product.stock > LOW_STOCK_THRESHOLD && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-                                    )}
-                                >
-                                    {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
-                            <TableCell className="hidden md:table-cell">{product.rating}/5</TableCell>
-                        </TableRow>
-                    ))
-                ) : (
+        <div className="overflow-x-auto">
+            <Table>
+                <TableHeader>
                     <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">
-                            No products to display in this category.
-                        </TableCell>
+                        <TableHead className="w-[80px] sm:w-[100px]">
+                            <span className="sr-only">Image</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="hidden sm:table-cell">Price</TableHead>
+                        <TableHead className="hidden md:table-cell">Stock</TableHead>
+                        <TableHead className="hidden lg:table-cell">Rating</TableHead>
                     </TableRow>
-                )}
-            </TableBody>
-        </Table>
+                </TableHeader>
+                <TableBody>
+                    {products.length > 0 ? (
+                        products.map((product) => (
+                            <TableRow 
+                                key={product._id as string} 
+                                onClick={() => handleRowClick(product._id as string)}
+                                className="cursor-pointer"
+                            >
+                                <TableCell>
+                                    {product.images && product.images.length > 0 ? (
+                                        <Image
+                                            alt={product.name}
+                                            className="aspect-square rounded-md object-cover"
+                                            height="64"
+                                            src={product.images[0]}
+                                            width="64"
+                                        />
+                                    ) : (
+                                        <div className="flex aspect-square h-16 w-16 items-center justify-center rounded-md bg-muted">
+                                            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                        </div>
+                                    )}
+                                </TableCell>
+                                <TableCell className="font-medium">{product.name}</TableCell>
+                                <TableCell>
+                                    <Badge 
+                                        variant={product.stock > 0 ? "default" : "destructive"}
+                                        className={cn(
+                                            "whitespace-nowrap",
+                                            product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
+                                            product.stock > LOW_STOCK_THRESHOLD && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                                        )}
+                                    >
+                                        {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell">
+                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                                <TableCell className="hidden lg:table-cell">{product.rating}/5</TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell colSpan={6} className="h-24 text-center">
+                                No products to display in this category.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </div>
     );
 
     if (loading) {
@@ -298,7 +301,7 @@ export default function InventoryPage() {
                         <br/>
                         You can seed some initial data or add products manually.
                     </CardDescription>
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                         <Button onClick={handleSeedData} disabled={isSeeding}>
                             {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                             Seed Products
@@ -317,54 +320,68 @@ export default function InventoryPage() {
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-start justify-between">
+            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                     <CardTitle>Inventory</CardTitle>
                     <CardDescription>
                         Showing products for: <strong>{selectedBrand}</strong>
                     </CardDescription>
                 </div>
-                 <div className="flex items-center gap-2">
-                     <Button
-                        variant="outline"
-                        onClick={handleDownloadTemplate}
-                        disabled={isUpdating || filteredProducts.length === 0}
-                        className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700"
-                    >
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Template
-                    </Button>
-                    <Button asChild variant="outline" className="relative cursor-pointer bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700">
-                        <div>
-                            <Upload className="mr-2 h-4 w-4" />
-                            <span>{isUpdating ? 'Processing...' : 'Bulk Stock Update'}</span>
-                            <input 
-                                type="file" 
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                accept=".xlsx, .xls, .csv"
-                                onChange={handleFileUpload}
-                                ref={fileInputRef}
-                                disabled={isUpdating}
-                            />
-                        </div>
-                    </Button>
-                     <Button asChild>
+                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                     <Button asChild className="w-full sm:w-auto">
                         <Link href="/admin/inventory/new">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Product
                         </Link>
                     </Button>
-                     <Button variant="secondary" onClick={handleSeedData} disabled={isSeeding}>
+                     <Button variant="secondary" onClick={handleSeedData} disabled={isSeeding} className="w-full sm:w-auto">
                         {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                        Seed Products & Reviews
+                        Seed Products
                     </Button>
                 </div>
             </CardHeader>
             <CardContent>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
+                    <div className="relative w-full md:flex-grow md:max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by product name..." 
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                     <div className="flex items-center gap-2 w-full md:w-auto">
+                        <Button
+                            variant="outline"
+                            onClick={handleDownloadTemplate}
+                            disabled={isUpdating || filteredProducts.length === 0}
+                            className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700 w-1/2 md:w-auto"
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                        </Button>
+                        <Button asChild variant="outline" className="relative cursor-pointer bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700 w-1/2 md:w-auto">
+                            <div>
+                                <Upload className="mr-2 h-4 w-4" />
+                                <span>Bulk Update</span>
+                                <input 
+                                    type="file" 
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                                    accept=".xlsx, .xls, .csv"
+                                    onChange={handleFileUpload}
+                                    ref={fileInputRef}
+                                    disabled={isUpdating}
+                                />
+                            </div>
+                        </Button>
+                    </div>
+                </div>
+
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <div className="flex items-center justify-between border-b">
-                        <TabsList className="bg-transparent p-0 border-none">
-                            <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">All Stock ({stockCounts.all})</TabsTrigger>
+                    <div className="overflow-x-auto border-b">
+                        <TabsList className="bg-transparent p-0 border-none w-max">
+                            <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">All ({stockCounts.all})</TabsTrigger>
                             <TabsTrigger value="out-of-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">Out of Stock ({stockCounts.outOfStock})</TabsTrigger>
                             <TabsTrigger value="low-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">
                                 <div className="flex items-center gap-2">
@@ -384,20 +401,11 @@ export default function InventoryPage() {
                         </TabsList>
                     </div>
                     
-                    <div className="flex items-center gap-4 py-4 px-1">
-                         <div className="relative flex-grow max-w-sm">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                                placeholder="Search by product name..." 
-                                className="pl-10"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                         <div className="flex items-center gap-2">
+                    <div className="flex flex-col md:flex-row items-center gap-4 py-4 px-1">
+                         <div className="flex items-center gap-2 w-full md:w-auto">
                             <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
                             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-full md:w-[180px]">
                                     <SelectValue placeholder="Select Category" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -407,10 +415,10 @@ export default function InventoryPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-muted-foreground">Sort catalogs by:</span>
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                            <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
                              <Select value={sortOption} onValueChange={setSortOption}>
-                                <SelectTrigger className="w-[220px]">
+                                <SelectTrigger className="w-full md:w-[220px]">
                                     <SelectValue placeholder="Sort by" />
                                 </SelectTrigger>
                                 <SelectContent>

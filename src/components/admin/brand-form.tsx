@@ -291,31 +291,31 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
           <CardHeader><CardTitle>Brand Identity</CardTitle></CardHeader>
           <CardContent className="space-y-6">
-             <FormField
-                control={form.control}
-                name="displayName"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Display Name</FormLabel>
-                    <FormControl><Input placeholder="Reeva" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="permanentName"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Permanent Name</FormLabel>
-                    <FormControl><Input placeholder="reeva" {...field} disabled={mode === 'edit'} /></FormControl>
-                    <FormDescription>
-                        This is the unique ID for the brand and will be used in the URL. It cannot be changed once set.
-                    </FormDescription>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="displayName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Display Name</FormLabel>
+                        <FormControl><Input placeholder="Reeva" {...field} /></FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="permanentName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Permanent Name</FormLabel>
+                        <FormControl><Input placeholder="reeva" {...field} disabled={mode === 'edit'} /></FormControl>
+                         <FormDescription>Unique ID in URL. Cannot be changed.</FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
              <FormField
                 control={form.control}
                 name="logoUrl"
@@ -519,7 +519,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                          <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeCategoryBanner(index)}>
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name={`categoryBanners.${index}.categoryName`}
@@ -646,7 +646,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
                     <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
                         <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
@@ -668,7 +668,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                          <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeReview(index)}>
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <div className="flex items-start gap-4">
+                        <div className="flex flex-col sm:flex-row items-start gap-4">
                             <FormField control={form.control} name={`reviews.${index}.customerAvatarUrl`} render={({ field }) => (
                                 <FormItem className="flex-shrink-0">
                                     <FormLabel>Avatar</FormLabel>
@@ -685,7 +685,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     <FormMessage />
                                 </FormItem>
                             )}/>
-                            <div className="flex-grow space-y-4">
+                            <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <FormField control={form.control} name={`reviews.${index}.customerName`} render={({ field }) => (
                                     <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )}/>
@@ -766,4 +766,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </>
   );
 }
-

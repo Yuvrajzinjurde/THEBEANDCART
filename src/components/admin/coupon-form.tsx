@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useEffect } from 'react';
@@ -153,7 +154,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                         <RadioGroup
                         onValueChange={field.onChange}
                         value={field.value}
-                        className="flex items-center gap-4"
+                        className="flex flex-col sm:flex-row sm:items-center gap-4"
                         >
                         <FormItem className="flex items-center space-x-2 space-y-0">
                             <FormControl>
@@ -228,7 +229,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
             )}
         />
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
                 control={form.control}
                 name="startDate"

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from "next/link";
@@ -11,11 +10,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
-import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { IBrand } from "@/models/brand.model";
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
@@ -30,10 +30,11 @@ import { cn } from "@/lib/utils";
 import useUserStore from "@/stores/user-store";
 
 export default function Header() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const params = useParams();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const pathBrand = params.brand as string;
   const queryBrand = searchParams.get('storefront');
@@ -53,7 +54,8 @@ export default function Header() {
     { href: `/${brandName}/products?keyword=fashion`, icon: Shirt, label: "Fashion Finds" },
     { href: `/${brandName}/products?keyword=home`, icon: HomeIcon, label: "Home Favourites" },
   ];
-
+  
+  const categories = brand?.categories || [];
 
   useEffect(() => {
     // This effect runs only on the client, after initial render and hydration.
@@ -81,6 +83,15 @@ export default function Header() {
     fetchBrandLogo();
   }, [brandName]);
   
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
+    if (query) {
+      router.push(`/${brandName}/products?keyword=${encodeURIComponent(query)}`);
+      setIsSheetOpen(false);
+    }
+  };
+
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
         <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
@@ -125,17 +136,19 @@ export default function Header() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-                <DropdownMenuItem>Electronics</DropdownMenuItem>
-                <DropdownMenuItem>Apparel</DropdownMenuItem>
-                <DropdownMenuItem>Home Goods</DropdownMenuItem>
-                <DropdownMenuItem>Books</DropdownMenuItem>
+                 {categories.map(cat => (
+                    <DropdownMenuItem key={cat} asChild>
+                        <Link href={`/${brandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                    </DropdownMenuItem>
+                ))}
             </DropdownMenuContent>
         </DropdownMenu>
 
         {/* Search Bar */}
         <div className="flex-1 mx-4">
-            <div className="relative w-full max-w-lg mx-auto">
+            <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearch}>
                 <Input
+                    name="search"
                     type="search"
                     placeholder="Search for anything"
                     className="h-11 w-full rounded-full pl-5 pr-12 text-base"
@@ -143,7 +156,7 @@ export default function Header() {
                  <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
                     <Search className="h-4 w-4" />
                 </Button>
-            </div>
+            </form>
         </div>
 
         {/* Actions */}
@@ -160,8 +173,55 @@ export default function Header() {
                         <span className="sr-only">Open menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[340px]">
-                    {/* Sheet Content for mobile */}
+                <SheetContent side="right" className="w-[300px] sm:w-[340px] flex flex-col p-0">
+                    <SheetHeader className="p-4 border-b">
+                         <Link href={`/${brandName}/home`} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                            <Logo className="h-8 w-8" />
+                            <span className="font-bold text-lg capitalize">{brand?.displayName || brandName}</span>
+                        </Link>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto p-4">
+                        <nav className="flex flex-col gap-4">
+                            <form className="relative w-full" onSubmit={handleSearch}>
+                                <Input name="search" type="search" placeholder="Search..." className="pr-10" />
+                                <Button type="submit" size="icon" variant="ghost" className="absolute right-0 top-0 h-full w-10">
+                                    <Search className="h-4 w-4" />
+                                </Button>
+                            </form>
+                            <Separator />
+                            <h3 className="font-semibold text-muted-foreground">Categories</h3>
+                             {categories.map(cat => (
+                                <Link key={cat} href={`/${brandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                    {cat}
+                                </Link>
+                            ))}
+                            <Separator />
+                            <h3 className="font-semibold text-muted-foreground">Explore</h3>
+                            {secondaryNavItems.map((item) => (
+                                <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                    <item.icon className="h-4 w-4" />
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </nav>
+                    </div>
+                     <div className="border-t p-4">
+                        <div className="flex items-center justify-around">
+                            <Button variant="ghost" size="icon" asChild>
+                                <Link href="/wishlist" className="relative" onClick={() => setIsSheetOpen(false)}>
+                                    <Heart className="h-6 w-6"/>
+                                    {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="icon" asChild>
+                                 <Link href={`/${brandName}/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
+                                    <ShoppingCart className="h-6 w-6" />
+                                    {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                                </Link>
+                            </Button>
+                             <UserNav />
+                        </div>
+                    </div>
                 </SheetContent>
             </Sheet>
         </div>
@@ -169,6 +229,16 @@ export default function Header() {
       
        <div className={cn(!showSecondaryNav && "hidden")}>
           <Separator />
+          <div className="md:hidden overflow-x-auto">
+             <nav className="container flex items-center gap-6 px-4 sm:px-6 h-12">
+                  {secondaryNavItems.map((item) => (
+                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                      </Link>
+                  ))}
+              </nav>
+          </div>
           <div className="hidden md:flex justify-center">
               <nav className="container flex items-center justify-center gap-6 px-4 sm:px-6 lg:px-8 h-12">
                   {secondaryNavItems.map((item) => (

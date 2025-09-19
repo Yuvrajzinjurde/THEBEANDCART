@@ -103,7 +103,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
             >
                 <CarouselContent>
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -160,7 +160,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="relative rounded-lg overflow-hidden h-[320px] bg-secondary text-foreground flex items-center">
+            <div className="relative rounded-lg overflow-hidden h-[400px] md:h-[320px] bg-secondary text-foreground flex items-center">
                  <Image
                     src={imageUrl}
                     alt={title}
@@ -189,6 +189,9 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                 <div className="text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shop by Brand</h2>
+                </div>
                 <Carousel
                     opts={{
                         align: "center",
@@ -202,10 +205,10 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                             const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
                             
                             return (
-                                <CarouselItem key={brand.permanentName} className="basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6">
-                                    <Link href={`/${brand.permanentName}/home`} className="block group p-4">
+                                <CarouselItem key={brand.permanentName} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                                    <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center">
                                         <div 
-                                            className="w-36 h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
+                                            className="w-32 h-32 md:w-36 md:h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
                                             style={{ 
                                                 borderColor: primaryColor,
                                                 boxShadow: `0 0 12px 2px ${primaryColor}66` 
@@ -218,6 +221,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                                                 className="object-cover"
                                             />
                                         </div>
+                                         <p className="mt-3 font-semibold text-center">{brand.displayName}</p>
                                     </Link>
                                 </CarouselItem>
                             );
@@ -282,13 +286,13 @@ export default function LandingPage() {
 
             const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
             const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
-            setTrendingProducts(sortedByPopularity.slice(0, 8));
+            setTrendingProducts(sortedByPopularity.slice(0, 12));
 
             const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
-            setTopRatedProducts(sortedByRating.slice(0, 8));
+            setTopRatedProducts(sortedByRating.slice(0, 12));
 
             const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-            setNewestProducts(sortedByDate.slice(0, 8));
+            setNewestProducts(sortedByDate.slice(0, 12));
 
             // Use featured categories from settings, or derive from products as a fallback
             if (settingsData && settingsData.featuredCategories.length > 0) {
@@ -398,7 +402,7 @@ export default function LandingPage() {
                         <div className="text-center mb-10">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             {uniqueCategories.map(category => (
                                 <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
                                     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
