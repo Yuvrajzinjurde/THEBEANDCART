@@ -190,9 +190,6 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                 <div className="text-center mb-10">
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shop by Brand</h2>
-                </div>
                 <Carousel
                     opts={{
                         align: "center",
