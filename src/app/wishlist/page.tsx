@@ -223,7 +223,6 @@ export default function WishlistPage() {
 
                              <div className="flex items-center gap-2 mt-4 pt-4 border-t sm:border-none sm:pt-0 sm:mt-auto">
                                 <Button 
-                                    className="w-full"
                                     onClick={() => handleAddToCart(product)} 
                                     disabled={isPending || product.stock === 0}
                                 >
@@ -232,13 +231,11 @@ export default function WishlistPage() {
                                 </Button>
                                  <Button 
                                     variant="secondary" 
-                                    size="icon" 
-                                    className="h-10 w-10 flex-shrink-0"
                                     onClick={() => handleRemoveFromWishlist(product._id as string)} 
                                     disabled={isPending}
                                 >
-                                    <Trash className="h-4 w-4"/>
-                                    <span className="sr-only">Remove</span>
+                                    <Trash className="mr-2 h-4 w-4"/>
+                                    Remove
                                 </Button>
                             </div>
                         </div>
