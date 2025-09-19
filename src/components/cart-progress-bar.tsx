@@ -55,7 +55,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
 
   return (
     <Card className="overflow-hidden">
-        {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.1} colors={['#FFC700', '#FF8A00', '#FFFFFF', '#4BFF7F']} confettiSource={{ x: width / 2, y: height / 4, w: 10, h: 10}} />}
+        {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.1} colors={['#FFC700', '#FF8A00', '#FFFFFF', '#4BFF7F']} />}
         <CardContent className="p-6 space-y-4">
             <div className="relative w-full h-2 bg-muted rounded-full">
                 <div 
@@ -86,7 +86,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
                                 )}
                                 {isUnlocking && <div className="absolute text-4xl animate-ping">🥳</div>}
                            </div>
-                           <p className="text-xs font-semibold">{isUnlocked ? milestone.reward : '???'}</p>
+                           <p className="text-xs font-semibold">{isUnlocked ? milestone.reward : 'Mystery Box'}</p>
                            <p className="text-xs text-muted-foreground">₹{milestone.threshold}</p>
                         </div>
                     );
