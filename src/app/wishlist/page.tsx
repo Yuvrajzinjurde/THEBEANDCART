@@ -222,13 +222,15 @@ export default function WishlistPage() {
                             </Badge>
 
                              <div className="flex items-center gap-2 mt-4 pt-4 border-t sm:border-none sm:pt-0 sm:mt-auto">
-                                <Button 
-                                    onClick={() => handleAddToCart(product)} 
-                                    disabled={isPending || product.stock === 0}
-                                >
-                                    <ShoppingCart className="mr-2 h-4 w-4" />
-                                    Move to Cart
-                                </Button>
+                                {product.stock > 0 && (
+                                    <Button 
+                                        onClick={() => handleAddToCart(product)} 
+                                        disabled={isPending}
+                                    >
+                                        <ShoppingCart className="mr-2 h-4 w-4" />
+                                        Move to Cart
+                                    </Button>
+                                )}
                                  <Button 
                                     variant="secondary" 
                                     onClick={() => handleRemoveFromWishlist(product._id as string)} 
