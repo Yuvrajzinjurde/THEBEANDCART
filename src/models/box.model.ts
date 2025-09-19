@@ -1,7 +1,7 @@
 
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
-export interface IBoxVariant {
+export interface IBoxVariant extends Document {
   name: string; // e.g., 'Small', 'Medium', 'Red Velvet'
   size?: string;
   color?: string;
@@ -26,7 +26,7 @@ const BoxVariantSchema: Schema<IBoxVariant> = new Schema({
   price: { type: Number, required: true, min: 0 },
   stock: { type: Number, required: true, min: 0, default: 0 },
   images: [{ type: String, required: true }],
-}, { _id: false });
+});
 
 
 const BoxSchema: Schema<IBox> = new Schema({

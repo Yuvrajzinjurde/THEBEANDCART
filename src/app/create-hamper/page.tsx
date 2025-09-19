@@ -104,10 +104,10 @@ const Step1_Occasion = () => {
     );
 };
 
-const BoxItem = ({ box, variant, selected, onSelect }: { box: IBox, variant: IBoxVariant, selected: boolean, onSelect: () => void }) => (
+const BoxItem = ({ box, variant }: { box: IBox, variant: IBoxVariant }) => (
     <div>
-        <RadioGroupItem value={`${box._id}-${variant.name}`} id={`${box._id}-${variant.name}`} className="sr-only" />
-        <Label htmlFor={`${box._id}-${variant.name}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all", selected ? "border-primary ring-2 ring-primary/50" : "border-muted hover:border-foreground/20")}>
+        <RadioGroupItem value={`${box._id}-${variant._id}`} id={`${box._id}-${variant._id}`} className="sr-only" />
+        <Label htmlFor={`${box._id}-${variant._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all border-muted hover:border-foreground/20", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
             <div className="relative">
                 <div className="aspect-square relative mb-2">
                     <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
@@ -124,7 +124,7 @@ const BoxItem = ({ box, variant, selected, onSelect }: { box: IBox, variant: IBo
 
 
 const Step2_Box = () => {
-    const { occasion, box, boxVariant, setBox } = useHamperStore();
+    const { occasion, box: selectedBox, boxVariant: selectedBoxVariant, setBox } = useHamperStore();
     const [allBoxes, setAllBoxes] = useState<IBox[]>([]);
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
@@ -156,12 +156,20 @@ const Step2_Box = () => {
         }
         fetchData();
     }, [occasion]);
-
-    const handleSelect = (selectedBox: IBox, selectedVariant: IBoxVariant) => {
-        setBox(selectedBox, selectedVariant);
+    
+    const handleSelect = (value: string) => {
+        const [boxId, variantId] = value.split('-');
+        const box = allBoxes.find(b => b._id === boxId);
+        if (box) {
+            const variant = box.variants.find(v => (v as any)._id.toString() === variantId);
+            if (variant) {
+                setBox(box, variant);
+            }
+        }
     };
 
-    const selectedVariantId = box && boxVariant ? `${box._id}-${boxVariant.name}` : undefined;
+
+    const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${(selectedBoxVariant as any)._id}` : undefined;
 
     const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
     const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
@@ -174,18 +182,16 @@ const Step2_Box = () => {
             </CardHeader>
             <CardContent>
                 {loading ? <Loader /> : (
-                    <div className="space-y-8">
+                    <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
                         {suggestedBoxes.length > 0 && (
                             <section>
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {suggestedBoxes.map(b => b.variants.map(v => (
                                         <BoxItem 
-                                            key={`${b._id}-${v.name}`}
+                                            key={`${b._id}-${(v as any)._id}`}
                                             box={b}
                                             variant={v}
-                                            selected={selectedVariantId === `${b._id}-${v.name}`}
-                                            onSelect={() => handleSelect(b, v)}
                                         />
                                     )))}
                                 </div>
@@ -196,16 +202,14 @@ const Step2_Box = () => {
                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {otherBoxes.map(b => b.variants.map(v => (
                                     <BoxItem 
-                                        key={`${b._id}-${v.name}`}
+                                        key={`${b._id}-${(v as any)._id}`}
                                         box={b}
                                         variant={v}
-                                        selected={selectedVariantId === `${b._id}-${v.name}`}
-                                        onSelect={() => handleSelect(b, v)}
                                     />
                                 )))}
                             </div>
                         </section>
-                    </div>
+                    </RadioGroup>
                 )}
             </CardContent>
         </motion.div>
@@ -391,7 +395,7 @@ export default function CreateHamperPage() {
                 const dataToSave = {
                     occasion: hamperState.occasion,
                     boxId: hamperState.box?._id,
-                    boxVariantId: hamperState.boxVariant?._id,
+                    boxVariantId: (hamperState.boxVariant as any)?._id,
                     products: hamperState.products.map(p => p._id),
                     notesToCreator: hamperState.notesToCreator,
                     notesToReceiver: hamperState.notesToReceiver,
@@ -505,26 +509,28 @@ export default function CreateHamperPage() {
                     </AnimatePresence>
                 </Card>
 
-                 <div className="flex justify-end items-center mt-6 gap-2">
-                    {step > 1 && (
-                        <Button variant="link" className="text-destructive p-0 mr-auto" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
+                 <div className="flex justify-between items-center mt-6 gap-2">
+                    {step > 1 ? (
+                        <Button variant="link" className="text-destructive p-0" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
                             {isDiscarding ? <Loader className="mr-2" /> : <Trash2 className="mr-2 h-4 w-4" />}
                             Discard & Start Over
                         </Button>
-                    )}
-                    <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
-                        <ArrowLeft className="mr-2 h-4 w-4"/> Previous
-                    </Button>
-                    {step < TOTAL_STEPS ? (
-                        <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
-                            Next <ArrowRight className="ml-2 h-4 w-4"/>
+                    ) : <div></div>}
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
+                            <ArrowLeft className="mr-2 h-4 w-4"/> Previous
                         </Button>
-                    ) : (
-                        <Button onClick={handleCheckout} disabled={isCheckingOut}>
-                           {isCheckingOut ? <Loader className="mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                            Review & Checkout
-                        </Button>
-                    )}
+                        {step < TOTAL_STEPS ? (
+                            <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
+                                Next <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Button>
+                        ) : (
+                            <Button onClick={handleCheckout} disabled={isCheckingOut}>
+                               {isCheckingOut ? <Loader className="mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                                Review & Checkout
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
             <AlertDialog open={discardAlertOpen} onOpenChange={setDiscardAlertOpen}>
