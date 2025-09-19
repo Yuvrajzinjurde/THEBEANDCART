@@ -11,6 +11,8 @@ export type HamperState = {
   occasion?: string;
   box?: IBox;
   boxVariant?: IBoxVariant;
+  bag?: IBox;
+  bagVariant?: IBoxVariant;
   products: IProduct[];
   notesToCreator?: string;
   notesToReceiver?: string;
@@ -21,6 +23,7 @@ type HamperActions = {
   setStep: (step: number) => void;
   setOccasion: (occasion: string) => void;
   setBox: (box: IBox, variant: IBoxVariant) => void;
+  setBag: (bag: IBox, variant: IBoxVariant) => void;
   addProduct: (product: IProduct) => void;
   removeProduct: (productId: string) => void;
   setNotes: (notes: { creator?: string; receiver?: string }) => void;
@@ -41,6 +44,7 @@ const useHamperStore = create<HamperState & HamperActions>()(
       setStep: (step) => set({ step }),
       setOccasion: (occasion) => set({ occasion }),
       setBox: (box, boxVariant) => set({ box, boxVariant }),
+      setBag: (bag, bagVariant) => set({ bag, bagVariant }),
       addProduct: (product) => {
         set(state => ({
             products: [...state.products, product]

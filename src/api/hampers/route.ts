@@ -14,6 +14,8 @@ const HamperUpdateSchema = z.object({
     occasion: z.string().optional(),
     boxId: z.string().refine(val => Types.ObjectId.isValid(val)).optional(),
     boxVariantId: z.string().refine(val => Types.ObjectId.isValid(val)).optional(),
+    bagId: z.string().refine(val => Types.ObjectId.isValid(val)).optional(),
+    bagVariantId: z.string().refine(val => Types.ObjectId.isValid(val)).optional(),
     products: z.array(z.string().refine(val => Types.ObjectId.isValid(val))).optional(),
     notesToCreator: z.string().optional(),
     notesToReceiver: z.string().optional(),

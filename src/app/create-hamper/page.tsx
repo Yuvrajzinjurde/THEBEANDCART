@@ -36,7 +36,7 @@ import {
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const occasionOptions = [
     { name: "Birthday", image: "https://picsum.photos/seed/bday-hamper/400/300", hint: "birthday cake" },
@@ -103,14 +103,14 @@ const Step1_Occasion = () => {
     );
 };
 
-const BoxItem = ({ box, variant, onLike }: { box: IBox, variant: IBoxVariant, onLike: (boxId: string) => void }) => {
+const BoxItem = ({ box, variant, onLike, isSelected }: { box: IBox, variant: IBoxVariant, onLike: (boxId: string) => void, isSelected: boolean }) => {
     const hasDiscount = variant.mrp > variant.sellingPrice;
     const discountPercentage = hasDiscount ? Math.round(((variant.mrp - variant.sellingPrice) / variant.mrp) * 100) : 0;
     
     return (
         <div>
             <RadioGroupItem value={`${box._id}-${variant._id}`} id={`${box._id}-${variant._id}`} className="sr-only" />
-            <Label htmlFor={`${box._id}-${variant._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all duration-300 ease-in-out border-muted hover:border-foreground/20 hover:shadow-lg", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
+            <Label htmlFor={`${box._id}-${variant._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all duration-300 ease-in-out hover:border-foreground/20 hover:shadow-lg", isSelected ? "border-primary ring-2 ring-primary/50" : "border-muted")}>
                 <div className="relative group/card">
                     <div className="aspect-square relative mb-2">
                         <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
@@ -142,19 +142,6 @@ const BoxItem = ({ box, variant, onLike }: { box: IBox, variant: IBoxVariant, on
     )
 };
 
-const PackagingGrid = ({ items, onLike }: { items: IBox[], onLike: (boxId: string) => void }) => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {items.flatMap(b => b.variants.map(v => (
-            <BoxItem 
-                key={`${b._id}-${v._id}`}
-                box={b}
-                variant={v}
-                onLike={onLike}
-            />
-        )))}
-    </div>
-);
-
 
 const Step2_Box = () => {
     const { occasion, box: selectedBox, boxVariant: selectedBoxVariant, setBox } = useHamperStore();
@@ -162,21 +149,30 @@ const Step2_Box = () => {
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const handleSelect = (value: string) => {
+        const [boxId, variantId] = value.split('-');
+        const box = allBoxes.find(b => b._id.toString() === boxId);
+        if (box) {
+            const variant = box.variants.find(v => v._id.toString() === variantId);
+            if (variant) {
+                setBox(box, variant);
+            }
+        }
+    };
+
     useEffect(() => {
-        async function fetchAndSuggest() {
+        const fetchAndSuggest = async () => {
             setLoading(true);
             try {
-                // Fetch all boxes first
                 const res = await fetch('/api/boxes');
                 if (!res.ok) throw new Error("Failed to fetch boxes");
                 const { boxes: fetchedPackages } = await res.json();
                 
-                const onlyBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
-                setAllBoxes(onlyBoxes);
+                const boxesOnly = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
+                setAllBoxes(boxesOnly);
                 
-                // Then, if occasion and boxes are available, get suggestions
-                if (occasion && onlyBoxes.length > 0) {
-                    const packageList = onlyBoxes.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
+                if (occasion && boxesOnly.length > 0) {
+                    const packageList = boxesOnly.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -193,21 +189,9 @@ const Step2_Box = () => {
             } finally {
                 setLoading(false);
             }
-        }
+        };
         fetchAndSuggest();
     }, [occasion]);
-    
-    
-    const handleSelect = (value: string) => {
-        const [boxId, variantId] = value.split('-');
-        const box = allBoxes.find(b => b._id.toString() === boxId);
-        if (box) {
-            const variant = box.variants.find(v => v._id.toString() === variantId);
-            if (variant) {
-                setBox(box, variant);
-            }
-        }
-    };
     
     const handleLike = async (boxId: string) => {
         try {
@@ -224,10 +208,7 @@ const Step2_Box = () => {
 
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${selectedBoxVariant._id}` : undefined;
 
-    const suggestedBoxes = suggestedBoxIds
-        .map(id => allBoxes.find(b => b._id.toString() === id))
-        .filter((b): b is IBox => !!b);
-
+    const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
     const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
@@ -244,12 +225,13 @@ const Step2_Box = () => {
                                 <section>
                                     <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {suggestedBoxes.map(b => b.variants.map(v => (
+                                        {suggestedBoxes.flatMap(b => b.variants.map(v => (
                                             <BoxItem 
                                                 key={`${b._id}-${v._id}`}
                                                 box={b}
                                                 variant={v}
                                                 onLike={handleLike}
+                                                isSelected={`${b._id}-${v._id}` === selectedVariantId}
                                             />
                                         )))}
                                     </div>
@@ -260,12 +242,13 @@ const Step2_Box = () => {
                                 <section>
                                     <h3 className="font-bold text-lg mb-4">All Boxes</h3>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {otherBoxes.map(b => b.variants.map(v => (
+                                        {otherBoxes.flatMap(b => b.variants.map(v => (
                                             <BoxItem 
                                                 key={`${b._id}-${v._id}`}
                                                 box={b}
                                                 variant={v}
                                                 onLike={handleLike}
+                                                isSelected={`${b._id}-${v._id}` === selectedVariantId}
                                             />
                                         )))}
                                     </div>
@@ -360,7 +343,86 @@ const Step3_Products = () => {
     );
 };
 
-const Step4_Notes = () => {
+const Step4_Bag = () => {
+    const { occasion, bag: selectedBag, bagVariant: selectedBagVariant, setBag } = useHamperStore();
+    const [allBags, setAllBags] = useState<IBox[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBags = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch('/api/boxes');
+                if (!res.ok) throw new Error("Failed to fetch bags");
+                const { boxes: fetchedPackages } = await res.json();
+                
+                const bagsOnly = fetchedPackages.filter((p: IBox) => p.boxType === 'bag');
+                setAllBags(bagsOnly);
+            } catch (error) {
+                console.error("Failed to fetch bags", error);
+                toast.error("Could not load bag options.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBags();
+    }, []);
+
+    const handleSelect = (value: string) => {
+        const [bagId, variantId] = value.split('-');
+        const bag = allBags.find(b => b._id.toString() === bagId);
+        if (bag) {
+            const variant = bag.variants.find(v => v._id.toString() === variantId);
+            if (variant) {
+                setBag(bag, variant);
+            }
+        }
+    };
+    
+    const handleLike = async (bagId: string) => {
+        try {
+            const response = await fetch(`/api/boxes/${bagId}`, { method: 'PATCH' });
+            if (response.ok) {
+                const { box: updatedBag } = await response.json();
+                setAllBags(prev => prev.map(b => b._id === bagId ? { ...b, likes: updatedBag.likes } : b));
+                toast.success('Thanks for your feedback!');
+            }
+        } catch (error) {
+            console.error("Failed to like bag", error);
+        }
+    };
+
+    const selectedVariantId = selectedBag && selectedBagVariant ? `${selectedBag._id}-${selectedBagVariant._id}` : undefined;
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <CardHeader>
+                <CardTitle>Choose Your Bag</CardTitle>
+                <CardDescription>Select a bag for your hamper.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
+                    {loading ? <Loader /> : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {allBags.flatMap(b => b.variants.map(v => (
+                                <BoxItem 
+                                    key={`${b._id}-${v._id}`}
+                                    box={b}
+                                    variant={v}
+                                    onLike={handleLike}
+                                    isSelected={`${b._id}-${v._id}` === selectedVariantId}
+                                />
+                            )))}
+                        </div>
+                    )}
+                </RadioGroup>
+            </CardContent>
+        </motion.div>
+    );
+};
+
+
+const Step5_Notes = () => {
     const { occasion, notesToCreator, notesToReceiver, addRose, setNotes, setAddRose } = useHamperStore();
     const [suggestion, setSuggestion] = useState({ shouldSuggest: false, suggestionText: '' });
     const [loadingSuggestion, setLoadingSuggestion] = useState(true);
@@ -459,6 +521,8 @@ export default function CreateHamperPage() {
                     occasion: hamperState.occasion,
                     boxId: hamperState.box?._id,
                     boxVariantId: hamperState.boxVariant?._id,
+                    bagId: hamperState.bag?._id,
+                    bagVariantId: hamperState.bagVariant?._id,
                     products: hamperState.products.map(p => p._id),
                     notesToCreator: hamperState.notesToCreator,
                     notesToReceiver: hamperState.notesToReceiver,
@@ -487,6 +551,7 @@ export default function CreateHamperPage() {
             case 1: return !hamperState.occasion;
             case 2: return !hamperState.box || !hamperState.boxVariant;
             case 3: return hamperState.products.length === 0;
+            case 4: return !hamperState.bag || !hamperState.bagVariant;
             default: return false;
         }
     }
@@ -541,7 +606,8 @@ export default function CreateHamperPage() {
             case 1: return <Step1_Occasion />;
             case 2: return <Step2_Box />;
             case 3: return <Step3_Products />;
-            case 4: return <Step4_Notes />;
+            case 4: return <Step4_Bag />;
+            case 5: return <Step5_Notes />;
             default: return null;
         }
     }

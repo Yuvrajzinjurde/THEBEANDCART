@@ -6,6 +6,8 @@ export interface IHamper extends Document {
   occasion: string;
   boxId: Types.ObjectId;
   boxVariantId: Types.ObjectId;
+  bagId?: Types.ObjectId;
+  bagVariantId?: Types.ObjectId;
   products: Types.ObjectId[];
   notesToCreator?: string;
   notesToReceiver?: string;
@@ -18,6 +20,8 @@ const HamperSchema: Schema<IHamper> = new Schema({
   occasion: { type: String, required: true },
   boxId: { type: Schema.Types.ObjectId, ref: 'Box' },
   boxVariantId: { type: Schema.Types.ObjectId },
+  bagId: { type: Schema.Types.ObjectId, ref: 'Box' },
+  bagVariantId: { type: Schema.Types.ObjectId },
   products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
   notesToCreator: { type: String },
   notesToReceiver: { type: String },
