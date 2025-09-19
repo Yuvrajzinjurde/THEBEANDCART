@@ -23,10 +23,14 @@ export async function GET(req: Request) {
         const decoded = jwtDecode<DecodedToken>(token);
         const userId = decoded.userId;
 
-        const wishlist = await Wishlist.findOne({ userId }).populate('products');
+        const wishlist = await Wishlist.findOne({ userId }).populate({
+            path: 'products',
+            model: Product,
+            select: 'name images sellingPrice mrp category rating storefront',
+        });
         
         if (!wishlist) {
-            return NextResponse.json({ wishlist: { products: [], totalItems: 0 } }, { status: 200 });
+            return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
         }
 
         return NextResponse.json({ wishlist }, { status: 200 });
@@ -95,7 +99,11 @@ export async function POST(req: Request) {
       message = 'Product added to wishlist.';
     }
 
-    const populatedWishlist = await Wishlist.findById(wishlist._id).populate('products');
+    const populatedWishlist = await Wishlist.findById(wishlist._id).populate({
+        path: 'products',
+        model: Product,
+        select: 'name images sellingPrice mrp category rating storefront',
+    });
 
     return NextResponse.json({ message, wishlist: populatedWishlist }, { status: 200 });
 

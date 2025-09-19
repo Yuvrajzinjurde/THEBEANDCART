@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
+import Link from 'next/link';
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -77,16 +78,7 @@ export default function WishlistPage() {
         toast.success("Added to cart!");
 
         // Remove from wishlist after adding to cart
-        const wishlistResponse = await fetch('/api/wishlist', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ productId: product._id }),
-        });
-        const wishlistResult = await wishlistResponse.json();
-        if (wishlistResponse.ok) setWishlist(wishlistResult.wishlist);
+        handleRemoveFromWishlist(product._id as string);
 
       } catch (error: any) {
         toast.error(error.message || "Failed to process request.");
