@@ -77,14 +77,14 @@ export default function RootLayout({
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
-  const isLandingPage = pathname === '/';
   const isGlobalPage = ['/', '/wishlist'].includes(pathname) || pathname.startsWith('/legal');
+  const isCreateHamperPage = pathname === '/create-hamper';
   
   const showHeader = !isAdminRoute && !isAuthRoute && !isGlobalPage;
 
   const getBrandName = () => {
     // These pages should use the default theme, not a brand-specific one.
-    if (isAdminRoute || isGlobalPage || pathname === '/create-hamper') {
+    if (isAdminRoute || isGlobalPage || isCreateHamperPage) {
       return null;
     }
     

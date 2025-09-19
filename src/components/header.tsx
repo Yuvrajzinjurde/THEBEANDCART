@@ -39,7 +39,8 @@ export default function Header() {
   
   const pathBrand = params.brand as string;
   const queryBrand = searchParams.get('storefront');
-  const brandName = pathBrand || queryBrand || 'reeva';
+  const isCreateHamperPage = pathname === '/create-hamper';
+  const brandName = isCreateHamperPage ? null : (pathBrand || queryBrand || 'reeva');
 
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -50,10 +51,12 @@ export default function Header() {
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
+  const effectiveBrandName = brandName || 'reeva';
+
   const secondaryNavItems = [
-    { href: `/${brandName}/products?keyword=gift`, icon: Gift, label: "Gifts" },
-    { href: `/${brandName}/products?keyword=fashion`, icon: Shirt, label: "Fashion Finds" },
-    { href: `/${brandName}/products?keyword=home`, icon: HomeIcon, label: "Home Favourites" },
+    { href: `/${effectiveBrandName}/products?keyword=gift`, icon: Gift, label: "Gifts" },
+    { href: `/${effectiveBrandName}/products?keyword=fashion`, icon: Shirt, label: "Fashion Finds" },
+    { href: `/${effectiveBrandName}/products?keyword=home`, icon: HomeIcon, label: "Home Favourites" },
   ];
   
   const categories = brand?.categories || [];
@@ -70,7 +73,10 @@ export default function Header() {
 
   useEffect(() => {
     async function fetchBrandLogo() {
-      if (!brandName) return;
+      if (!brandName) {
+        setBrand(null);
+        return;
+      };
       try {
         const res = await fetch(`/api/brands/${brandName}`);
         if (res.ok) {
@@ -88,7 +94,7 @@ export default function Header() {
     e.preventDefault();
     const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
     if (query) {
-      router.push(`/${brandName}/products?keyword=${encodeURIComponent(query)}`);
+      router.push(`/${effectiveBrandName}/products?keyword=${encodeURIComponent(query)}`);
       setIsSheetOpen(false);
     }
   };
@@ -108,7 +114,7 @@ export default function Header() {
         </Button>
         <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href={`/${brandName}/cart`} className="relative">
+            <Link href={`/${effectiveBrandName}/cart`} className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
             </Link>
@@ -119,13 +125,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href={`/${brandName}/home`} className="mr-4 flex items-center space-x-2">
+        <Link href={brandName ? `/${brandName}/home` : '/'} className="mr-4 flex items-center space-x-2">
           {brand?.logoUrl ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
-          <span className="hidden font-bold text-lg sm:inline-block capitalize">{brand?.displayName || brandName}</span>
+          <span className="hidden font-bold text-lg sm:inline-block capitalize">{brand?.displayName || 'The Brand Cart'}</span>
         </Link>
 
         {/* Categories Dropdown */}
@@ -139,7 +145,7 @@ export default function Header() {
             <DropdownMenuContent align="start">
                  {categories.map(cat => (
                     <DropdownMenuItem key={cat} asChild>
-                        <Link href={`/${brandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                        <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
@@ -177,9 +183,9 @@ export default function Header() {
                 <SheetContent side="right" className="w-[300px] sm:w-[340px] flex flex-col p-0">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
-                            <Link href={`/${brandName}/home`} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                            <Link href={brandName ? `/${brandName}/home`: '/'} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
                                 <Logo className="h-8 w-8" />
-                                <span className="font-bold text-lg capitalize">{brand?.displayName || brandName}</span>
+                                <span className="font-bold text-lg capitalize">{brand?.displayName || 'The Brand Cart'}</span>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
@@ -194,7 +200,7 @@ export default function Header() {
                             <Separator />
                             <h3 className="font-semibold text-muted-foreground">Categories</h3>
                              {categories.map(cat => (
-                                <Link key={cat} href={`/${brandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
                                     {cat}
                                 </Link>
                             ))}
@@ -217,7 +223,7 @@ export default function Header() {
                                 </Link>
                             </Button>
                             <Button variant="ghost" size="icon" asChild>
-                                 <Link href={`/${brandName}/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
+                                 <Link href={`/${effectiveBrandName}/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
                                     <ShoppingCart className="h-6 w-6" />
                                     {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
                                 </Link>
