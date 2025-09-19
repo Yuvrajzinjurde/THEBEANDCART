@@ -12,7 +12,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Logo } from "@/components/logo";
 
 const TOTAL_STEPS = 4;
 
@@ -46,6 +47,33 @@ const occasionOptions = [
     { name: "Festive (Diwali)", image: "https://picsum.photos/seed/diwali-hamper/400/300", hint: "diya lamp" },
     { name: "Corporate Gift", image: "https://picsum.photos/seed/corp-hamper/400/300", hint: "office desk" },
 ];
+
+const LandingFooter = () => (
+    <footer className="w-full border-t bg-background mt-16">
+        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                     <Logo className="h-6 w-6 text-primary" />
+                    <span className="font-bold">The Brand Cart</span>
+                </div>
+                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href="/legal/about-us" className="hover:text-primary">About Us</Link>
+                    <Link href="/legal/privacy-policy" className="hover:text-primary">Policies</Link>
+                    <Link href="/legal/contact-us" className="hover:text-primary">Contact Us</Link>
+                </div>
+                 <div className="flex space-x-4">
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
+                </div>
+            </div>
+            <div className="mt-8 border-t pt-4">
+                 <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} The Brand Cart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+);
 
 const Step1_Occasion = () => {
     const { occasion, setOccasion } = useHamperStore();
@@ -416,15 +444,10 @@ export default function CreateHamperPage() {
     }
 
     return (
+        <>
         <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
                  <div className="relative mb-8 text-center">
-                    <Button variant="outline" size="icon" className="absolute top-1/2 -translate-y-1/2 left-0 h-8 w-8" asChild>
-                        <Link href="/">
-                            <ArrowLeft className="h-4 w-4" />
-                            <span className="sr-only">Back to Home</span>
-                        </Link>
-                    </Button>
                     <div className="space-y-4">
                         <h1 className="text-3xl font-bold">Create Your Perfect Hamper</h1>
                         <Progress value={(step / TOTAL_STEPS) * 100} className="w-full h-2" />
@@ -476,5 +499,7 @@ export default function CreateHamperPage() {
                 </AlertDialogContent>
             </AlertDialog>
         </main>
+        <LandingFooter />
+        </>
     );
 }
