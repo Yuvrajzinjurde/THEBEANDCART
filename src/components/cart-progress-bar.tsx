@@ -56,7 +56,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
     <Card className="overflow-hidden">
         <CardContent className="p-4 space-y-3">
             <div className="relative h-4">
-                <Progress value={progress} className="h-full" indicatorClassName="bg-gradient-to-r from-yellow-400 to-orange-500" />
+                <Progress value={progress} className="h-full shadow-inner" indicatorClassName="bg-gradient-to-r from-orange-400 to-yellow-400" />
                 {milestones.map((milestone, index) => {
                     const status = getMilestoneStatus(milestone.threshold);
                     const leftPosition = (milestone.threshold / maxThreshold) * 100;
