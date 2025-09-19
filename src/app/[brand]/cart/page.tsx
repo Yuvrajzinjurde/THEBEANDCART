@@ -227,37 +227,38 @@ export default function CartPage() {
 
   return (
     <>
-      <div className="sticky top-16 z-20 w-full bg-background/95 py-4 backdrop-blur-sm -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b">
-        <div className="w-full flex justify-center container mx-auto">
-            <CartProgressBar currentValue={subtotal} />
+      <div className="sticky top-16 z-20 w-full bg-background/95 py-3 backdrop-blur-sm -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b">
+        <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => router.back()}
+                >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+                </Button>
+                <Breadcrumb className="hidden sm:block">
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+                </Breadcrumb>
+            </div>
+            <div className="flex-grow flex justify-center">
+                <CartProgressBar currentValue={subtotal} />
+            </div>
+            <div className="w-48 hidden lg:block" />
         </div>
       </div>
 
-      <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8">
-       <div className="py-4">
-        <div className="flex items-center gap-4">
-            <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => router.back()}
-            >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-            </Button>
-            <Breadcrumb>
-            <BreadcrumbList>
-                <BreadcrumbItem>
-                <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
-                </BreadcrumbItem>
-            </BreadcrumbList>
-            </Breadcrumb>
-        </div>
-       </div>
+      <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8 pt-6">
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
         <div className="lg:col-span-2">
