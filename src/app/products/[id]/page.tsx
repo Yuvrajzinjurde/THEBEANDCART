@@ -20,14 +20,49 @@ import Link from 'next/link';
 import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import type { IReview } from '@/models/review.model';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const ProductPageSkeleton = () => (
+    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-8">
+            <div className="flex flex-col gap-4">
+                <Skeleton className="aspect-square w-full rounded-lg" />
+                <div className="grid grid-cols-6 gap-2">
+                    {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="aspect-square w-full rounded-md" />
+                    ))}
+                </div>
+            </div>
+            <div className="space-y-4">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-10 w-3/4" />
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-4 w-1/3" />
+                <Separator />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+        </div>
+    </div>
+);
+
 
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
         return (
             <div className="pt-12">
                 <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
-                <div className="w-full flex justify-center">
-                    <Loader />
+                <div className="flex space-x-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
+                            <div className="space-y-2">
+                                <Skeleton className="aspect-square w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                                <Skeleton className="h-6 w-1/2" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         )
@@ -247,11 +282,7 @@ export default function ProductPage() {
   }, [id, addProduct]);
 
   if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center min-h-screen">
-        <Loader className="h-8 w-8 text-primary" />
-      </div>
-    );
+    return <ProductPageSkeleton />;
   }
 
   if (error) {

@@ -25,11 +25,31 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from 'embla-carousel-autoplay';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 type GroupedProducts = {
   [category: string]: IProduct[];
 };
+
+const ProductCarouselSkeleton = () => (
+    <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Separator className="mb-6" />
+        <div className="flex space-x-4">
+            {[...Array(6)].map((_, i) => (
+                <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
+                     <div className="space-y-2">
+                        <Skeleton className="aspect-square w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-6 w-1/2" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    </section>
+);
+
 
 const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
     if (!products || products.length === 0) return null;
@@ -417,9 +437,12 @@ export default function BrandHomePage() {
 
   if (authLoading || loading) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center">
-        <Loader className="h-12 w-12" />
-      </main>
+        <main>
+            <Skeleton className="w-full h-[130px] md:h-[180px]" />
+            <ProductCarouselSkeleton />
+            <ProductCarouselSkeleton />
+            <ProductCarouselSkeleton />
+        </main>
     );
   }
   

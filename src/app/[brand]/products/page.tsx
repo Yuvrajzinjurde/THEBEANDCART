@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Smile } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 export type ActiveFilters = {
   categories: string[];
@@ -40,6 +42,18 @@ const SORT_OPTIONS: { [key: string]: string } = {
   newest: "Newest",
   rating: "Rating",
 };
+
+const ProductGridSkeleton = () => (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
+        {[...Array(12)].map((_, i) => (
+            <div key={i} className="space-y-2">
+                <Skeleton className="aspect-square w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-6 w-1/2" />
+            </div>
+        ))}
+    </div>
+);
 
 
 export default function ProductsPage() {
@@ -160,14 +174,6 @@ export default function ProductsPage() {
   const productsForCategoryFilter = allProducts;
   const productsForOtherFilters = filteredProducts;
 
-  if (loading) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center">
-        <Loader className="h-12 w-12" />
-      </main>
-    );
-  }
-  
   if (error) {
       return (
           <main className="flex min-h-screen flex-col items-center justify-center">
@@ -235,10 +241,8 @@ export default function ProductsPage() {
                     </div>
                 </div>
 
-                {isPending ? (
-                     <div className="flex flex-1 items-center justify-center pt-16">
-                        <Loader className="h-8 w-8" />
-                    </div>
+                {loading || isPending ? (
+                     <ProductGridSkeleton />
                 ) : filteredProducts.length > 0 ? (
                     <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
                         {filteredProducts.map((product) => (
