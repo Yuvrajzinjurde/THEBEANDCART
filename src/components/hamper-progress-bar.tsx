@@ -25,7 +25,7 @@ const Milestone = ({
     const { name, icon: Icon } = step;
 
     return (
-        <div className="flex flex-col items-center text-center w-24">
+        <div className="flex flex-col items-center text-center w-16 sm:w-24">
             <div 
                 className={cn(
                     "h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300",
