@@ -53,10 +53,14 @@ export default function CartPage() {
   }, [user, authLoading, router]);
 
   const cartItems = useMemo(() => {
-    return cart?.items?.map(item => ({
-      ...item,
-      product: item.productId as IProduct,
-    })) || [];
+    return (
+      cart?.items
+        ?.map((item) => ({
+          ...item,
+          product: item.productId as IProduct,
+        }))
+        .filter((item) => item.product) || [] // Filter out items where product is null
+    );
   }, [cart]);
 
   const handleQuantityChange = async (productId: string, newQuantity: number) => {
