@@ -118,11 +118,11 @@ export default function CartPage() {
 
   const cartItems = useMemo(() => {
     const items = cart?.items
-        ?.map((item) => ({
+        ?.filter((item) => item.productId) // Ensure productId exists
+        .map((item) => ({
           ...item,
           product: item.productId as IProduct,
-        }))
-        .filter((item) => item.product) || [];
+        })) || [];
     
     if (subtotal >= FREE_GIFT_THRESHOLD) {
         // Add the free gift as an item to the cart list
@@ -135,7 +135,7 @@ export default function CartPage() {
         });
     }
     return items;
-  }, [cart, subtotal]);
+  }, [cart?.items, subtotal]);
 
   const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
@@ -432,3 +432,5 @@ export default function CartPage() {
     </>
   );
 }
+
+    
