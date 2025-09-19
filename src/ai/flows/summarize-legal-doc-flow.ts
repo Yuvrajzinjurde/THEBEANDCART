@@ -40,7 +40,8 @@ const summarizeLegalDocPrompt = ai.definePrompt({
   - Condition of the item (e.g., "unused", "original packaging").
   - Any non-returnable items.
 
-  Format the output as a clean, simple HTML unordered list (<ul>). Do not include any titles or introductory text. Just the list itself.
+  Format the output as a clean, simple HTML unordered list (<ul>). Do not include any titles or introductory text. 
+  After the list, add a paragraph with a link to the full policy page. The link should say "Click here for details." and point to '/legal/return-policy'. The paragraph should look like this: <p><a href="/legal/return-policy">Click here for details.</a></p>
 
   Document to Summarize:
   {{{documentContent}}}
