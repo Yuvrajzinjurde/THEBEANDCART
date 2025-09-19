@@ -122,6 +122,18 @@ const BoxItem = ({ box, variant }: { box: IBox, variant: IBoxVariant }) => (
     </div>
 );
 
+const PackagingGrid = ({ items }: { items: IBox[] }) => (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {items.flatMap(b => b.variants.map(v => (
+            <BoxItem 
+                key={`${b._id}-${v.name}`}
+                box={b}
+                variant={v}
+            />
+        )))}
+    </div>
+);
+
 
 const Step2_Box = () => {
     const { occasion, box: selectedBox, boxVariant: selectedBoxVariant, setBox } = useHamperStore();
@@ -173,43 +185,41 @@ const Step2_Box = () => {
 
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${(selectedBoxVariant as any)._id}` : undefined;
 
-    const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id.toString()));
-    const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id.toString()));
+    const suggestedItems = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
+    const suggestedBoxes = suggestedItems.filter(b => b.boxType === 'box');
+    const suggestedBags = suggestedItems.filter(b => b.boxType === 'bag');
+
+    const otherItems = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
+    const otherBoxes = otherItems.filter(b => b.boxType === 'box');
+    const otherBags = otherItems.filter(b => b.boxType === 'bag');
+
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <CardHeader>
-                <CardTitle>Choose Your Box</CardTitle>
-                <CardDescription>Select the perfect vessel for your gifts. Free options are available!</CardDescription>
+                <CardTitle>Choose Your Packaging</CardTitle>
+                <CardDescription>Select the perfect vessel for your gifts. You can choose a box or a bag.</CardDescription>
             </CardHeader>
             <CardContent>
                 {loading ? <Loader /> : (
                     <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
-                        {suggestedBoxes.length > 0 && (
+                        
+                        {(suggestedBoxes.length > 0 || suggestedBags.length > 0) && (
                             <section>
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {suggestedBoxes.flatMap(b => b.variants.map(v => (
-                                        <BoxItem 
-                                            key={`${b._id}-${v.name}`}
-                                            box={b}
-                                            variant={v}
-                                        />
-                                    )))}
-                                </div>
+                                {suggestedBoxes.length > 0 && <PackagingGrid items={suggestedBoxes} />}
+                                {suggestedBags.length > 0 && <PackagingGrid items={suggestedBags} />}
                             </section>
                         )}
+                        
                         <section>
-                             <h3 className="font-bold text-lg mb-4">All Options</h3>
-                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {otherBoxes.flatMap(b => b.variants.map(v => (
-                                    <BoxItem 
-                                        key={`${b._id}-${v.name}`}
-                                        box={b}
-                                        variant={v}
-                                    />
-                                )))}
-                            </div>
+                             <h3 className="font-bold text-lg mb-4">All Boxes</h3>
+                             <PackagingGrid items={otherBoxes} />
+                        </section>
+
+                        <section>
+                             <h3 className="font-bold text-lg mb-4">All Bags</h3>
+                             <PackagingGrid items={otherBags} />
                         </section>
                     </RadioGroup>
                 )}
@@ -519,7 +529,7 @@ export default function CreateHamperPage() {
                         {step > 1 && (
                             <Button variant="destructive" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
                                 {isDiscarding ? <Loader className="mr-2" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                                Discard
+                                Discard & Start Over
                             </Button>
                         )}
                         {step < TOTAL_STEPS ? (
@@ -554,4 +564,3 @@ export default function CreateHamperPage() {
         </>
     );
 }
-
