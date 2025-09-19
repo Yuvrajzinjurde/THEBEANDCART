@@ -48,7 +48,7 @@ const freeGiftProduct: IProduct = {
     _id: 'free-gift-id',
     name: 'Surprise Gift',
     brand: 'From us, to you!',
-    images: ['https://picsum.photos/seed/gift-box/200/200'],
+    images: [''], // No image needed, we use the icon
     sellingPrice: 0,
     mrp: 999, // Show a perceived value
     storefront: 'reeva',
@@ -63,6 +63,17 @@ const freeGiftProduct: IProduct = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
 } as IProduct;
+
+const GiftBoxIcon = () => (
+    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
+        <rect x="20" y="45" width="60" height="30" rx="3" fill="currentColor" fillOpacity="0.9"/>
+        <path d="M50 45V75" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        <rect x="20" y="30" width="60" height="15" rx="3" fill="currentColor"/>
+        <path d="M30 30H70" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M50 10C40 10 30 20 30 30H50V10Z" fill="currentColor"/>
+        <path d="M50 10C60 10 70 20 70 30H50V10Z" fill="currentColor"/>
+    </svg>
+)
 
 export default function CartPage() {
   const router = useRouter();
@@ -257,9 +268,17 @@ export default function CartPage() {
                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                             return (
                             <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex gap-4">
-                                <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`block flex-shrink-0 ${isGift ? 'pointer-events-none' : ''}`}>
-                                    <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border"/>
-                                </Link>
+                                <div className="block flex-shrink-0 w-[120px] h-[120px]">
+                                    {isGift ? (
+                                        <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
+                                            <GiftBoxIcon />
+                                        </div>
+                                    ) : (
+                                        <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
+                                            <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
+                                        </Link>
+                                    )}
+                                </div>
                                 <div className="flex flex-col flex-grow gap-1">
                                     <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
                                     <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
@@ -367,4 +386,3 @@ export default function CartPage() {
     </main>
   );
 }
-
