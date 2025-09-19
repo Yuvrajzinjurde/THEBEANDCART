@@ -45,7 +45,7 @@ export default function Header() {
   const [showSecondaryNav, setShowSecondaryNav] = useState(false);
   const { cart, wishlist } = useUserStore();
 
-  const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0;
+  const cartCount = cart?.items?.filter(Boolean).reduce((acc, item) => acc + item.quantity, 0) ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
   const secondaryNavItems = [
