@@ -22,7 +22,6 @@ import { BrandProductCard } from "@/components/brand-product-card";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "react-toastify";
-import { Badge } from "@/components/ui/badge";
 
 const TOTAL_STEPS = 4;
 
@@ -141,6 +140,7 @@ const Step3_Products = () => {
     useEffect(() => {
         async function fetchProducts() {
             try {
+                // Fetch all products, not just from one storefront
                 const productResponse = await fetch(`/api/products`);
                 if (productResponse.ok) {
                     const productData = await productResponse.json();
@@ -312,6 +312,7 @@ export default function CreateHamperPage() {
                     products: hamperState.products.map(p => p._id),
                     notesToCreator: hamperState.notesToCreator,
                     notesToReceiver: hamperState.notesToReceiver,
+                    addRose: hamperState.addRose,
                 };
                 try {
                     await fetch('/api/hampers', {
@@ -365,8 +366,10 @@ export default function CreateHamperPage() {
             // possibly creating a custom product or adding a bundle to cart.
             // For now, we'll just mark as complete and redirect.
             toast.success("Hamper finalized and added to cart!");
+            // TODO: Here you would call an API to convert the hamper into a cart item.
+            // For now, we just reset the state and redirect.
             resetHamper();
-            router.push('/cart'); // A generic cart page
+            router.push('/cart'); // A generic cart page for now.
         } catch (error) {
             console.error("Checkout failed:", error);
             toast.error("Could not proceed to checkout.");
@@ -404,9 +407,13 @@ export default function CreateHamperPage() {
                 </Card>
 
                  <div className="flex justify-between items-center mt-6">
-                    <Button variant="link" className="text-destructive p-0" onClick={handleDiscard}>
-                       <Trash2 className="mr-2 h-4 w-4" /> Discard
-                    </Button>
+                    <div>
+                        {step > 1 && (
+                             <Button variant="link" className="text-destructive p-0" onClick={handleDiscard}>
+                               <Trash2 className="mr-2 h-4 w-4" /> Discard & Start Over
+                            </Button>
+                        )}
+                    </div>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
                             <ArrowLeft className="mr-2 h-4 w-4"/> Previous

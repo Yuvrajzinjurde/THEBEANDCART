@@ -17,6 +17,7 @@ const HamperUpdateSchema = z.object({
     products: z.array(z.string().refine(val => Types.ObjectId.isValid(val))).optional(),
     notesToCreator: z.string().optional(),
     notesToReceiver: z.string().optional(),
+    addRose: z.boolean().optional(),
 });
 
 // GET the user's active (incomplete) hamper

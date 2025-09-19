@@ -9,17 +9,19 @@ export interface IHamper extends Document {
   products: Types.ObjectId[];
   notesToCreator?: string;
   notesToReceiver?: string;
+  addRose?: boolean;
   isComplete: boolean;
 }
 
 const HamperSchema: Schema<IHamper> = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   occasion: { type: String, required: true },
-  boxId: { type: Schema.Types.ObjectId, ref: 'Box', required: true },
-  boxVariantId: { type: Schema.Types.ObjectId, required: true },
+  boxId: { type: Schema.Types.ObjectId, ref: 'Box' },
+  boxVariantId: { type: Schema.Types.ObjectId },
   products: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
   notesToCreator: { type: String },
   notesToReceiver: { type: String },
+  addRose: { type: Boolean, default: false },
   isComplete: { type: Boolean, default: false },
 }, { timestamps: true });
 
