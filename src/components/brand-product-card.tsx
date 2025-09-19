@@ -156,7 +156,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         </div>
         <div className="p-3 space-y-1.5 flex flex-col flex-grow">
           <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-          <h3 className="truncate text-sm font-semibold text-foreground flex-grow min-h-[40px]">{product.name}</h3>
+          <h3 className="h-10 text-sm font-semibold text-foreground flex-grow line-clamp-2">{product.name}</h3>
           
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
