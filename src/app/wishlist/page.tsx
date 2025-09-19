@@ -95,7 +95,9 @@ export default function WishlistPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.replace("/"); // Redirect to home if not logged in
+        // Corrected redirection logic
+        const currentBrand = router.pathname?.split('/')[1] || 'reeva';
+        router.replace(`/${currentBrand}/login`);
         return;
       }
       setLoading(false);
@@ -121,7 +123,8 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = async (product: IProduct) => {
-    if (product.stock === 0) {
+    const availableStock = product.stock ?? 0;
+    if (availableStock === 0) {
       toast.error("This item is out of stock.");
       return;
     }
@@ -140,16 +143,7 @@ export default function WishlistPage() {
       setCart(cartResult.cart);
       
       // Remove from wishlist
-      const wishlistRes = await fetch('/api/wishlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ productId: product._id }),
-      });
-      const wishlistResult = await wishlistRes.json();
-      if (!wishlistRes.ok) {
-          console.error("Failed to remove from wishlist after adding to cart:", wishlistResult.message);
-      }
-      setWishlist(wishlistResult.wishlist);
+      await handleRemoveFromWishlist(product._id as string);
 
     } catch (error: any) {
       toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
@@ -205,6 +199,8 @@ export default function WishlistPage() {
           {wishlistProducts.map((product) => {
             const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
             const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
+            const availableStock = product.stock ?? 0;
+            
             return (
                 <Card key={product._id as string}>
                     <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
@@ -226,17 +222,17 @@ export default function WishlistPage() {
                             </div>
                             
                             <Badge
-                                variant={product.stock > 0 ? "default" : "destructive"}
+                                variant={availableStock > 0 ? "default" : "destructive"}
                                 className={cn(
                                     "w-max mt-2",
-                                    product.stock > 0 && "bg-green-100 text-green-800"
+                                    availableStock > 0 && "bg-green-100 text-green-800"
                                 )}
                             >
-                                {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                                {availableStock > 0 ? 'In Stock' : 'Out of Stock'}
                             </Badge>
 
                              <div className="flex items-center gap-2 mt-4 pt-4 border-t sm:border-none sm:pt-0 sm:mt-auto">
-                                {product.stock > 0 && (
+                                {availableStock > 0 && (
                                     <Button 
                                         onClick={() => handleAddToCart(product)} 
                                     >
