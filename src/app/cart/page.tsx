@@ -194,7 +194,7 @@ export default function CartPage() {
         </Breadcrumb>
       </div>
       
-      <div className="mb-6">
+      <div className="mb-8">
         <CartProgressBar currentValue={subtotal} />
       </div>
 

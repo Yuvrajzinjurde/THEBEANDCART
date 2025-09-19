@@ -1,11 +1,13 @@
 
 "use client";
 
-import { Gift, Tag, Truck } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Gift, Lock, Tag, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from './ui/card';
 import { useState, useEffect, useRef } from 'react';
+import ReactConfetti from 'react-confetti';
+import { useWindowSize } from '@react-hook/window-size';
+
 
 const milestones = [
   { threshold: 399, reward: "Free Delivery", icon: Truck },
@@ -15,83 +17,85 @@ const milestones = [
 
 const maxThreshold = milestones[milestones.length - 1].threshold;
 
+
 export function CartProgressBar({ currentValue }: { currentValue: number }) {
-  const progress = Math.min((currentValue / maxThreshold) * 100, 100);
-  const [unlockedMilestones, setUnlockedMilestones] = useState<number[]>([]);
+  const [unlockedIndex, setUnlockedIndex] = useState<number | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize();
   const prevValueRef = useRef(currentValue);
 
   useEffect(() => {
-    const newlyUnlocked: number[] = [];
+    let newlyUnlockedIndex: number | null = null;
     milestones.forEach((milestone, index) => {
-      const wasUnlocked = prevValueRef.current >= milestone.threshold;
-      const isUnlocked = currentValue >= milestone.threshold;
-      if (isUnlocked && !wasUnlocked) {
-        newlyUnlocked.push(index);
-      }
+        const wasUnlocked = prevValueRef.current >= milestone.threshold;
+        const isUnlocked = currentValue >= milestone.threshold;
+        if (isUnlocked && !wasUnlocked) {
+            newlyUnlockedIndex = index;
+        }
     });
 
-    if (newlyUnlocked.length > 0) {
-      setUnlockedMilestones(newlyUnlocked);
-      // Remove the animation class after it has played
-      const timer = setTimeout(() => {
-        setUnlockedMilestones([]);
-      }, 1000); // Animation is 0.8s, so 1s is safe.
-      return () => clearTimeout(timer);
+    if (newlyUnlockedIndex !== null) {
+        setUnlockedIndex(newlyUnlockedIndex);
+        setShowConfetti(true);
+        const timer = setTimeout(() => {
+            setShowConfetti(false);
+            setUnlockedIndex(null); // Reset after animation
+        }, 5000); // Confetti duration
+        return () => clearTimeout(timer);
     }
-    
     prevValueRef.current = currentValue;
-  }, [currentValue]);
 
+  }, [currentValue]);
 
   const nextMilestone = milestones.find(m => currentValue < m.threshold);
   const amountNeeded = nextMilestone ? nextMilestone.threshold - currentValue : 0;
   
-  const getMilestoneStatus = (threshold: number) => {
-    if (currentValue >= threshold) return 'unlocked';
-    if (nextMilestone && threshold === nextMilestone.threshold) return 'active';
-    return 'locked';
-  };
+  const progressPercentage = Math.min((currentValue / maxThreshold) * 100, 100);
 
   return (
     <Card className="overflow-hidden">
-        <CardContent className="p-4 space-y-3">
-            <div className="relative h-4">
-                <Progress value={progress} className="h-full shadow-inner" indicatorClassName="bg-gradient-to-r from-orange-400 to-yellow-400" />
+        {showConfetti && <ReactConfetti width={width} height={height} recycle={false} numberOfPieces={400} />}
+        <CardContent className="p-6 space-y-4">
+            <div className="relative w-full h-1 bg-gray-200 rounded-full">
+                <div 
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                />
+            </div>
+            
+             <div className="flex justify-between items-start">
                 {milestones.map((milestone, index) => {
-                    const status = getMilestoneStatus(milestone.threshold);
-                    const leftPosition = (milestone.threshold / maxThreshold) * 100;
-                    
+                    const isUnlocked = currentValue >= milestone.threshold;
+                    const isUnlocking = unlockedIndex === index;
+                    const Icon = milestone.icon;
+
                     return (
-                        <div
-                            key={index}
-                            className={cn(
-                                "absolute -top-1/2 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300",
-                                {
-                                    'bg-background border-muted-foreground/30': status === 'locked',
-                                    'bg-yellow-100 border-yellow-400 shadow-md scale-110': status === 'active',
-                                    'bg-green-100 border-green-500 shadow-lg': status === 'unlocked',
-                                },
-                                unlockedMilestones.includes(index) && 'sparkle-animation'
-                            )}
-                            style={{ left: `calc(${leftPosition}% - 16px)` }}
-                        >
-                            <milestone.icon className={cn(
-                                "h-4 w-4",
-                                {
-                                    'text-muted-foreground/50': status === 'locked',
-                                    'text-yellow-600': status === 'active',
-                                    'text-green-600': status === 'unlocked',
-                                }
-                            )} />
+                        <div key={index} className="flex flex-col items-center gap-2 text-center w-24">
+                           <div className={cn(
+                                "relative flex h-16 w-16 items-center justify-center rounded-lg border-2 transition-all duration-500",
+                                isUnlocked ? 'bg-blue-100 border-blue-400 shadow-lg' : 'bg-gray-100 border-gray-300'
+                           )}>
+                                {isUnlocked ? (
+                                     <Icon className={cn(
+                                        "h-8 w-8 text-blue-500 transition-all duration-300",
+                                        isUnlocking && "animate-ping"
+                                     )} />
+                                ) : (
+                                    <Lock className="h-8 w-8 text-gray-400" />
+                                )}
+                                {isUnlocking && <div className="absolute inset-0 bg-white/50 animate-ping rounded-lg" />}
+                           </div>
+                           <p className="text-xs font-semibold">{isUnlocked ? milestone.reward : '???'}</p>
+                           <p className="text-xs text-muted-foreground">₹{milestone.threshold}</p>
                         </div>
-                    )
+                    );
                 })}
             </div>
+            
              <div className="text-center text-sm font-medium mt-2">
                 {nextMilestone ? (
                     <p>
-                        Add <span className="font-bold text-primary">₹{amountNeeded.toFixed(0)}</span> more to unlock{' '}
-                        <span className="font-bold">{nextMilestone.reward}!</span>
+                        Add <span className="font-bold text-primary">₹{amountNeeded.toFixed(0)}</span> more to unlock the next surprise!
                     </p>
                 ) : (
                     <p className="font-bold text-green-600">Congratulations! You've unlocked all rewards!</p>
