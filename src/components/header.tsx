@@ -96,7 +96,7 @@ export default function Header() {
         </Button>
         <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href="/cart" className="relative">
+            <Link href={`/${brandName}/cart`} className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
             </Link>

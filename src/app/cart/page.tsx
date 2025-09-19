@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
 import { Loader } from "@/components/ui/loader";
@@ -41,6 +41,8 @@ const FREE_SHIPPING_THRESHOLD = 500;
 
 export default function CartPage() {
   const router = useRouter();
+  const params = useParams();
+  const brandName = params.brand as string || 'reeva';
   const { user, token, loading: authLoading } = useAuth();
   const { cart, setCart, setWishlist } = useUserStore();
   const [loading, setLoading] = useState(true);
@@ -48,12 +50,12 @@ export default function CartPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.replace("/"); // Redirect if not logged in
+        router.replace(`/${brandName}/login`); // Redirect to brand-specific login
         return;
       }
       setLoading(false);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, brandName]);
 
   const cartItems = useMemo(() => {
     return (
@@ -162,7 +164,7 @@ export default function CartPage() {
                     Add items you want to buy to your cart.
                 </p>
                 <Button asChild className="mt-6">
-                    <Link href="/">Continue Shopping</Link>
+                    <Link href={`/${brandName}/home`}>Continue Shopping</Link>
                 </Button>
             </div>
         </main>
@@ -184,7 +186,7 @@ export default function CartPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
