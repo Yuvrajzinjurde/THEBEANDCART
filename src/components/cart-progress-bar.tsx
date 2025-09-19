@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { cn } from '@/lib/utils';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@react-hook/window-size';
@@ -14,7 +14,7 @@ const milestones = [
 ];
 
 const ActiveGiftBox = () => (
-    <svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
+    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
         {/* Sparkles */}
         <path d="M50 10L52.5359 20.5359L63.0718 23.0718L52.5359 25.6077L50 36.1436L47.4641 25.6077L36.9282 23.0718L47.4641 20.5359L50 10Z" fill="url(#sparkle1)" />
         <path d="M20 25L21.768 32.268L29 35L21.768 37.732L20 45L18.232 37.732L11 35L18.232 32.268L20 25Z" fill="url(#sparkle2)" />
@@ -42,7 +42,7 @@ const ActiveGiftBox = () => (
 
 
 const LockedGiftBox = ({ className }: { className?: string }) => (
-    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
+    <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
         <path d="M10 18C10 15.7909 11.7909 14 14 14H26C28.2091 14 30 15.7909 30 18V28H10V18Z" fill="currentColor"/>
         <path d="M16 14V11C16 8.79086 17.7909 7 20 7C22.2091 7 24 8.79086 24 11V14" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
         <rect x="8" y="28" width="24" height="5" rx="1" fill="currentColor"/>
@@ -78,14 +78,14 @@ const Milestone = ({
 
     return (
         <div className="flex flex-col items-center text-center w-24">
-            <div className="h-12 flex items-center justify-center" ref={ref} data-unlocked="false">
+            <div className="h-10 flex items-center justify-center" ref={ref} data-unlocked="false">
                 {isUnlocked ? <ActiveGiftBox /> : <LockedGiftBox />}
             </div>
-            <div className="mt-2 h-14 flex flex-col items-center">
+            <div className="mt-1 h-12 flex flex-col items-center">
                 <p className="text-sm font-semibold">
                     {isUnlocked ? reward : 'Mystery Box'}
                 </p>
-                {isUnlocked && <Icon className="h-4 w-4 text-muted-foreground my-1" />}
+                {isUnlocked && <Icon className="h-4 w-4 text-muted-foreground my-0.5" />}
                  <p className="text-xs text-muted-foreground font-medium mt-auto">
                     ₹{threshold}
                 </p>
@@ -148,14 +148,14 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
                 onUnlock={handleUnlock}
               />
               {index < milestones.length - 1 && (
-                <div className="flex-1 h-px bg-muted-foreground/30 mt-5 border-t-2 border-dashed" />
+                <div className="flex-1 h-px bg-muted-foreground/30 mt-4 border-t-2 border-dashed" />
               )}
             </React.Fragment>
           );
         })}
       </div>
 
-       <div className="text-center text-sm font-medium mt-2">
+       <div className="text-center text-sm font-medium mt-1">
         {nextMilestone ? (
           <p>
             Add <span className="font-bold text-primary">₹{Math.max(0, amountNeeded).toFixed(0)}</span> more to unlock the next reward!
