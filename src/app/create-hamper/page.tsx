@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -34,6 +35,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Logo } from "@/components/logo";
+import { Badge } from "@/components/ui/badge";
 
 const TOTAL_STEPS = 4;
 
@@ -102,30 +104,67 @@ const Step1_Occasion = () => {
     );
 };
 
+const BoxItem = ({ box, variant, selected, onSelect }: { box: IBox, variant: IBoxVariant, selected: boolean, onSelect: () => void }) => (
+    <div>
+        <RadioGroupItem value={`${box._id}-${variant.name}`} id={`${box._id}-${variant.name}`} className="sr-only" />
+        <Label htmlFor={`${box._id}-${variant.name}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all", selected ? "border-primary ring-2 ring-primary/50" : "border-muted hover:border-foreground/20")}>
+            <div className="relative">
+                <div className="aspect-square relative mb-2">
+                    <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
+                </div>
+                <Badge className="absolute top-1 left-1 capitalize">{box.boxType}</Badge>
+            </div>
+            <div className="text-center">
+                <p className="font-semibold truncate">{box.name} ({variant.name})</p>
+                <p className="text-sm text-muted-foreground">{variant.price > 0 ? `₹${variant.price}` : 'Free'}</p>
+            </div>
+        </Label>
+    </div>
+);
+
+
 const Step2_Box = () => {
-    const { box, boxVariant, setBox } = useHamperStore();
+    const { occasion, box, boxVariant, setBox } = useHamperStore();
     const [allBoxes, setAllBoxes] = useState<IBox[]>([]);
+    const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchBoxes() {
+        async function fetchData() {
             try {
                 const res = await fetch('/api/boxes');
-                if (res.ok) {
-                    const data = await res.json();
-                    setAllBoxes(data.boxes);
+                if (!res.ok) throw new Error("Failed to fetch boxes");
+                const data = await res.json();
+                setAllBoxes(data.boxes);
+
+                const boxList = data.boxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
+                const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ occasion, boxes: boxList }),
+                });
+                if (suggestionRes.ok) {
+                    const suggestionData = await suggestionRes.json();
+                    setSuggestedBoxIds(suggestionData.suggestedBoxIds);
                 }
+
             } catch (error) {
-                console.error("Failed to fetch boxes", error);
+                console.error("Failed to fetch boxes or suggestions", error);
             } finally {
                 setLoading(false);
             }
         }
-        fetchBoxes();
-    }, []);
+        fetchData();
+    }, [occasion]);
 
-    const selectedBoxId = box?._id;
-    const selectedVariantId = `${box?._id}-${boxVariant?.name}`;
+    const handleSelect = (selectedBox: IBox, selectedVariant: IBoxVariant) => {
+        setBox(selectedBox, selectedVariant);
+    };
+
+    const selectedVariantId = box && boxVariant ? `${box._id}-${boxVariant.name}` : undefined;
+
+    const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
+    const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -135,35 +174,37 @@ const Step2_Box = () => {
             </CardHeader>
             <CardContent>
                 {loading ? <Loader /> : (
-                    <div className="space-y-6">
-                        {allBoxes.map(b => (
-                            <div key={b._id as string}>
-                                <h3 className="font-bold text-lg mb-2">{b.name}</h3>
-                                <RadioGroup onValueChange={(val) => {
-                                    const [bId, vName] = val.split('-');
-                                    const selectedB = allBoxes.find(b => b._id === bId);
-                                    const selectedV = selectedB?.variants.find(v => v.name === vName);
-                                    if(selectedB && selectedV) setBox(selectedB, selectedV);
-                                }} 
-                                value={box?._id === b._id ? selectedVariantId : undefined}
-                                className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {b.variants.map(v => (
-                                        <div key={`${b._id}-${v.name}`}>
-                                            <RadioGroupItem value={`${b._id}-${v.name}`} id={`${b._id}-${v.name}`} className="sr-only" />
-                                            <Label htmlFor={`${b._id}-${v.name}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full", selectedVariantId === `${b._id}-${v.name}` ? "border-primary" : "border-muted")}>
-                                                <div className="aspect-square relative mb-2">
-                                                    <Image src={v.images[0]} alt={v.name} fill className="object-cover rounded-md" />
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-semibold">{v.name}</p>
-                                                    <p className="text-sm text-muted-foreground">{v.price > 0 ? `₹${v.price}` : 'Free'}</p>
-                                                </div>
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </RadioGroup>
+                    <div className="space-y-8">
+                        {suggestedBoxes.length > 0 && (
+                            <section>
+                                <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {suggestedBoxes.map(b => b.variants.map(v => (
+                                        <BoxItem 
+                                            key={`${b._id}-${v.name}`}
+                                            box={b}
+                                            variant={v}
+                                            selected={selectedVariantId === `${b._id}-${v.name}`}
+                                            onSelect={() => handleSelect(b, v)}
+                                        />
+                                    )))}
+                                </div>
+                            </section>
+                        )}
+                        <section>
+                             <h3 className="font-bold text-lg mb-4">All Options</h3>
+                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {otherBoxes.map(b => b.variants.map(v => (
+                                    <BoxItem 
+                                        key={`${b._id}-${v.name}`}
+                                        box={b}
+                                        variant={v}
+                                        selected={selectedVariantId === `${b._id}-${v.name}`}
+                                        onSelect={() => handleSelect(b, v)}
+                                    />
+                                )))}
                             </div>
-                        ))}
+                        </section>
                     </div>
                 )}
             </CardContent>
@@ -179,7 +220,6 @@ const Step3_Products = () => {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                // Fetch all products, not just from one storefront
                 const productResponse = await fetch(`/api/products`);
                 if (productResponse.ok) {
                     const productData = await productResponse.json();
@@ -340,7 +380,7 @@ export default function CreateHamperPage() {
     useEffect(() => {
         if (!authLoading && !user) {
             toast.info("Please log in to create a hamper.");
-            router.replace(`/reeva/login`); // Default to a brand login page
+            router.replace(`/login`);
         }
     }, [user, authLoading, router]);
     
@@ -448,6 +488,9 @@ export default function CreateHamperPage() {
         <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
                  <div className="relative mb-8 text-center">
+                     <Button variant="link" onClick={() => router.push('/')} className="absolute left-0 top-1/2 -translate-y-1/2 p-0 h-auto">
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+                    </Button>
                     <div className="space-y-4">
                         <h1 className="text-3xl font-bold">Create Your Perfect Hamper</h1>
                         <Progress value={(step / TOTAL_STEPS) * 100} className="w-full h-2" />

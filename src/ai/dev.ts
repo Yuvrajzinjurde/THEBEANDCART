@@ -1,4 +1,5 @@
 
+
 import { config } from 'dotenv';
 config();
 
@@ -10,3 +11,5 @@ import '@/ai/flows/parse-legal-doc-flow.ts';
 import '@/ai/flows/summarize-legal-doc-flow.ts';
 import '@/ai/flows/suggest-product-price-flow.ts';
 import '@/ai/flows/suggest-dried-rose-flow.ts';
+import '@/ai/flows/suggest-boxes-flow.ts';
+
