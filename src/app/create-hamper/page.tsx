@@ -13,7 +13,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot, Heart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -104,31 +104,53 @@ const Step1_Occasion = () => {
     );
 };
 
-const BoxItem = ({ box, variant }: { box: IBox, variant: IBoxVariant }) => (
-    <div>
-        <RadioGroupItem value={`${box._id}-${(variant as any)._id}`} id={`${box._id}-${(variant as any)._id}`} className="sr-only" />
-        <Label htmlFor={`${box._id}-${(variant as any)._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all border-muted hover:border-foreground/20", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
-            <div className="relative">
-                <div className="aspect-square relative mb-2">
-                    <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
+const BoxItem = ({ box, variant, onLike }: { box: IBox, variant: IBoxVariant, onLike: (boxId: string) => void }) => {
+    const hasDiscount = variant.mrp > variant.sellingPrice;
+    const discountPercentage = hasDiscount ? Math.round(((variant.mrp - variant.sellingPrice) / variant.mrp) * 100) : 0;
+    
+    return (
+        <div>
+            <RadioGroupItem value={`${box._id}-${(variant as any)._id}`} id={`${box._id}-${(variant as any)._id}`} className="sr-only" />
+            <Label htmlFor={`${box._id}-${(variant as any)._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all duration-300 ease-in-out border-muted hover:border-foreground/20 hover:shadow-lg", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
+                <div className="relative group/card">
+                    <div className="aspect-square relative mb-2">
+                        <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
+                    </div>
+                    <Button 
+                        size="icon" 
+                        variant="secondary"
+                        className="absolute top-1 right-1 h-7 w-7 rounded-full z-10 opacity-0 group-hover/card:opacity-100"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLike(box._id as string); }}
+                    >
+                        <Heart className="h-4 w-4" />
+                    </Button>
                 </div>
-                <Badge className="absolute top-1 left-1 capitalize">{box.boxType}</Badge>
-            </div>
-            <div className="text-center">
-                <p className="font-semibold truncate">{box.name} ({variant.name})</p>
-                <p className="text-sm text-muted-foreground">{variant.price > 0 ? `₹${variant.price}` : 'Free'}</p>
-            </div>
-        </Label>
-    </div>
-);
+                <div className="text-center space-y-1">
+                    <p className="font-semibold truncate">{box.name} ({variant.name})</p>
+                    <Badge variant="outline" className="capitalize">{box.boxType}</Badge>
+                    <div className="flex items-baseline justify-center gap-2 flex-wrap min-h-[20px]">
+                        <p className="text-sm font-bold text-foreground">₹{variant.sellingPrice.toLocaleString('en-IN')}</p>
+                        {hasDiscount && (
+                            <>
+                                <p className="text-xs font-medium text-muted-foreground line-through">₹{variant.mrp.toLocaleString('en-IN')}</p>
+                                <p className="text-xs font-semibold text-green-600">{discountPercentage}% off</p>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </Label>
+        </div>
+    )
+};
 
-const PackagingGrid = ({ items }: { items: IBox[] }) => (
+const PackagingGrid = ({ items, onLike }: { items: IBox[], onLike: (boxId: string) => void }) => (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.flatMap(b => b.variants.map(v => (
             <BoxItem 
                 key={`${b._id}-${v.name}`}
                 box={b}
                 variant={v}
+                onLike={onLike}
             />
         )))}
     </div>
@@ -140,17 +162,29 @@ const Step2_Box = () => {
     const [allBoxes, setAllBoxes] = useState<IBox[]>([]);
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    const fetchAllBoxes = async () => {
+        try {
+            const res = await fetch('/api/boxes');
+            if (!res.ok) throw new Error("Failed to fetch boxes");
+            const data = await res.json();
+            setAllBoxes(data.boxes);
+            return data.boxes;
+        } catch (error) {
+            console.error("Failed to fetch boxes", error);
+            return [];
+        }
+    };
+
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                const res = await fetch('/api/boxes');
-                if (!res.ok) throw new Error("Failed to fetch boxes");
-                const data = await res.json();
-                setAllBoxes(data.boxes);
-
-                if (occasion) {
-                    const boxList = data.boxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
+        async function fetchDataAndSuggestions() {
+            setLoading(true);
+            const fetchedBoxes = await fetchAllBoxes();
+            
+            if (occasion && fetchedBoxes.length > 0) {
+                try {
+                    const boxList = fetchedBoxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -160,15 +194,13 @@ const Step2_Box = () => {
                         const suggestionData = await suggestionRes.json();
                         setSuggestedBoxIds(suggestionData.suggestedBoxIds);
                     }
+                } catch (error) {
+                    console.error("Failed to fetch suggestions", error);
                 }
-
-            } catch (error) {
-                console.error("Failed to fetch boxes or suggestions", error);
-            } finally {
-                setLoading(false);
             }
+            setLoading(false);
         }
-        fetchData();
+        fetchDataAndSuggestions();
     }, [occasion]);
     
     const handleSelect = (value: string) => {
@@ -179,6 +211,19 @@ const Step2_Box = () => {
             if (variant) {
                 setBox(box, variant);
             }
+        }
+    };
+    
+    const handleLike = async (boxId: string) => {
+        try {
+            const response = await fetch(`/api/boxes/${boxId}`, { method: 'PATCH' });
+            if (response.ok) {
+                const { box: updatedBox } = await response.json();
+                setAllBoxes(prev => prev.map(b => b._id === boxId ? { ...b, likes: updatedBox.likes } : b));
+                toast.success('Thanks for your feedback!');
+            }
+        } catch (error) {
+            console.error("Failed to like box", error);
         }
     };
 
@@ -207,19 +252,19 @@ const Step2_Box = () => {
                         {(suggestedBoxes.length > 0 || suggestedBags.length > 0) && (
                             <section>
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
-                                {suggestedBoxes.length > 0 && <PackagingGrid items={suggestedBoxes} />}
-                                {suggestedBags.length > 0 && <PackagingGrid items={suggestedBags} />}
+                                {suggestedBoxes.length > 0 && <PackagingGrid items={suggestedBoxes} onLike={handleLike} />}
+                                {suggestedBags.length > 0 && <PackagingGrid items={suggestedBags} onLike={handleLike} />}
                             </section>
                         )}
                         
                         <section>
                              <h3 className="font-bold text-lg mb-4">All Boxes</h3>
-                             <PackagingGrid items={otherBoxes} />
+                             <PackagingGrid items={otherBoxes} onLike={handleLike} />
                         </section>
 
                         <section>
                              <h3 className="font-bold text-lg mb-4">All Bags</h3>
-                             <PackagingGrid items={otherBags} />
+                             <PackagingGrid items={otherBags} onLike={handleLike} />
                         </section>
                     </RadioGroup>
                 )}

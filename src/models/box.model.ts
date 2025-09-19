@@ -5,7 +5,8 @@ export interface IBoxVariant extends Document {
   name: string; // e.g., 'Small', 'Medium', 'Red Velvet'
   size?: string;
   color?: string;
-  price: number;
+  mrp: number;
+  sellingPrice: number;
   stock: number;
   images: string[];
 }
@@ -23,10 +24,11 @@ const BoxVariantSchema: Schema<IBoxVariant> = new Schema({
   name: { type: String, required: true },
   size: { type: String },
   color: { type: String },
-  price: { type: Number, required: true, min: 0 },
+  mrp: { type: Number, required: true, min: 0 },
+  sellingPrice: { type: Number, required: true, min: 0 },
   stock: { type: Number, required: true, min: 0, default: 0 },
   images: [{ type: String, required: true }],
-});
+}, { _id: true });
 
 
 const BoxSchema: Schema<IBox> = new Schema({
