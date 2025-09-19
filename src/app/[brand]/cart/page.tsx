@@ -226,7 +226,14 @@ export default function CartPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8">
+    <>
+      <div className="sticky top-16 z-20 w-full bg-background/95 py-4 backdrop-blur-sm -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b">
+        <div className="w-full flex justify-center container mx-auto">
+            <CartProgressBar currentValue={subtotal} />
+        </div>
+      </div>
+
+      <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8">
        <div className="py-4">
         <div className="flex items-center gap-4">
             <Button
@@ -252,13 +259,7 @@ export default function CartPage() {
         </div>
        </div>
       
-      <div className="sticky top-16 z-20 w-full bg-background/95 py-4 backdrop-blur-sm -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 mb-4 border-b">
-        <div className="w-full flex justify-center container mx-auto">
-            <CartProgressBar currentValue={subtotal} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
         <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
@@ -271,7 +272,7 @@ export default function CartPage() {
                              const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                             return (
-                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4">
+                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex gap-4">
                                 <div className="block flex-shrink-0 w-[100px] h-[100px] sm:w-[120px] sm:h-[120px]">
                                     {isGift ? (
                                         <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
@@ -388,5 +389,6 @@ export default function CartPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
