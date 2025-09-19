@@ -195,6 +195,13 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         router.push(`/${storefront}/login`);
         return;
     }
+    
+    // Check if variants exist and if a selection has been made
+    if (variants.length > 1 && (!selectedColor || !selectedSize)) {
+        toast.warn("Please select a color and size before adding to cart.");
+        return;
+    }
+
     toast.info("Adding to cart...");
     try {
         const response = await fetch('/api/cart', {
