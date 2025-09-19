@@ -37,16 +37,29 @@ export default function Header() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const pathBrand = params.brand as string;
-  const queryBrand = searchParams.get('storefront');
-  const isCreateHamperPage = pathname === '/create-hamper';
-  const brandName = isCreateHamperPage ? null : (pathBrand || queryBrand || 'reeva');
-
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const [showSecondaryNav, setShowSecondaryNav] = useState(false);
   const { cart, wishlist } = useUserStore();
+
+  const [brandName, setBrandName] = useState<string | null>(null);
+
+  useEffect(() => {
+    // This logic now runs only on the client, avoiding server-client mismatch
+    const pathBrand = params.brand as string;
+    const queryBrand = searchParams.get('storefront');
+    const isCreateHamperPage = pathname === '/create-hamper';
+    const determinedBrandName = isCreateHamperPage ? null : (pathBrand || queryBrand || 'reeva');
+    setBrandName(determinedBrandName);
+
+    if (pathname === `/${determinedBrandName}/home`) {
+      setShowSecondaryNav(true);
+    } else {
+      setShowSecondaryNav(false);
+    }
+  }, [pathname, params, searchParams]);
+
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
@@ -62,16 +75,6 @@ export default function Header() {
   const categories = brand?.categories || [];
 
   useEffect(() => {
-    // This effect runs only on the client, after initial render and hydration.
-    // This prevents the hydration mismatch error.
-    if (pathname === `/${brandName}/home`) {
-      setShowSecondaryNav(true);
-    } else {
-      setShowSecondaryNav(false);
-    }
-  }, [pathname, brandName]);
-
-  useEffect(() => {
     async function fetchBrandLogo() {
       if (!brandName) {
         setBrand(null);
@@ -82,9 +85,12 @@ export default function Header() {
         if (res.ok) {
           const { brand: brandData } = await res.json();
           setBrand(brandData);
+        } else {
+          setBrand(null); // Explicitly set to null if brand not found
         }
       } catch (error) {
         console.error("Failed to fetch brand data for header", error);
+        setBrand(null);
       }
     }
     fetchBrandLogo();
