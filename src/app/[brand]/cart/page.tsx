@@ -267,8 +267,8 @@ export default function CartPage() {
                              const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                             return (
-                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4">
-                                <div className="block flex-shrink-0 w-full sm:w-[120px] h-auto sm:h-[120px]">
+                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-row gap-4">
+                                <div className="block flex-shrink-0 w-[100px] h-[100px] sm:w-[120px] sm:h-[120px]">
                                     {isGift ? (
                                         <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
                                             <GiftBoxIcon />
@@ -281,7 +281,7 @@ export default function CartPage() {
                                 </div>
                                 <div className="flex flex-col flex-grow gap-1">
                                     <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
-                                    <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
+                                    <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
                                     
                                     {isGift && (
                                         <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">
@@ -386,5 +386,3 @@ export default function CartPage() {
     </main>
   );
 }
-
-    
