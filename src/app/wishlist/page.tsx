@@ -73,7 +73,6 @@ const WishlistSkeleton = () => (
                             <Skeleton className="h-4 w-1/4" />
                             <Skeleton className="h-6 w-3/4" />
                             <Skeleton className="h-8 w-1/2 mt-2" />
-                            <Skeleton className="h-5 w-20 mt-2" />
                             <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
                                 <Skeleton className="h-10 w-36" />
                                 <Skeleton className="h-10 w-28" />
@@ -122,6 +121,12 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = async (product: IProduct) => {
+    const availableStock = product.stock ?? 0;
+    if (availableStock === 0) {
+      toast.error("This item is out of stock.");
+      return;
+    }
+
     try {
       // Add to cart
       const cartResponse = await fetch('/api/cart', {
@@ -213,7 +218,7 @@ export default function WishlistPage() {
                                     </>
                                 )}
                             </div>
-
+                            
                              <div className="flex items-center gap-2 mt-auto pt-4 border-t sm:border-none sm:pt-2">
                                 <Button 
                                     onClick={() => handleAddToCart(product)} 
