@@ -43,6 +43,8 @@ import { UserNav } from "../user-nav";
 import { Separator } from "../ui/separator";
 import type { IBrand } from "@/models/brand.model";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 
 const navItems = [
   { href: "/admin/boxes", icon: Box, label: "Boxes & Bags" },
@@ -58,16 +60,15 @@ const navItems = [
   { href: "/admin/users", icon: Users, label: "Users" },
 ];
 
-const SidebarContent = () => {
-    const pathname = usePathname();
+const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
     const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
-    const [isBrandSelectorOpen, setIsBrandSelectorOpen] = useState(false);
-    const [currentBrand, setCurrentBrand] = useState<IBrand | null>(null);
+    const [currentBrandDetails, setCurrentBrandDetails] = useState<IBrand | null>(null);
 
-     useEffect(() => {
+    useEffect(() => {
         async function fetchBrands() {
         try {
             const response = await fetch('/api/brands');
+            if (!response.ok) throw new Error("Failed to fetch brands");
             const data = await response.json();
             
             const allBrands: IBrand[] = data.brands;
@@ -76,11 +77,10 @@ const SidebarContent = () => {
 
             if (selectedBrand !== 'All Brands') {
                 const brandDetails = allBrands.find(b => b.permanentName === selectedBrand);
-                setCurrentBrand(brandDetails || null);
+                setCurrentBrandDetails(brandDetails || null);
             } else {
-                setCurrentBrand(null);
+                setCurrentBrandDetails(null);
             }
-
         } catch (error) {
             console.error("Failed to fetch brands", error);
         }
@@ -88,39 +88,76 @@ const SidebarContent = () => {
         fetchBrands();
     }, [setAvailableBrands, selectedBrand]);
 
-    const handleBrandSelect = (brand: string) => {
-        setSelectedBrand(brand);
-        setIsBrandSelectorOpen(false);
+    if (isCollapsed) {
+        return (
+            <DropdownMenu>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                                <Avatar className="h-8 w-8">
+                                    {currentBrandDetails?.logoUrl ? (
+                                        <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
+                                    ) : (
+                                        <AvatarFallback>{selectedBrand === 'All Brands' ? 'All' : selectedBrand.charAt(0).toUpperCase()}</AvatarFallback>
+                                    )}
+                                </Avatar>
+                            </Button>
+                        </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Switch Brand</TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent className="w-56" align="start">
+                    {availableBrands.map(brand => (
+                        <DropdownMenuItem key={brand} onClick={() => setSelectedBrand(brand)}>
+                             <Check className={cn("mr-2 h-4 w-4", selectedBrand === brand ? "opacity-100" : "opacity-0")} />
+                            <span className="capitalize">{brand}</span>
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        )
     }
 
+    return (
+        <Collapsible>
+            <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-start h-12">
+                    <div className="flex items-center gap-3">
+                         <Avatar className="h-8 w-8">
+                            {currentBrandDetails?.logoUrl ? (
+                                <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
+                            ) : (
+                                <AvatarFallback className="text-xs font-bold">{selectedBrand === 'All Brands' ? 'ALL' : selectedBrand.substring(0, 3).toUpperCase()}</AvatarFallback>
+                            )}
+                        </Avatar>
+                        <span className="truncate capitalize font-semibold">{selectedBrand}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 opacity-50 transition-transform ml-auto" />
+                </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2 space-y-1">
+                {availableBrands.map((brand) => (
+                    <Button key={brand} variant="ghost" className="w-full justify-start gap-2 capitalize" onClick={() => setSelectedBrand(brand)}>
+                        <div className="flex items-center justify-center h-5 w-5">
+                            {selectedBrand === brand && <Check className="h-4 w-4" />}
+                        </div>
+                        {brand}
+                    </Button>
+                ))}
+            </CollapsibleContent>
+        </Collapsible>
+    )
+}
+
+const SidebarContent = () => {
+    const pathname = usePathname();
     return (
         <>
         {/* Main Content */}
         <div className="flex-1 overflow-auto py-2">
             <div className="p-2">
-                <Collapsible open={isBrandSelectorOpen} onOpenChange={setIsBrandSelectorOpen}>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start">
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-xs font-bold shrink-0 capitalize">
-                                    {selectedBrand === 'All Brands' ? 'All' : selectedBrand.substring(0, 3)}
-                                </div>
-                                <span className="truncate capitalize">{selectedBrand}</span>
-                            </div>
-                            <ChevronDown className="h-4 w-4 opacity-50 transition-transform ml-auto" />
-                        </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="mt-2 space-y-1">
-                        {availableBrands.map((brand) => (
-                            <Button key={brand} variant="ghost" className="w-full justify-start gap-2 capitalize" onClick={() => handleBrandSelect(brand)}>
-                                <div className="flex items-center justify-center h-5 w-5">
-                                    {selectedBrand === brand && <Check className="h-4 w-4" />}
-                                </div>
-                                {brand}
-                            </Button>
-                        ))}
-                    </CollapsibleContent>
-                </Collapsible>
+                <BrandSelector isCollapsed={false} />
             </div>
             <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
                 {navItems.map(({ href, icon: Icon, label }) => (
@@ -170,7 +207,7 @@ export function MobileAdminHeader() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-64 flex flex-col p-0">
-                     <SheetHeader className="h-16 border-b px-4 flex flex-row items-center">
+                    <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
                                 <Store className="h-6 w-6 text-primary" />
@@ -188,9 +225,7 @@ export function MobileAdminHeader() {
 
 export function AdminSidebar() {
     const pathname = usePathname();
-    const { selectedBrand } = useBrandStore();
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [currentBrand, setCurrentBrand] = useState<IBrand | null>(null);
 
     useEffect(() => {
         const checkIsMobile = () => {
@@ -221,10 +256,11 @@ export function AdminSidebar() {
                         <span className="sr-only">Toggle Sidebar</span>
                     </Button>
                 </div>
+                 <div className={cn("p-2", isCollapsed && "px-1.5 py-2 flex justify-center")}>
+                    <BrandSelector isCollapsed={isCollapsed} />
+                </div>
                 <TooltipProvider delayDuration={0}>
                     <div className="flex-1 overflow-auto py-2">
-                        <div className={cn("p-2", isCollapsed && "px-1")}>
-                        </div>
                         <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
                             {navItems.map(({ href, icon: Icon, label }) => (
                                 <Tooltip key={label}>
