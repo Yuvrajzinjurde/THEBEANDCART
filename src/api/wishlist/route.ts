@@ -26,7 +26,8 @@ export async function GET(req: Request) {
         const wishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products',
             model: Product,
-            select: 'name images sellingPrice mrp category rating storefront',
+            // Explicitly select the stock field
+            select: 'name images sellingPrice mrp category rating storefront stock brand',
         });
         
         if (!wishlist) {
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
     const populatedWishlist = await Wishlist.findById(wishlist._id).populate({
         path: 'products',
         model: Product,
-        select: 'name images sellingPrice mrp category rating storefront',
+        select: 'name images sellingPrice mrp category rating storefront stock brand',
     });
 
     return NextResponse.json({ message, wishlist: populatedWishlist }, { status: 200 });
@@ -115,3 +116,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
+
