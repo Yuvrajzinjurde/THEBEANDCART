@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@react-hook/window-size';
-import { Truck, Tag, Gift } from 'lucide-react';
+import { Truck, Tag, Gift, Lock } from 'lucide-react';
 
 
 const milestones = [
@@ -14,142 +14,97 @@ const milestones = [
   { threshold: 999, reward: "Free Gift", icon: Gift },
 ];
 
-const LockedGiftBox = ({ className }: { className?: string }) => (
-    <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-gray-300", className)}>
-        <path d="M50 41.5C38.6853 41.5 29.5 50.6853 29.5 62V71.5H70.5V62C70.5 50.6853 61.3147 41.5 50 41.5Z" fill="currentColor"/>
-        <rect x="25" y="71.5" width="50" height="5" fill="currentColor"/>
-        <path d="M41 41.5C41 36.8056 44.8056 33 49.5 33V33C54.1944 33 58 36.8056 58 41.5V52.5H41V41.5Z" stroke="currentColor" strokeWidth="3"/>
-    </svg>
-);
-
-const UnlockedGiftBox = ({ className }: { className?: string }) => (
-    <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-primary", className)}>
-        <path d="M50 41.5C38.6853 41.5 29.5 50.6853 29.5 62V71.5H70.5V62C70.5 50.6853 61.3147 41.5 50 41.5Z" fill="currentColor"/>
-        <rect x="25" y="71.5" width="50" height="5" fill="currentColor"/>
-        <path d="M41 41.5C41 36.8056 44.8056 33 49.5 33V33C54.1944 33 58 36.8056 58 41.5V52.5H41V41.5Z" stroke="currentColor" strokeWidth="3"/>
-    </svg>
-);
-
-
-const ActiveGiftBox = ({ className }: { className?: string }) => (
-    <div className={cn("relative w-20 h-20", className)}>
-        <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-primary", className)}>
-            <rect y="26.5" width="100" height="15" fill="url(#paint0_linear_1_2)"/>
-            <path d="M15 41.5H85V76.5C85 79.2614 82.7614 81.5 80 81.5H20C17.2386 81.5 15 79.2614 15 76.5V41.5Z" fill="url(#paint1_linear_1_2)"/>
-            <path d="M50 3.5C41.4396 3.5 34.5 10.4396 34.5 19V26.5H50V3.5Z" fill="url(#paint2_linear_1_2)"/>
-            <path d="M50 3.5C58.5604 3.5 65.5 10.4396 65.5 19V26.5H50V3.5Z" fill="url(#paint3_linear_1_2)"/>
-            <path d="M26.216 67.8927C44.7838 88.0315 70.1651 86.9452 79.7997 73.5418" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-            <path d="M92 21.5L88.5 25L92 28.5L88.5 32" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-            <defs>
-                <linearGradient id="paint0_linear_1_2" x1="50" y1="26.5" x2="50" y2="41.5" gradientUnits="userSpaceOnUse"><stop stopColor="hsl(var(--primary))" stopOpacity="0.7"/><stop offset="1" stopColor="hsl(var(--primary))"/></linearGradient>
-                <linearGradient id="paint1_linear_1_2" x1="50" y1="41.5" x2="50" y2="81.5" gradientUnits="userSpaceOnUse"><stop stopColor="hsl(var(--primary))" stopOpacity="0.8"/><stop offset="1" stopColor="hsl(var(--primary))"/></linearGradient>
-                <linearGradient id="paint2_linear_1_2" x1="42.25" y1="3.5" x2="42.25" y2="26.5" gradientUnits="userSpaceOnUse"><stop stopColor="hsl(var(--primary))"/><stop offset="1" stopColor="hsl(var(--primary))" stopOpacity="0.5"/></linearGradient>
-                <linearGradient id="paint3_linear_1_2" x1="57.75" y1="3.5" x2="57.75" y2="26.5" gradientUnits="userSpaceOnUse"><stop stopColor="hsl(var(--primary))"/><stop offset="1" stopColor="hsl(var(--primary))" stopOpacity="0.5"/></linearGradient>
-            </defs>
-        </svg>
-    </div>
-);
-
-
-const Milestone = ({ milestone, currentValue, isLast, isHighestUnlocked, onUnlock }: { milestone: typeof milestones[0], currentValue: number, isLast: boolean, isHighestUnlocked: boolean, onUnlock: () => void }) => {
-    const isUnlocked = currentValue >= milestone.threshold;
-    const prevUnlocked = useRef(isUnlocked);
-
-    useEffect(() => {
-        if(isUnlocked && !prevUnlocked.current) {
-            onUnlock();
-        }
-        prevUnlocked.current = isUnlocked;
-    }, [isUnlocked, onUnlock]);
-    
-    return (
-        <div className={cn("flex items-start", isLast ? 'flex-grow-0' : 'flex-grow')}>
-            <div className="relative flex flex-col items-center text-center gap-1">
-                 <div>
-                    {isHighestUnlocked ? (
-                        <ActiveGiftBox />
-                    ) : isUnlocked ? (
-                        <UnlockedGiftBox />
-                    ) : (
-                        <LockedGiftBox />
-                    )}
-                </div>
-                <div className="flex flex-col items-center h-12">
-                    <p className="text-sm font-semibold">
-                      {isUnlocked ? milestone.reward : "Mystery Box"}
-                    </p>
-                     {isUnlocked && <milestone.icon className="h-4 w-4 text-muted-foreground mt-1" />}
-                </div>
-                <p className="text-xs text-muted-foreground">₹{milestone.threshold}</p>
-            </div>
-             {!isLast && <div className="flex-grow h-px bg-gray-200 border-t border-dashed mt-10" />}
-        </div>
-    );
-};
-
-const drawSparkle = (ctx: CanvasRenderingContext2D) => {
-    const emojis = ['🥳', '🎊', '🎉'];
-    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+const drawCoin = (ctx: CanvasRenderingContext2D) => {
+    const emoji = '🪙';
     ctx.font = "24px serif";
     ctx.fillText(emoji, 0, 0);
 };
 
 export function CartProgressBar({ currentValue }: { currentValue: number }) {
-  const [showConfetti, setShowConfetti] = useState(false);
   const { width, height } = useWindowSize();
+  const [unlockedMilestones, setUnlockedMilestones] = useState<number[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
 
-  const handleUnlock = () => {
+  useEffect(() => {
+    const newlyUnlocked: number[] = [];
+    milestones.forEach((milestone, index) => {
+      if (currentValue >= milestone.threshold && !unlockedMilestones.includes(index)) {
+        newlyUnlocked.push(index);
+      }
+    });
+
+    if (newlyUnlocked.length > 0) {
+      setUnlockedMilestones(prev => [...prev, ...newlyUnlocked]);
       setShowConfetti(true);
-      const timer = setTimeout(() => setShowConfetti(false), 5000);
+      const timer = setTimeout(() => setShowConfetti(false), 2500); // Shower for 2.5 seconds
       return () => clearTimeout(timer);
-  }
+    }
+  }, [currentValue, unlockedMilestones]);
 
-  const highestUnlockedIndex = milestones.reduce((highest, milestone, index) => {
-    return currentValue >= milestone.threshold ? index : highest;
-  }, -1);
-  
-
-  const nextMilestone = milestones.find(m => currentValue < m.threshold);
+  const highestUnlockedIndex = unlockedMilestones.length > 0 ? Math.max(...unlockedMilestones) : -1;
+  const nextMilestone = milestones[highestUnlockedIndex + 1];
   const amountNeeded = nextMilestone ? nextMilestone.threshold - currentValue : 0;
-  
 
   return (
-    <div className="overflow-hidden py-6">
-        {showConfetti && (
-             <ReactConfetti
-                width={width}
-                height={height}
-                recycle={false}
-                numberOfPieces={200}
-                gravity={0.1}
-                tweenDuration={4900}
-                drawShape={drawSparkle}
-            />
-        )}
-        <div className="space-y-4">
-            <div className="flex justify-between items-start">
-                {milestones.map((milestone, index) => (
-                    <Milestone 
-                        key={index} 
-                        milestone={milestone} 
-                        currentValue={currentValue}
-                        isLast={index === milestones.length - 1}
-                        isHighestUnlocked={index === highestUnlockedIndex}
-                        onUnlock={handleUnlock}
-                    />
-                ))}
-            </div>
-            
-             <div className="text-center text-sm font-medium">
-                {nextMilestone ? (
-                    <p>
-                        Add <span className="font-bold text-primary">₹{amountNeeded.toFixed(0)}</span> more to unlock the <span className="font-semibold">{nextMilestone.reward}</span>!
-                    </p>
-                ) : (
-                    <p className="font-bold text-green-600">Congratulations! You've unlocked all rewards!</p>
-                )}
-            </div>
+    <div className="w-full py-4">
+      {showConfetti && (
+        <ReactConfetti
+          width={width}
+          height={height}
+          recycle={true}
+          numberOfPieces={150}
+          gravity={0.15}
+          drawShape={drawCoin}
+        />
+      )}
+      <div className="relative mb-6">
+        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${Math.min((currentValue / (milestones[milestones.length-1].threshold)) * 100, 100)}%` }}
+          />
         </div>
+        <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between">
+          {milestones.map((milestone, index) => (
+            <div
+              key={index}
+              className={cn(
+                "h-5 w-5 rounded-full flex items-center justify-center transition-all duration-300",
+                currentValue >= milestone.threshold ? 'bg-primary' : 'bg-muted'
+              )}
+              style={{ left: `${(milestone.threshold / milestones[milestones.length-1].threshold) * 100}%`, transform: 'translateX(-50%)', position: 'absolute' }}
+            >
+              {currentValue >= milestone.threshold && <div className="h-3 w-3 rounded-full bg-primary-foreground" />}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-between items-start text-center text-xs">
+        {milestones.map((milestone, index) => {
+          const isUnlocked = currentValue >= milestone.threshold;
+          const Icon = milestone.icon;
+          return (
+            <div key={index} className="flex flex-col items-center gap-1 w-24">
+              <div className={cn("flex items-center justify-center h-8 w-8 rounded-full transition-colors duration-300", isUnlocked ? "bg-primary/10" : "bg-muted")}>
+                {isUnlocked ? <Icon className="h-5 w-5 text-primary" /> : <Lock className="h-5 w-5 text-muted-foreground/50" />}
+              </div>
+              <p className={cn("font-semibold", isUnlocked ? "text-primary" : "text-muted-foreground")}>
+                {isUnlocked ? milestone.reward : "Mystery Box"}
+              </p>
+              <p className="text-muted-foreground">₹{milestone.threshold}</p>
+            </div>
+          )
+        })}
+      </div>
+       <div className="text-center text-sm font-medium mt-6">
+        {nextMilestone ? (
+          <p>
+            Add <span className="font-bold text-primary">₹{Math.max(0, amountNeeded).toFixed(0)}</span> more to unlock the <span className="font-semibold">{nextMilestone.reward}</span>!
+          </p>
+        ) : (
+          <p className="font-bold text-green-600">Congratulations! You've unlocked all rewards!</p>
+        )}
+      </div>
     </div>
   );
 }
