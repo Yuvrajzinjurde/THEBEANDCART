@@ -166,13 +166,16 @@ const Step2_Box = () => {
         const fetchAndSuggest = async () => {
             setLoading(true);
             try {
+                // 1. Fetch all packages
                 const res = await fetch('/api/boxes');
                 if (!res.ok) throw new Error("Failed to fetch boxes");
                 const { boxes: fetchedPackages } = await res.json();
                 
+                // 2. Filter for only 'box' type
                 const boxesOnly = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
                 setAllBoxes(boxesOnly);
                 
+                // 3. If occasion and boxes are available, get AI suggestions
                 if (occasion && boxesOnly.length > 0) {
                     const packageList = boxesOnly.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
@@ -477,9 +480,9 @@ const Step5_Notes = () => {
             } else {
                 throw new Error("Failed to get suggestion.");
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to get message suggestion", error);
-            toast.error("Could not generate a message at this time.");
+            toast.error(error.message || "Could not generate a message at this time.");
         } finally {
             setIsGeneratingMessage(false);
         }
