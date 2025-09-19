@@ -30,7 +30,7 @@ const LandingHeader = () => (
         <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center space-x-2">
                 <Logo className="h-8 w-8 text-primary" />
-                <span className="font-bold sm:inline-block">Brandify</span>
+                <span className="font-bold sm:inline-block">The Brand Cart</span>
             </Link>
             <nav className="flex items-center gap-4">
                  <Link href="/admin/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
@@ -47,7 +47,7 @@ const LandingFooter = () => (
             <div className="md:col-span-2">
                 <div className="flex items-center gap-2">
                     <Logo className="h-8 w-8 text-primary" />
-                    <span className="font-bold">Brandify</span>
+                    <span className="font-bold">The Brand Cart</span>
                 </div>
                 <p className="mt-4 text-sm text-muted-foreground">The best place to find your new favorite brands.</p>
             </div>
@@ -84,7 +84,7 @@ const LandingFooter = () => (
             </div>
         </div>
         <div className="border-t py-4">
-             <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Brandify, Inc. All rights reserved.</p>
+             <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} The Brand Cart. All rights reserved.</p>
         </div>
     </footer>
 );
