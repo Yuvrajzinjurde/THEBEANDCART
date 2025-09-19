@@ -7,8 +7,8 @@ export interface IHamper extends Document {
   occasion: string;
   boxId: Types.ObjectId;
   boxVariantId: Types.ObjectId;
-  bagId?: Types.ObjectId;
-  bagVariantId?: Types.ObjectId;
+  bagId: Types.ObjectId;
+  bagVariantId: Types.ObjectId;
   products: Types.ObjectId[];
   notesToCreator?: string;
   notesToReceiver?: string;

@@ -56,19 +56,48 @@ export async function POST(req: Request) {
 
     // Add box and bag as items in the cart
     const box = await Box.findById(hamper.boxId);
-    if(box) {
+    if(box && hamper.boxVariantId) {
         const boxVariant = box.variants.find(v => (v as any)._id.equals(hamper.boxVariantId));
         if (boxVariant && boxVariant.sellingPrice > 0) {
-            // Find or create a temporary "product" for the box to add to cart
             // This is a simplification. A real app might have boxes as actual products.
+            // For now, we find or create a temporary "product" for the box to add to cart
+            let boxProduct = await Product.findOne({ name: `${box.name} (${boxVariant.name})`, storefront: 'hamper-assets' });
+            if (!boxProduct) {
+                boxProduct = new Product({
+                    name: `${box.name} (${boxVariant.name})`,
+                    storefront: 'hamper-assets',
+                    category: 'Packaging',
+                    brand: 'Packaging',
+                    sellingPrice: boxVariant.sellingPrice,
+                    mrp: boxVariant.mrp,
+                    images: boxVariant.images,
+                    stock: 999
+                });
+                await boxProduct.save();
+            }
+            cart.items.push({ productId: boxProduct._id, quantity: 1 });
         }
     }
     
     const bag = await Box.findById(hamper.bagId);
-    if(bag) {
+    if(bag && hamper.bagVariantId) {
         const bagVariant = bag.variants.find(v => (v as any)._id.equals(hamper.bagVariantId));
         if (bagVariant && bagVariant.sellingPrice > 0) {
-            // Similarly, handle adding bag to cart
+            let bagProduct = await Product.findOne({ name: `${bag.name} (${bagVariant.name})`, storefront: 'hamper-assets' });
+             if (!bagProduct) {
+                bagProduct = new Product({
+                    name: `${bag.name} (${bagVariant.name})`,
+                    storefront: 'hamper-assets',
+                    category: 'Packaging',
+                    brand: 'Packaging',
+                    sellingPrice: bagVariant.sellingPrice,
+                    mrp: bagVariant.mrp,
+                    images: bagVariant.images,
+                    stock: 999
+                });
+                await bagProduct.save();
+            }
+            cart.items.push({ productId: bagProduct._id, quantity: 1 });
         }
     }
 
