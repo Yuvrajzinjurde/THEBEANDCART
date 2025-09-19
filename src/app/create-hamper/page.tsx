@@ -163,9 +163,10 @@ const Step2_Box = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchAllBoxes() {
+        async function fetchAndSuggest() {
             setLoading(true);
             try {
+                // Fetch all boxes first
                 const res = await fetch('/api/boxes');
                 if (!res.ok) throw new Error("Failed to fetch boxes");
                 const { boxes: fetchedPackages } = await res.json();
@@ -173,30 +174,27 @@ const Step2_Box = () => {
                 const onlyBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
                 setAllBoxes(onlyBoxes);
                 
+                // Then, if occasion and boxes are available, get suggestions
                 if (occasion && onlyBoxes.length > 0) {
                     const packageList = onlyBoxes.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
-                    try {
-                        const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ occasion, boxes: packageList }),
-                        });
-                        if (suggestionRes.ok) {
-                            const suggestionData = await suggestionRes.json();
-                            setSuggestedBoxIds(suggestionData.suggestedBoxIds);
-                        }
-                    } catch (suggestionError) {
-                        console.error("Failed to fetch suggestions", suggestionError);
+                    const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ occasion, boxes: packageList }),
+                    });
+                    if (suggestionRes.ok) {
+                        const suggestionData = await suggestionRes.json();
+                        setSuggestedBoxIds(suggestionData.suggestedBoxIds);
                     }
                 }
             } catch (error) {
-                console.error("Failed to fetch boxes", error);
+                console.error("Failed to fetch boxes or suggestions", error);
                 toast.error("Could not load packaging options.");
             } finally {
                 setLoading(false);
             }
         }
-        fetchAllBoxes();
+        fetchAndSuggest();
     }, [occasion]);
     
     
@@ -245,14 +243,34 @@ const Step2_Box = () => {
                             {suggestedBoxes.length > 0 && (
                                 <section>
                                     <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
-                                    <PackagingGrid items={suggestedBoxes} onLike={handleLike} />
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {suggestedBoxes.map(b => b.variants.map(v => (
+                                            <BoxItem 
+                                                key={`${b._id}-${v._id}`}
+                                                box={b}
+                                                variant={v}
+                                                onLike={handleLike}
+                                            />
+                                        )))}
+                                    </div>
                                 </section>
                             )}
                             
-                            <section>
-                                <h3 className="font-bold text-lg mb-4">All Boxes</h3>
-                                <PackagingGrid items={otherBoxes} onLike={handleLike} />
-                            </section>
+                            {otherBoxes.length > 0 && (
+                                <section>
+                                    <h3 className="font-bold text-lg mb-4">All Boxes</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {otherBoxes.map(b => b.variants.map(v => (
+                                            <BoxItem 
+                                                key={`${b._id}-${v._id}`}
+                                                box={b}
+                                                variant={v}
+                                                onLike={handleLike}
+                                            />
+                                        )))}
+                                    </div>
+                                </section>
+                            )}
                         </>
                     )}
                 </RadioGroup>
@@ -440,7 +458,7 @@ export default function CreateHamperPage() {
                 const dataToSave = {
                     occasion: hamperState.occasion,
                     boxId: hamperState.box?._id,
-                    boxVariantId: (hamperState.boxVariant as any)?._id,
+                    boxVariantId: hamperState.boxVariant?._id,
                     products: hamperState.products.map(p => p._id),
                     notesToCreator: hamperState.notesToCreator,
                     notesToReceiver: hamperState.notesToReceiver,
