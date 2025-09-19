@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
@@ -58,21 +57,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             setUser(decoded);
             setToken(storedToken);
-            // Fetch cart and wishlist
-            const [cartRes, wishlistRes] = await Promise.all([
-              fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
-              fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
-            ]);
             
-            if (cartRes.ok) {
-              const { cart } = await cartRes.json();
-              setCart(cart);
+            // Only fetch cart/wishlist if user is not already set or token changed
+            if (!user || storedToken !== token) {
+                const [cartRes, wishlistRes] = await Promise.all([
+                  fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
+                  fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
+                ]);
+                
+                if (cartRes.ok) {
+                  const { cart } = await cartRes.json();
+                  setCart(cart);
+                }
+                if (wishlistRes.ok) {
+                  const { wishlist } = await wishlistRes.json();
+                  setWishlist(wishlist);
+                }
             }
-            if (wishlistRes.ok) {
-              const { wishlist } = await wishlistRes.json();
-              setWishlist(wishlist);
-            }
-
           }
         } catch (error) {
           console.error("Invalid token:", error);
@@ -87,7 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
     initializeAuth();
-  }, [logout, pathname, setCart, setWishlist]); // Rerun on path change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]); // Rerun only on path change to avoid loops
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>
