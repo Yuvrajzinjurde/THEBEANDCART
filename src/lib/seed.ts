@@ -185,8 +185,8 @@ export async function seedDatabase() {
 
   try {
     // Clear only the 'boxes' collection
-    await Box.deleteMany({});
-    console.log('Cleared existing boxes and bags.');
+    const deleteResult = await Box.deleteMany({});
+    console.log(`Cleared ${deleteResult.deletedCount} existing boxes and bags.`);
     
     if (boxTemplates.length > 0) {
       await Box.insertMany(boxTemplates);
