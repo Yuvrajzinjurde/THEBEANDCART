@@ -7,7 +7,7 @@ export interface IProduct extends Document {
   description: string;
   mrp?: number; // Original Price (Maximum Retail Price)
   sellingPrice: number; // Discounted/Selling Price
-  category:  string; // Can be single or multiple categories
+  category:  string; 
   images: string[];
   stock: number;
   rating: number;
@@ -52,11 +52,6 @@ ProductSchema.virtual('price').get(function() {
 // Compound index to quickly find variants of a style
 ProductSchema.index({ styleId: 1, storefront: 1 });
 
-// Delete the model from the cache to avoid issues in development
-if (mongoose.models.Product) {
-  delete mongoose.models.Product;
-}
-
-const Product: Model<IProduct> = mongoose.model<IProduct>('Product', ProductSchema);
+const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;
