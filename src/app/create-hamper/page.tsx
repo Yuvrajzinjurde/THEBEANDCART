@@ -210,7 +210,10 @@ const Step2_Box = () => {
 
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${selectedBoxVariant._id}` : undefined;
 
-    const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
+    const suggestedBoxes = allBoxes
+        .filter(b => suggestedBoxIds.includes(b._id as string))
+        .sort((a, b) => suggestedBoxIds.indexOf(a._id as string) - suggestedBoxIds.indexOf(b._id as string));
+        
     const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
@@ -425,14 +428,16 @@ const Step4_Bag = () => {
 
 
 const Step5_Notes = () => {
-    const { occasion, notesToCreator, notesToReceiver, addRose, setNotes, setAddRose } = useHamperStore();
-    const [suggestion, setSuggestion] = useState({ shouldSuggest: false, suggestionText: '' });
-    const [loadingSuggestion, setLoadingSuggestion] = useState(true);
+    const { occasion, products, notesToCreator, notesToReceiver, addRose, setNotes, setAddRose } = useHamperStore();
+    const [roseSuggestion, setRoseSuggestion] = useState({ shouldSuggest: false, suggestionText: '' });
+    const [loadingRoseSuggestion, setLoadingRoseSuggestion] = useState(true);
+    const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
+
 
     useEffect(() => {
-        async function getSuggestion() {
+        async function getRoseSuggestion() {
             if (!occasion) return;
-            setLoadingSuggestion(true);
+            setLoadingRoseSuggestion(true);
             try {
                 const res = await fetch('/api/hampers/suggest-rose', {
                     method: 'POST',
@@ -441,16 +446,44 @@ const Step5_Notes = () => {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    setSuggestion(data);
+                    setRoseSuggestion(data);
                 }
             } catch (error) {
-                console.error("Failed to get suggestion", error);
+                console.error("Failed to get rose suggestion", error);
             } finally {
-                setLoadingSuggestion(false);
+                setLoadingRoseSuggestion(false);
             }
         }
-        getSuggestion();
+        getRoseSuggestion();
     }, [occasion]);
+    
+    const handleGenerateMessage = async () => {
+        if (!occasion || products.length === 0) {
+            toast.warn("Please select an occasion and add products to the hamper first.");
+            return;
+        }
+        setIsGeneratingMessage(true);
+        try {
+            const productInfo = products.map(p => ({ name: p.name, description: p.description }));
+            const res = await fetch('/api/hampers/suggest-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ occasion, products: productInfo }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setNotes({ receiver: data.message });
+                toast.success("AI message generated!");
+            } else {
+                throw new Error("Failed to get suggestion.");
+            }
+        } catch (error) {
+            console.error("Failed to get message suggestion", error);
+            toast.error("Could not generate a message at this time.");
+        } finally {
+            setIsGeneratingMessage(false);
+        }
+    };
     
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -459,13 +492,13 @@ const Step5_Notes = () => {
                 <CardDescription>Include messages and special requests.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                {loadingSuggestion ? <Loader/> : suggestion.shouldSuggest && (
+                {loadingRoseSuggestion ? <Loader/> : roseSuggestion.shouldSuggest && (
                     <Card className="p-4 flex items-center justify-between bg-primary/10 border-primary/30">
                         <div className="flex items-center gap-4">
                             <Sparkles className="h-8 w-8 text-primary" />
                             <div>
                                 <p className="font-semibold">Make it memorable</p>
-                                <p className="text-sm text-muted-foreground">{suggestion.suggestionText}</p>
+                                <p className="text-sm text-muted-foreground">{roseSuggestion.suggestionText}</p>
                             </div>
                         </div>
                         <Switch checked={addRose} onCheckedChange={setAddRose} />
@@ -473,7 +506,13 @@ const Step5_Notes = () => {
                 )}
 
                 <div>
-                    <Label htmlFor="notes-receiver">Message for Recipient</Label>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="notes-receiver">Message for Recipient</Label>
+                         <Button type="button" variant="ghost" size="sm" onClick={handleGenerateMessage} disabled={isGeneratingMessage}>
+                            {isGeneratingMessage ? <Loader className="mr-2 h-4 w-4" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                            Suggest with AI
+                        </Button>
+                    </div>
                     <Textarea 
                         id="notes-receiver"
                         placeholder="Happy Birthday! Hope you have a great day."
