@@ -30,7 +30,7 @@ const LockedGiftBox = ({ className }: { className?: string }) => (
 
 
 const ActiveGiftBox = () => (
-    <svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
+    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
         {/* Sparkles */}
         <path d="M50 0L52.5359 10.5359L63.0718 13.0718L52.5359 15.6077L50 26.1436L47.4641 15.6077L36.9282 13.0718L47.4641 10.5359L50 0Z" fill="url(#paint4_radial_1_2)" />
         <path d="M15 20L16.768 27.268L24 30L16.768 32.732L15 40L13.232 32.732L6 30L13.232 27.268L15 20Z" fill="url(#paint5_radial_1_2)" />
@@ -79,11 +79,11 @@ const Milestone = ({
     }, [isUnlocked, onUnlock]);
 
     return (
-        <div className="flex flex-col items-center text-center w-28">
-            <div className="h-14 flex items-center justify-center" ref={ref}>
+        <div className="flex flex-col items-center text-center w-24">
+            <div className="h-12 flex items-center justify-center" ref={ref}>
                 {isUnlocked ? <ActiveGiftBox /> : <LockedGiftBox />}
             </div>
-            <div className="mt-2 h-16 flex flex-col items-center">
+            <div className="mt-2 h-14 flex flex-col items-center">
                 <p className="text-sm font-semibold">
                     {isUnlocked ? reward : 'Mystery Box'}
                 </p>
@@ -134,7 +134,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
           tweenDuration={2500}
         />
       )}
-      <div className="relative flex justify-between items-start px-8">
+      <div className="relative flex justify-between items-start px-4">
         {milestones.map((milestone, index) => {
           const isUnlocked = currentValue >= milestone.threshold;
           const isNext = highestUnlockedIndex === index - 1;
@@ -148,7 +148,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
                 onUnlock={handleUnlock}
               />
               {index < milestones.length - 1 && (
-                <div className="flex-1 h-px bg-muted-foreground/30 mt-8 border-t-2 border-dashed" />
+                <div className="flex-1 h-px bg-muted-foreground/30 mt-6 border-t-2 border-dashed" />
               )}
             </React.Fragment>
           );
