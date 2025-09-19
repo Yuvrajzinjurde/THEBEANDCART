@@ -1,5 +1,4 @@
 
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Box from '@/models/box.model';
@@ -9,7 +8,8 @@ export async function GET(req: Request) {
   try {
     await dbConnect();
     
-    const boxes = await Box.find({}).sort({ 'variants.price': 1, name: 1 });
+    // Fetch boxes without server-side sorting to ensure consistent order for AI processing
+    const boxes = await Box.find({});
 
     return NextResponse.json({ boxes }, { status: 200 });
   } catch (error) {
