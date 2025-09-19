@@ -196,7 +196,7 @@ export default function RatingsAndReviews({ productId, reviewStats: initialRevie
         }
 
         try {
-            const response = await fetch(`/api/reviews/${reviewId}/like`, {
+            const response = await fetch(`/api/reviews/like/${reviewId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
