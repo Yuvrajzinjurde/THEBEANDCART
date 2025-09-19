@@ -332,7 +332,7 @@ export default function BrandHomePage() {
   
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
-  const [newestProducts, set==============] = useState<IProduct[]>([]);
+  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -522,5 +522,7 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
 
     
