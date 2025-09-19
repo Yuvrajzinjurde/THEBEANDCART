@@ -17,6 +17,7 @@ import {
   Minus,
   Plus,
   ShoppingCart,
+  Truck,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -32,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
 import type { ICartItem } from "@/models/cart.model";
+import { addDays, format } from 'date-fns';
 
 const SHIPPING_COST = 50;
 const FREE_SHIPPING_THRESHOLD = 500;
@@ -137,6 +139,8 @@ export default function CartPage() {
   
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_COST;
   const grandTotal = subtotal + shipping;
+  
+  const deliveryDate = format(addDays(new Date(), 5), 'EEE, MMM d');
 
 
   if (loading || authLoading) {
@@ -205,8 +209,15 @@ export default function CartPage() {
                                 <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block flex-shrink-0">
                                     <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border"/>
                                 </Link>
-                                <div className="flex flex-col flex-grow">
-                                    <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="font-semibold text-lg hover:underline">{item.product.name}</Link>
+                                <div className="flex flex-col flex-grow gap-1">
+                                    <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
+                                    <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="font-semibold text-lg hover:underline leading-tight">{item.product.name}</Link>
+                                    
+                                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                        {item.product.size && <span>Size: {item.product.size}</span>}
+                                        {item.product.color && <span>Color: {item.product.color}</span>}
+                                    </div>
+                                    
                                     <div className="flex items-baseline gap-2 mt-1">
                                         <p className="text-base font-bold text-foreground">₹{item.product.sellingPrice.toLocaleString('en-IN')}</p>
                                         {hasDiscount && (
@@ -216,16 +227,22 @@ export default function CartPage() {
                                             </>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-4 mt-4">
+
+                                    <div className="flex items-center gap-2 text-sm mt-1">
+                                        <Truck className="h-4 w-4 text-muted-foreground" />
+                                        <span>Delivery by {deliveryDate}</span>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between mt-2">
                                         <div className="flex items-center gap-1 rounded-full border p-1">
                                             <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1)}><Minus className="h-4 w-4" /></Button>
                                             <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
                                             <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1)}><Plus className="h-4 w-4" /></Button>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 mt-auto pt-2">
-                                        <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
-                                        <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
+                                        <div className="flex items-center gap-4">
+                                            <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
+                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -24,7 +24,7 @@ export async function GET(req: Request) {
         const decoded = jwtDecode<DecodedToken>(token);
         const userId = decoded.userId;
 
-        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront');
+        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
         if (!cart) {
             return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
 
     return NextResponse.json({ message: 'Cart updated successfully', cart: populatedCart }, { status: 200 });
   } catch (error) {
@@ -137,7 +137,7 @@ export async function DELETE(req: Request) {
         }
 
         await cart.save();
-        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront');
+        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
 
         return NextResponse.json({ message: 'Product removed from cart', cart: populatedCart }, { status: 200 });
 
