@@ -37,7 +37,9 @@ import { addDays, format } from 'date-fns';
 import { CartProgressBar } from "@/components/cart-progress-bar";
 
 const SHIPPING_COST = 50;
-const FREE_SHIPPING_THRESHOLD = 500;
+const FREE_SHIPPING_THRESHOLD = 399; // Aligned with progress bar
+const EXTRA_DISCOUNT_THRESHOLD = 799;
+const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
 
 export default function CartPage() {
   const router = useRouter();
@@ -140,8 +142,15 @@ export default function CartPage() {
     [cartItems]
   );
   
+  const milestoneDiscount = useMemo(() => {
+    if (subtotal >= EXTRA_DISCOUNT_THRESHOLD) {
+      return subtotal * EXTRA_DISCOUNT_PERCENTAGE;
+    }
+    return 0;
+  }, [subtotal]);
+  
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_COST;
-  const grandTotal = subtotal + shipping;
+  const grandTotal = subtotal - milestoneDiscount + shipping;
   
   const deliveryDate = format(addDays(new Date(), 5), 'EEE, MMM d');
 
@@ -280,8 +289,14 @@ export default function CartPage() {
                         </div>
                          {totalDiscount > 0 && (
                             <div className="flex justify-between text-green-600 font-medium">
-                                <span className="">You Saved</span>
+                                <span className="">Product Savings</span>
                                 <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
+                            </div>
+                         )}
+                         {milestoneDiscount > 0 && (
+                            <div className="flex justify-between text-green-600 font-medium">
+                                <span className="">Milestone Discount</span>
+                                <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
                             </div>
                          )}
                          <div className="flex justify-between">
