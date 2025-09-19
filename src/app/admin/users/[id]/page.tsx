@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -18,6 +19,80 @@ import { getUserDetails } from './actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const UserDetailsSkeleton = () => (
+    <div className="space-y-6">
+        <div className="flex items-center gap-4">
+            <Skeleton className="h-8 w-8 rounded-md" />
+            <Skeleton className="h-6 w-32" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+                <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
+                    <Skeleton className="h-14 w-14 rounded-full" />
+                    <div className="flex flex-col space-y-2">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-3 text-center mt-2 divide-x">
+                        {[...Array(3)].map((_, i) => (
+                             <div key={i} className="flex flex-col items-center space-y-1">
+                                <Skeleton className="h-5 w-5" />
+                                <Skeleton className="h-4 w-16" />
+                                <Skeleton className="h-6 w-8" />
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
+                    <Skeleton className="h-6 w-6" />
+                    <Skeleton className="h-6 w-32" />
+                </CardHeader>
+                <CardContent className="grid gap-y-3">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-2/3" />
+                </CardContent>
+            </Card>
+        </div>
+        <Card>
+            <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+            <CardContent>
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <Skeleton className="h-10 w-64" />
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-10 w-32" />
+                        <Skeleton className="h-10 w-36" />
+                    </div>
+                </div>
+                 <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                {[...Array(6)].map((_, i) => <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>)}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {[...Array(3)].map((_, i) => (
+                                <TableRow key={i}>
+                                    {[...Array(6)].map((_, j) => (
+                                        <TableCell key={j}><Skeleton className="h-5 w-full" /></TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
+
 
 export default function UserDetailsPage() {
     const params = useParams();
@@ -78,11 +153,7 @@ export default function UserDetailsPage() {
 
 
     if (loading) {
-        return (
-            <div className="flex h-full flex-1 items-center justify-center">
-                <Loader className="h-8 w-8" />
-            </div>
-        );
+        return <UserDetailsSkeleton />;
     }
 
     if (error) {

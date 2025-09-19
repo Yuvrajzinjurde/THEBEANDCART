@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -26,6 +27,28 @@ import {
 import { Badge } from '@/components/ui/badge';
 import useBrandStore from '@/stores/brand-store';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const TableSkeleton = () => (
+    <div className="border rounded-md">
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    {[...Array(7)].map((_, i) => <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>)}
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {[...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                        {[...Array(7)].map((_, j) => (
+                            <TableCell key={j}><Skeleton className="h-5 w-full" /></TableCell>
+                        ))}
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    </div>
+);
 
 export default function ManageCouponsPage() {
   const { selectedBrand } = useBrandStore();
@@ -102,9 +125,7 @@ export default function ManageCouponsPage() {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader className="h-8 w-8 text-primary" />
-          </div>
+          <TableSkeleton />
         ) : error ? (
           <div className="text-center text-destructive">
             <p>{error}</p>
@@ -187,4 +208,3 @@ export default function ManageCouponsPage() {
     </Card>
   );
 }
-

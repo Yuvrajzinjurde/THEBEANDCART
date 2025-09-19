@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,7 +10,31 @@ import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "./actions";
 import { Loader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
+
+const DashboardSkeleton = () => (
+    <div className="flex-1 space-y-6">
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-5 w-1/3" />
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+                <Card key={i}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <Skeleton className="h-5 w-1/3" />
+                        <Skeleton className="h-4 w-4" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-8 w-1/2" />
+                        <Skeleton className="h-4 w-2/3 mt-1" />
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    </div>
+);
 
 function AdminDashboardPage() {
   const { user } = useAuth();
@@ -54,11 +79,7 @@ function AdminDashboardPage() {
 
 
   if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader className="h-8 w-8" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {

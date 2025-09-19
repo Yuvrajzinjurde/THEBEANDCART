@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from 'react';
@@ -21,9 +22,35 @@ import * as XLSX from 'xlsx';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LOW_STOCK_THRESHOLD = 10;
+
+const TableSkeleton = () => (
+    <div className="border rounded-md">
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    {[...Array(6)].map((_, i) => <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>)}
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {[...Array(10)].map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-16 w-16 rounded-md" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-10" /></TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    </div>
+);
+
 
 export default function InventoryPage() {
     const { selectedBrand } = useBrandStore();
@@ -272,9 +299,21 @@ export default function InventoryPage() {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-full flex-1">
-                <Loader className="h-8 w-8 text-primary" />
-            </div>
+            <Card>
+                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <Skeleton className="h-7 w-32" />
+                        <Skeleton className="h-5 w-48 mt-2" />
+                    </div>
+                     <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                        <Skeleton className="h-10 w-full sm:w-32" />
+                        <Skeleton className="h-10 w-full sm:w-36" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <TableSkeleton />
+                </CardContent>
+            </Card>
         );
     }
 

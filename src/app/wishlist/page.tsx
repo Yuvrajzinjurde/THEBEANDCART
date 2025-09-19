@@ -27,6 +27,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const WishlistFooter = () => (
     <footer className="w-full border-t bg-background mt-16">
@@ -55,6 +56,35 @@ const WishlistFooter = () => (
     </footer>
 );
 
+const WishlistSkeleton = () => (
+    <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-6">
+            <Skeleton className="h-8 w-64" />
+        </div>
+        <Skeleton className="h-6 w-24 mb-2" />
+        <Skeleton className="h-5 w-48 mb-6" />
+        <Skeleton className="h-16 w-full mb-6" />
+        <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                    <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
+                        <Skeleton className="w-36 h-36 rounded-lg flex-shrink-0" />
+                        <div className="flex-grow space-y-2">
+                            <Skeleton className="h-4 w-1/4" />
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-8 w-1/2 mt-2" />
+                            <Skeleton className="h-5 w-20 mt-2" />
+                            <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
+                                <Skeleton className="h-10 w-36" />
+                                <Skeleton className="h-10 w-28" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    </main>
+);
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -127,11 +157,7 @@ export default function WishlistPage() {
   };
 
   if (loading || authLoading) {
-    return (
-      <main className="flex min-h-[60vh] flex-col items-center justify-center">
-        <Loader className="h-12 w-12" />
-      </main>
-    );
+    return <WishlistSkeleton />;
   }
 
   const wishlistProducts = (wishlist?.products as IProduct[]) || [];

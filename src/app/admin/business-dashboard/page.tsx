@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { ChartTooltipContent, ChartContainer } from "@/components/ui/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { IProduct } from "@/models/product.model";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 type Period = '7d' | '30d' | 'yesterday' | 'custom';
@@ -37,6 +39,66 @@ const EmptyState = () => (
         <p className="text-sm text-muted-foreground">There is no sufficient data to show the results in the selected timeframe.</p>
     </div>
 );
+
+const DashboardSkeleton = () => (
+    <div className="flex-1 space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Card>
+            <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-64 mt-2" />
+                    </div>
+                    <Skeleton className="h-10 w-80 rounded-md" />
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <Skeleton className="h-10 w-40 rounded-md" />
+                <Skeleton className="h-[300px] w-full" />
+                <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="p-4 bg-background rounded-lg flex-1 min-w-[150px] space-y-2">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-6 w-24" />
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-56" />
+                <Skeleton className="h-4 w-72 mt-2" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-10 w-full" />
+                <div className="mt-4 border rounded-lg">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                {[...Array(9)].map((_, i) => (
+                                    <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>
+                                ))}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {[...Array(3)].map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-md" /><Skeleton className="h-5 w-32" /></div></TableCell>
+                                    {[...Array(8)].map((_, j) => (
+                                        <TableCell key={j}><Skeleton className="h-5 w-16" /></TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
+
 
 function BusinessDashboardPage() {
   const { selectedBrand } = useBrandStore();
@@ -88,11 +150,7 @@ function BusinessDashboardPage() {
   const hasChartData = chartData && chartData.some(d => d.sales > 0 || d.orders > 0);
 
   if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader className="h-8 w-8" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error || !data) {
