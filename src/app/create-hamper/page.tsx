@@ -191,7 +191,7 @@ const Step2_Box = () => {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {suggestedBoxes.flatMap(b => b.variants.map(v => (
                                         <BoxItem 
-                                            key={`${b._id}-${(v as any)._id}`}
+                                            key={`${b._id}-${v.name}`}
                                             box={b}
                                             variant={v}
                                         />
@@ -204,7 +204,7 @@ const Step2_Box = () => {
                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {otherBoxes.flatMap(b => b.variants.map(v => (
                                     <BoxItem 
-                                        key={`${b._id}-${(v as any)._id}`}
+                                        key={`${b._id}-${v.name}`}
                                         box={b}
                                         variant={v}
                                     />
@@ -386,7 +386,7 @@ export default function CreateHamperPage() {
     useEffect(() => {
         if (!authLoading && !user) {
             toast.info("Please log in to create a hamper.");
-            router.replace(`/login`);
+            router.replace(`/reeva/login`);
         }
     }, [user, authLoading, router]);
     
@@ -554,3 +554,4 @@ export default function CreateHamperPage() {
         </>
     );
 }
+
