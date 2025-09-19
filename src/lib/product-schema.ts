@@ -21,6 +21,7 @@ const ServerVariantSchema = VariantSchema.extend({
 const BaseProductFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
+  purchasePrice: z.coerce.number().min(0.01, "Purchase price must be greater than 0"),
   mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
   category: z.string().min(1, "Category is required"), // Main category for simplicity in form
@@ -48,6 +49,15 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
 }, {
   message: "Selling price cannot be greater than MRP",
   path: ["sellingPrice"],
+})
+.refine(data => {
+    if (data.sellingPrice && data.purchasePrice) {
+        return data.sellingPrice > data.purchasePrice;
+    }
+    return true;
+}, {
+    message: "Selling price must be greater than the purchase price.",
+    path: ["sellingPrice"],
 })
 .refine(data => {
     // If there are no variants, there must be top-level images.
@@ -105,3 +115,22 @@ export const GenerateTagsOutputSchema = z.object({
   tags: z.array(z.string()).describe('An array of 5-7 relevant, single-word tags for the product.'),
 });
 export type GenerateTagsOutput = z.infer<typeof GenerateTagsOutputSchema>;
+
+
+export const SuggestPriceInputSchema = z.object({
+  productName: z.string().describe('The name of the product.'),
+  description: z.string().describe('The description of the product.'),
+  category: z.string().describe('The product category.'),
+  purchasePrice: z.number().describe('The cost price at which the product was purchased.'),
+  mainImage: z
+    .string()
+    .describe(
+      "The primary image of the product, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+});
+export type SuggestPriceInput = z.infer<typeof SuggestPriceInputSchema>;
+
+export const SuggestPriceOutputSchema = z.object({
+  suggestedPrice: z.number().describe('The suggested selling price for the product.'),
+});
+export type SuggestPriceOutput = z.infer<typeof SuggestPriceOutputSchema>;

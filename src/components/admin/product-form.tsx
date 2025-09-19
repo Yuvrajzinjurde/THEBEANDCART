@@ -25,6 +25,7 @@ import type { IBrand } from '@/models/brand.model';
 import { getSEODescription } from '@/ai/flows/seo-description-flow';
 import { autofillProductDetails } from '@/ai/flows/autofill-product-flow';
 import { generateProductTags } from '@/ai/flows/generate-product-tags-flow';
+import { suggestProductPrice } from '@/ai/flows/suggest-product-price-flow';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -240,6 +241,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
   const [isGeneratingTags, setIsGeneratingTags] = React.useState(false);
+  const [isGeneratingPrice, setIsGeneratingPrice] = React.useState(false);
   const [isAutofilling, setIsAutofilling] = React.useState(false);
   const [aiError, setAiError] = React.useState<string | null>(null);
   const [tagInput, setTagInput] = React.useState('');
@@ -262,6 +264,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     keywords: (existingProduct.keywords || []).map(keyword => ({ value: keyword })),
     mrp: existingProduct.mrp || '',
     sellingPrice: existingProduct.sellingPrice,
+    purchasePrice: (existingProduct as any).purchasePrice || 0,
     storefront: existingProduct.storefront,
     returnPeriod: existingProduct.returnPeriod || 10,
     variants: [], // TODO: Populate variants for editing
@@ -269,6 +272,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     name: '',
     description: '',
     mrp: '',
+    purchasePrice: 0,
     sellingPrice: 0,
     category: '',
     brand: '', // Product's actual brand
@@ -336,9 +340,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     name: 'variants',
   });
   
-  const hasVariants = useWatch({ control, name: 'variants' }).length > 0;
-  const productName = useWatch({ control, name: 'name' });
-  const productDescription = useWatch({ control, name: 'description' });
+  const watchedFormValues = useWatch({ control });
 
 
   const handleAIError = (error: any, context: string): string => {
@@ -358,14 +360,14 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   }
 
   const handleGenerateDescription = async () => {
-      if (!productName) {
+      if (!watchedFormValues.name) {
           toast.warn("Please enter a product name first.");
           return;
       }
       setAiError(null);
       setIsGeneratingDesc(true);
       try {
-          const result = await getSEODescription({ productName });
+          const result = await getSEODescription({ productName: watchedFormValues.name });
           form.setValue('description', result.description, { shouldValidate: true, shouldDirty: true });
           toast.success("AI description generated!");
       } catch (error) {
@@ -377,14 +379,14 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
   
   const handleGenerateTags = async () => {
-    if (!productName || !productDescription) {
+    if (!watchedFormValues.name || !watchedFormValues.description) {
       toast.warn("Please enter a product name and description first.");
       return;
     }
     setAiError(null);
     setIsGeneratingTags(true);
     try {
-      const result = await generateProductTags({ productName, description: productDescription });
+      const result = await generateProductTags({ productName: watchedFormValues.name, description: watchedFormValues.description });
       const tagsAsObjects = result.tags.map(tag => ({ value: tag }));
       form.setValue('keywords', tagsAsObjects, { shouldValidate: true, shouldDirty: true });
       toast.success("AI keywords generated!");
@@ -396,9 +398,35 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     }
   };
 
+  const handleSuggestPrice = async () => {
+    const { name, description, category, purchasePrice, images } = watchedFormValues;
+    if (!name || !description || !category || !purchasePrice || !images || images.length === 0) {
+        toast.warn("Please fill in Name, Description, Category, Purchase Price, and upload at least one image before suggesting a price.");
+        return;
+    }
+    setAiError(null);
+    setIsGeneratingPrice(true);
+    try {
+        const result = await suggestProductPrice({
+            productName: name,
+            description,
+            category,
+            purchasePrice: Number(purchasePrice),
+            mainImage: images[0].value,
+        });
+        form.setValue('sellingPrice', result.suggestedPrice, { shouldValidate: true, shouldDirty: true });
+        toast.success("AI selling price suggested!");
+    } catch (error) {
+        const displayMessage = handleAIError(error, "price suggestion");
+        toast.error(displayMessage);
+    } finally {
+        setIsGeneratingPrice(false);
+    }
+  };
+
 
   const handleAutofill = async () => {
-    if (!productName) {
+    if (!watchedFormValues.name) {
       toast.warn("Please enter a product name to autofill the form.");
       return;
     }
@@ -406,7 +434,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setIsAutofilling(true);
     toast.info("Autofilling form with AI...");
     try {
-      const result = await autofillProductDetails({ productName });
+      const result = await autofillProductDetails({ productName: watchedFormValues.name });
       form.setValue('description', result.description, { shouldValidate: true, shouldDirty: true });
       form.setValue('mrp', result.mrp, { shouldValidate: true, shouldDirty: true });
       form.setValue('sellingPrice', result.sellingPrice, { shouldValidate: true, shouldDirty: true });
@@ -438,7 +466,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setIsSubmitting(true);
     const dataToSubmit = {
       ...data,
-      images: hasVariants ? [] : data.images.map(img => img.value), // Use top-level images only if no variants
+      images: watchedFormValues.variants.length > 0 ? [] : data.images.map(img => img.value), // Use top-level images only if no variants
       videos: data.videos?.map(vid => vid.value),
       keywords: data.keywords?.map(tag => tag.value),
       variants: data.variants.map(variant => ({
@@ -576,7 +604,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
                                     <FormMessage />
                                   </div>
-                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !productName || isFormDisabled}>
+                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !watchedFormValues.name || isFormDisabled}>
                                     {isAutofilling ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                     Autofill
                                   </Button>
@@ -590,7 +618,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Description</FormLabel>
-                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGeneratingDesc || !productName || isFormDisabled}>
+                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGeneratingDesc || !watchedFormValues.name || isFormDisabled}>
                                         {isGeneratingDesc ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate with AI
                                     </Button>
@@ -608,7 +636,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardContent>
                 </Card>
 
-                {!hasVariants && (
+                {!watchedFormValues.variants?.length && (
                 <Card>
                     <CardHeader><CardTitle>Media</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
@@ -717,7 +745,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                             </Button>
                          )}
-                         {!hasVariants && (
+                         {!watchedFormValues.variants?.length && (
                             <FormField control={control} name="stock" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Stock</FormLabel>
@@ -783,7 +811,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Keywords</FormLabel>
-                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !productName || !productDescription || isFormDisabled}>
+                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !watchedFormValues.name || !watchedFormValues.description || isFormDisabled}>
                                         {isGeneratingTags ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate Keywords
                                     </Button>
@@ -819,10 +847,40 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 </Card>
                  <Card>
                     <CardHeader><CardTitle>Pricing & Policy</CardTitle></CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4">
-                         <FormField control={control} name="mrp" render={({ field }) => (
+                    <CardContent className="grid grid-cols-1 gap-4">
+                        <FormField control={control} name="purchasePrice" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>MRP</FormLabel>
+                                <FormLabel>Purchase Price</FormLabel>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                                    <FormControl>
+                                        <Input type="number" placeholder="0.00" className="pl-7" {...field} />
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="sellingPrice" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Selling Price</FormLabel>
+                                <div className="flex items-center gap-2">
+                                    <div className="relative flex-grow">
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                                        <FormControl>
+                                            <Input type="number" placeholder="0.00" className="pl-7" {...field} />
+                                        </FormControl>
+                                    </div>
+                                    <Button type="button" variant="outline" onClick={handleSuggestPrice} disabled={isGeneratingPrice || isFormDisabled}>
+                                        {isGeneratingPrice ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
+                                        Suggest
+                                    </Button>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="mrp" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>MRP (Maximum Retail Price)</FormLabel>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
                                     <FormControl>
@@ -832,22 +890,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormDescription>Original price (optional).</FormDescription>
                                 <FormMessage />
                             </FormItem>
-                         )} />
-                         <FormField control={control} name="sellingPrice" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Selling Price</FormLabel>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
-                                    <FormControl>
-                                        <Input type="number" placeholder="0.00" className="pl-7" {...field} />
-                                    </FormControl>
-                                </div>
-                                 <FormDescription>The price it will be sold at.</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                         )} />
+                        )} />
                          <FormField control={control} name="returnPeriod" render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Return Period (Days)</FormLabel>
                                 <div className="relative">
                                     <FormControl>

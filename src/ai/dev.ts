@@ -8,5 +8,6 @@ import '@/ai/flows/autofill-product-flow.ts';
 import '@/ai/flows/generate-product-tags-flow.ts';
 import '@/ai/flows/parse-legal-doc-flow.ts';
 import '@/ai/flows/summarize-legal-doc-flow.ts';
+import '@/ai/flows/suggest-product-price-flow.ts';
 
 
