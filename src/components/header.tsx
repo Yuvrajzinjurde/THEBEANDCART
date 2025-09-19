@@ -46,18 +46,21 @@ export default function Header() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // This effect runs only on the client, after hydration
     setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (isClient) {
-        const pathBrand = params.brand as string;
-        const queryBrand = searchParams.get('storefront');
-        const isCreateHamperPage = pathname === '/create-hamper';
-        const determinedBrandName = isCreateHamperPage ? null : (pathBrand || queryBrand || 'reeva');
-        setBrandName(determinedBrandName);
+    
+    const pathBrand = params.brand as string;
+    const queryBrand = searchParams.get('storefront');
+    
+    // Determine the brand from URL
+    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
+      setBrandName(null);
+    } else {
+      const determinedBrand = pathBrand || queryBrand || 'reeva';
+      setBrandName(determinedBrand);
     }
-  }, [isClient, pathname, params, searchParams]);
+
+  }, [pathname, params, searchParams]);
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
@@ -86,13 +89,14 @@ export default function Header() {
           const { brand: brandData } = await res.json();
           setBrand(brandData);
         } else {
-          setBrand(null); // Explicitly set to null if brand not found
+          setBrand(null);
         }
       } catch (error) {
         console.error("Failed to fetch brand data for header", error);
         setBrand(null);
       }
     }
+    // Only fetch when brandName is determined on the client
     if (isClient) {
         fetchBrandLogo();
     }
@@ -106,6 +110,9 @@ export default function Header() {
       setIsSheetOpen(false);
     }
   };
+  
+  const currentDisplayName = isClient && brand ? brand.displayName : 'The Brand Cart';
+  const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
@@ -133,13 +140,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href={isClient && brandName ? `/${brandName}/home` : '/'} className="mr-4 flex items-center space-x-2">
+        <Link href={homeLink} className="mr-4 flex items-center space-x-2">
           {isClient && brand?.logoUrl ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
-          <span className="hidden font-bold text-lg sm:inline-block capitalize">{isClient && brand?.displayName ? brand.displayName : 'The Brand Cart'}</span>
+          <span className="hidden font-bold text-lg sm:inline-block capitalize">{currentDisplayName}</span>
         </Link>
 
         {/* Categories Dropdown */}
@@ -191,9 +198,9 @@ export default function Header() {
                 <SheetContent side="right" className="w-[300px] sm:w-[340px] flex flex-col p-0">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
-                            <Link href={brandName ? `/${brandName}/home`: '/'} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                            <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
                                 <Logo className="h-8 w-8" />
-                                <span className="font-bold text-lg capitalize">{brand?.displayName || 'The Brand Cart'}</span>
+                                <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
@@ -270,5 +277,3 @@ export default function Header() {
     </header>
   );
 }
-
-    

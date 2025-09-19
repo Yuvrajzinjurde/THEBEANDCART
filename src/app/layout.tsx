@@ -77,14 +77,10 @@ export default function RootLayout({
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
-  const isGlobalPage = ['/', '/wishlist'].includes(pathname) || pathname.startsWith('/legal');
-  const isCreateHamperPage = pathname === '/create-hamper';
   
-  const showHeader = !isAdminRoute && !isAuthRoute && !isGlobalPage;
-
   const getBrandName = () => {
     // These pages should use the default theme, not a brand-specific one.
-    if (isAdminRoute || isGlobalPage || isCreateHamperPage) {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
       return null;
     }
     
@@ -100,10 +96,11 @@ export default function RootLayout({
         return storefrontQuery;
     }
 
-    return null;
+    return 'reeva'; // Default fallback
   }
   
   const brandName = getBrandName();
+  const showHeader = !isAdminRoute && !isAuthRoute;
 
   return (
     <html lang="en" suppressHydrationWarning>
