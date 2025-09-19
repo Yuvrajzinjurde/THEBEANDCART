@@ -194,7 +194,7 @@ export default function WishlistPage() {
             return (
                 <Card key={product._id as string}>
                     <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
-                        <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="block flex-shrink-0 w-full sm:w-36 aspect-square">
+                        <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="block flex-shrink-0 w-36 aspect-square">
                             <Image src={product.images[0]} alt={product.name} width={144} height={144} className="rounded-lg object-cover border w-full h-full"/>
                         </Link>
                         <div className="flex flex-col flex-grow">
@@ -264,4 +264,3 @@ export default function WishlistPage() {
     </>
   );
 }
-
