@@ -336,7 +336,7 @@ export default function LandingPage() {
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
-                            <div className="relative w-full h-[250px] md:h-[400px] bg-secondary text-foreground">
+                            <div className="relative w-full h-[125px] md:h-[200px] bg-secondary text-foreground">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title}
