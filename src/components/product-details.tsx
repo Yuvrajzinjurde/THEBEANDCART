@@ -207,7 +207,12 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         const response = await fetch('/api/cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ productId: product._id, quantity: 1 }),
+            body: JSON.stringify({ 
+              productId: product._id, 
+              quantity: 1,
+              size: selectedSize,
+              color: selectedColor
+            }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
