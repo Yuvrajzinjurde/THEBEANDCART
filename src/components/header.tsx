@@ -16,6 +16,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
@@ -175,10 +176,12 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[340px] flex flex-col p-0">
                     <SheetHeader className="p-4 border-b">
-                         <Link href={`/${brandName}/home`} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                            <Logo className="h-8 w-8" />
-                            <span className="font-bold text-lg capitalize">{brand?.displayName || brandName}</span>
-                        </Link>
+                        <SheetTitle>
+                            <Link href={`/${brandName}/home`} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                                <Logo className="h-8 w-8" />
+                                <span className="font-bold text-lg capitalize">{brand?.displayName || brandName}</span>
+                            </Link>
+                        </SheetTitle>
                     </SheetHeader>
                     <div className="flex-1 overflow-y-auto p-4">
                         <nav className="flex flex-col gap-4">
