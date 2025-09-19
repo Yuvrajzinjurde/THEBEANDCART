@@ -32,7 +32,7 @@ const seoDescriptionPrompt = ai.definePrompt({
   name: 'seoDescriptionPrompt',
   input: {schema: SEODescriptionInputSchema},
   output: {schema: SEODescriptionOutputSchema},
-  model: 'googleai/gemini-1.5-flash-preview',
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are an expert copywriter specializing in e-commerce. Your task is to generate a compelling, SEO-optimized product description.
 
   The description should be engaging, highlight key features and benefits, and include relevant keywords naturally. Structure it with clear headings or bullet points. The tone should be persuasive and professional.
