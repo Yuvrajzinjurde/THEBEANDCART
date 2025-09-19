@@ -113,7 +113,7 @@ export default function CartPage() {
   
   const subtotal = useMemo(() =>
     cart?.items?.reduce((acc, item) => acc + (item.productId as IProduct).sellingPrice * item.quantity, 0) || 0,
-    [cart?.items]
+    [cart]
   );
 
   const cartItems = useMemo(() => {
@@ -135,7 +135,7 @@ export default function CartPage() {
         });
     }
     return items;
-  }, [cart?.items, subtotal]);
+  }, [cart, subtotal]);
 
   const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
@@ -202,7 +202,7 @@ export default function CartPage() {
       const mrp = product.mrp || product.sellingPrice;
       return acc + (mrp - product.sellingPrice) * item.quantity;
     }, 0) || 0,
-    [cart?.items]
+    [cart]
   );
   
   const milestoneDiscount = useMemo(() => {
@@ -432,5 +432,3 @@ export default function CartPage() {
     </>
   );
 }
-
-    
