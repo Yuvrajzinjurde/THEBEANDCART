@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import { jwtDecode } from 'jwt-decode';
 import dbConnect from '@/lib/mongodb';
@@ -9,6 +10,40 @@ import { Types } from 'mongoose';
 interface DecodedToken {
   userId: string;
 }
+
+// GET the user's wishlist
+export async function GET(req: Request) {
+    try {
+        await dbConnect();
+
+        const token = req.headers.get('authorization')?.split(' ')[1];
+        if (!token) {
+            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        }
+        const decoded = jwtDecode<DecodedToken>(token);
+        const userId = decoded.userId;
+
+        const wishlist = await Wishlist.findOne({ userId }).populate({
+            path: 'products',
+            model: Product,
+            select: 'name images sellingPrice mrp category rating storefront',
+        });
+        
+        if (!wishlist) {
+            return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
+        }
+
+        return NextResponse.json({ wishlist }, { status: 200 });
+
+    } catch (error) {
+        console.error('Get Wishlist Error:', error);
+        if (error instanceof Error && error.name === 'ExpiredSignatureError') {
+            return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
+        }
+        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    }
+}
+
 
 // Add or remove a product from the wishlist
 export async function POST(req: Request) {
@@ -64,7 +99,13 @@ export async function POST(req: Request) {
       message = 'Product added to wishlist.';
     }
 
-    return NextResponse.json({ message, wishlist }, { status: 200 });
+    const populatedWishlist = await Wishlist.findById(wishlist._id).populate({
+        path: 'products',
+        model: Product,
+        select: 'name images sellingPrice mrp category rating storefront',
+    });
+
+    return NextResponse.json({ message, wishlist: populatedWishlist }, { status: 200 });
 
   } catch (error) {
     console.error('Wishlist Error:', error);

@@ -45,8 +45,8 @@ export default function Header() {
   const [showSecondaryNav, setShowSecondaryNav] = useState(false);
   const { cart, wishlist } = useUserStore();
 
-  const cartCount = cart?.totalItems ?? 0;
-  const wishlistCount = wishlist?.totalItems ?? 0;
+  const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0;
+  const wishlistCount = wishlist?.products?.length ?? 0;
   
   const secondaryNavItems = [
     { href: `/${brandName}/products?keyword=gift`, icon: Gift, label: "Gifts" },
@@ -84,7 +84,7 @@ export default function Header() {
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
         <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
-            <Link href="#" className="relative">
+            <Link href="/wishlist" className="relative">
                 <Heart className="h-5 w-5" />
                  {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
             </Link>
@@ -96,7 +96,7 @@ export default function Header() {
         </Button>
         <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href="#" className="relative">
+            <Link href="/cart" className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
             </Link>
