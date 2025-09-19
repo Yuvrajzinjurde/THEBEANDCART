@@ -193,7 +193,7 @@ export default function CartPage() {
         <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
-                    <CardTitle>My Cart ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})</CardTitle>
+                    <CardTitle>My Cart ({cartItems.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
