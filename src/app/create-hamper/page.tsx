@@ -487,7 +487,8 @@ const Step5_Notes = () => {
                 setNotes({ receiver: data.message });
                 toast.success("AI message generated!");
             } else {
-                throw new Error("Failed to get suggestion.");
+                 const errorData = await res.json();
+                throw new Error(errorData.message || "Failed to get suggestion.");
             }
         } catch (error: any) {
             console.error("Failed to get message suggestion", error);
@@ -650,7 +651,9 @@ export default function CreateHamperPage() {
 
             toast.success("Hamper finalized and added to cart!");
             resetHamper();
-            router.push(`/${cart.items[0]?.productId.storefront || 'reeva'}/cart`);
+            const firstItem = cart.items?.[0];
+            const storefront = (firstItem?.productId as any)?.storefront;
+            router.push(`/${storefront || 'reeva'}/cart`);
         } catch (error: any) {
             console.error("Checkout failed:", error);
             toast.error(error.message);
