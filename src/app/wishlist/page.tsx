@@ -1,7 +1,8 @@
 
+
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import Link from 'next/link';
@@ -60,7 +61,6 @@ export default function WishlistPage() {
   const { user, token, loading: authLoading } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
   const [loading, setLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (!authLoading) {
@@ -72,68 +72,58 @@ export default function WishlistPage() {
     }
   }, [user, authLoading, router]);
 
-  const handleRemoveFromWishlist = (productId: string) => {
-    startTransition(async () => {
-      toast.info("Removing from wishlist...");
-      try {
-        const response = await fetch('/api/wishlist', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ productId }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        setWishlist(result.wishlist);
-        toast.success(result.message);
-      } catch (error: any) {
-        toast.error(error.message || "Failed to update wishlist.");
-      }
-    });
+  const handleRemoveFromWishlist = async (productId: string) => {
+    try {
+      const response = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message);
+      setWishlist(result.wishlist);
+    } catch (error: any) {
+      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+    }
   };
 
-  const handleAddToCart = (product: IProduct) => {
-    startTransition(async () => {
-      if (product.stock === 0) {
-        toast.error("This item is out of stock.");
-        return;
+  const handleAddToCart = async (product: IProduct) => {
+    if (product.stock === 0) {
+      toast.error("This item is out of stock.");
+      return;
+    }
+    try {
+      // Add to cart
+      const cartResponse = await fetch('/api/cart', {
+          method: 'POST',
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ productId: product._id, quantity: 1 }),
+      });
+      const cartResult = await cartResponse.json();
+      if (!cartResponse.ok) throw new Error(cartResult.message);
+      setCart(cartResult.cart);
+      
+      // Remove from wishlist
+      const wishlistRes = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ productId: product._id }),
+      });
+      const wishlistResult = await wishlistRes.json();
+      if (!wishlistRes.ok) {
+          console.error("Failed to remove from wishlist after adding to cart:", wishlistResult.message);
       }
-      toast.info("Moving to cart...");
-      try {
-        // Add to cart
-        const cartResponse = await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ productId: product._id, quantity: 1 }),
-        });
-        const cartResult = await cartResponse.json();
-        if (!cartResponse.ok) throw new Error(cartResult.message);
-        setCart(cartResult.cart);
-        
-        // Remove from wishlist
-        const wishlistRes = await fetch('/api/wishlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ productId: product._id }),
-        });
-        const wishlistResult = await wishlistRes.json();
-        if (!wishlistRes.ok) {
-            // Note: Even if removing from wishlist fails, we don't rollback the cart addition.
-            // It's not a critical failure. We'll just log it.
-            console.error("Failed to remove from wishlist after adding to cart:", wishlistResult.message);
-        }
-        setWishlist(wishlistResult.wishlist);
-        toast.success("Moved to cart!");
+      setWishlist(wishlistResult.wishlist);
 
-      } catch (error: any) {
-        toast.error(error.message || "Failed to process request.");
-      }
-    });
+    } catch (error: any) {
+      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+    }
   };
 
   if (loading || authLoading) {
@@ -173,8 +163,6 @@ export default function WishlistPage() {
        <p className="text-muted-foreground mb-6">
         {wishlistProducts.length} {wishlistProducts.length === 1 ? 'item' : 'items'}
       </p>
-      
-      {isPending && <div className="fixed inset-0 bg-background/50 flex items-center justify-center z-50"><Loader/></div>}
       
       {wishlistProducts.length > 0 && (
         <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-800 [&>svg]:text-blue-800">
@@ -225,7 +213,6 @@ export default function WishlistPage() {
                                 {product.stock > 0 && (
                                     <Button 
                                         onClick={() => handleAddToCart(product)} 
-                                        disabled={isPending}
                                     >
                                         <ShoppingCart className="mr-2 h-4 w-4" />
                                         Move to Cart
@@ -234,7 +221,6 @@ export default function WishlistPage() {
                                  <Button 
                                     variant="secondary" 
                                     onClick={() => handleRemoveFromWishlist(product._id as string)} 
-                                    disabled={isPending}
                                 >
                                     <Trash className="mr-2 h-4 w-4"/>
                                     Remove

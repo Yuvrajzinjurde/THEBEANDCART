@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -187,12 +188,11 @@ export default function CartPage() {
       if (!response.ok) throw new Error(result.message);
       setCart(result.cart);
     } catch (error: any) {
-      toast.error(error.message || "Failed to update quantity.");
+      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
 
   const handleRemoveItem = async (productId: string) => {
-    toast.info("Removing item...");
     try {
       const response = await fetch(`/api/cart?productId=${productId}`, {
         method: 'DELETE',
@@ -201,14 +201,12 @@ export default function CartPage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       setCart(result.cart);
-      toast.success("Item removed from cart.");
     } catch (error: any) {
-      toast.error(error.message || "Failed to remove item.");
+      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
 
   const handleMoveToWishlist = async (productId: string) => {
-    toast.info("Moving to wishlist...");
     try {
       // First, add to wishlist
       const wishlistRes = await fetch('/api/wishlist', {
@@ -222,10 +220,9 @@ export default function CartPage() {
 
       // Then, remove from cart
       await handleRemoveItem(productId);
-      toast.success("Moved to wishlist!");
 
     } catch (error: any) {
-      toast.error(error.message || "Failed to move item.");
+      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
 
