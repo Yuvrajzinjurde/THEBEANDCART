@@ -5,7 +5,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { cn } from '@/lib/utils';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@react-hook/window-size';
-import useMeasure from "react-use-measure";
 import { Truck, Tag, Gift } from 'lucide-react';
 
 const milestones = [
@@ -21,7 +20,7 @@ const drawCoin = (ctx: CanvasRenderingContext2D) => {
 };
 
 const LockedGiftBox = ({ className }: { className?: string }) => (
-    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
+    <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
         <path d="M10 18C10 15.7909 11.7909 14 14 14H26C28.2091 14 30 15.7909 30 18V28H10V18Z" fill="currentColor"/>
         <path d="M16 14V11C16 8.79086 17.7909 7 20 7C22.2091 7 24 8.79086 24 11V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
         <rect x="8" y="28" width="24" height="5" rx="1" fill="currentColor"/>
@@ -56,17 +55,13 @@ const ActiveGiftBox = () => (
     </svg>
 );
 
-
-
 const Milestone = ({
     milestone,
     isUnlocked,
-    isNext,
     onUnlock,
 }: {
     milestone: typeof milestones[0];
     isUnlocked: boolean;
-    isNext: boolean;
     onUnlock: () => void;
 }) => {
     const { threshold, reward, icon: Icon } = milestone;
@@ -79,15 +74,15 @@ const Milestone = ({
     }, [isUnlocked, onUnlock]);
 
     return (
-        <div className="flex flex-col items-center text-center w-24">
-            <div className="h-12 flex items-center justify-center" ref={ref}>
+        <div className="flex flex-col items-center text-center w-20">
+            <div className="h-10 flex items-center justify-center" ref={ref}>
                 {isUnlocked ? <ActiveGiftBox /> : <LockedGiftBox />}
             </div>
-            <div className="mt-2 h-14 flex flex-col items-center">
-                <p className="text-sm font-semibold">
+            <div className="mt-2 h-12 flex flex-col items-center">
+                <p className="text-xs font-semibold">
                     {isUnlocked ? reward : 'Mystery Box'}
                 </p>
-                {isUnlocked && <Icon className="h-5 w-5 text-muted-foreground my-1" />}
+                {isUnlocked && <Icon className="h-4 w-4 text-muted-foreground my-1" />}
                  <p className="text-xs text-muted-foreground font-medium mt-auto">
                     ₹{threshold}
                 </p>
@@ -106,7 +101,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
   const handleUnlock = React.useCallback(() => {
     setShowConfetti(true);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => setShowConfetti(false), 2500); 
+    timeoutRef.current = setTimeout(() => setShowConfetti(false), 1500); 
   }, []);
 
   useEffect(() => {
@@ -122,7 +117,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
   const amountNeeded = nextMilestone ? nextMilestone.threshold - currentValue : 0;
 
   return (
-    <div className="w-full py-4 mb-8">
+    <div className="w-full max-w-lg">
        {showConfetti && (
         <ReactConfetti
           width={width}
@@ -131,24 +126,22 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
           numberOfPieces={400}
           gravity={0.12}
           drawShape={drawCoin}
-          tweenDuration={2500}
+          tweenDuration={1500}
         />
       )}
       <div className="relative flex justify-between items-start px-4">
         {milestones.map((milestone, index) => {
           const isUnlocked = currentValue >= milestone.threshold;
-          const isNext = highestUnlockedIndex === index - 1;
           
           return (
             <React.Fragment key={milestone.threshold}>
               <Milestone
                 milestone={milestone}
                 isUnlocked={isUnlocked}
-                isNext={isNext}
                 onUnlock={handleUnlock}
               />
               {index < milestones.length - 1 && (
-                <div className="flex-1 h-px bg-muted-foreground/30 mt-6 border-t-2 border-dashed" />
+                <div className="flex-1 h-px bg-muted-foreground/30 mt-4 border-t-2 border-dashed" />
               )}
             </React.Fragment>
           );
