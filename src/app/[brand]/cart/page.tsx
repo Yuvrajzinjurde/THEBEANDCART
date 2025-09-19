@@ -19,6 +19,7 @@ import {
   ShoppingCart,
   Truck,
   Gift,
+  Store,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -34,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
 import type { ICartItem } from "@/models/cart.model";
+import type { IBrand } from "@/models/brand.model";
 import { addDays, format } from 'date-fns';
 import { CartProgressBar } from "@/components/cart-progress-bar";
 
@@ -82,6 +84,22 @@ export default function CartPage() {
   const { user, token, loading: authLoading } = useAuth();
   const { cart, setCart, setWishlist } = useUserStore();
   const [loading, setLoading] = useState(true);
+  const [allBrands, setAllBrands] = useState<IBrand[]>([]);
+
+  useEffect(() => {
+    async function fetchBrands() {
+        try {
+            const response = await fetch('/api/brands');
+            if (response.ok) {
+                const data = await response.json();
+                setAllBrands(data.brands);
+            }
+        } catch (error) {
+            console.error("Failed to fetch brands", error);
+        }
+    }
+    fetchBrands();
+  }, []);
 
   useEffect(() => {
     if (!authLoading) {
@@ -199,6 +217,10 @@ export default function CartPage() {
   
   const deliveryDate = format(addDays(new Date(), 5), 'EEE, MMM d');
 
+  const otherBrands = useMemo(() => 
+    allBrands.filter(b => b.permanentName !== brandName).slice(0, 2),
+    [allBrands, brandName]
+  );
 
   if (loading || authLoading) {
     return (
@@ -228,7 +250,7 @@ export default function CartPage() {
   return (
     <>
        <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
-        <div className="container flex items-center justify-between">
+        <div className="container mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
                 <Button
                 variant="outline"
@@ -386,6 +408,23 @@ export default function CartPage() {
                         </Button>
                     </CardContent>
                 </Card>
+                {otherBrands.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-base"><Store className="h-5 w-5"/> Explore Other Brands</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex justify-around items-start gap-4">
+                            {otherBrands.map(brand => (
+                                <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="flex flex-col items-center gap-2 group">
+                                    <div className="relative w-20 h-20 rounded-full border-2 border-transparent group-hover:border-primary transition-all duration-300">
+                                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="rounded-full object-cover"/>
+                                    </div>
+                                    <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
+                                </Link>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
              </div>
         </div>
       </div>
@@ -393,5 +432,3 @@ export default function CartPage() {
     </>
   );
 }
-
-    
