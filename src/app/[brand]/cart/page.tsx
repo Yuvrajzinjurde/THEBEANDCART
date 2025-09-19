@@ -267,8 +267,8 @@ export default function CartPage() {
                              const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                             return (
-                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex gap-4">
-                                <div className="block flex-shrink-0 w-[120px] h-[120px]">
+                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4">
+                                <div className="block flex-shrink-0 w-full sm:w-[120px] h-auto sm:h-[120px]">
                                     {isGift ? (
                                         <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
                                             <GiftBoxIcon />
@@ -315,7 +315,7 @@ export default function CartPage() {
                                     )}
                                     
                                     {!isGift ? (
-                                      <div className="flex items-center justify-between mt-2">
+                                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-4">
                                           <div className="flex items-center gap-1 rounded-full border p-1">
                                               <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
                                               <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
@@ -386,3 +386,5 @@ export default function CartPage() {
     </main>
   );
 }
+
+    
