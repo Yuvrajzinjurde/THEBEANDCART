@@ -110,8 +110,8 @@ const BoxItem = ({ box, variant, onLike }: { box: IBox, variant: IBoxVariant, on
     
     return (
         <div>
-            <RadioGroupItem value={`${box._id}-${(variant as any)._id}`} id={`${box._id}-${(variant as any)._id}`} className="sr-only" />
-            <Label htmlFor={`${box._id}-${(variant as any)._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all duration-300 ease-in-out border-muted hover:border-foreground/20 hover:shadow-lg", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
+            <RadioGroupItem value={`${box._id}-${variant._id}`} id={`${box._id}-${variant._id}`} className="sr-only" />
+            <Label htmlFor={`${box._id}-${variant._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all duration-300 ease-in-out border-muted hover:border-foreground/20 hover:shadow-lg", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
                 <div className="relative group/card">
                     <div className="aspect-square relative mb-2">
                         <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
@@ -147,7 +147,7 @@ const PackagingGrid = ({ items, onLike }: { items: IBox[], onLike: (boxId: strin
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.flatMap(b => b.variants.map(v => (
             <BoxItem 
-                key={`${b._id}-${v.name}`}
+                key={`${b._id}-${v._id}`}
                 box={b}
                 variant={v}
                 onLike={onLike}
@@ -186,7 +186,7 @@ const Step2_Box = () => {
 
             if (occasion && availableBoxes.length > 0) {
                 try {
-                    const packageList = availableBoxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
+                    const packageList = availableBoxes.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -209,7 +209,7 @@ const Step2_Box = () => {
         const [boxId, variantId] = value.split('-');
         const box = allBoxes.find(b => b._id.toString() === boxId);
         if (box) {
-            const variant = box.variants.find(v => (v as any)._id.toString() === variantId);
+            const variant = box.variants.find(v => v._id.toString() === variantId);
             if (variant) {
                 setBox(box, variant);
             }
@@ -230,10 +230,14 @@ const Step2_Box = () => {
     };
 
 
-    const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${(selectedBoxVariant as any)._id}` : undefined;
+    const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${selectedBoxVariant._id}` : undefined;
 
     const onlyBoxes = allBoxes.filter(b => b.boxType === 'box');
-    const suggestedBoxes = onlyBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
+
+    const suggestedBoxes = suggestedBoxIds.map(id => 
+        onlyBoxes.find(b => b._id.toString() === id)
+    ).filter((b): b is IBox => !!b);
+    
     const otherBoxes = onlyBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
