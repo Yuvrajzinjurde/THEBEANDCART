@@ -197,7 +197,10 @@ export default function CartPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
-                        {cartItems.map(item => (
+                        {cartItems.map(item => {
+                             const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
+                             const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
+                            return (
                             <div key={item.product._id as string} className="flex gap-4">
                                 <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block flex-shrink-0">
                                     <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border"/>
@@ -206,8 +209,11 @@ export default function CartPage() {
                                     <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="font-semibold text-lg hover:underline">{item.product.name}</Link>
                                     <div className="flex items-baseline gap-2 mt-1">
                                         <p className="text-base font-bold text-foreground">₹{item.product.sellingPrice.toLocaleString('en-IN')}</p>
-                                        {item.product.mrp && item.product.mrp > item.product.sellingPrice && (
-                                            <p className="text-sm font-medium text-muted-foreground line-through">₹{item.product.mrp.toLocaleString('en-IN')}</p>
+                                        {hasDiscount && (
+                                            <>
+                                                <p className="text-sm font-medium text-muted-foreground line-through">₹{item.product.mrp!.toLocaleString('en-IN')}</p>
+                                                <p className="text-sm font-semibold text-green-600">{discountPercentage}% off</p>
+                                            </>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-4 mt-4">
@@ -223,7 +229,7 @@ export default function CartPage() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 </CardContent>
             </Card>
