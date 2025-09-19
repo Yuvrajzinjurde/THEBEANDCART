@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
 import { BrandProductCard } from "@/components/brand-product-card";
-import { Loader } from "@/components/ui/loader";
+import { Loader } from "@/components/ui/loader';
 import { Button } from "@/components/ui/button";
-import { HeartCrack, ShoppingCart, ArrowLeft } from "lucide-react";
+import { HeartCrack, ShoppingCart, ArrowLeft, Twitter, Facebook, Instagram, Linkedin } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,6 +20,35 @@ import {
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
 import Link from 'next/link';
+import { Logo } from "@/components/logo";
+
+const WishlistFooter = () => (
+    <footer className="w-full border-t bg-background mt-16">
+        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    <Logo className="h-6 w-6 text-primary" />
+                    <span className="font-bold">The Brand Cart</span>
+                </div>
+                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href="/legal/about-us" className="hover:text-primary">About Us</Link>
+                    <Link href="/legal/privacy-policy" className="hover:text-primary">Policies</Link>
+                    <Link href="/legal/contact-us" className="hover:text-primary">Contact Us</Link>
+                </div>
+                 <div className="flex space-x-4">
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
+                </div>
+            </div>
+            <div className="mt-8 border-t pt-4">
+                 <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} The Brand Cart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+);
+
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -106,6 +135,7 @@ export default function WishlistPage() {
   const wishlistProducts = (wishlist?.products as IProduct[]) || [];
 
   return (
+    <>
     <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-6">
          <div className="flex items-center gap-4">
@@ -161,5 +191,9 @@ export default function WishlistPage() {
         </div>
       )}
     </main>
+    <WishlistFooter />
+    </>
   );
 }
+
+    

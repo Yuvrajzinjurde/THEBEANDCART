@@ -295,51 +295,27 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
         <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-                <div className="md:col-span-2">
-                    <div className="flex items-center gap-3">
-                        {brand?.logoUrl && (
-                            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={40} height={40} className="h-10 w-10 object-cover rounded-full" />
-                        )}
-                        <span className="text-xl font-bold capitalize">{brand?.displayName}</span>
-                    </div>
-                     <p className="text-sm text-muted-foreground mt-4">Your one-stop shop for everything great.</p>
+             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    {brand?.logoUrl && (
+                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 object-cover rounded-full" />
+                    )}
+                    <span className="text-lg font-bold capitalize">{brand?.displayName}</span>
                 </div>
-
-                <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">About</h3>
-                    <ul className="mt-4 space-y-2">
-                        <li><Link href={`/${brand?.permanentName}/legal/about-us`} className="text-sm text-muted-foreground hover:text-primary">Our Story</Link></li>
-                        <li><Link href={`/${brand?.permanentName}/legal/contact-us`} className="text-sm text-muted-foreground hover:text-primary">Contact</Link></li>
-                    </ul>
+                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href={`/${brand?.permanentName}/legal/about-us`} className="hover:text-primary">About Us</Link>
+                    <Link href={`/${brand?.permanentName}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
+                    <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
                 </div>
-                 <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Support</h3>
-                    <ul className="mt-4 space-y-2">
-                        <li><Link href={`/${brand?.permanentName}/legal/contact-us`} className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                        <li><Link href={`/${brand?.permanentName}/legal/shipping-policy`} className="text-sm text-muted-foreground hover:text-primary">Shipping & Returns</Link></li>
-                    </ul>
-                </div>
-                 <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Legal</h3>
-                    <ul className="mt-4 space-y-2">
-                         <li><Link href={`/${brand?.permanentName}/legal/privacy-policy`} className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                        <li><Link href={`/${brand?.permanentName}/legal/terms-and-conditions`} className="text-sm text-muted-foreground hover:text-primary">Terms of Service</Link></li>
-                        <li><Link href={`/${brand?.permanentName}/legal/refund-policy`} className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
-                    </ul>
-                </div>
-                 <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Connect</h3>
-                    <div className="mt-4 flex space-x-4">
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
-                    </div>
+                 <div className="flex space-x-4">
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
                 </div>
             </div>
             <div className="mt-8 border-t pt-4">
-                <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} {brand?.displayName}. All rights reserved.</p>
+                <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {brand?.displayName}. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -356,7 +332,7 @@ export default function BrandHomePage() {
   
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
-  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
+  const [newestProducts, set==============] = useState<IProduct[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -546,3 +522,5 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    

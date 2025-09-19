@@ -43,48 +43,27 @@ const LandingHeader = () => (
 
 const LandingFooter = () => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container mx-auto grid grid-cols-2 md:grid-cols-5 gap-8 px-4 py-12 sm:px-6 lg:px-8">
-            <div className="md:col-span-2">
+        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                    <Logo className="h-8 w-8 text-primary" />
+                     <Logo className="h-6 w-6 text-primary" />
                     <span className="font-bold">The Brand Cart</span>
                 </div>
-                <p className="mt-4 text-sm text-muted-foreground">The best place to find your new favorite brands.</p>
-            </div>
-            <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">About</h3>
-                <ul className="mt-4 space-y-2">
-                    <li><Link href="/legal/about-us" className="text-sm text-muted-foreground hover:text-primary">Our Story</Link></li>
-                    <li><Link href="/legal/contact-us" className="text-sm text-muted-foreground hover:text-primary">Contact</Link></li>
-                </ul>
-            </div>
-             <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Support</h3>
-                <ul className="mt-4 space-y-2">
-                    <li><Link href="/legal/contact-us" className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                    <li><Link href="/legal/shipping-policy" className="text-sm text-muted-foreground hover:text-primary">Shipping & Returns</Link></li>
-                </ul>
-            </div>
-             <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Legal</h3>
-                <ul className="mt-4 space-y-2">
-                    <li><Link href="/legal/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                    <li><Link href="/legal/terms-and-conditions" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</Link></li>
-                    <li><Link href="/legal/refund-policy" className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
-                </ul>
-            </div>
-            <div>
-                 <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Connect</h3>
-                <div className="mt-4 flex space-x-4">
+                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href="/legal/about-us" className="hover:text-primary">About Us</Link>
+                    <Link href="/legal/privacy-policy" className="hover:text-primary">Policies</Link>
+                    <Link href="/legal/contact-us" className="hover:text-primary">Contact Us</Link>
+                </div>
+                 <div className="flex space-x-4">
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
                 </div>
             </div>
-        </div>
-        <div className="border-t py-4">
-             <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} The Brand Cart. All rights reserved.</p>
+            <div className="mt-8 border-t pt-4">
+                 <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} The Brand Cart. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 );
@@ -424,4 +403,6 @@ export default function LandingPage() {
     </>
   );
 }
+    
+
     
