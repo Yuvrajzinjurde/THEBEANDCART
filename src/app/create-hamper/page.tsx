@@ -681,8 +681,8 @@ export default function CreateHamperPage() {
         <>
         <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-                 <div className="relative mb-8 text-center">
-                     <Button variant="link" onClick={() => router.push('/')} className="absolute left-0 top-1/2 -translate-y-1/2 p-0 h-auto">
+                 <div className="relative mb-8">
+                     <Button variant="link" onClick={() => router.push('/')} className="absolute left-0 top-1/2 -translate-y-1/2 p-0 h-auto hidden sm:flex">
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
                     </Button>
                     <div className="space-y-4">
@@ -702,6 +702,7 @@ export default function CreateHamperPage() {
                     <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1 || isDiscarding}>
                         <ArrowLeft className="mr-2 h-4 w-4"/> Previous
                     </Button>
+                    
                     <div className="flex items-center gap-2">
                         {step > 1 && (
                             <Button variant="destructive" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
