@@ -161,42 +161,44 @@ const Step2_Box = () => {
     const [allBoxes, setAllBoxes] = useState<IBox[]>([]);
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
     useEffect(() => {
-        const fetchDataAndSuggestions = async () => {
+        async function fetchAllBoxes() {
             setLoading(true);
             try {
-                // Step 1: Fetch all packages
                 const res = await fetch('/api/boxes');
                 if (!res.ok) throw new Error("Failed to fetch boxes");
                 const { boxes: fetchedPackages } = await res.json();
-                setAllBoxes(fetchedPackages);
                 
-                const availableBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
-
-                // Step 2: Fetch suggestions only if occasion and packages are available
-                if (occasion && availableBoxes.length > 0) {
-                    const packageList = availableBoxes.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
-                    const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ occasion, boxes: packageList }),
-                    });
-                    if (suggestionRes.ok) {
-                        const suggestionData = await suggestionRes.json();
-                        setSuggestedBoxIds(suggestionData.suggestedBoxIds);
+                const onlyBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
+                setAllBoxes(onlyBoxes);
+                
+                if (occasion && onlyBoxes.length > 0) {
+                    const packageList = onlyBoxes.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
+                    try {
+                        const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ occasion, boxes: packageList }),
+                        });
+                        if (suggestionRes.ok) {
+                            const suggestionData = await suggestionRes.json();
+                            setSuggestedBoxIds(suggestionData.suggestedBoxIds);
+                        }
+                    } catch (suggestionError) {
+                        console.error("Failed to fetch suggestions", suggestionError);
                     }
                 }
             } catch (error) {
-                console.error("Failed to fetch data or suggestions", error);
-                toast.error("Could not load packaging options or suggestions.");
+                console.error("Failed to fetch boxes", error);
+                toast.error("Could not load packaging options.");
             } finally {
                 setLoading(false);
             }
-        };
-
-        fetchDataAndSuggestions();
+        }
+        fetchAllBoxes();
     }, [occasion]);
+    
     
     const handleSelect = (value: string) => {
         const [boxId, variantId] = value.split('-');
@@ -224,13 +226,11 @@ const Step2_Box = () => {
 
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${selectedBoxVariant._id}` : undefined;
 
-    const onlyBoxes = allBoxes.filter(b => b.boxType === 'box');
-
     const suggestedBoxes = suggestedBoxIds
-        .map(id => onlyBoxes.find(b => b._id.toString() === id))
+        .map(id => allBoxes.find(b => b._id.toString() === id))
         .filter((b): b is IBox => !!b);
 
-    const otherBoxes = onlyBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
+    const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -597,5 +597,3 @@ export default function CreateHamperPage() {
         </>
     );
 }
-
-    
