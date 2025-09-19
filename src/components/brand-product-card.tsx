@@ -101,6 +101,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   
   const sellingPrice = typeof product.sellingPrice === 'number' ? product.sellingPrice : 0;
   const mrp = typeof product.mrp === 'number' ? product.mrp : 0;
+  const rating = typeof product.rating === 'number' ? product.rating : 0;
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
   const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
@@ -112,7 +113,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       onClick={handleCardClick} 
       className={cn("group block", className)}
     >
-      <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
+      <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col h-full">
         <Carousel
             opts={{ loop: product.images.length > 1 }}
             className="w-full"
@@ -153,27 +154,30 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-3 space-y-1.5">
-          <h3 className="truncate text-sm font-semibold text-foreground">{product.name}</h3>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="truncate">{categoryDisplay}</span>
-              <span className="h-1 w-1 rounded-full bg-muted-foreground/50"></span>
-              <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  <span>{product.rating.toFixed(1)}</span>
-              </div>
+        <div className="p-3 space-y-1.5 flex flex-col flex-grow">
+          <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
+          <h3 className="truncate text-sm font-semibold text-foreground flex-grow min-h-[40px]">{product.name}</h3>
+          
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+              <span>{rating.toFixed(1)}</span>
           </div>
+
           <div className="flex items-baseline gap-2 flex-wrap">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toLocaleString('en-IN')}
             </p>
             {hasDiscount && (
-              <>
                 <p className="text-sm font-medium text-muted-foreground line-through">
                     ₹{mrp.toLocaleString('en-IN')}
                 </p>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm font-semibold text-green-600 whitespace-nowrap">{discountPercentage}% off</span>
+            )}
+          </div>
+          
+          <div className="h-5">
+            {hasDiscount && (
+              <div className="flex items-center gap-1 text-sm font-semibold text-green-600">
+                  <span>{discountPercentage}% off</span>
                   <TooltipProvider>
                       <Tooltip>
                           <TooltipTrigger asChild>
@@ -186,23 +190,22 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                                   <p className="font-bold text-sm">Price details</p>
                                   <div className="flex justify-between text-xs">
                                       <p>MRP</p>
-                                      <p>₹{mrp.toFixed(2)}</p>
+                                      <p className='line-through'>₹{mrp.toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
                                   </div>
                                   <div className="flex justify-between text-xs">
-                                      <p>Selling Price</p>
-                                      <p>₹{sellingPrice.toFixed(2)}</p>
+                                      <p>Discount Price</p>
+                                      <p>₹{sellingPrice.toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
                                   </div>
                                   <Separator />
                                   <div className="flex justify-between text-xs font-semibold text-green-600">
                                      <p>Overall savings</p>
-                                     <p>₹{amountSaved.toFixed(2)}</p>
+                                     <p>₹{amountSaved.toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
                                   </div>
                               </div>
                           </TooltipContent>
                       </Tooltip>
                   </TooltipProvider>
-                </div>
-              </>
+              </div>
             )}
           </div>
         </div>
