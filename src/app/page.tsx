@@ -201,46 +201,60 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     }, [api]);
 
     if (!brands || brands.length === 0) return null;
+    
+    // Determine whether to use Carousel or simple Flex layout
+    const useCarousel = brands.length > 5; // Adjust this threshold as needed
+
+    const BrandLogo = ({ brand }: { brand: IBrand }) => {
+        const theme = themeColors.find(t => t.name === brand.themeName);
+        const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
+        return (
+            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center">
+                <div 
+                    className="w-32 h-32 md:w-36 md:h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
+                    style={{ 
+                        borderColor: primaryColor,
+                        boxShadow: `0 0 12px 2px ${primaryColor}66` 
+                    }}
+                >
+                    <Image
+                        src={brand.logoUrl}
+                        alt={`${brand.displayName} Logo`}
+                        fill
+                        className="object-cover"
+                    />
+                </div>
+                 <p className="mt-3 font-semibold text-center">{brand.displayName}</p>
+            </Link>
+        );
+    };
 
     return (
         <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <Carousel
-                    setApi={setApi}
-                    opts={{ align: "center", loop: brands.length > 6 }}
-                    className="w-full"
-                >
-                    <CarouselContent>
-                        {brands.map((brand) => {
-                            const theme = themeColors.find(t => t.name === brand.themeName);
-                            const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
-                            
-                            return (
+                {useCarousel ? (
+                    <Carousel
+                        setApi={setApi}
+                        opts={{ align: "start", loop: brands.length > 6 }}
+                        className="w-full"
+                    >
+                        <CarouselContent>
+                            {brands.map((brand) => (
                                 <CarouselItem key={brand.permanentName} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                                    <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center">
-                                        <div 
-                                            className="w-32 h-32 md:w-36 md:h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
-                                            style={{ 
-                                                borderColor: primaryColor,
-                                                boxShadow: `0 0 12px 2px ${primaryColor}66` 
-                                            }}
-                                        >
-                                            <Image
-                                                src={brand.logoUrl}
-                                                alt={`${brand.displayName} Logo`}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                         <p className="mt-3 font-semibold text-center">{brand.displayName}</p>
-                                    </Link>
+                                    <BrandLogo brand={brand} />
                                 </CarouselItem>
-                            );
-                        })}
-                    </CarouselContent>
-                    {canScrollPrev && <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
-                    {canScrollNext && <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
-                </Carousel>
+                            ))}
+                        </CarouselContent>
+                        {canScrollPrev && <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
+                        {canScrollNext && <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
+                    </Carousel>
+                ) : (
+                    <div className="flex justify-center items-center gap-8">
+                         {brands.map((brand) => (
+                            <BrandLogo key={brand.permanentName} brand={brand} />
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );
@@ -439,4 +453,3 @@ export default function LandingPage() {
     
 
     
-
