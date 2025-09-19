@@ -686,7 +686,6 @@ export default function CreateHamperPage() {
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
                     </Button>
                     <div className="space-y-4">
-                        <h1 className="text-3xl font-bold">Create Your Perfect Hamper</h1>
                         <HamperProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
                     </div>
                 </div>
