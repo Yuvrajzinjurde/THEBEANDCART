@@ -10,6 +10,8 @@ export interface IBox extends Document {
   color?: string;
   stock: number;
   storefront: string;
+  likes: number;
+  usageCount: number;
 }
 
 const BoxSchema: Schema<IBox> = new Schema({
@@ -21,6 +23,8 @@ const BoxSchema: Schema<IBox> = new Schema({
   color: { type: String },
   stock: { type: Number, required: true, min: 0, default: 0 },
   storefront: { type: String, required: true, index: true },
+  likes: { type: Number, default: 0 },
+  usageCount: { type: Number, default: 0 },
 }, { timestamps: true });
 
 
