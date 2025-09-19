@@ -78,17 +78,19 @@ export default function RootLayout({
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
   const isLandingPage = pathname === '/';
+  const isGlobalPage = ['/', '/create-hamper', '/wishlist'].includes(pathname) || pathname.startsWith('/legal');
   
-  const showHeader = !isAdminRoute && !isAuthRoute && !isLandingPage;
+  const showHeader = !isAdminRoute && !isAuthRoute && !isGlobalPage;
 
   const getBrandName = () => {
-    if (isAdminRoute || isLandingPage) {
+    // These pages should use the default theme, not a brand-specific one.
+    if (isAdminRoute || isGlobalPage) {
       return null;
     }
     
     // First, try to get from the path, e.g., /reeva/home
     const pathParts = pathname.split('/');
-    if (pathParts.length > 1 && pathParts[1] && pathParts[1] !== 'products' && pathParts[1] !== 'legal') {
+    if (pathParts.length > 1 && pathParts[1] && pathParts[1] !== 'products') {
       return pathParts[1];
     }
 

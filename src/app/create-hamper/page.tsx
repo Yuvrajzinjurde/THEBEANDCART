@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import useHamperStore from "@/stores/hamper-store";
@@ -22,6 +23,16 @@ import { BrandProductCard } from "@/components/brand-product-card";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "react-toastify";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const TOTAL_STEPS = 4;
 
@@ -293,6 +304,10 @@ export default function CreateHamperPage() {
     const { user, loading: authLoading, token } = useAuth();
     
     const { step, setStep, reset: resetHamper, ...hamperState } = useHamperStore();
+    const [isDiscarding, setIsDiscarding] = useState(false);
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [discardAlertOpen, setDiscardAlertOpen] = useState(false);
+
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -342,37 +357,47 @@ export default function CreateHamperPage() {
     }
     
     const handleDiscard = async () => {
-        if (window.confirm("Are you sure you want to discard this hamper and start over?")) {
-            try {
-                if (token) {
-                    await fetch('/api/hampers', {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` },
-                    });
-                }
-                resetHamper();
-                toast.success("Hamper discarded.");
-            } catch (error) {
-                console.error("Failed to discard hamper from server", error);
-                toast.error("Could not discard hamper. Please try again.");
+        setDiscardAlertOpen(false);
+        setIsDiscarding(true);
+        try {
+            if (token) {
+                await fetch('/api/hampers', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
             }
+            resetHamper();
+            toast.success("Hamper discarded.");
+        } catch (error) {
+            console.error("Failed to discard hamper from server", error);
+            toast.error("Could not discard hamper. Please try again.");
+        } finally {
+            setIsDiscarding(false);
         }
     };
     
     const handleCheckout = async () => {
         if (!token) return;
+        setIsCheckingOut(true);
         try {
-            // This would be a more complex flow in a real app,
-            // possibly creating a custom product or adding a bundle to cart.
-            // For now, we'll just mark as complete and redirect.
+            const response = await fetch('/api/hampers/checkout', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to finalize hamper.");
+            }
+
             toast.success("Hamper finalized and added to cart!");
-            // TODO: Here you would call an API to convert the hamper into a cart item.
-            // For now, we just reset the state and redirect.
             resetHamper();
-            router.push('/cart'); // A generic cart page for now.
-        } catch (error) {
+            router.push('/cart');
+        } catch (error: any) {
             console.error("Checkout failed:", error);
-            toast.error("Could not proceed to checkout.");
+            toast.error(error.message);
+        } finally {
+            setIsCheckingOut(false);
         }
     };
 
@@ -393,9 +418,17 @@ export default function CreateHamperPage() {
     return (
         <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-                <div className="space-y-4 mb-8">
-                    <h1 className="text-3xl font-bold text-center">Create Your Perfect Hamper</h1>
-                    <Progress value={(step / TOTAL_STEPS) * 100} className="w-full h-2" />
+                 <div className="relative mb-8 text-center">
+                    <Button variant="outline" size="icon" className="absolute top-1/2 -translate-y-1/2 left-0 h-8 w-8" asChild>
+                        <Link href="/">
+                            <ArrowLeft className="h-4 w-4" />
+                            <span className="sr-only">Back to Home</span>
+                        </Link>
+                    </Button>
+                    <div className="space-y-4">
+                        <h1 className="text-3xl font-bold">Create Your Perfect Hamper</h1>
+                        <Progress value={(step / TOTAL_STEPS) * 100} className="w-full h-2" />
+                    </div>
                 </div>
 
                 <Card>
@@ -406,30 +439,42 @@ export default function CreateHamperPage() {
                     </AnimatePresence>
                 </Card>
 
-                 <div className="flex justify-between items-center mt-6">
-                    <div>
-                        {step > 1 && (
-                             <Button variant="link" className="text-destructive p-0" onClick={handleDiscard}>
-                               <Trash2 className="mr-2 h-4 w-4" /> Discard & Start Over
-                            </Button>
-                        )}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
-                            <ArrowLeft className="mr-2 h-4 w-4"/> Previous
+                 <div className="flex justify-end items-center mt-6 gap-2">
+                    {step > 1 && (
+                        <Button variant="link" className="text-destructive p-0 mr-auto" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
+                            {isDiscarding ? <Loader className="mr-2" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                            Discard & Start Over
                         </Button>
-                        {step < TOTAL_STEPS ? (
-                            <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
-                                Next <ArrowRight className="ml-2 h-4 w-4"/>
-                            </Button>
-                        ) : (
-                            <Button onClick={handleCheckout}>
-                               <CheckCircle className="mr-2 h-4 w-4" /> Review & Checkout
-                            </Button>
-                        )}
-                    </div>
+                    )}
+                    <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
+                        <ArrowLeft className="mr-2 h-4 w-4"/> Previous
+                    </Button>
+                    {step < TOTAL_STEPS ? (
+                        <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
+                            Next <ArrowRight className="ml-2 h-4 w-4"/>
+                        </Button>
+                    ) : (
+                        <Button onClick={handleCheckout} disabled={isCheckingOut}>
+                           {isCheckingOut ? <Loader className="mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                            Review & Checkout
+                        </Button>
+                    )}
                 </div>
             </div>
+            <AlertDialog open={discardAlertOpen} onOpenChange={setDiscardAlertOpen}>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    This will permanently discard your current hamper progress. This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDiscard}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </main>
     );
 }
