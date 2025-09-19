@@ -1,9 +1,8 @@
 
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from '@/lib/utils';
-import { useState, useEffect, useRef } from 'react';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@react-hook/window-size';
 import { Truck, Tag, Gift } from 'lucide-react';
@@ -21,19 +20,19 @@ const drawCoin = (ctx: CanvasRenderingContext2D) => {
 };
 
 const LockedGiftBox = ({ className }: { className?: string }) => (
-     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
         <path d="M10 18C10 15.7909 11.7909 14 14 14H26C28.2091 14 30 15.7909 30 18V28H10V18Z" fill="currentColor"/>
         <path d="M16 14V11C16 8.79086 17.7909 7 20 7C22.2091 7 24 8.79086 24 11V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
         <rect x="8" y="28" width="24" height="5" rx="1" fill="currentColor"/>
     </svg>
 );
 
-const UnlockedGiftBox = () => (
+const ActiveGiftBox = () => (
     <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
         <rect x="10" y="30" width="40" height="20" rx="2" fill="currentColor" />
         <path d="M18 20C18 16.6863 20.6863 14 24 14H36C39.3137 14 42 16.6863 42 20V26H18V20Z" fill="currentColor"/>
-        <path d="M28 26V50" stroke="hsl(var(--background))" strokeWidth="2" strokeLinecap="round" />
-        <path d="M32 26V50" stroke="hsl(var(--background))" strokeWidth="2" strokeLinecap="round" />
+        <path d="M28 26V50" stroke="hsl(var(--primary-foreground))" strokeWidth="2" strokeLinecap="round" />
+        <path d="M32 26V50" stroke="hsl(var(--primary-foreground))" strokeWidth="2" strokeLinecap="round" />
     </svg>
 );
 
@@ -52,7 +51,7 @@ const Milestone = ({
     return (
         <div className="flex flex-col items-center text-center w-28">
             <div className="h-16 flex items-center justify-center">
-                 {isUnlocked ? <UnlockedGiftBox /> : <LockedGiftBox />}
+                 {isUnlocked ? <ActiveGiftBox /> : <LockedGiftBox />}
             </div>
             <div className="mt-2 h-16 flex flex-col items-center">
                 <p className="text-sm font-semibold">
@@ -135,7 +134,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
        <div className="text-center text-sm font-medium mt-4">
         {nextMilestone ? (
           <p>
-            Add <span className="font-bold text-primary">₹{Math.max(0, amountNeeded).toFixed(0)}</span> more to unlock the <span className="font-semibold">{nextMilestone.reward}</span>!
+            Add <span className="font-bold text-primary">₹{Math.max(0, amountNeeded).toFixed(0)}</span> more to unlock the next reward!
           </p>
         ) : (
           <p className="font-bold text-green-600">Congratulations! You've unlocked all rewards!</p>
