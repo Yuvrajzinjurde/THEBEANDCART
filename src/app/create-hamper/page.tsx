@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -163,29 +162,20 @@ const Step2_Box = () => {
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     
-    const fetchAllBoxes = async () => {
-        try {
-            const res = await fetch('/api/boxes');
-            if (!res.ok) throw new Error("Failed to fetch boxes");
-            const data = await res.json();
-            setAllBoxes(data.boxes);
-            return data.boxes;
-        } catch (error) {
-            console.error("Failed to fetch boxes", error);
-            return [];
-        }
-    };
-
-
     useEffect(() => {
-        async function fetchDataAndSuggestions() {
+        const fetchDataAndSuggestions = async () => {
             setLoading(true);
-            const fetchedPackages = await fetchAllBoxes();
-            
-            const availableBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
+            try {
+                // Step 1: Fetch all packages
+                const res = await fetch('/api/boxes');
+                if (!res.ok) throw new Error("Failed to fetch boxes");
+                const { boxes: fetchedPackages } = await res.json();
+                setAllBoxes(fetchedPackages);
+                
+                const availableBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
 
-            if (occasion && availableBoxes.length > 0) {
-                try {
+                // Step 2: Fetch suggestions only if occasion and packages are available
+                if (occasion && availableBoxes.length > 0) {
                     const packageList = availableBoxes.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
@@ -196,12 +186,15 @@ const Step2_Box = () => {
                         const suggestionData = await suggestionRes.json();
                         setSuggestedBoxIds(suggestionData.suggestedBoxIds);
                     }
-                } catch (error) {
-                    console.error("Failed to fetch suggestions", error);
                 }
+            } catch (error) {
+                console.error("Failed to fetch data or suggestions", error);
+                toast.error("Could not load packaging options or suggestions.");
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
-        }
+        };
+
         fetchDataAndSuggestions();
     }, [occasion]);
     
@@ -229,15 +222,14 @@ const Step2_Box = () => {
         }
     };
 
-
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${selectedBoxVariant._id}` : undefined;
 
     const onlyBoxes = allBoxes.filter(b => b.boxType === 'box');
 
-    const suggestedBoxes = suggestedBoxIds.map(id => 
-        onlyBoxes.find(b => b._id.toString() === id)
-    ).filter((b): b is IBox => !!b);
-    
+    const suggestedBoxes = suggestedBoxIds
+        .map(id => onlyBoxes.find(b => b._id.toString() === id))
+        .filter((b): b is IBox => !!b);
+
     const otherBoxes = onlyBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
 
     return (
@@ -247,23 +239,23 @@ const Step2_Box = () => {
                 <CardDescription>Select the perfect vessel for your gifts.</CardDescription>
             </CardHeader>
             <CardContent>
-                {loading ? <Loader /> : (
-                     <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
-                        
-                        {suggestedBoxes.length > 0 && (
+                 <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
+                    {loading ? <Loader /> : (
+                        <>
+                            {suggestedBoxes.length > 0 && (
+                                <section>
+                                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
+                                    <PackagingGrid items={suggestedBoxes} onLike={handleLike} />
+                                </section>
+                            )}
+                            
                             <section>
-                                <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
-                                <PackagingGrid items={suggestedBoxes} onLike={handleLike} />
+                                <h3 className="font-bold text-lg mb-4">All Boxes</h3>
+                                <PackagingGrid items={otherBoxes} onLike={handleLike} />
                             </section>
-                        )}
-                        
-                        <section>
-                             <h3 className="font-bold text-lg mb-4">All Boxes</h3>
-                             <PackagingGrid items={otherBoxes} onLike={handleLike} />
-                        </section>
-
-                    </RadioGroup>
-                )}
+                        </>
+                    )}
+                </RadioGroup>
             </CardContent>
         </motion.div>
     );
@@ -605,3 +597,5 @@ export default function CreateHamperPage() {
         </>
     );
 }
+
+    
