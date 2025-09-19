@@ -5,6 +5,7 @@ import { Gift, Tag, Truck } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from './ui/card';
+import { useState, useEffect, useRef } from 'react';
 
 const milestones = [
   { threshold: 399, reward: "Free Delivery", icon: Truck },
@@ -16,6 +17,31 @@ const maxThreshold = milestones[milestones.length - 1].threshold;
 
 export function CartProgressBar({ currentValue }: { currentValue: number }) {
   const progress = Math.min((currentValue / maxThreshold) * 100, 100);
+  const [unlockedMilestones, setUnlockedMilestones] = useState<number[]>([]);
+  const prevValueRef = useRef(currentValue);
+
+  useEffect(() => {
+    const newlyUnlocked: number[] = [];
+    milestones.forEach((milestone, index) => {
+      const wasUnlocked = prevValueRef.current >= milestone.threshold;
+      const isUnlocked = currentValue >= milestone.threshold;
+      if (isUnlocked && !wasUnlocked) {
+        newlyUnlocked.push(index);
+      }
+    });
+
+    if (newlyUnlocked.length > 0) {
+      setUnlockedMilestones(newlyUnlocked);
+      // Remove the animation class after it has played
+      const timer = setTimeout(() => {
+        setUnlockedMilestones([]);
+      }, 1000); // Animation is 0.8s, so 1s is safe.
+      return () => clearTimeout(timer);
+    }
+    
+    prevValueRef.current = currentValue;
+  }, [currentValue]);
+
 
   const nextMilestone = milestones.find(m => currentValue < m.threshold);
   const amountNeeded = nextMilestone ? nextMilestone.threshold - currentValue : 0;
@@ -44,7 +70,8 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
                                     'bg-background border-muted-foreground/30': status === 'locked',
                                     'bg-yellow-100 border-yellow-400 shadow-md scale-110': status === 'active',
                                     'bg-green-100 border-green-500 shadow-lg': status === 'unlocked',
-                                }
+                                },
+                                unlockedMilestones.includes(index) && 'sparkle-animation'
                             )}
                             style={{ left: `calc(${leftPosition}% - 16px)` }}
                         >
