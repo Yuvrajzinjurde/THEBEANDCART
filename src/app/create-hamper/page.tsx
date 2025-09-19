@@ -106,8 +106,8 @@ const Step1_Occasion = () => {
 
 const BoxItem = ({ box, variant }: { box: IBox, variant: IBoxVariant }) => (
     <div>
-        <RadioGroupItem value={`${box._id}-${variant._id}`} id={`${box._id}-${variant._id}`} className="sr-only" />
-        <Label htmlFor={`${box._id}-${variant._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all border-muted hover:border-foreground/20", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
+        <RadioGroupItem value={`${box._id}-${(variant as any)._id}`} id={`${box._id}-${(variant as any)._id}`} className="sr-only" />
+        <Label htmlFor={`${box._id}-${(variant as any)._id}`} className={cn("block rounded-lg border-2 p-2 cursor-pointer h-full transition-all border-muted hover:border-foreground/20", "data-[state=checked]:border-primary data-[state=checked]:ring-2 data-[state=checked]:ring-primary/50")}>
             <div className="relative">
                 <div className="aspect-square relative mb-2">
                     <Image src={variant.images[0]} alt={variant.name} fill className="object-cover rounded-md" />
@@ -137,15 +137,17 @@ const Step2_Box = () => {
                 const data = await res.json();
                 setAllBoxes(data.boxes);
 
-                const boxList = data.boxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
-                const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ occasion, boxes: boxList }),
-                });
-                if (suggestionRes.ok) {
-                    const suggestionData = await suggestionRes.json();
-                    setSuggestedBoxIds(suggestionData.suggestedBoxIds);
+                if (occasion) {
+                    const boxList = data.boxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
+                    const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ occasion, boxes: boxList }),
+                    });
+                    if (suggestionRes.ok) {
+                        const suggestionData = await suggestionRes.json();
+                        setSuggestedBoxIds(suggestionData.suggestedBoxIds);
+                    }
                 }
 
             } catch (error) {
@@ -159,7 +161,7 @@ const Step2_Box = () => {
     
     const handleSelect = (value: string) => {
         const [boxId, variantId] = value.split('-');
-        const box = allBoxes.find(b => b._id === boxId);
+        const box = allBoxes.find(b => b._id.toString() === boxId);
         if (box) {
             const variant = box.variants.find(v => (v as any)._id.toString() === variantId);
             if (variant) {
@@ -171,8 +173,8 @@ const Step2_Box = () => {
 
     const selectedVariantId = selectedBox && selectedBoxVariant ? `${selectedBox._id}-${(selectedBoxVariant as any)._id}` : undefined;
 
-    const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id as string));
-    const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id as string));
+    const suggestedBoxes = allBoxes.filter(b => suggestedBoxIds.includes(b._id.toString()));
+    const otherBoxes = allBoxes.filter(b => !suggestedBoxIds.includes(b._id.toString()));
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -187,7 +189,7 @@ const Step2_Box = () => {
                             <section>
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bot className="text-primary" /> AI Suggested for You</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {suggestedBoxes.map(b => b.variants.map(v => (
+                                    {suggestedBoxes.flatMap(b => b.variants.map(v => (
                                         <BoxItem 
                                             key={`${b._id}-${(v as any)._id}`}
                                             box={b}
@@ -200,7 +202,7 @@ const Step2_Box = () => {
                         <section>
                              <h3 className="font-bold text-lg mb-4">All Options</h3>
                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {otherBoxes.map(b => b.variants.map(v => (
+                                {otherBoxes.flatMap(b => b.variants.map(v => (
                                     <BoxItem 
                                         key={`${b._id}-${(v as any)._id}`}
                                         box={b}
@@ -509,17 +511,17 @@ export default function CreateHamperPage() {
                     </AnimatePresence>
                 </Card>
 
-                 <div className="flex justify-between items-center mt-6 gap-2">
-                    {step > 1 ? (
-                        <Button variant="link" className="text-destructive p-0" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
-                            {isDiscarding ? <Loader className="mr-2" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                            Discard & Start Over
-                        </Button>
-                    ) : <div></div>}
+                 <div className="flex justify-between items-center mt-6 gap-4">
+                    <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1 || isDiscarding}>
+                        <ArrowLeft className="mr-2 h-4 w-4"/> Previous
+                    </Button>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
-                            <ArrowLeft className="mr-2 h-4 w-4"/> Previous
-                        </Button>
+                        {step > 1 && (
+                            <Button variant="destructive" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
+                                {isDiscarding ? <Loader className="mr-2" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                Discard
+                            </Button>
+                        )}
                         {step < TOTAL_STEPS ? (
                             <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
                                 Next <ArrowRight className="ml-2 h-4 w-4"/>
