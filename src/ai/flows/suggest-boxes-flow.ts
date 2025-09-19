@@ -26,7 +26,7 @@ const SuggestBoxesInputSchema = z.object({
 export type SuggestBoxesInput = z.infer<typeof SuggestBoxesInputSchema>;
 
 const SuggestBoxesOutputSchema = z.object({
-  suggestedBoxIds: z.array(z.string()).describe('An array of IDs for the 3-5 most suitable boxes for the occasion.'),
+  suggestedBoxIds: z.array(z.string()).describe('An array of IDs for the 4 most suitable boxes for the occasion.'),
 });
 export type SuggestBoxesOutput = z.infer<typeof SuggestBoxesOutputSchema>;
 
@@ -52,7 +52,7 @@ Here is a list of available boxes and bags:
   Type: {{type}}
 {{/each}}
 
-Based on the occasion, choose the 3 to 5 most appropriate packaging options from the list. Consider the description and type (box vs. bag) to make your recommendations. For example:
+Based on the occasion, choose the 4 most appropriate packaging options from the list. Consider the description and type (box vs. bag) to make your recommendations. For example:
 - A "Birthday" might call for a "Celebration Surprise Box".
 - A "Corporate Gift" might suit a "Luxury Boutique Bag" or "Minimalist White Box".
 - "Jewelry" should be in a "Premium Jewelry Box".

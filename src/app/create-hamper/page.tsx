@@ -182,9 +182,11 @@ const Step2_Box = () => {
             setLoading(true);
             const fetchedPackages = await fetchAllBoxes();
             
-            if (occasion && fetchedPackages.length > 0) {
+            const availableBoxes = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
+
+            if (occasion && availableBoxes.length > 0) {
                 try {
-                    const packageList = fetchedPackages.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
+                    const packageList = availableBoxes.map((b: IBox) => ({ id: b._id, name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -242,7 +244,7 @@ const Step2_Box = () => {
             </CardHeader>
             <CardContent>
                 {loading ? <Loader /> : (
-                    <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
+                     <RadioGroup onValueChange={handleSelect} value={selectedVariantId} className="space-y-8">
                         
                         {suggestedBoxes.length > 0 && (
                             <section>
