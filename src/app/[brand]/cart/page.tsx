@@ -121,12 +121,14 @@ export default function CartPage() {
   );
 
   const cartItems = useMemo(() => {
-    const items = cart?.items
-        ?.filter((item) => item.productId) // Ensure productId exists
+    if (!cart || !cart.items) return [];
+    
+    const items = cart.items
+        ?.filter((item): item is ICartItem & { productId: IProduct } => !!item.productId)
         .map((item) => ({
           ...item,
-          product: item.productId as IProduct,
-        })) || [];
+          product: item.productId,
+        }));
     
     if (subtotal >= FREE_GIFT_THRESHOLD) {
         // Add the free gift as an item to the cart list
@@ -254,33 +256,35 @@ export default function CartPage() {
   return (
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
-        <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => router.back()}
-                >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">Back</span>
-                </Button>
-                <Breadcrumb className="hidden sm:block">
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                    <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                    <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
-                    </BreadcrumbItem>
-                </BreadcrumbList>
-                </Breadcrumb>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => router.back()}
+                    >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                    </Button>
+                    <Breadcrumb className="hidden sm:block">
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                        <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                        <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                    </Breadcrumb>
+                </div>
+                <div className="flex-grow flex justify-center">
+                    <CartProgressBar currentValue={subtotal} />
+                </div>
+                <div className="w-48 hidden lg:block" />
             </div>
-            <div className="flex-grow flex justify-center">
-                <CartProgressBar currentValue={subtotal} />
-            </div>
-            <div className="w-48 hidden lg:block" />
         </div>
       </div>
 
@@ -438,3 +442,5 @@ export default function CartPage() {
     </>
   );
 }
+
+    
