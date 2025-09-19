@@ -1,9 +1,10 @@
 
 
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
+import { IProduct } from './product.model';
 
 export interface ICartItem {
-    productId: Types.ObjectId;
+    productId: Types.ObjectId | IProduct; // Can be populated
     quantity: number;
     size?: string;
     color?: string;
@@ -30,7 +31,7 @@ const CartSchema: Schema<ICart> = new Schema({
 }, { timestamps: true });
 
 
-CartSchema.virtual('totalItems').get(function() {
+CartSchema.virtual('totalItems').get(function(this: ICart) {
     return this.items.reduce((total: number, item: ICartItem) => total + item.quantity, 0);
 });
 
