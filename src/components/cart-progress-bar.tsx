@@ -13,8 +13,8 @@ const milestones = [
   { threshold: 999, reward: "Free Gift", icon: Gift },
 ];
 
-const ActiveGiftBox = () => (
-    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
+const ActiveGiftBox = ({ className }: { className?: string }) => (
+    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-primary drop-shadow-lg", className)}>
         {/* Sparkles */}
         <path d="M50 10L52.5359 20.5359L63.0718 23.0718L52.5359 25.6077L50 36.1436L47.4641 25.6077L36.9282 23.0718L47.4641 20.5359L50 10Z" fill="url(#sparkle1)" />
         <path d="M20 25L21.768 32.268L29 35L21.768 37.732L20 45L18.232 37.732L11 35L18.232 32.268L20 25Z" fill="url(#sparkle2)" />
@@ -78,7 +78,14 @@ const Milestone = ({
 
     return (
         <div className="flex flex-col items-center text-center w-24">
-            <div className="h-10 flex items-center justify-center" ref={ref} data-unlocked="false">
+            <div 
+                className={cn(
+                    "h-10 w-10 flex items-center justify-center transition-transform duration-500",
+                    isUnlocked && "animate-in zoom-in-50"
+                )} 
+                ref={ref} 
+                data-unlocked="false"
+            >
                 {isUnlocked ? <ActiveGiftBox /> : <LockedGiftBox />}
             </div>
             <div className="mt-1 h-12 flex flex-col items-center">
