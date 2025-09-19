@@ -1,28 +1,39 @@
 
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
-export interface IBox extends Document {
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
+export interface IBoxVariant {
+  name: string; // e.g., 'Small', 'Medium', 'Red Velvet'
   size?: string;
   color?: string;
+  price: number;
   stock: number;
-  storefront: string;
+  images: string[];
+}
+
+export interface IBox extends Document {
+  name: string; // e.g., 'Classic Cardboard Box', 'Luxury Jewelry Box'
+  description: string;
+  boxType: 'box' | 'bag';
+  variants: IBoxVariant[];
   likes: number;
   usageCount: number;
 }
 
+const BoxVariantSchema: Schema<IBoxVariant> = new Schema({
+  name: { type: String, required: true },
+  size: { type: String },
+  color: { type: String },
+  price: { type: Number, required: true, min: 0 },
+  stock: { type: Number, required: true, min: 0, default: 0 },
+  images: [{ type: String, required: true }],
+}, { _id: false });
+
+
 const BoxSchema: Schema<IBox> = new Schema({
   name: { type: String, required: true, trim: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true, min: 0 },
-  images: [{ type: String, required: true }],
-  size: { type: String },
-  color: { type: String },
-  stock: { type: Number, required: true, min: 0, default: 0 },
-  storefront: { type: String, required: true, index: true },
+  boxType: { type: String, enum: ['box', 'bag'], required: true },
+  variants: [BoxVariantSchema],
   likes: { type: Number, default: 0 },
   usageCount: { type: Number, default: 0 },
 }, { timestamps: true });

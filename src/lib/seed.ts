@@ -1,106 +1,183 @@
 
-
 'use server';
 
 import dbConnect from './mongodb';
 import Box from '@/models/box.model';
 
 const boxTemplates = [
-    // Cardboard Boxes
-    {
-      name: 'Small Cardboard Box',
-      description: 'A sturdy and reliable small cardboard box, perfect for shipping individual items securely. Made from recycled materials.',
-      price: 25,
-      images: ['https://picsum.photos/seed/small-box/400/400'],
-      size: 'Small',
-      color: 'Brown',
-      stock: 500,
-      storefront: 'aura',
-    },
-    {
-      name: 'Medium Cardboard Box',
-      description: 'Our most popular size. A versatile medium cardboard box ideal for packing multiple products or larger items.',
-      price: 40,
-      images: ['https://picsum.photos/seed/medium-box/400/400'],
+  // == DEFAULT FREE ITEMS ==
+  {
+    name: 'Default Gift Box',
+    description: 'A simple and elegant default gift box for any occasion. Included free with gift wrapping service.',
+    boxType: 'box',
+    variants: [{
+      name: 'Standard',
       size: 'Medium',
-      color: 'Brown',
-      stock: 300,
-      storefront: 'aura',
-    },
-     {
-      name: 'Large Cardboard Box',
-      description: 'For your biggest orders. This large box provides ample space and reinforced corners for heavy-duty shipping.',
-      price: 60,
-      images: ['https://picsum.photos/seed/large-box/400/400'],
-      size: 'Large',
-      color: 'Brown',
-      stock: 150,
-      storefront: 'reeva',
-    },
-    // Jewelry Boxes
-    {
-      name: 'Classic Jewelry Box',
-      description: 'A premium, velvet-lined box designed to present fine jewelry with elegance. Features a soft-touch exterior and a secure magnetic clasp.',
-      price: 150,
-      images: ['https://picsum.photos/seed/jewelry-box/400/400'],
-      size: 'Small',
-      color: 'Black',
-      stock: 200,
-      storefront: 'reeva',
-    },
-    {
-      name: 'Luxury Ring Box',
-      description: 'The perfect box for the perfect ring. Lined with plush silk and featuring a single ring slot, this box adds a touch of luxury to any proposal or gift.',
-      price: 250,
-      images: ['https://picsum.photos/seed/ring-box/400/400'],
-      size: 'Extra Small',
-      color: 'Navy Blue',
-      stock: 100,
-      storefront: 'reeva',
-    },
-    // Hamper & Gift Boxes
-    {
-        name: 'Medium Hamper Box',
-        description: 'Create a beautiful gift with this medium-sized hamper box. Features a glossy finish and a clear lid to showcase the products inside. Comes with filler paper.',
-        price: 300,
-        images: ['https://picsum.photos/seed/medium-hamper/400/400'],
-        size: 'Medium',
-        color: 'White',
-        stock: 80,
-        storefront: 'aura',
-    },
-    {
-        name: 'Large Surprise Box',
-        description: 'A fun and festive box with a "Surprise!" motif. Designed with a special lid that pops open. Perfect for birthdays and celebrations.',
-        price: 450,
-        images: ['https://picsum.photos/seed/surprise-box/400/400'],
-        size: 'Large',
-        color: 'Multicolor',
-        stock: 50,
-        storefront: 'reeva',
-    },
-    // Shopping Bags
-    {
-        name: 'Standard Shopping Bag',
-        description: 'A simple and elegant paper shopping bag with sturdy rope handles. Ideal for in-store purchases and gifting.',
-        price: 15,
-        images: ['https://picsum.photos/seed/shopping-bag/400/400'],
-        size: 'Medium',
-        color: 'Cream',
-        stock: 1000,
-        storefront: 'aura',
-    },
-    {
-        name: 'Luxury Boutique Bag',
-        description: 'Make a statement with this high-end boutique bag. Made from thick, textured paper with satin ribbon handles and a reinforced bottom.',
-        price: 50,
-        images: ['https://picsum.photos/seed/luxury-bag/400/400'],
-        size: 'Large',
-        color: 'Matte Black',
-        stock: 250,
-        storefront: 'reeva',
-    },
+      color: 'White',
+      price: 0,
+      stock: 9999,
+      images: [
+        'https://picsum.photos/seed/free-box-1/400/400',
+        'https://picsum.photos/seed/free-box-2/400/400',
+        'https://picsum.photos/seed/free-box-3/400/400',
+        'https://picsum.photos/seed/free-box-4/400/400'
+      ]
+    }]
+  },
+  {
+    name: 'Default Shopping Bag',
+    description: 'A sturdy and eco-friendly shopping bag for your purchases. Included free with every order.',
+    boxType: 'bag',
+    variants: [{
+      name: 'Standard',
+      size: 'Medium',
+      color: 'Kraft Brown',
+      price: 0,
+      stock: 9999,
+      images: [
+        'https://picsum.photos/seed/free-bag-1/400/400',
+        'https://picsum.photos/seed/free-bag-2/400/400',
+        'https://picsum.photos/seed/free-bag-3/400/400',
+        'https://picsum.photos/seed/free-bag-4/400/400'
+      ]
+    }]
+  },
+
+  // == BOXES ==
+  {
+    name: 'Classic Cardboard Boxes',
+    description: 'Sturdy and reliable cardboard boxes, perfect for shipping items securely. Made from recycled materials.',
+    boxType: 'box',
+    variants: [
+      { name: 'Small', size: 'Small', color: 'Brown', price: 25, stock: 500, images: ['https://picsum.photos/seed/sm-card-1/400/400', 'https://picsum.photos/seed/sm-card-2/400/400', 'https://picsum.photos/seed/sm-card-3/400/400', 'https://picsum.photos/seed/sm-card-4/400/400'] },
+      { name: 'Medium', size: 'Medium', color: 'Brown', price: 40, stock: 300, images: ['https://picsum.photos/seed/md-card-1/400/400', 'https://picsum.photos/seed/md-card-2/400/400', 'https://picsum.photos/seed/md-card-3/400/400', 'https://picsum.photos/seed/md-card-4/400/400'] },
+      { name: 'Large', size: 'Large', color: 'Brown', price: 60, stock: 150, images: ['https://picsum.photos/seed/lg-card-1/400/400', 'https://picsum.photos/seed/lg-card-2/400/400', 'https://picsum.photos/seed/lg-card-3/400/400', 'https://picsum.photos/seed/lg-card-4/400/400'] },
+    ],
+  },
+  {
+    name: 'Premium Jewelry Boxes',
+    description: 'A premium, velvet-lined box designed to present fine jewelry with elegance. Features a soft-touch exterior and a secure magnetic clasp.',
+    boxType: 'box',
+    variants: [
+        { name: 'Ring Box', size: 'Extra Small', color: 'Black', price: 250, stock: 100, images: ['https://picsum.photos/seed/ring-box-1/400/400', 'https://picsum.photos/seed/ring-box-2/400/400', 'https://picsum.photos/seed/ring-box-3/400/400', 'https://picsum.photos/seed/ring-box-4/400/400'] },
+        { name: 'Necklace Box', size: 'Large', color: 'Navy Blue', price: 150, stock: 200, images: ['https://picsum.photos/seed/necklace-box-1/400/400', 'https://picsum.photos/seed/necklace-box-2/400/400', 'https://picsum.photos/seed/necklace-box-3/400/400', 'https://picsum.photos/seed/necklace-box-4/400/400'] },
+    ],
+  },
+  {
+    name: 'Gourmet Hamper Boxes',
+    description: 'Create a beautiful gift with this hamper box. Features a glossy finish and a clear lid to showcase the products inside. Comes with filler paper.',
+    boxType: 'box',
+    variants: [
+        { name: 'Medium Hamper', size: 'Medium', color: 'White', price: 300, stock: 80, images: ['https://picsum.photos/seed/md-hamper-1/400/400', 'https://picsum.photos/seed/md-hamper-2/400/400', 'https://picsum.photos/seed/md-hamper-3/400/400', 'https://picsum.photos/seed/md-hamper-4/400/400'] },
+        { name: 'Large Hamper', size: 'Large', color: 'Black', price: 450, stock: 50, images: ['https://picsum.photos/seed/lg-hamper-1/400/400', 'https://picsum.photos/seed/lg-hamper-2/400/400', 'https://picsum.photos/seed/lg-hamper-3/400/400', 'https://picsum.photos/seed/lg-hamper-4/400/400'] },
+    ],
+  },
+  {
+    name: 'Celebration Surprise Box',
+    description: 'A fun and festive box with a "Surprise!" motif. Designed with a special lid that pops open. Perfect for birthdays and celebrations.',
+    boxType: 'box',
+    variants: [{ name: 'Standard', size: 'Medium', color: 'Multicolor', price: 350, stock: 75, images: ['https://picsum.photos/seed/surprise-box-1/400/400', 'https://picsum.photos/seed/surprise-box-2/400/400', 'https://picsum.photos/seed/surprise-box-3/400/400', 'https://picsum.photos/seed/surprise-box-4/400/400'] }],
+  },
+  {
+      name: 'Matte Finish Gift Box',
+      description: 'A sophisticated and modern gift box with a smooth matte finish and a matching ribbon.',
+      boxType: 'box',
+      variants: [
+          { name: 'Small', size: 'Small', color: 'Pastel Pink', price: 120, stock: 150, images: ['https://picsum.photos/seed/matte-pink-1/400/400', 'https://picsum.photos/seed/matte-pink-2/400/400', 'https://picsum.photos/seed/matte-pink-3/400/400', 'https://picsum.photos/seed/matte-pink-4/400/400']},
+          { name: 'Medium', size: 'Medium', color: 'Sage Green', price: 180, stock: 120, images: ['https://picsum.photos/seed/matte-green-1/400/400', 'https://picsum.photos/seed/matte-green-2/400/400', 'https://picsum.photos/seed/matte-green-3/400/400', 'https://picsum.photos/seed/matte-green-4/400/400']},
+      ]
+  },
+  {
+    name: 'Minimalist White Box',
+    description: 'Clean, simple, and elegant. A versatile white box for any product.',
+    boxType: 'box',
+    variants: [{ name: 'Standard', size: 'Medium', color: 'White', price: 90, stock: 300, images: ['https://picsum.photos/seed/min-white-1/400/400', 'https://picsum.photos/seed/min-white-2/400/400', 'https://picsum.photos/seed/min-white-3/400/400', 'https://picsum.photos/seed/min-white-4/400/400'] }],
+  },
+  {
+    name: 'Eco-Friendly Product Box',
+    description: 'A sustainable choice, this box is made from 100% compostable materials.',
+    boxType: 'box',
+    variants: [{ name: 'Standard', size: 'Small', color: 'Natural', price: 50, stock: 400, images: ['https://picsum.photos/seed/eco-box-1/400/400', 'https://picsum.photos/seed/eco-box-2/400/400', 'https://picsum.photos/seed/eco-box-3/400/400', 'https://picsum.photos/seed/eco-box-4/400/400'] }],
+  },
+  {
+    name: 'Windowed Product Box',
+    description: 'Showcase your products with this box featuring a clear acetate window.',
+    boxType: 'box',
+    variants: [{ name: 'Standard', size: 'Medium', color: 'Black', price: 110, stock: 200, images: ['https://picsum.photos/seed/window-box-1/400/400', 'https://picsum.photos/seed/window-box-2/400/400', 'https://picsum.photos/seed/window-box-3/400/400', 'https://picsum.photos/seed/window-box-4/400/400'] }],
+  },
+  {
+    name: 'Magnetic Closure Box',
+    description: 'A premium feel with a satisfying snap. This rigid box has a hidden magnetic closure.',
+    boxType: 'box',
+    variants: [{ name: 'Standard', size: 'Large', color: 'Gray', price: 500, stock: 100, images: ['https://picsum.photos/seed/magnetic-box-1/400/400', 'https://picsum.photos/seed/magnetic-box-2/400/400', 'https://picsum.photos/seed/magnetic-box-3/400/400', 'https://picsum.photos/seed/magnetic-box-4/400/400'] }],
+  },
+
+  // == BAGS ==
+  {
+    name: 'Standard Paper Shopping Bags',
+    description: 'Simple and elegant paper shopping bags with sturdy rope handles. Ideal for in-store purchases and gifting.',
+    boxType: 'bag',
+    variants: [
+        { name: 'Small', size: 'Small', color: 'Cream', price: 15, stock: 1000, images: ['https://picsum.photos/seed/sm-bag-1/400/400', 'https://picsum.photos/seed/sm-bag-2/400/400', 'https://picsum.photos/seed/sm-bag-3/400/400', 'https://picsum.photos/seed/sm-bag-4/400/400'] },
+        { name: 'Medium', size: 'Medium', color: 'Cream', price: 25, stock: 1000, images: ['https://picsum.photos/seed/md-bag-1/400/400', 'https://picsum.photos/seed/md-bag-2/400/400', 'https://picsum.photos/seed/md-bag-3/400/400', 'https://picsum.photos/seed/md-bag-4/400/400'] },
+    ],
+  },
+  {
+    name: 'Luxury Boutique Bags',
+    description: 'Make a statement with these high-end boutique bags. Made from thick, textured paper with satin ribbon handles.',
+    boxType: 'bag',
+    variants: [
+        { name: 'Medium', size: 'Medium', color: 'Matte Black', price: 50, stock: 250, images: ['https://picsum.photos/seed/lux-bag-black-1/400/400', 'https://picsum.photos/seed/lux-bag-black-2/400/400', 'https://picsum.photos/seed/lux-bag-black-3/400/400', 'https://picsum.photos/seed/lux-bag-black-4/400/400'] },
+        { name: 'Large', size: 'Large', color: 'Pearl White', price: 70, stock: 200, images: ['https://picsum.photos/seed/lux-bag-white-1/400/400', 'https://picsum.photos/seed/lux-bag-white-2/400/400', 'https://picsum.photos/seed/lux-bag-white-3/400/400', 'https://picsum.photos/seed/lux-bag-white-4/400/400'] },
+    ],
+  },
+  {
+    name: 'Reusable Canvas Tote Bag',
+    description: 'An eco-friendly and stylish tote bag that customers can use again and again. Features a printed brand logo.',
+    boxType: 'bag',
+    variants: [{ name: 'Standard', size: 'Large', color: 'Natural Canvas', price: 200, stock: 300, images: ['https://picsum.photos/seed/tote-bag-1/400/400', 'https://picsum.photos/seed/tote-bag-2/400/400', 'https://picsum.photos/seed/tote-bag-3/400/400', 'https://picsum.photos/seed/tote-bag-4/400/400'] }],
+  },
+  {
+    name: 'Clear PVC Gift Bag',
+    description: 'A modern and trendy transparent PVC bag, perfect for showcasing product collections. Comes with a small inner pouch.',
+    boxType: 'bag',
+    variants: [{ name: 'Standard', size: 'Medium', color: 'Clear', price: 180, stock: 150, images: ['https://picsum.photos/seed/pvc-bag-1/400/400', 'https://picsum.photos/seed/pvc-bag-2/400/400', 'https://picsum.photos/seed/pvc-bag-3/400/400', 'https://picsum.photos/seed/pvc-bag-4/400/400'] }],
+  },
+  {
+    name: 'Drawstring Pouch',
+    description: 'A soft, fabric drawstring pouch ideal for small items, jewelry, or as an inner bag for hampers.',
+    boxType: 'bag',
+    variants: [
+        { name: 'Velvet', size: 'Small', color: 'Burgundy', price: 80, stock: 400, images: ['https://picsum.photos/seed/velvet-pouch-1/400/400', 'https://picsum.photos/seed/velvet-pouch-2/400/400', 'https://picsum.photos/seed/velvet-pouch-3/400/400', 'https://picsum.photos/seed/velvet-pouch-4/400/400']},
+        { name: 'Satin', size: 'Small', color: 'Silver', price: 60, stock: 500, images: ['https://picsum.photos/seed/satin-pouch-1/400/400', 'https://picsum.photos/seed/satin-pouch-2/400/400', 'https://picsum.photos/seed/satin-pouch-3/400/400', 'https://picsum.photos/seed/satin-pouch-4/400/400']},
+    ]
+  },
+  {
+    name: 'Bottle Bag',
+    description: 'A specially designed tall and sturdy bag for gifting bottles of wine, spirits, or premium oils.',
+    boxType: 'bag',
+    variants: [{ name: 'Standard', size: 'Tall', color: 'Forest Green', price: 75, stock: 200, images: ['https://picsum.photos/seed/bottle-bag-1/400/400', 'https://picsum.photos/seed/bottle-bag-2/400/400', 'https://picsum.photos/seed/bottle-bag-3/400/400', 'https://picsum.photos/seed/bottle-bag-4/400/400'] }],
+  },
+  {
+    name: 'Die-Cut Handle Bag',
+    description: 'A sleek plastic bag with die-cut handles, offering a modern alternative to traditional shopping bags.',
+    boxType: 'bag',
+    variants: [{ name: 'Standard', size: 'Medium', color: 'Frosted White', price: 30, stock: 800, images: ['https://picsum.photos/seed/diecut-bag-1/400/400', 'https://picsum.photos/seed/diecut-bag-2/400/400', 'https://picsum.photos/seed/diecut-bag-3/400/400', 'https://picsum.photos/seed/diecut-bag-4/400/400'] }],
+  },
+  {
+    name: 'Patterned Paper Bag',
+    description: 'A vibrant paper bag with a unique, artistic pattern. Perfect for seasonal promotions or adding a pop of color.',
+    boxType: 'bag',
+    variants: [{ name: 'Floral', size: 'Medium', color: 'Multicolor', price: 40, stock: 350, images: ['https://picsum.photos/seed/pattern-bag-1/400/400', 'https://picsum.photos/seed/pattern-bag-2/400/400', 'https://picsum.photos/seed/pattern-bag-3/400/400', 'https://picsum.photos/seed/pattern-bag-4/400/400'] }],
+  },
+  {
+    name: 'Jute Gift Bag',
+    description: 'A rustic and eco-friendly jute bag with a window to see the contents. Great for organic and natural products.',
+    boxType: 'bag',
+    variants: [{ name: 'Standard', size: 'Medium', color: 'Natural Jute', price: 120, stock: 200, images: ['https://picsum.photos/seed/jute-bag-1/400/400', 'https://picsum.photos/seed/jute-bag-2/400/400', 'https://picsum.photos/seed/jute-bag-3/400/400', 'https://picsum.photos/seed/jute-bag-4/400/400'] }],
+  },
 ];
+
 
 export async function seedDatabase() {
   await dbConnect();
@@ -113,11 +190,11 @@ export async function seedDatabase() {
     
     if (boxTemplates.length > 0) {
       await Box.insertMany(boxTemplates);
-      const message = `Successfully seeded database with ${boxTemplates.length} new boxes/bags.`;
+      const message = `Successfully seeded database with ${boxTemplates.length} new box/bag types.`;
       console.log(message);
       return { success: true, message };
     } else {
-      const message = "No boxes were generated to seed.";
+      const message = "No boxes or bags were generated to seed.";
       console.log(message);
       return { success: false, message };
     }

@@ -24,10 +24,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
-import useBrandStore from '@/stores/brand-store';
 
 export default function ManageBoxesPage() {
-  const { selectedBrand } = useBrandStore();
   const [boxes, setBoxes] = useState<IBox[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +34,7 @@ export default function ManageBoxesPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/boxes?storefront=${selectedBrand}`);
+      const response = await fetch(`/api/boxes`);
       if (!response.ok) {
         throw new Error('Failed to fetch boxes');
       }
@@ -51,7 +49,7 @@ export default function ManageBoxesPage() {
 
   useEffect(() => {
     fetchBoxes();
-  }, [selectedBrand]);
+  }, []);
 
   const handleDelete = async (boxId: string) => {
     toast.info("Deleting box...");
@@ -78,14 +76,8 @@ export default function ManageBoxesPage() {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
             <CardTitle className="flex items-center gap-2"><BoxIcon /> Boxes & Bags</CardTitle>
-            <CardDescription>Manage packaging options for <strong>{selectedBrand}</strong>.</CardDescription>
+            <CardDescription>Manage all available packaging options.</CardDescription>
         </div>
-        <Button asChild>
-            <Link href="/admin/boxes/new">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add New Box/Bag
-            </Link>
-        </Button>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -102,8 +94,8 @@ export default function ManageBoxesPage() {
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Variants</TableHead>
                 <TableHead>
                   <span className="sr-only">Actions</span>
                 </TableHead>
@@ -117,13 +109,15 @@ export default function ManageBoxesPage() {
                       alt={box.name}
                       className="aspect-square rounded-md object-contain"
                       height="64"
-                      src={box.images[0]}
+                      src={box.variants[0]?.images[0] || 'https://placehold.co/64x64'}
                       width="64"
                     />
                   </TableCell>
                   <TableCell className="font-medium">{box.name}</TableCell>
-                  <TableCell>₹{box.price.toFixed(2)}</TableCell>
-                  <TableCell>{box.stock}</TableCell>
+                   <TableCell>
+                        <Badge variant="outline" className="capitalize">{box.boxType}</Badge>
+                   </TableCell>
+                  <TableCell>{box.variants.length}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
                       <AlertDialog>
@@ -157,10 +151,7 @@ export default function ManageBoxesPage() {
         )}
         {boxes.length === 0 && !loading && (
           <div className="text-center py-16 text-muted-foreground">
-            <p>No boxes or bags found for this brand.</p>
-             <Button asChild variant="link" className="mt-2">
-                <Link href="/admin/boxes/new">Create your first one</Link>
-            </Button>
+            <p>No boxes or bags found. You can add them via the seeding script.</p>
           </div>
         )}
       </CardContent>
