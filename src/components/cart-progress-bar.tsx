@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { cn } from '@/lib/utils';
@@ -51,7 +52,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
         <ReactConfetti
           width={width}
           height={height}
-          recycle={true}
+          recycle={false}
           numberOfPieces={150}
           gravity={0.15}
           drawShape={drawCoin}
