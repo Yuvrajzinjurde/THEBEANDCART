@@ -1,6 +1,7 @@
 
 "use client";
 
+import React from "react";
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
 import ReactConfetti from 'react-confetti';
@@ -19,9 +20,8 @@ const drawCoin = (ctx: CanvasRenderingContext2D) => {
     ctx.fillText(emoji, 0, 0);
 };
 
-
 const LockedGiftBox = ({ className }: { className?: string }) => (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
+     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-muted-foreground/30", className)}>
         <path d="M10 18C10 15.7909 11.7909 14 14 14H26C28.2091 14 30 15.7909 30 18V28H10V18Z" fill="currentColor"/>
         <path d="M16 14V11C16 8.79086 17.7909 7 20 7C22.2091 7 24 8.79086 24 11V14" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
         <rect x="8" y="28" width="24" height="5" rx="1" fill="currentColor"/>
@@ -42,12 +42,10 @@ const Milestone = ({
     milestone,
     isUnlocked,
     isNext,
-    currentValue,
 }: {
     milestone: typeof milestones[0];
     isUnlocked: boolean;
     isNext: boolean;
-    currentValue: number;
 }) => {
     const { threshold, reward, icon: Icon } = milestone;
 
@@ -86,7 +84,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
     if (newlyUnlockedIndex !== -1) {
       setShowConfetti(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setShowConfetti(false), 3000); // Confetti for 3 seconds
+      timeoutRef.current = setTimeout(() => setShowConfetti(false), 2500); 
     }
     
     setUnlocked(milestones.map(m => currentValue >= m.threshold));
@@ -94,6 +92,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentValue]);
 
 
@@ -124,7 +123,6 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
                 milestone={milestone}
                 isUnlocked={isUnlocked}
                 isNext={isNext}
-                currentValue={currentValue}
               />
               {index < milestones.length - 1 && (
                 <div className="flex-1 h-px bg-muted-foreground/30 mt-8 border-t-2 border-dashed" />
