@@ -24,7 +24,7 @@ export async function GET(req: Request) {
         const decoded = jwtDecode<DecodedToken>(token);
         const userId = decoded.userId;
 
-        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock');
+        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
         if (!cart) {
             return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     const decoded = jwtDecode<DecodedToken>(token);
     const userId = decoded.userId;
 
-    const { productId, quantity } = await req.json();
+    const { productId, quantity, size, color } = await req.json();
 
     if (!productId || !quantity || quantity < 1) {
       return NextResponse.json({ message: 'Product ID and a valid quantity are required' }, { status: 400 });
@@ -74,26 +74,30 @@ export async function POST(req: Request) {
     let cart: ICart | null = await Cart.findOne({ userId });
 
     if (cart) {
-      // Cart exists for user
-      const itemIndex = cart.items.findIndex(p => p.productId.toString() === productId);
+      // Cart exists for user. Check if the exact variant is already in the cart.
+      const itemIndex = cart.items.findIndex(item => 
+          item.productId.toString() === productId &&
+          item.size === size &&
+          item.color === color
+      );
 
       if (itemIndex > -1) {
-        // Product exists in the cart, update the quantity
-        cart.items[itemIndex].quantity = quantity; // Set quantity directly
+        // Product variant exists in the cart, update the quantity
+        cart.items[itemIndex].quantity = quantity;
       } else {
-        // Product does not exist in cart, add new item
-        cart.items.push({ productId: new Types.ObjectId(productId), quantity });
+        // Product variant does not exist in cart, add new item
+        cart.items.push({ productId: new Types.ObjectId(productId), quantity, size, color });
       }
       await cart.save();
     } else {
       // No cart for user, create new cart
       cart = await Cart.create({
         userId,
-        items: [{ productId: new Types.ObjectId(productId), quantity }],
+        items: [{ productId: new Types.ObjectId(productId), quantity, size, color }],
       });
     }
 
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
 
     return NextResponse.json({ message: 'Cart updated successfully', cart: populatedCart }, { status: 200 });
   } catch (error) {
@@ -130,6 +134,8 @@ export async function DELETE(req: Request) {
         }
 
         const initialLength = cart.items.length;
+        // This will remove all variants of a product ID. If you need to remove a specific variant,
+        // you'd need to pass size/color here as well. For now, this seems acceptable.
         cart.items = cart.items.filter(item => item.productId.toString() !== productId);
 
         if (cart.items.length === initialLength) {
@@ -137,7 +143,7 @@ export async function DELETE(req: Request) {
         }
 
         await cart.save();
-        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock');
+        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
 
         return NextResponse.json({ message: 'Product removed from cart', cart: populatedCart }, { status: 200 });
 

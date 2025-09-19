@@ -11,7 +11,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, ArrowRight, Check, CheckCircle, Package, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -340,6 +340,39 @@ export default function CreateHamperPage() {
         }
     }
     
+    const handleDiscard = async () => {
+        if (window.confirm("Are you sure you want to discard this hamper and start over?")) {
+            try {
+                if (token) {
+                    await fetch('/api/hampers', {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    });
+                }
+                resetHamper();
+                toast.success("Hamper discarded.");
+            } catch (error) {
+                console.error("Failed to discard hamper from server", error);
+                toast.error("Could not discard hamper. Please try again.");
+            }
+        }
+    };
+    
+    const handleCheckout = async () => {
+        if (!token) return;
+        try {
+            // This would be a more complex flow in a real app,
+            // possibly creating a custom product or adding a bundle to cart.
+            // For now, we'll just mark as complete and redirect.
+            toast.success("Hamper finalized and added to cart!");
+            resetHamper();
+            router.push('/cart'); // A generic cart page
+        } catch (error) {
+            console.error("Checkout failed:", error);
+            toast.error("Could not proceed to checkout.");
+        }
+    };
+
     const renderStep = () => {
         switch(step) {
             case 1: return <Step1_Occasion />;
@@ -370,26 +403,24 @@ export default function CreateHamperPage() {
                     </AnimatePresence>
                 </Card>
 
-                <div className="flex justify-between mt-6">
-                    <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
-                        <ArrowLeft className="mr-2 h-4 w-4"/> Previous
+                 <div className="flex justify-between items-center mt-6">
+                    <Button variant="link" className="text-destructive p-0" onClick={handleDiscard}>
+                       <Trash2 className="mr-2 h-4 w-4" /> Discard
                     </Button>
-                    {step < TOTAL_STEPS ? (
-                        <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
-                            Next <ArrowRight className="ml-2 h-4 w-4"/>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1}>
+                            <ArrowLeft className="mr-2 h-4 w-4"/> Previous
                         </Button>
-                    ) : (
-                        <Button onClick={() => alert("Checkout!")}>
-                           <CheckCircle className="mr-2 h-4 w-4" /> Review & Checkout
-                        </Button>
-                    )}
-                </div>
-                 <div className="text-center mt-4">
-                    <Button variant="link" className="text-destructive" onClick={() => {
-                        if (window.confirm("Are you sure you want to discard this hamper and start over?")) {
-                            resetHamper();
-                        }
-                    }}>Discard and Start Over</Button>
+                        {step < TOTAL_STEPS ? (
+                            <Button onClick={() => setStep(step + 1)} disabled={isNextDisabled()}>
+                                Next <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Button>
+                        ) : (
+                            <Button onClick={handleCheckout}>
+                               <CheckCircle className="mr-2 h-4 w-4" /> Review & Checkout
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </main>
