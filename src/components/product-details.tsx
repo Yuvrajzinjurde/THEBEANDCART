@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useTransition } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle } from 'lucide-react';
@@ -68,6 +68,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   
+  const [isPending, startTransition] = useTransition();
   const [product, setProduct] = useState(initialProduct);
   
   const [returnPolicySummary, setReturnPolicySummary] = useState<string | null>(null);
@@ -196,31 +197,32 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         return;
     }
     
-    // Check if variants exist and if a selection has been made
     if (variants.length > 1 && (!selectedColor || !selectedSize)) {
         toast.warn("Please select a color and size before adding to cart.");
         return;
     }
 
-    toast.info("Adding to cart...");
-    try {
-        const response = await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ 
-              productId: product._id, 
-              quantity: 1,
-              size: selectedSize,
-              color: selectedColor
-            }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        setCart(result.cart);
-        toast.success("Added to cart!");
-    } catch (error: any) {
-        toast.error(error.message || "Failed to add to cart.");
-    }
+    startTransition(async () => {
+        toast.info("Adding to cart...");
+        try {
+            const response = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ 
+                  productId: product._id, 
+                  quantity: 1,
+                  size: selectedSize,
+                  color: selectedColor
+                }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            setCart(result.cart);
+            toast.success("Added to cart!");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to add to cart.");
+        }
+    });
   };
 
   const handleAddToWishlist = async () => {
@@ -229,24 +231,27 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         router.push(`/${storefront}/login`);
         return;
     }
-    toast.info("Updating wishlist...");
-    try {
-        const response = await fetch('/api/wishlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ productId: product._id }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        setWishlist(result.wishlist);
-        toast.success(result.message);
-    } catch (error: any) {
-        toast.error(error.message || "Failed to update wishlist.");
-    }
+    startTransition(async () => {
+        toast.info("Updating wishlist...");
+        try {
+            const response = await fetch('/api/wishlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ productId: product._id }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            setWishlist(result.wishlist);
+            toast.success(result.message);
+        } catch (error: any) {
+            toast.error(error.message || "Failed to update wishlist.");
+        }
+    });
   };
 
   return (
     <div className="grid md:grid-cols-2 lg:gap-x-4">
+        {isPending && <div className="fixed inset-0 bg-background/50 flex items-center justify-center z-50"><Loader/></div>}
         {/* Left Column: Media Gallery */}
         <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
             <div
@@ -273,7 +278,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                      <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
                 </Carousel>
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
+                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist} disabled={isPending}><Heart /></Button>
                 </div>
                 {/* Zoom Pane */}
                 {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
@@ -314,8 +319,8 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                     </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
-                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
+                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart} disabled={isPending}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                    <Button size="lg" variant="secondary" className="h-12 text-base" disabled={isPending}>Buy Now</Button>
                 </div>
             </div>
         </div>

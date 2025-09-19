@@ -19,6 +19,8 @@ import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
+import React, { useTransition } from 'react';
+
 
 interface BrandProductCardProps {
   product: IProduct;
@@ -29,8 +31,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const router = useRouter();
   const { user, token } = useAuth();
   const { setWishlist, setCart } = useUserStore();
+  const [isPending, startTransition] = useTransition();
   
-  const handleWishlistClick = async (e: React.MouseEvent) => {
+  const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
@@ -38,26 +41,28 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         router.push(`/${product.storefront}/login`);
         return;
     }
-    toast.info("Updating wishlist...");
-    try {
-        const response = await fetch('/api/wishlist', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ productId: product._id }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        setWishlist(result.wishlist);
-        toast.success(result.message);
-    } catch (error: any) {
-        toast.error(error.message || "Failed to update wishlist.");
-    }
+    startTransition(async () => {
+        toast.info("Updating wishlist...");
+        try {
+            const response = await fetch('/api/wishlist', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId: product._id }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            setWishlist(result.wishlist);
+            toast.success(result.message);
+        } catch (error: any) {
+            toast.error(error.message || "Failed to update wishlist.");
+        }
+    });
   };
 
-  const handleCartClick = async (e: React.MouseEvent) => {
+  const handleCartClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
      if (!user) {
@@ -65,38 +70,40 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         router.push(`/${product.storefront}/login`);
         return;
     }
-    toast.info("Adding to cart...");
-    try {
-        const response = await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ productId: product._id, quantity: 1 }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        setCart(result.cart);
-        toast.success("Added to cart!");
-    } catch (error: any) {
-        toast.error(error.message || "Failed to add to cart.");
-    }
+    startTransition(async () => {
+        toast.info("Adding to cart...");
+        try {
+            const response = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId: product._id, quantity: 1 }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            setCart(result.cart);
+            toast.success("Added to cart!");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to add to cart.");
+        }
+    });
   };
 
-  const handleCardClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    try {
-      // Track the click - fire and forget
-      fetch(`/api/products/${product._id}/track`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metric: 'clicks' }),
-      }).catch(err => console.error("Failed to track click:", err));
-    } finally {
-      // Construct the correct URL with storefront query parameter
-      router.push(`/products/${product._id}?storefront=${product.storefront}`);
-    }
+    startTransition(() => {
+        // Track the click - fire and forget
+        fetch(`/api/products/${product._id}/track`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ metric: 'clicks' }),
+        }).catch(err => console.error("Failed to track click:", err));
+        
+        // Navigate after initiating tracking
+        router.push(`/products/${product._id}?storefront=${product.storefront}`);
+    });
   };
   
   const sellingPrice = typeof product.sellingPrice === 'number' ? product.sellingPrice : 0;
@@ -114,6 +121,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       className={cn("group block", className)}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col h-full">
+        {isPending && <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}
         <Carousel
             opts={{ loop: product.images.length > 1 }}
             className="w-full"
@@ -141,6 +149,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             className="rounded-full w-8 h-8 shadow-md hover:bg-background hover:text-red-500"
             onClick={handleWishlistClick}
             aria-label="Add to wishlist"
+            disabled={isPending}
           >
             <Heart className="h-4 w-4" />
           </Button>
@@ -150,6 +159,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             className="rounded-full w-8 h-8 shadow-md hover:bg-background"
             onClick={handleCartClick}
             aria-label="Add to cart"
+            disabled={isPending}
           >
             <ShoppingCart className="h-4 w-4" />
           </Button>

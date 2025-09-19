@@ -77,8 +77,17 @@ export default function WishlistPage() {
         setCart(cartResult.cart);
         toast.success("Added to cart!");
 
-        // Remove from wishlist after adding to cart
-        handleRemoveFromWishlist(product._id as string);
+        // Then, remove from wishlist
+        const wishlistRes = await fetch('/api/wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ productId: product._id }),
+        });
+        const wishlistResult = await wishlistRes.json();
+        if (!wishlistRes.ok) throw new Error(wishlistResult.message);
+        setWishlist(wishlistResult.wishlist);
+        toast.success("Moved to cart!");
+
 
       } catch (error: any) {
         toast.error(error.message || "Failed to process request.");
@@ -128,10 +137,10 @@ export default function WishlistPage() {
             <div key={product._id as string} className="flex flex-col gap-2">
               <BrandProductCard product={product} />
               <div className="grid grid-cols-2 gap-2">
-                 <Button variant="outline" size="sm" onClick={() => handleRemoveFromWishlist(product._id as string)}>
+                 <Button variant="outline" size="sm" onClick={() => handleRemoveFromWishlist(product._id as string)} disabled={isPending}>
                     Remove
                 </Button>
-                <Button size="sm" onClick={() => handleAddToCart(product)}>
+                <Button size="sm" onClick={() => handleAddToCart(product)} disabled={isPending}>
                     <ShoppingCart className="mr-2 h-4 w-4" />
                     Move to Cart
                 </Button>
