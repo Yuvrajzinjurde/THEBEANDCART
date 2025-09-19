@@ -44,17 +44,17 @@ import { Separator } from "../ui/separator";
 import type { IBrand } from "@/models/brand.model";
 
 const navItems = [
-  { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
-  { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/boxes", icon: Box, label: "Boxes & Bags" },
-  { href: "/admin/orders", icon: Package, label: "Orders" },
-  { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
-  { href: "/admin/users", icon: Users, label: "Users" },
-  { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
-  { href: "/admin/brands", icon: Store, label: "Manage Brands" },
+  { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
+  { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
+  { href: "/admin/brands", icon: Store, label: "Manage Brands" },
+  { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/platform", icon: Home, label: "Platform" },
+  { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
+  { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
+  { href: "/admin/users", icon: Users, label: "Users" },
 ];
 
 export function AdminSidebar() {
