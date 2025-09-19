@@ -198,6 +198,7 @@ export default function WishlistPage() {
           {wishlistProducts.map((product) => {
             const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
             const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
+            const availableStock = product.stock ?? 0;
             
             return (
                 <Card key={product._id as string}>
@@ -209,6 +210,13 @@ export default function WishlistPage() {
                             <p className="text-sm text-muted-foreground font-medium">{product.brand}</p>
                             <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="font-semibold text-lg hover:underline leading-tight">{product.name}</Link>
                             
+                            <Badge
+                                variant={availableStock > 0 ? "default" : "destructive"}
+                                className={cn("w-max mt-2", availableStock > 0 && "bg-green-100 text-green-800")}
+                            >
+                                {availableStock > 0 ? 'In Stock' : 'Out of Stock'}
+                            </Badge>
+
                             <div className="flex items-baseline gap-2 mt-2">
                                 <p className="text-xl font-bold text-foreground">₹{product.sellingPrice.toLocaleString('en-IN')}</p>
                                 {hasDiscount && (
