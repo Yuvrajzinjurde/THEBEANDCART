@@ -414,7 +414,7 @@ export default function BrandHomePage() {
   if (authLoading || loading) {
     return (
         <main>
-            <Skeleton className="w-full h-[130px] md:h-[180px]" />
+            <Skeleton className="w-full h-[65px] md:h-[90px]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
@@ -450,7 +450,7 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full h-[130px] md:h-[180px] bg-secondary text-foreground">
+                        <div className="relative w-full h-[65px] md:h-[90px] bg-secondary text-foreground">
                             <Image
                                 src={banner.imageUrl}
                                 alt={banner.title}
