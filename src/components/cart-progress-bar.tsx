@@ -1,8 +1,7 @@
 
-
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from '@/lib/utils';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@react-hook/window-size';
@@ -100,7 +99,6 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
   const { width, height } = useWindowSize();
   const [unlocked, setUnlocked] = useState<boolean[]>(milestones.map(m => currentValue >= m.threshold));
   const [showConfetti, setShowConfetti] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleUnlock = React.useCallback(() => {
     setShowConfetti(true);
@@ -124,7 +122,7 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
   const amountNeeded = nextMilestone ? nextMilestone.threshold - currentValue : 0;
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-lg">
        {showConfetti && (
         <ReactConfetti
           width={width}
@@ -169,4 +167,3 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
     </div>
   );
 }
-
