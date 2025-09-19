@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from 'react';
@@ -16,11 +15,12 @@ import { toast } from 'react-toastify';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Info, Download, Upload, PlusCircle, ImageIcon, RefreshCw } from 'lucide-react';
+import { Info, Download, Upload, PlusCircle, ImageIcon, RefreshCw, Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
 
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -36,6 +36,7 @@ export default function InventoryPage() {
     const [activeTab, setActiveTab] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [sortOption, setSortOption] = useState('estimated-orders-desc');
+    const [searchQuery, setSearchQuery] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
@@ -74,6 +75,13 @@ export default function InventoryPage() {
     useEffect(() => {
         let productsToDisplay = [...allProducts];
 
+        // Search filter
+        if (searchQuery) {
+            productsToDisplay = productsToDisplay.filter(p =>
+                p.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
         // Tab filter
         if (activeTab === 'out-of-stock') {
             productsToDisplay = productsToDisplay.filter(p => p.stock === 0);
@@ -95,7 +103,7 @@ export default function InventoryPage() {
         }
         
         setFilteredProducts(productsToDisplay);
-    }, [activeTab, categoryFilter, sortOption, allProducts]);
+    }, [activeTab, categoryFilter, sortOption, searchQuery, allProducts]);
 
     const handleSeedData = async () => {
         setIsSeeding(true);
@@ -377,6 +385,15 @@ export default function InventoryPage() {
                     </div>
                     
                     <div className="flex items-center gap-4 py-4 px-1">
+                         <div className="relative flex-grow max-w-sm">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search by product name..." 
+                                className="pl-10"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                          <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
                             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
