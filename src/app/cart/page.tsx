@@ -34,6 +34,7 @@ import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
 import type { ICartItem } from "@/models/cart.model";
 import { addDays, format } from 'date-fns';
+import { CartProgressBar } from "@/components/cart-progress-bar";
 
 const SHIPPING_COST = 50;
 const FREE_SHIPPING_THRESHOLD = 500;
@@ -61,11 +62,11 @@ export default function CartPage() {
           ...item,
           product: item.productId as IProduct,
         }))
-        .filter((item) => item.product) || [] // Filter out items where product is null
+        .filter((item) => item.product) || []
     );
   }, [cart]);
 
-  const handleQuantityChange = async (productId: string, newQuantity: number) => {
+  const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
 
     try {
@@ -75,7 +76,7 @@ export default function CartPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ productId, quantity: newQuantity }),
+        body: JSON.stringify({ productId, quantity: newQuantity, size, color }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
@@ -192,6 +193,10 @@ export default function CartPage() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+      
+      <div className="mb-6">
+        <CartProgressBar currentValue={subtotal} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -205,7 +210,7 @@ export default function CartPage() {
                              const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                             return (
-                            <div key={item.product._id as string} className="flex gap-4">
+                            <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex gap-4">
                                 <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block flex-shrink-0">
                                     <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border"/>
                                 </Link>
@@ -214,8 +219,8 @@ export default function CartPage() {
                                     <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="font-semibold text-lg hover:underline leading-tight">{item.product.name}</Link>
                                     
                                     <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                        {item.product.size && <span>Size: {item.product.size}</span>}
-                                        {item.product.color && <span>Color: {item.product.color}</span>}
+                                        {item.size && <span>Size: {item.size}</span>}
+                                        {item.color && <span>Color: {item.color}</span>}
                                     </div>
                                     
                                     <div className="flex items-baseline gap-2 mt-1">
@@ -235,9 +240,9 @@ export default function CartPage() {
                                     
                                     <div className="flex items-center justify-between mt-2">
                                         <div className="flex items-center gap-1 rounded-full border p-1">
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1)}><Minus className="h-4 w-4" /></Button>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
                                             <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1)}><Plus className="h-4 w-4" /></Button>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
