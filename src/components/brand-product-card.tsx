@@ -165,7 +165,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
               <span>{rating.toFixed(1)}</span>
           </div>
 
-          <div className="flex items-baseline gap-2 flex-wrap">
+          <div className="flex items-baseline gap-2 flex-wrap min-h-[24px]">
             <p className="text-base font-bold text-foreground">
                 ₹{sellingPrice.toLocaleString('en-IN')}
             </p>
@@ -215,4 +215,3 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
-
