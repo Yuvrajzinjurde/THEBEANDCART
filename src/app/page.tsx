@@ -19,6 +19,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
@@ -185,16 +186,28 @@ const HamperSection = () => (
 
 
 const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
+    const [api, setApi] = useState<CarouselApi>()
+    const [canScrollPrev, setCanScrollPrev] = useState(false)
+    const [canScrollNext, setCanScrollNext] = useState(false)
+
+    useEffect(() => {
+        if (!api) return;
+        setCanScrollPrev(api.canScrollPrev())
+        setCanScrollNext(api.canScrollNext())
+        api.on("select", () => {
+            setCanScrollPrev(api.canScrollPrev())
+            setCanScrollNext(api.canScrollNext())
+        });
+    }, [api]);
+
     if (!brands || brands.length === 0) return null;
 
     return (
         <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <Carousel
-                    opts={{
-                        align: "center",
-                        loop: true,
-                    }}
+                    setApi={setApi}
+                    opts={{ align: "center", loop: brands.length > 6 }}
                     className="w-full"
                 >
                     <CarouselContent>
@@ -225,8 +238,8 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                             );
                         })}
                     </CarouselContent>
-                    <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                    <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                    {canScrollPrev && <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
+                    {canScrollNext && <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
                 </Carousel>
             </div>
         </section>
@@ -426,3 +439,4 @@ export default function LandingPage() {
     
 
     
+
