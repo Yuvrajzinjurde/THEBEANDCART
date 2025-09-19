@@ -155,12 +155,12 @@ const SidebarContent = () => {
     return (
         <>
         {/* Main Content */}
-        <div className="flex-1 overflow-auto py-2">
+        <div className="flex-1 overflow-auto py-2 no-scrollbar">
             <div className="p-2">
                 <BrandSelector isCollapsed={false} />
             </div>
             <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
-                {navItems.map(({ href, icon: Icon, label }) => (
+                {navItems.sort((a, b) => a.label.localeCompare(b.label)).map(({ href, icon: Icon, label }) => (
                     <Link key={label} href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary")}>
                         <Icon className="h-4 w-4" />
                         <span>{label}</span>
@@ -260,9 +260,9 @@ export function AdminSidebar() {
                     <BrandSelector isCollapsed={isCollapsed} />
                 </div>
                 <TooltipProvider delayDuration={0}>
-                    <div className="flex-1 overflow-auto py-2">
+                    <div className="flex-1 overflow-auto py-2 no-scrollbar">
                         <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
-                            {navItems.map(({ href, icon: Icon, label }) => (
+                            {navItems.sort((a, b) => a.label.localeCompare(b.label)).map(({ href, icon: Icon, label }) => (
                                 <Tooltip key={label}>
                                     <TooltipTrigger asChild>
                                         <Link
