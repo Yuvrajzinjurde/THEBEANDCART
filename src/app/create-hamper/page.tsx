@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
+import { HamperProgressBar } from "@/components/hamper-progress-bar";
 
 const TOTAL_STEPS = 5;
 
@@ -626,7 +628,7 @@ export default function CreateHamperPage() {
                     </Button>
                     <div className="space-y-4">
                         <h1 className="text-3xl font-bold">Create Your Perfect Hamper</h1>
-                        <Progress value={(step / TOTAL_STEPS) * 100} className="w-full h-2" />
+                        <HamperProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
                     </div>
                 </div>
 
