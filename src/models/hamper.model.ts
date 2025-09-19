@@ -1,4 +1,5 @@
 
+
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 export interface IHamper extends Document {
@@ -13,6 +14,7 @@ export interface IHamper extends Document {
   notesToReceiver?: string;
   addRose?: boolean;
   isComplete: boolean;
+  isAddedToCart: boolean; // New field
 }
 
 const HamperSchema: Schema<IHamper> = new Schema({
@@ -27,6 +29,7 @@ const HamperSchema: Schema<IHamper> = new Schema({
   notesToReceiver: { type: String },
   addRose: { type: Boolean, default: false },
   isComplete: { type: Boolean, default: false },
+  isAddedToCart: { type: Boolean, default: false }, // New field
 }, { timestamps: true });
 
 const Hamper: Model<IHamper> = mongoose.models.Hamper || mongoose.model<IHamper>('Hamper', HamperSchema);

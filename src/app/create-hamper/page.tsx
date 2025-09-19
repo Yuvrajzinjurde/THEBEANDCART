@@ -33,11 +33,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { HamperProgressBar } from "@/components/hamper-progress-bar";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { Separator } from "@/components/ui/separator";
 
 const TOTAL_STEPS = 5;
 
@@ -554,6 +556,7 @@ export default function CreateHamperPage() {
     const [isDiscarding, setIsDiscarding] = useState(false);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [discardAlertOpen, setDiscardAlertOpen] = useState(false);
+    const [checkoutAlertOpen, setCheckoutAlertOpen] = useState(false);
 
 
     useEffect(() => {
@@ -628,6 +631,7 @@ export default function CreateHamperPage() {
     
     const handleCheckout = async () => {
         if (!token) return;
+        setCheckoutAlertOpen(false);
         setIsCheckingOut(true);
         try {
             const response = await fetch('/api/hampers/checkout', {
@@ -639,10 +643,13 @@ export default function CreateHamperPage() {
                 const errorData = await response.json();
                 throw new Error(errorData.message || "Failed to finalize hamper.");
             }
+            
+            const { cart } = await response.json();
+            useUserStore.getState().setCart(cart);
 
             toast.success("Hamper finalized and added to cart!");
             resetHamper();
-            router.push('/cart');
+            router.push(`/${cart.items[0]?.productId.storefront || 'reeva'}/cart`);
         } catch (error: any) {
             console.error("Checkout failed:", error);
             toast.error(error.message);
@@ -696,7 +703,7 @@ export default function CreateHamperPage() {
                         {step > 1 && (
                             <Button variant="destructive" onClick={() => setDiscardAlertOpen(true)} disabled={isDiscarding}>
                                 {isDiscarding ? <Loader className="mr-2" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                                Discard & Start Over
+                                Start Over
                             </Button>
                         )}
                         {step < TOTAL_STEPS ? (
@@ -704,10 +711,75 @@ export default function CreateHamperPage() {
                                 Next <ArrowRight className="ml-2 h-4 w-4"/>
                             </Button>
                         ) : (
-                            <Button onClick={handleCheckout} disabled={isCheckingOut}>
-                               {isCheckingOut ? <Loader className="mr-2" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                Review & Checkout
-                            </Button>
+                             <AlertDialog open={checkoutAlertOpen} onOpenChange={setCheckoutAlertOpen}>
+                                <AlertDialogTrigger asChild>
+                                    <Button disabled={isCheckingOut}>
+                                        <CheckCircle className="mr-2 h-4 w-4" />
+                                        Review & Checkout
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="max-w-2xl">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Your Hamper Summary</AlertDialogTitle>
+                                        <AlertDialogDescription>Review your creation before adding it to your cart.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <div className="max-h-[60vh] overflow-y-auto p-1 pr-4">
+                                        <div className="space-y-4">
+                                            <p><span className="font-semibold">Occasion:</span> {hamperState.occasion}</p>
+                                            
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {hamperState.boxVariant && (
+                                                    <Card>
+                                                        <CardHeader className="p-3"><CardTitle className="text-base">Box</CardTitle></CardHeader>
+                                                        <CardContent className="p-3 pt-0 flex flex-col items-center text-center">
+                                                            <Image src={hamperState.boxVariant.images[0]} alt={hamperState.boxVariant.name} width={80} height={80} className="rounded-md object-cover mb-2" />
+                                                            <p className="text-sm font-medium">{hamperState.box?.name} ({hamperState.boxVariant.name})</p>
+                                                        </CardContent>
+                                                    </Card>
+                                                )}
+                                                {hamperState.bagVariant && (
+                                                     <Card>
+                                                        <CardHeader className="p-3"><CardTitle className="text-base">Bag</CardTitle></CardHeader>
+                                                        <CardContent className="p-3 pt-0 flex flex-col items-center text-center">
+                                                            <Image src={hamperState.bagVariant.images[0]} alt={hamperState.bagVariant.name} width={80} height={80} className="rounded-md object-cover mb-2" />
+                                                            <p className="text-sm font-medium">{hamperState.bag?.name} ({hamperState.bagVariant.name})</p>
+                                                        </CardContent>
+                                                    </Card>
+                                                )}
+                                            </div>
+
+                                            <Card>
+                                                <CardHeader className="p-3"><CardTitle className="text-base">Products Inside ({hamperState.products.length})</CardTitle></CardHeader>
+                                                <CardContent className="p-3 pt-0 space-y-2">
+                                                    {hamperState.products.map(p => (
+                                                         <div key={p._id as string} className="flex items-center gap-3 text-sm">
+                                                            <Image src={p.images[0]} alt={p.name} width={32} height={32} className="rounded object-cover" />
+                                                            <span className="truncate">{p.name}</span>
+                                                        </div>
+                                                    ))}
+                                                </CardContent>
+                                            </Card>
+
+                                            {hamperState.notesToReceiver && (
+                                                 <Card>
+                                                    <CardHeader className="p-3"><CardTitle className="text-base">Your Message</CardTitle></CardHeader>
+                                                    <CardContent className="p-3 pt-0">
+                                                        <p className="text-sm text-muted-foreground italic">&quot;{hamperState.notesToReceiver}&quot;</p>
+                                                    </CardContent>
+                                                </Card>
+                                            )}
+
+                                        </div>
+                                    </div>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Keep Editing</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleCheckout} disabled={isCheckingOut}>
+                                            {isCheckingOut ? <Loader className="mr-2" /> : <ShoppingCart className="mr-2 h-4 w-4" />}
+                                            Add to Cart
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )}
                     </div>
                 </div>
