@@ -13,7 +13,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot, Heart } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot, Heart, ShoppingCart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { HamperProgressBar } from "@/components/hamper-progress-bar";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Separator } from "@/components/ui/separator";
+import useUserStore from '@/stores/user-store';
 
 const TOTAL_STEPS = 5;
 
