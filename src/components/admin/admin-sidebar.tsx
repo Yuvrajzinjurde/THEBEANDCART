@@ -42,15 +42,15 @@ import { Button } from "../ui/button";
 import { UserNav } from "../user-nav";
 import { Separator } from "../ui/separator";
 import type { IBrand } from "@/models/brand.model";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 
 const navItems = [
   { href: "/admin/boxes", icon: Box, label: "Boxes & Bags" },
+  { href: "/admin/brands", icon: Store, label: "Manage Brands" },
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
-  { href: "/admin/brands", icon: Store, label: "Manage Brands" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/platform", icon: Home, label: "Platform" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
@@ -170,12 +170,14 @@ export function MobileAdminHeader() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-64 flex flex-col p-0">
-                     <div className="flex items-center h-16 border-b px-4 shrink-0">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-                            <Store className="h-6 w-6 text-primary" />
-                            <span>Admin Panel</span>
-                        </Link>
-                    </div>
+                     <SheetHeader className="h-16 border-b px-4 flex flex-row items-center">
+                        <SheetTitle>
+                            <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
+                                <Store className="h-6 w-6 text-primary" />
+                                <span>Admin Panel</span>
+                            </Link>
+                        </SheetTitle>
+                    </SheetHeader>
                     <SidebarContent />
                 </SheetContent>
             </Sheet>
