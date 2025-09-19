@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -201,12 +201,12 @@ const OffersSection = ({ brand }: { brand: IBrand | null }) => {
     );
 };
 
-const PromoBannerSection = ({ brand }: { brand: IBrand | null }) => {
+const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandName: string }) => {
     if (!brand?.promoBanner) return null;
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="relative rounded-lg overflow-hidden h-[320px] bg-secondary text-foreground flex items-center">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
                  <Image
                     src={imageUrl}
                     alt={title}
@@ -214,13 +214,29 @@ const PromoBannerSection = ({ brand }: { brand: IBrand | null }) => {
                     className="object-cover"
                     data-ai-hint={imageHint}
                 />
-                <div className="absolute inset-0 bg-black/60" />
-                <div className="relative z-10 p-8 md:p-16 max-w-2xl">
-                    <h2 className="text-3xl md:text-5xl font-bold text-white">{title}</h2>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+                <div className="relative z-10 p-8 md:p-16 max-w-2xl text-white flex flex-col items-start h-full justify-center">
+                    <h2 className="text-3xl md:text-5xl font-bold">{title}</h2>
                     <p className="text-lg text-white/90 mt-4">{description}</p>
                     <Button asChild size="lg" className="mt-6">
                         <Link href={buttonLink}>
                             {buttonText} <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+             <div className="relative rounded-2xl overflow-hidden shadow-xl mt-12 bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
+                <div className="relative z-10 p-8 md:p-12 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
+                        <Gift className="h-8 w-8 text-primary" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                        Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
+                    </p>
+                    <Button asChild size="lg" className="mt-6">
+                        <Link href={`/${brandName}/create-hamper`}>
+                            Start Creating <ArrowRight className="ml-2" />
                         </Link>
                     </Button>
                 </div>
@@ -392,7 +408,7 @@ export default function BrandHomePage() {
 
             // 4. Group products by category for main sections
             const grouped = fetchedProducts.reduce((acc: GroupedProducts, product: IProduct) => {
-                const category = Array.isArray(product.category) ? product.category[0] : product.category;
+                const category = product.category;
                 if (!acc[category]) {
                     acc[category] = [];
                 }
@@ -514,7 +530,7 @@ export default function BrandHomePage() {
       </div>
 
       <OffersSection brand={brand} />
-      <PromoBannerSection brand={brand} />
+      <PromoBannerSection brand={brand} brandName={brandName} />
       <ReviewsSection brand={brand} />
 
     </main>
@@ -522,7 +538,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-    
-
-    
