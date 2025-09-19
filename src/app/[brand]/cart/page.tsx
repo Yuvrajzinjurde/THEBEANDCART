@@ -227,9 +227,9 @@ export default function CartPage() {
 
   return (
     <>
-      <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
+       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
         <div className="container flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-48">
                 <Button
                 variant="outline"
                 size="icon"
