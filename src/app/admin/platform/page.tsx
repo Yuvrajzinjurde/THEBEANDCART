@@ -9,15 +9,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot } from 'lucide-react';
 import type { IPlatformSettings } from '@/models/platform.model';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import usePlatformSettingsStore from '@/stores/platform-settings-store';
 
 const staticDefaultValues: PlatformSettingsValues = {
+  aiEnabled: true,
   heroBanners: [
     {
       title: "Elevate Your Style",
@@ -80,10 +83,12 @@ export default function PlatformSettingsPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
+  const { fetchSettings } = usePlatformSettingsStore();
 
   const form = useForm<PlatformSettingsValues>({
     resolver: zodResolver(PlatformSettingsValidationSchema),
     defaultValues: {
+        aiEnabled: true,
         heroBanners: [],
         featuredCategories: [],
         promoBanner: { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' },
@@ -187,6 +192,8 @@ export default function PlatformSettingsPage() {
           featuredCategories: result.featuredCategories.map((cat: string) => ({ name: cat })),
       };
       form.reset(newDefaults);
+      // Re-fetch settings for the global store
+      await fetchSettings();
 
     } catch (error: any) {
       console.error("Submission Error:", error);
@@ -223,6 +230,39 @@ export default function PlatformSettingsPage() {
                     Save Changes
                 </Button>
             </CardHeader>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>AI Feature Control</CardTitle>
+            <CardDescription>
+              Enable or disable generative AI features across the entire platform.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="aiEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Enable AI Features
+                    </FormLabel>
+                    <FormDescription>
+                      When disabled, all AI-powered buttons like 'Autofill', 'Suggest', and 'Generate' will be turned off.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </CardContent>
         </Card>
 
         <Card>
@@ -422,5 +462,3 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
-
-    

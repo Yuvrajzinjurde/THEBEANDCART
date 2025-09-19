@@ -37,6 +37,7 @@ import {
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { HamperProgressBar } from "@/components/hamper-progress-bar";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 
 const TOTAL_STEPS = 5;
 
@@ -150,6 +151,7 @@ const Step2_Box = () => {
     const [allBoxes, setAllBoxes] = useState<IBox[]>([]);
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const { aiEnabled } = usePlatformSettingsStore();
 
     const handleSelect = (value: string) => {
         const [boxId, variantId] = value.split('-');
@@ -175,8 +177,8 @@ const Step2_Box = () => {
                 const boxesOnly = fetchedPackages.filter((p: IBox) => p.boxType === 'box');
                 setAllBoxes(boxesOnly);
                 
-                // 3. If occasion and boxes are available, get AI suggestions
-                if (occasion && boxesOnly.length > 0) {
+                // 3. If occasion, boxes, and AI are available, get AI suggestions
+                if (aiEnabled && occasion && boxesOnly.length > 0) {
                     const packageList = boxesOnly.map((b: IBox) => ({ id: b._id.toString(), name: b.name, description: b.description, type: b.boxType }));
                     const suggestionRes = await fetch('/api/hampers/suggest-boxes', {
                         method: 'POST',
@@ -196,7 +198,7 @@ const Step2_Box = () => {
             }
         };
         fetchAndSuggest();
-    }, [occasion]);
+    }, [occasion, aiEnabled]);
     
     const handleLike = async (boxId: string) => {
         try {
@@ -352,7 +354,7 @@ const Step3_Products = () => {
 };
 
 const Step4_Bag = () => {
-    const { occasion, bag: selectedBag, bagVariant: selectedBagVariant, setBag } = useHamperStore();
+    const { bag: selectedBag, bagVariant: selectedBagVariant, setBag } = useHamperStore();
     const [allBags, setAllBags] = useState<IBox[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -432,6 +434,7 @@ const Step4_Bag = () => {
 
 const Step5_Notes = () => {
     const { occasion, products, notesToCreator, notesToReceiver, addRose, setNotes, setAddRose } = useHamperStore();
+    const { aiEnabled } = usePlatformSettingsStore();
     const [roseSuggestion, setRoseSuggestion] = useState({ shouldSuggest: false, suggestionText: '' });
     const [loadingRoseSuggestion, setLoadingRoseSuggestion] = useState(true);
     const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
@@ -439,7 +442,10 @@ const Step5_Notes = () => {
 
     useEffect(() => {
         async function getRoseSuggestion() {
-            if (!occasion) return;
+            if (!aiEnabled || !occasion) {
+                 setLoadingRoseSuggestion(false);
+                return;
+            };
             setLoadingRoseSuggestion(true);
             try {
                 const res = await fetch('/api/hampers/suggest-rose', {
@@ -458,7 +464,7 @@ const Step5_Notes = () => {
             }
         }
         getRoseSuggestion();
-    }, [occasion]);
+    }, [occasion, aiEnabled]);
     
     const handleGenerateMessage = async () => {
         if (!occasion || products.length === 0) {
@@ -511,7 +517,7 @@ const Step5_Notes = () => {
                 <div>
                     <div className="flex items-center justify-between">
                         <Label htmlFor="notes-receiver">Message for Recipient</Label>
-                         <Button type="button" variant="ghost" size="sm" onClick={handleGenerateMessage} disabled={isGeneratingMessage}>
+                         <Button type="button" variant="ghost" size="sm" onClick={handleGenerateMessage} disabled={!aiEnabled || isGeneratingMessage}>
                             {isGeneratingMessage ? <Loader className="mr-2 h-4 w-4" /> : <Sparkles className="mr-2 h-4 w-4" />}
                             Suggest with AI
                         </Button>

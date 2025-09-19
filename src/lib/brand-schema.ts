@@ -80,6 +80,7 @@ export type BrandFormValues = z.infer<typeof BrandFormSchema>;
 
 // Zod schema for Platform Settings form validation
 export const PlatformSettingsValidationSchema = z.object({
+  aiEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required"),
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
   promoBanner: promoBannerSchema.optional(),
@@ -87,5 +88,3 @@ export const PlatformSettingsValidationSchema = z.object({
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;
-
-    

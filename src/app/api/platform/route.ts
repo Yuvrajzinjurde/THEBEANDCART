@@ -5,6 +5,7 @@ import PlatformSettings from '@/models/platform.model';
 import { z } from 'zod';
 
 const FormSchema = z.object({
+  aiEnabled: z.boolean().optional(),
   heroBanners: z.array(z.object({
       title: z.string(),
       description: z.string(),

@@ -10,6 +10,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { IBrand } from '@/models/brand.model';
 import { themeColors } from '@/lib/brand-schema';
+import usePlatformSettingsStore from '@/stores/platform-settings-store';
 
 type Theme = (typeof themeColors)[number];
 
@@ -74,6 +75,11 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const fetchSettings = usePlatformSettingsStore(state => state.fetchSettings);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);

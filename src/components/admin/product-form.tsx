@@ -32,6 +32,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { ProductCard } from '../product-card';
 import { Badge } from '../ui/badge';
+import usePlatformSettingsStore from '@/stores/platform-settings-store';
 
 
 const SortableImage = ({ id, url, onRemove, disabled }: { id: any; url: string; onRemove: () => void; disabled: boolean }) => {
@@ -238,6 +239,7 @@ interface ProductFormProps {
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
   const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
+  const { aiEnabled } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
   const [isGeneratingTags, setIsGeneratingTags] = React.useState(false);
@@ -420,7 +422,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         const displayMessage = handleAIError(error, "price suggestion");
         toast.error(displayMessage);
     } finally {
-        setIsGeneratingPrice(false);
+      setIsGeneratingPrice(false);
     }
   };
 
@@ -604,7 +606,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     <FormControl><Input placeholder="e.g., Classic Cotton T-Shirt" {...field} /></FormControl>
                                     <FormMessage />
                                   </div>
-                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={isAutofilling || !watchedFormValues.name || isFormDisabled}>
+                                  <Button type="button" variant="outline" onClick={handleAutofill} disabled={!aiEnabled || isAutofilling || !watchedFormValues.name || isFormDisabled}>
                                     {isAutofilling ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                     Autofill
                                   </Button>
@@ -618,7 +620,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Description</FormLabel>
-                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGeneratingDesc || !watchedFormValues.name || isFormDisabled}>
+                                    <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={!aiEnabled || isGeneratingDesc || !watchedFormValues.name || isFormDisabled}>
                                         {isGeneratingDesc ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate with AI
                                     </Button>
@@ -811,7 +813,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <FormItem>
                                  <div className="flex items-center justify-between">
                                     <FormLabel>Keywords</FormLabel>
-                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGeneratingTags || !watchedFormValues.name || !watchedFormValues.description || isFormDisabled}>
+                                     <Button type="button" variant="ghost" size="sm" onClick={handleGenerateTags} disabled={!aiEnabled || isGeneratingTags || !watchedFormValues.name || !watchedFormValues.description || isFormDisabled}>
                                         {isGeneratingTags ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Generate Keywords
                                     </Button>
@@ -870,7 +872,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                             <Input type="number" placeholder="0.00" className="pl-7" {...field} />
                                         </FormControl>
                                     </div>
-                                    <Button type="button" variant="outline" onClick={handleSuggestPrice} disabled={isGeneratingPrice || isFormDisabled}>
+                                    <Button type="button" variant="outline" onClick={handleSuggestPrice} disabled={!aiEnabled || isGeneratingPrice || isFormDisabled}>
                                         {isGeneratingPrice ? <Loader className="mr-2" /> : <Sparkles className="mr-2" />}
                                         Suggest
                                     </Button>
