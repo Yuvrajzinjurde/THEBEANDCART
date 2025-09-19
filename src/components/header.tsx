@@ -40,31 +40,31 @@ export default function Header() {
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
-  const [showSecondaryNav, setShowSecondaryNav] = useState(false);
   const { cart, wishlist } = useUserStore();
 
   const [brandName, setBrandName] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // This logic now runs only on the client, avoiding server-client mismatch
-    const pathBrand = params.brand as string;
-    const queryBrand = searchParams.get('storefront');
-    const isCreateHamperPage = pathname === '/create-hamper';
-    const determinedBrandName = isCreateHamperPage ? null : (pathBrand || queryBrand || 'reeva');
-    setBrandName(determinedBrandName);
+    setIsClient(true);
+  }, []);
 
-    if (pathname === `/${determinedBrandName}/home`) {
-      setShowSecondaryNav(true);
-    } else {
-      setShowSecondaryNav(false);
+  useEffect(() => {
+    if (isClient) {
+        const pathBrand = params.brand as string;
+        const queryBrand = searchParams.get('storefront');
+        const isCreateHamperPage = pathname === '/create-hamper';
+        const determinedBrandName = isCreateHamperPage ? null : (pathBrand || queryBrand || 'reeva');
+        setBrandName(determinedBrandName);
     }
-  }, [pathname, params, searchParams]);
-
+  }, [isClient, pathname, params, searchParams]);
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
   const effectiveBrandName = brandName || 'reeva';
+  const showSecondaryNav = pathname === `/${effectiveBrandName}/home`;
+
 
   const secondaryNavItems = [
     { href: `/${effectiveBrandName}/products?keyword=gift`, icon: Gift, label: "Gifts" },
@@ -93,8 +93,10 @@ export default function Header() {
         setBrand(null);
       }
     }
-    fetchBrandLogo();
-  }, [brandName]);
+    if (isClient) {
+        fetchBrandLogo();
+    }
+  }, [brandName, isClient]);
   
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -131,13 +133,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href={brandName ? `/${brandName}/home` : '/'} className="mr-4 flex items-center space-x-2">
-          {brand?.logoUrl ? (
+        <Link href={isClient && brandName ? `/${brandName}/home` : '/'} className="mr-4 flex items-center space-x-2">
+          {isClient && brand?.logoUrl ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
-          <span className="hidden font-bold text-lg sm:inline-block capitalize">{brand?.displayName || 'The Brand Cart'}</span>
+          <span className="hidden font-bold text-lg sm:inline-block capitalize">{isClient && brand?.displayName ? brand.displayName : 'The Brand Cart'}</span>
         </Link>
 
         {/* Categories Dropdown */}
@@ -268,3 +270,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
