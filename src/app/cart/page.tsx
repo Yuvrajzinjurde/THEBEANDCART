@@ -18,6 +18,7 @@ import {
   Plus,
   ShoppingCart,
   Truck,
+  Gift,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -37,9 +38,31 @@ import { addDays, format } from 'date-fns';
 import { CartProgressBar } from "@/components/cart-progress-bar";
 
 const SHIPPING_COST = 50;
-const FREE_SHIPPING_THRESHOLD = 399; // Aligned with progress bar
+const FREE_SHIPPING_THRESHOLD = 399;
 const EXTRA_DISCOUNT_THRESHOLD = 799;
+const FREE_GIFT_THRESHOLD = 999;
 const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
+
+// Create a mock product for the free gift
+const freeGiftProduct: IProduct = {
+    _id: 'free-gift-id',
+    name: 'Surprise Gift',
+    brand: 'From us, to you!',
+    images: ['https://picsum.photos/seed/gift-box/200/200'],
+    sellingPrice: 0,
+    mrp: 999, // Show a perceived value
+    storefront: 'reeva',
+    category: 'Gift',
+    description: '',
+    stock: 1,
+    rating: 5,
+    views: 0,
+    clicks: 0,
+    keywords: [],
+    returnPeriod: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+} as IProduct;
 
 export default function CartPage() {
   const router = useRouter();
@@ -52,23 +75,38 @@ export default function CartPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.replace(`/${brandName}/login`); // Redirect to brand-specific login
+        router.replace(`/${brandName}/login`);
         return;
       }
       setLoading(false);
     }
   }, [user, authLoading, router, brandName]);
+  
+  const subtotal = useMemo(() =>
+    cart?.items?.reduce((acc, item) => acc + (item.productId as IProduct).sellingPrice * item.quantity, 0) || 0,
+    [cart?.items]
+  );
 
   const cartItems = useMemo(() => {
-    return (
-      cart?.items
+    const items = cart?.items
         ?.map((item) => ({
           ...item,
           product: item.productId as IProduct,
         }))
-        .filter((item) => item.product) || []
-    );
-  }, [cart]);
+        .filter((item) => item.product) || [];
+    
+    if (subtotal >= FREE_GIFT_THRESHOLD) {
+        // Add the free gift as an item to the cart list
+        items.push({
+            productId: 'free-gift-id' as any,
+            quantity: 1,
+            size: undefined,
+            color: undefined,
+            product: freeGiftProduct
+        });
+    }
+    return items;
+  }, [cart, subtotal]);
 
   const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
@@ -129,17 +167,13 @@ export default function CartPage() {
   };
 
 
-  const subtotal = useMemo(() =>
-    cartItems.reduce((acc, item) => acc + item.product.sellingPrice * item.quantity, 0),
-    [cartItems]
-  );
-  
   const totalDiscount = useMemo(() =>
-    cartItems.reduce((acc, item) => {
-      const mrp = item.product.mrp || item.product.sellingPrice;
-      return acc + (mrp - item.product.sellingPrice) * item.quantity;
-    }, 0),
-    [cartItems]
+    cart?.items?.reduce((acc, item) => {
+      const product = item.productId as IProduct;
+      const mrp = product.mrp || product.sellingPrice;
+      return acc + (mrp - product.sellingPrice) * item.quantity;
+    }, 0) || 0,
+    [cart?.items]
   );
   
   const milestoneDiscount = useMemo(() => {
@@ -218,25 +252,35 @@ export default function CartPage() {
                 <CardContent>
                     <div className="space-y-6">
                         {cartItems.map(item => {
+                             const isGift = item.product._id === 'free-gift-id';
                              const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                             return (
                             <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex gap-4">
-                                <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block flex-shrink-0">
+                                <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`block flex-shrink-0 ${isGift ? 'pointer-events-none' : ''}`}>
                                     <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border"/>
                                 </Link>
                                 <div className="flex flex-col flex-grow gap-1">
                                     <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
-                                    <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="font-semibold text-lg hover:underline leading-tight">{item.product.name}</Link>
+                                    <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
                                     
+                                    {isGift && (
+                                        <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">
+                                            <Gift className="h-4 w-4 mt-0.5 shrink-0" />
+                                            <p className="text-xs font-medium">You'll find this surprise gift tucked inside one of your product boxes!</p>
+                                        </div>
+                                    )}
+
                                     <div className="text-sm text-muted-foreground flex items-center gap-2">
                                         {item.size && <span>Size: {item.size}</span>}
                                         {item.color && <span>Color: {item.color}</span>}
                                     </div>
                                     
                                     <div className="flex items-baseline gap-2 mt-1">
-                                        <p className="text-base font-bold text-foreground">₹{item.product.sellingPrice.toLocaleString('en-IN')}</p>
-                                        {hasDiscount && (
+                                        <p className="text-base font-bold text-foreground">
+                                          {isGift ? 'FREE' : `₹${item.product.sellingPrice.toLocaleString('en-IN')}`}
+                                        </p>
+                                        {hasDiscount && !isGift && (
                                             <>
                                                 <p className="text-sm font-medium text-muted-foreground line-through">₹{item.product.mrp!.toLocaleString('en-IN')}</p>
                                                 <p className="text-sm font-semibold text-green-600">{discountPercentage}% off</p>
@@ -244,22 +288,26 @@ export default function CartPage() {
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-2 text-sm mt-1">
-                                        <Truck className="h-4 w-4 text-muted-foreground" />
-                                        <span>Delivery by {deliveryDate}</span>
-                                    </div>
+                                    {!isGift && (
+                                        <div className="flex items-center gap-2 text-sm mt-1">
+                                            <Truck className="h-4 w-4 text-muted-foreground" />
+                                            <span>Delivery by {deliveryDate}</span>
+                                        </div>
+                                    )}
                                     
-                                    <div className="flex items-center justify-between mt-2">
-                                        <div className="flex items-center gap-1 rounded-full border p-1">
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
-                                            <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
-                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
-                                        </div>
-                                    </div>
+                                    {!isGift ? (
+                                      <div className="flex items-center justify-between mt-2">
+                                          <div className="flex items-center gap-1 rounded-full border p-1">
+                                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
+                                              <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
+                                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
+                                          </div>
+                                          <div className="flex items-center gap-4">
+                                              <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
+                                              <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
+                                          </div>
+                                      </div>
+                                    ) : <div className="mt-2 h-8" />}
                                 </div>
                             </div>
                         )})}
@@ -319,3 +367,5 @@ export default function CartPage() {
     </main>
   );
 }
+
+    
