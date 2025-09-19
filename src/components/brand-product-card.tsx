@@ -19,7 +19,7 @@ import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
-import React from 'react';
+import React, { useMemo } from 'react';
 
 
 interface BrandProductCardProps {
@@ -30,7 +30,13 @@ interface BrandProductCardProps {
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
   const { user, token } = useAuth();
-  const { setWishlist, setCart } = useUserStore();
+  const { wishlist, setWishlist, setCart } = useUserStore();
+
+  const isWishlisted = useMemo(() => {
+    if (!wishlist || !wishlist.products) return false;
+    const wishlistProducts = wishlist.products as IProduct[];
+    return wishlistProducts.some(p => p._id === product._id);
+  }, [wishlist, product._id]);
   
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -133,11 +139,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           <Button
             size="icon"
             variant="secondary"
-            className="rounded-full w-8 h-8 shadow-md hover:bg-background hover:text-red-500"
+            className={cn(
+                "rounded-full w-8 h-8 shadow-md hover:bg-background",
+                isWishlisted ? "text-primary hover:text-primary/90" : "hover:text-red-500"
+            )}
             onClick={handleWishlistClick}
             aria-label="Add to wishlist"
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={cn("h-4 w-4", isWishlisted && "fill-current")} />
           </Button>
           <Button
             size="icon"
