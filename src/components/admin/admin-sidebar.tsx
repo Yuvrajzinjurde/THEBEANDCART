@@ -19,6 +19,7 @@ import {
   TicketPercent,
   Landmark,
   Home,
+  Box,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -46,6 +47,7 @@ const navItems = [
   { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
+  { href: "/admin/boxes", icon: Box, label: "Boxes & Bags" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
   { href: "/admin/users", icon: Users, label: "Users" },
