@@ -53,7 +53,7 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
         return (
             <div className="pt-12">
                 <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
                             <div className="space-y-2">
@@ -102,7 +102,7 @@ const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
   return (
     <div className="mt-8">
       <h3 className="text-lg font-semibold mb-2">Frequently Bought Together</h3>
-      <div className="flex items-center gap-4 rounded-lg">
+      <div className="flex items-center gap-4 rounded-lg overflow-x-auto no-scrollbar">
         {products.map((p, index) => (
           <React.Fragment key={p._id as string}>
             <div className="w-32 flex-shrink-0">
@@ -295,5 +295,3 @@ export default function ProductPage() {
     </>
   );
 }
-
-    

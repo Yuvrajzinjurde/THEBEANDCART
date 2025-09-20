@@ -403,8 +403,8 @@ export default function CartPage() {
                               const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                               const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                               return (
-                              <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex gap-4">
-                                  <div className="block flex-shrink-0 w-[100px] h-[100px] sm:w-[120px] sm:h-[120px]">
+                              <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4">
+                                  <div className="block flex-shrink-0 w-full sm:w-[120px] aspect-square sm:h-[120px]">
                                       {isGift ? (
                                           <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
                                               <GiftBoxIcon />

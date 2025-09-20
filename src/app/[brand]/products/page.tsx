@@ -23,8 +23,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Smile } from 'lucide-react';
+import { ChevronDown, Smile, SlidersHorizontal } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 
 export type ActiveFilters = {
@@ -208,12 +209,14 @@ export default function ProductsPage() {
             <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
-            <ProductFilters 
-                productsForCategories={productsForCategoryFilter}
-                productsForOthers={productsForOtherFilters}
-                activeFilters={activeFilters}
-                onFilterChange={handleFilterChange}
-            />
+             <div className="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
+                <ProductFilters 
+                    productsForCategories={productsForCategoryFilter}
+                    productsForOthers={productsForOtherFilters}
+                    activeFilters={activeFilters}
+                    onFilterChange={handleFilterChange}
+                />
+            </div>
             <div className="flex-1">
                  <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
                     <div className="flex items-baseline justify-between">
@@ -223,21 +226,41 @@ export default function ProductsPage() {
                             </h1>
                             <p className="text-sm text-muted-foreground mt-1">{filteredProducts.length} products</p>
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="shrink-0">
-                                    Sort by: <span className="font-semibold ml-1">{SORT_OPTIONS[sortOption]}</span>
-                                    <ChevronDown className="ml-2 h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                {Object.entries(SORT_OPTIONS).map(([key, value]) => (
-                                     <DropdownMenuItem key={key} onClick={() => setSortOption(key)}>
-                                        {value}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center gap-2">
+                             <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" className="lg:hidden">
+                                        <SlidersHorizontal className="mr-2 h-4 w-4" /> Filters
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="w-full max-w-sm">
+                                    <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
+                                    <div className="p-4">
+                                         <ProductFilters 
+                                            productsForCategories={productsForCategoryFilter}
+                                            productsForOthers={productsForOtherFilters}
+                                            activeFilters={activeFilters}
+                                            onFilterChange={handleFilterChange}
+                                        />
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="shrink-0">
+                                        Sort by: <span className="font-semibold ml-1 hidden sm:inline">{SORT_OPTIONS[sortOption]}</span>
+                                        <ChevronDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    {Object.entries(SORT_OPTIONS).map(([key, value]) => (
+                                        <DropdownMenuItem key={key} onClick={() => setSortOption(key)}>
+                                            {value}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </div>
 

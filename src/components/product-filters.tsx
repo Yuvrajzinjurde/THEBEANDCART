@@ -98,7 +98,7 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
   const allCategories = useMemo(() => (brand?.categories || []).sort(), [brand]);
 
   return (
-    <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+    <aside className="w-full">
       <div className="sticky top-20">
          <div className="flex items-center justify-between pb-4 border-b">
           <h2 className="text-lg font-bold">Filters</h2>
