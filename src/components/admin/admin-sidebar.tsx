@@ -20,6 +20,7 @@ import {
   Landmark,
   Home,
   Box,
+  ShoppingCart,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -57,7 +58,7 @@ const navItems = [
   { href: "/admin/platform", icon: Home, label: "Platform" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
   { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
-  { href: "/admin/settings", icon: Settings, label: "Settings" },
+  { href: "/admin/settings", icon: ShoppingCart, label: "Cart Offers" },
   { href: "/admin/users", icon: Users, label: "Users" },
 ];
 

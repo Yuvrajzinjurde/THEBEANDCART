@@ -2,14 +2,14 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, Save, ShoppingCart, Info } from 'lucide-react';
+import { Save, ShoppingCart, Info } from 'lucide-react';
 import { Loader } from '@/components/ui/loader';
 import { CartSettingsSchema, type CartSettingsValues } from '@/lib/brand-schema';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -79,8 +79,8 @@ export default function SettingsPage() {
       return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><ShoppingCart /> Cart Settings</CardTitle>
-                <CardDescription>Manage the cart page features like the progress bar milestones.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><ShoppingCart /> Cart Offers</CardTitle>
+                <CardDescription>Manage the cart page offers and progress bar milestones.</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center items-center h-64"><Loader /></CardContent>
         </Card>
@@ -93,8 +93,8 @@ export default function SettingsPage() {
         <Card>
             <CardHeader className="flex flex-row justify-between items-start">
                 <div>
-                    <CardTitle className="flex items-center gap-2"><ShoppingCart /> Cart Settings</CardTitle>
-                    <CardDescription>Manage the cart page features like the progress bar milestones.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><ShoppingCart /> Cart Offers</CardTitle>
+                    <CardDescription>Manage the cart page offers and progress bar milestones.</CardDescription>
                 </div>
                 <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
                     {isSubmitting && <Loader className="mr-2" />}
