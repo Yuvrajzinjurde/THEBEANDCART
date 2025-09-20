@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -225,36 +225,48 @@ export default function PlatformSettingsPage() {
                 <FormField control={form.control} name="platformLogoUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Platform Logo</FormLabel>
-                        <div className="flex items-start gap-4">
-                            {field.value && <Image src={field.value} alt="Logo Preview" width={64} height={64} className="rounded-md border p-1" />}
-                            <div className="w-full space-y-2">
-                                <FormControl>
-                                    <Input placeholder="https://example.com/logo.png" {...field} />
-                                </FormControl>
-                                <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('logo-upload')?.click()}>
-                                    <UploadCloud className="mr-2 h-4 w-4" /> Upload
-                                </Button>
-                                <Input id="logo-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, field.onChange)} />
+                         <FormControl>
+                            <div className="w-full">
+                                <Input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange)} />
+                                {field.value ? (
+                                    <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                        <Image src={field.value} alt="Logo preview" fill objectFit="contain" />
+                                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
+                                    </div>
+                                ) : (
+                                    <label htmlFor="logo-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                        </div>
+                                    </label>
+                                )}
                             </div>
-                        </div>
+                        </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}/>
                 <FormField control={form.control} name="platformFaviconUrl" render={({ field }) => (
-                    <FormItem>
+                     <FormItem>
                         <FormLabel>Platform Favicon</FormLabel>
-                          <div className="flex items-start gap-4">
-                            {field.value && <Image src={field.value} alt="Favicon Preview" width={64} height={64} className="rounded-md border p-1" />}
-                            <div className="w-full space-y-2">
-                                <FormControl>
-                                    <Input placeholder="https://example.com/favicon.ico" {...field} />
-                                </FormControl>
-                                <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('favicon-upload')?.click()}>
-                                    <UploadCloud className="mr-2 h-4 w-4" /> Upload
-                                </Button>
-                                <Input id="favicon-upload" type="file" className="hidden" accept="image/x-icon, image/png, image/svg+xml" onChange={(e) => handleFileChange(e, field.onChange)} />
+                         <FormControl>
+                            <div className="w-full">
+                                <Input id="favicon-upload" type="file" accept="image/x-icon, image/png, image/svg+xml" className="hidden" onChange={(e) => handleFileChange(e, field.onChange)} />
+                                {field.value ? (
+                                    <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                        <Image src={field.value} alt="Favicon preview" fill objectFit="contain" />
+                                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
+                                    </div>
+                                ) : (
+                                    <label htmlFor="favicon-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                        </div>
+                                    </label>
+                                )}
                             </div>
-                        </div>
+                        </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}/>
@@ -499,4 +511,5 @@ export default function PlatformSettingsPage() {
   );
 }
 
+    
     
