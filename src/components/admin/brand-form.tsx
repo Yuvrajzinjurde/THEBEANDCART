@@ -201,12 +201,20 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   });
 
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void, dimensions?: { width: number, height: number }) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange(reader.result as string);
+      reader.onload = (loadEvent) => {
+        const image = new window.Image();
+        image.src = loadEvent.target?.result as string;
+        image.onload = () => {
+          if (dimensions && (image.width !== dimensions.width || image.height !== dimensions.height)) {
+            toast.error(`Image must be ${dimensions.width}x${dimensions.height}px.`);
+            return;
+          }
+          onChange(reader.result as string);
+        };
       };
       reader.readAsDataURL(file);
     }
@@ -416,7 +424,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Banners</CardTitle>
-                <CardDescription>Add at least one banner for the homepage carousel. Recommended size: 1600x400px.</CardDescription>
+                <CardDescription>Add at least one banner for the homepage carousel.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -465,7 +473,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                 type="file"
                                                 accept="image/png, image/jpeg"
                                                 className="hidden"
-                                                onChange={(e) => handleFileChange(e, imageField.onChange)}
+                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })}
                                             />
                                             {imageField.value ? (
                                                 <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
@@ -485,7 +493,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">PNG or JPG (1600x400px recommended)</p>
+                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                                     </div>
                                                 </label>
                                             )}
@@ -567,7 +575,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                 <label htmlFor={`cat-banner-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                        <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                                        <p className="text-xs text-muted-foreground">e.g., 400x400 or 400x600px</p>
                                                     </div>
                                                 </label>
                                             )}
@@ -612,7 +621,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Promotional Banner</CardTitle>
-                <CardDescription>A large banner to highlight a special campaign or collection. Recommended size: 1200x600px.</CardDescription>
+                <CardDescription>A large banner to highlight a special campaign or collection.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
@@ -626,7 +635,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                         <FormLabel>Image</FormLabel>
                          <FormControl>
                            <div className="w-full">
-                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange)} />
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
                                 {field.value ? (
                                     <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
                                         <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
@@ -635,7 +644,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 ) : (
                                     <label htmlFor="promo-banner-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                        <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                        <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
                                     </label>
                                 )}
                             </div>
@@ -766,3 +776,4 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </>
   );
 }
+
