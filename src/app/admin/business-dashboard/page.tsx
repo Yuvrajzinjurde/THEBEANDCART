@@ -41,7 +41,7 @@ const EmptyState = () => (
 );
 
 const DashboardSkeleton = () => (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-6 text-center">
         <Skeleton className="h-8 w-64" />
         <Card>
             <CardHeader>
@@ -96,6 +96,7 @@ const DashboardSkeleton = () => (
                 </div>
             </CardContent>
         </Card>
+        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 

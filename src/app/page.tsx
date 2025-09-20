@@ -30,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LandingPageSkeleton = () => (
-    <div className="flex flex-col items-center justify-center h-screen bg-background">
+    <div className="flex flex-col items-center justify-center h-screen">
         <div className="w-full max-w-4xl px-4">
             <div className="space-y-8 animate-pulse">
                 <div className="flex justify-center">
@@ -347,17 +347,18 @@ export default function LandingPage() {
   }, [settings]);
 
   const platformSettings = settings as IPlatformSettings;
-  const heroBanners = platformSettings?.heroBanners;
 
-  if (loading || !platformSettings || !platformSettings.platformName) {
+  if (loading || !platformSettings || !platformSettings.heroBanners || platformSettings.heroBanners.length === 0) {
       return <LandingPageSkeleton />;
   }
+  
+  const heroBanners = platformSettings.heroBanners;
 
   return (
     <>
     <main className="flex-1 flex flex-col items-center">
 
-        {heroBanners && heroBanners.length > 0 ? (
+        {heroBanners.length > 0 ? (
              <section className="w-full">
                 <Carousel 
                     className="w-full" 
@@ -368,7 +369,7 @@ export default function LandingPage() {
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
-                            <div className="relative w-full h-[65vh] md:h-[80vh] bg-secondary text-foreground">
+                            <div className="relative w-full h-[65vh] md:h-[80vh] text-foreground">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title}
@@ -420,7 +421,7 @@ export default function LandingPage() {
         {loading ? (
             <div className="flex flex-col items-center justify-center text-center py-16">
                 <Loader className="h-12 w-12" />
-                <p className="mt-4 text-muted-foreground">Loading products...</p>
+                <p className="mt-4 text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         ) : error ? (
             <div className="text-center text-destructive py-16">

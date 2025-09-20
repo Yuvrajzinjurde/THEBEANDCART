@@ -23,7 +23,7 @@ import type { IReview } from '@/models/review.model';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductPageSkeleton = () => (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
         <div className="grid md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
                 <Skeleton className="aspect-square w-full rounded-lg" />
@@ -44,6 +44,7 @@ const ProductPageSkeleton = () => (
                 <Skeleton className="h-24 w-full" />
             </div>
         </div>
+        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 
@@ -51,7 +52,7 @@ const ProductPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
         return (
-            <div className="pt-12">
+            <div className="pt-12 text-center">
                 <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
                 <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
                     {[...Array(6)].map((_, i) => (
@@ -64,6 +65,7 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
                         </div>
                     ))}
                 </div>
+                 <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         )
     }

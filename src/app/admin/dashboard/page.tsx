@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 const DashboardSkeleton = () => (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-6 text-center">
         <div className="space-y-2">
             <Skeleton className="h-8 w-1/2" />
             <Skeleton className="h-5 w-1/3" />
@@ -33,6 +33,7 @@ const DashboardSkeleton = () => (
                 </Card>
             ))}
         </div>
+        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 

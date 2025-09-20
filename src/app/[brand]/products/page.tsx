@@ -45,7 +45,7 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6 text-center">
         {[...Array(12)].map((_, i) => (
             <div key={i} className="space-y-2">
                 <Skeleton className="aspect-square w-full" />
@@ -53,6 +53,7 @@ const ProductGridSkeleton = () => (
                 <Skeleton className="h-6 w-1/2" />
             </div>
         ))}
+         <p className="mt-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
     </div>
 );
 

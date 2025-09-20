@@ -36,23 +36,26 @@ import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TableSkeleton = () => (
-    <div className="border rounded-md">
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    {[...Array(5)].map((_, i) => <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>)}
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {[...Array(5)].map((_, i) => (
-                    <TableRow key={i}>
-                        {[...Array(5)].map((_, j) => (
-                            <TableCell key={j}><Skeleton className="h-5 w-full" /></TableCell>
-                        ))}
+    <div className="text-center">
+        <div className="border rounded-md">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        {[...Array(5)].map((_, i) => <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>)}
                     </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                </TableHeader>
+                <TableBody>
+                    {[...Array(5)].map((_, i) => (
+                        <TableRow key={i}>
+                            {[...Array(5)].map((_, j) => (
+                                <TableCell key={j}><Skeleton className="h-5 w-full" /></TableCell>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
+        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 

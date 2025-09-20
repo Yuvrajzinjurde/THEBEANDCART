@@ -57,7 +57,7 @@ const WishlistFooter = () => (
 );
 
 const WishlistSkeleton = () => (
-    <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
         <div className="flex items-center justify-between mb-6">
             <Skeleton className="h-8 w-64" />
         </div>
@@ -82,6 +82,7 @@ const WishlistSkeleton = () => (
                 </Card>
             ))}
         </div>
+         <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </main>
 );
 

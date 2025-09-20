@@ -22,7 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 
 const UserDetailsSkeleton = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 text-center">
         <div className="flex items-center gap-4">
             <Skeleton className="h-8 w-8 rounded-md" />
             <Skeleton className="h-6 w-32" />
@@ -90,6 +90,7 @@ const UserDetailsSkeleton = () => (
                 </div>
             </CardContent>
         </Card>
+        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 

@@ -33,7 +33,7 @@ type GroupedProducts = {
 };
 
 const ProductCarouselSkeleton = () => (
-    <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+    <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8 text-center">
         <Skeleton className="h-8 w-48 mb-4" />
         <Separator className="mb-6" />
         <div className="flex space-x-4">
@@ -47,6 +47,7 @@ const ProductCarouselSkeleton = () => (
                 </div>
             ))}
         </div>
+         <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </section>
 );
 
@@ -413,7 +414,7 @@ export default function BrandHomePage() {
 
   if (authLoading || loading) {
     return (
-        <main>
+        <main className="text-center">
             <Skeleton className="w-full h-[65px] md:h-[90px]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
