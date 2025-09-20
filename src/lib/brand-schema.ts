@@ -34,11 +34,13 @@ const promoBannerSchema = z.object({
     const filledFields = fields.filter(f => f && f.length > 0).length;
     // It's either all empty (0) or all filled (5).
     if (filledFields > 0 && filledFields < 5) return false;
-    if (data.buttonLink && data.buttonLink.length > 0) return z.string().url().safeParse(data.buttonLink).success;
+    if (data.buttonLink && data.buttonLink.length > 0) {
+        if (!z.string().url().safeParse(data.buttonLink).success) return false;
+    }
     return true;
 }, {
     message: "To use the promo banner, all fields must be filled out with a valid link.",
-    path: ['buttonLink'], // Or a more general path
+    path: ['buttonLink'],
 });
 
 
@@ -78,14 +80,15 @@ export const BrandFormSchema = z.object({
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;
 
-// Zod schema for Platform Settings form validation
 export const PlatformSettingsValidationSchema = z.object({
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
-  heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required"),
-  featuredCategories: z.array(z.object({ name: z.string() })).optional(),
+  heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
+  featuredCategories: z.array(z.string()).optional(),
   promoBanner: promoBannerSchema.optional(),
   offers: z.array(offerSchema).optional(),
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;
+
+    

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Image from "next/image";
@@ -34,8 +33,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
   const isWishlisted = useMemo(() => {
     if (!wishlist || !wishlist.products) return false;
-    const wishlistProducts = wishlist.products as IProduct[];
-    return wishlistProducts.some(p => p._id === product._id);
+    const wishlistProducts = wishlist.products as (IProduct | string)[];
+    return wishlistProducts.some(p => (typeof p === 'string' ? p : p._id) === product._id);
   }, [wishlist, product._id]);
   
   const handleWishlistClick = async (e: React.MouseEvent) => {
@@ -219,3 +218,5 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
+
+    

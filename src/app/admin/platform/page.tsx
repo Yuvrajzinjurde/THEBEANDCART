@@ -99,6 +99,8 @@ export default function PlatformSettingsPage() {
     mode: 'onChange',
   });
   
+  const stableFetchSettings = useCallback(fetchSettings, [fetchSettings]);
+
   useEffect(() => {
     const fetchAndSetSettings = async () => {
         setIsLoading(true);
@@ -128,7 +130,7 @@ export default function PlatformSettingsPage() {
         }
     }
     fetchAndSetSettings();
-  }, [form]);
+  }, [form, stableFetchSettings]);
 
   const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
     control: form.control,
@@ -488,3 +490,5 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
+
+    

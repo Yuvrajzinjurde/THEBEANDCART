@@ -192,8 +192,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
     if (!brands || brands.length === 0) return null;
     
-    // Determine whether to use Carousel or simple Flex layout
-    const useCarousel = brands.length > 5; // Adjust this threshold as needed
+    const useCarousel = brands.length > 5;
 
     const BrandLogo = ({ brand }: { brand: IBrand }) => {
         const theme = themeColors.find(t => t.name === brand.themeName);
@@ -252,8 +251,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 
 export default function LandingPage() {
-  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const { settings, fetchSettings } = usePlatformSettingsStore();
+  const { settings } = usePlatformSettingsStore();
   const platformSettings = settings as IPlatformSettings;
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -268,17 +266,13 @@ export default function LandingPage() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
-  const stableFetchSettings = useCallback(fetchSettings, []);
-
   useEffect(() => {
     async function fetchData() {
         try {
             setLoading(true);
-            // Fetch all products, platform settings, and brands in parallel
             const [productResponse, brandResponse] = await Promise.all([
                 fetch('/api/products'),
                 fetch('/api/brands'),
-                stableFetchSettings(), // fetch settings for the store
             ]);
             
             if (!productResponse.ok) throw new Error('Failed to fetch products');
@@ -286,13 +280,10 @@ export default function LandingPage() {
             
             const productData = await productResponse.json();
             const fetchedProducts: IProduct[] = productData.products;
-            setAllProducts(fetchedProducts);
             
             const brandData = await brandResponse.json();
             setBrands(brandData.brands);
             
-
-            // --- Sort and Slice Products for Carousels ---
             const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
@@ -307,7 +298,6 @@ export default function LandingPage() {
             const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
             setNewestProducts(sortedByDate.slice(0, 12));
 
-            // Use featured categories from settings, or derive from products as a fallback
             if (platformSettings && platformSettings.featuredCategories && platformSettings.featuredCategories.length > 0) {
                 setUniqueCategories(platformSettings.featuredCategories);
             } else {
@@ -322,11 +312,11 @@ export default function LandingPage() {
           }
     }
     fetchData();
-  }, [stableFetchSettings, platformSettings]);
+  }, [platformSettings]);
 
   const heroBanners = platformSettings?.heroBanners;
 
-  if (loading) {
+  if (loading || !platformSettings) {
       return (
         <div className="flex flex-col items-center justify-center h-screen bg-background">
             <Loader className="h-16 w-16" />
@@ -437,3 +427,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+    

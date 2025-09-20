@@ -46,13 +46,11 @@ export default function Header() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // This effect runs only on the client, after hydration
     setIsClient(true);
     
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
-    // Determine the brand from URL
     if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
       setBrandName(null);
     } else {
@@ -96,7 +94,6 @@ export default function Header() {
         setBrand(null);
       }
     }
-    // Only fetch when brandName is determined on the client
     if (isClient) {
         fetchBrandLogo();
     }
@@ -111,7 +108,7 @@ export default function Header() {
     }
   };
   
-  const currentDisplayName = isClient && brand ? brand.displayName : 'The Brand Cart';
+  const currentDisplayName = isClient && brand && brandName ? brand.displayName : 'The Brand Cart';
   const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
@@ -141,7 +138,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-          {isClient && brand?.logoUrl ? (
+          {isClient && brand?.logoUrl && brandName ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
@@ -149,22 +146,23 @@ export default function Header() {
           <span className="hidden font-bold text-lg sm:inline-block capitalize">{currentDisplayName}</span>
         </Link>
 
-        {/* Categories Dropdown */}
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="hidden md:flex items-center gap-2">
-                    <Menu className="h-5 w-5" />
-                    <span className="font-semibold">Categories</span>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-                 {categories.map(cat => (
-                    <DropdownMenuItem key={cat} asChild>
-                        <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
+        {brandName && categories.length > 0 && (
+          <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="hidden md:flex items-center gap-2">
+                      <Menu className="h-5 w-5" />
+                      <span className="font-semibold">Categories</span>
+                  </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                  {categories.map(cat => (
+                      <DropdownMenuItem key={cat} asChild>
+                          <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                      </DropdownMenuItem>
+                  ))}
+              </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* Search Bar */}
         <div className="flex-1 mx-4">
@@ -277,3 +275,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
