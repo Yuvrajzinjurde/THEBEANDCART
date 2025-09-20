@@ -19,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import type { IProduct } from '@/models/product.model';
+import { Combobox } from '@/components/ui/combobox';
 
 
 const staticDefaultValues: PlatformSettingsValues = {
@@ -60,9 +62,11 @@ const staticDefaultValues: PlatformSettingsValues = {
 
 export default function PlatformSettingsPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [categoryInput, setCategoryInput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
   const { settings, fetchSettings } = usePlatformSettingsStore();
+  
+  const [availableCategories, setAvailableCategories] = useState<{ value: string; label: string; count: number }[]>([]);
+
 
   const form = useForm<PlatformSettingsValues>({
     resolver: zodResolver(PlatformSettingsValidationSchema),
@@ -74,17 +78,38 @@ export default function PlatformSettingsPage() {
     const fetchAndSetSettings = async () => {
         setIsLoading(true);
         try {
+            // Fetch products to determine categories
+            const productResponse = await fetch('/api/products');
+            if (productResponse.ok) {
+                const productData = await productResponse.json();
+                const products: IProduct[] = productData.products;
+                const categoryCounts = products.reduce((acc, product) => {
+                    if (product.category) {
+                        acc[product.category] = (acc[product.category] || 0) + 1;
+                    }
+                    return acc;
+                }, {} as Record<string, number>);
+
+                const categoriesWithOptions = Object.entries(categoryCounts)
+                    .filter(([, count]) => count > 0)
+                    .map(([name, count]) => ({
+                        value: name.toLowerCase(),
+                        label: `${name} (${count})`,
+                        count: count,
+                    }));
+                setAvailableCategories(categoriesWithOptions);
+            }
+
             const response = await fetch('/api/platform');
             if (response.ok) {
                 const settingsData = await response.json();
                 if (settingsData) {
-                    // Ensure all fields have a default value to avoid uncontrolled inputs
                     const defaultSocials = { twitter: '', facebook: '', instagram: '', linkedin: '' };
                     const defaultPromoBanner = { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' };
 
                     const sanitizedSettings: PlatformSettingsValues = {
-                        ...staticDefaultValues, // Start with static defaults
-                        ...settingsData, // Overwrite with fetched data
+                        ...staticDefaultValues,
+                        ...settingsData,
                         platformName: settingsData.platformName || '',
                         platformLogoUrl: settingsData.platformLogoUrl || '',
                         platformFaviconUrl: settingsData.platformFaviconUrl || '',
@@ -103,8 +128,8 @@ export default function PlatformSettingsPage() {
                  form.reset(staticDefaultValues);
             }
         } catch (error) {
-            console.error("Failed to fetch platform settings", error);
-            toast.error("Could not load platform settings. Displaying default values.");
+            console.error("Failed to fetch settings", error);
+            toast.error("Could not load initial data. Displaying default values.");
             form.reset(staticDefaultValues);
         } finally {
             setIsLoading(false);
@@ -147,16 +172,6 @@ export default function PlatformSettingsPage() {
     }
   };
   
-  const handleCategoryKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' || event.key === ',') {
-      event.preventDefault();
-      const newCategory = categoryInput.trim();
-      if (newCategory && !(form.getValues('featuredCategories') || []).some(cat => cat.name === newCategory)) {
-        appendCategory({ name: newCategory });
-        setCategoryInput('');
-      }
-    }
-  };
   
   async function onSubmit(data: PlatformSettingsValues) {
     setIsSubmitting(true);
@@ -180,7 +195,6 @@ export default function PlatformSettingsPage() {
 
       toast.success(`Platform settings saved successfully!`);
       
-      // Manually trigger a re-fetch of the global settings store
       await fetchSettings();
       
       const newDefaults = {
@@ -389,7 +403,7 @@ export default function PlatformSettingsPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Hero Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the main landing page.</CardDescription>
+                <CardDescription>Manage the carousel banners on the main landing page. Required dimensions: 1600x400px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -402,7 +416,7 @@ export default function PlatformSettingsPage() {
                          <FormField control={form.control} name={`heroBanners.${index}.imageUrl`} render={({ field: imageField }) => (
                             <FormItem>
                                 <FormLabel>Banner Image</FormLabel>
-                                 <FormDescription>Required dimensions: 1600x400px</FormDescription>
+                                <FormDescription>Required dimensions: 1600x400px</FormDescription>
                                 <FormControl>
                                    <div className="w-full">
                                         <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })} />
@@ -520,11 +534,15 @@ export default function PlatformSettingsPage() {
                             <FormLabel>Categories</FormLabel>
                             <FormControl>
                                 <div>
-                                    <Input
-                                        placeholder="Add a category and press Enter"
-                                        value={categoryInput}
-                                        onChange={(e) => setCategoryInput(e.target.value)}
-                                        onKeyDown={handleCategoryKeyDown}
+                                    <Combobox
+                                        options={availableCategories}
+                                        placeholder="Select a category..."
+                                        onSelect={(selectedValue) => {
+                                            const categoryName = availableCategories.find(c => c.value === selectedValue)?.label.split(' (')[0];
+                                            if (categoryName && !categoryFields.some(field => field.name === categoryName)) {
+                                                appendCategory({ name: categoryName });
+                                            }
+                                        }}
                                     />
                                     <div className="flex flex-wrap gap-2 mt-4">
                                         {categoryFields.map((field, index) => (
