@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save, Bot } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift } from 'lucide-react';
 import type { IPlatformSettings } from '@/models/platform.model';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
@@ -21,6 +21,7 @@ import usePlatformSettingsStore from '@/stores/platform-settings-store';
 
 const staticDefaultValues: PlatformSettingsValues = {
   aiEnabled: true,
+  hamperFeatureEnabled: true,
   heroBanners: [
     {
       title: "Elevate Your Style",
@@ -89,6 +90,7 @@ export default function PlatformSettingsPage() {
     resolver: zodResolver(PlatformSettingsValidationSchema),
     defaultValues: {
         aiEnabled: true,
+        hamperFeatureEnabled: true,
         heroBanners: [],
         featuredCategories: [],
         promoBanner: { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' },
@@ -98,7 +100,7 @@ export default function PlatformSettingsPage() {
   });
   
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchAndSetSettings = async () => {
         setIsLoading(true);
         try {
             const response = await fetch('/api/platform');
@@ -125,7 +127,7 @@ export default function PlatformSettingsPage() {
             setIsLoading(false);
         }
     }
-    fetchSettings();
+    fetchAndSetSettings();
   }, [form]);
 
   const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
@@ -234,23 +236,47 @@ export default function PlatformSettingsPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle>AI Feature Control</CardTitle>
+            <CardTitle>Feature Controls</CardTitle>
             <CardDescription>
-              Enable or disable generative AI features across the entire platform.
+              Enable or disable major features across the entire platform.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <FormField
+          <CardContent className="space-y-4">
+             <FormField
               control={form.control}
               name="aiEnabled"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">
+                    <FormLabel className="text-base flex items-center gap-2">
+                      <Bot />
                       Enable AI Features
                     </FormLabel>
                     <FormDescription>
-                      When disabled, all AI-powered buttons like 'Autofill', 'Suggest', and 'Generate' will be turned off.
+                      Turn off all AI-powered buttons like 'Autofill', 'Suggest', and 'Generate'.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="hamperFeatureEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base flex items-center gap-2">
+                        <Gift />
+                        Enable Hamper Creation
+                    </FormLabel>
+                    <FormDescription>
+                      Turn off the 'Create Your Own Hamper' feature on the main landing page.
                     </FormDescription>
                   </div>
                   <FormControl>

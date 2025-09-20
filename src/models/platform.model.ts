@@ -26,6 +26,7 @@ const OfferSchema: Schema = new Schema({
 
 export interface IPlatformSettings extends Document {
   aiEnabled: boolean;
+  hamperFeatureEnabled: boolean;
   heroBanners: {
     title: string;
     description: string;
@@ -50,6 +51,7 @@ export interface IPlatformSettings extends Document {
 
 const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   aiEnabled: { type: Boolean, default: true },
+  hamperFeatureEnabled: { type: Boolean, default: true },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
   promoBanner: PromoBannerSchema,

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -25,6 +24,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { themeColors } from '@/lib/brand-schema';
+import usePlatformSettingsStore from '@/stores/platform-settings-store';
 
 const LandingFooter = () => (
     <footer className="w-full border-t bg-background mt-16">
@@ -147,26 +147,32 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     )
 };
 
-const HamperSection = () => (
-    <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
-            <div className="relative z-10 p-8 md:p-12 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
-                    <Gift className="h-8 w-8 text-primary" />
+const HamperSection = () => {
+    const { hamperFeatureEnabled } = usePlatformSettingsStore();
+    
+    if (!hamperFeatureEnabled) return null;
+
+    return (
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
+                <div className="relative z-10 p-8 md:p-12 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
+                        <Gift className="h-8 w-8 text-primary" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                        Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
+                    </p>
+                    <Button asChild size="lg" className="mt-6">
+                        <Link href="/create-hamper">
+                            Start Creating <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
-                <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                    Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
-                </p>
-                <Button asChild size="lg" className="mt-6">
-                    <Link href="/create-hamper">
-                        Start Creating <ArrowRight className="ml-2" />
-                    </Link>
-                </Button>
             </div>
-        </div>
-    </section>
-);
+        </section>
+    );
+};
 
 
 const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
