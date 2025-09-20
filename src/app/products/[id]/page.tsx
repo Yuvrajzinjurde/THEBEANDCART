@@ -44,7 +44,7 @@ const ProductPageSkeleton = () => (
                 <Skeleton className="h-24 w-full" />
             </div>
         </div>
-        <p className="mt-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 
@@ -65,7 +65,7 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
                         </div>
                     ))}
                 </div>
-                 <p className="mt-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+                 <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         )
     }
@@ -121,7 +121,7 @@ const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container mx-auto py-8">
+        <div className="mx-auto max-w-7xl px-4 py-8">
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
