@@ -154,7 +154,8 @@ const Step2_Box = () => {
     const [allBoxes, setAllBoxes] = useState<IBox[]>([]);
     const [suggestedBoxIds, setSuggestedBoxIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
-    const { aiEnabled } = usePlatformSettingsStore();
+    const { settings } = usePlatformSettingsStore();
+    const aiEnabled = settings.aiEnabled;
 
     const handleSelect = (value: string) => {
         const [boxId, variantId] = value.split('-');
@@ -437,7 +438,8 @@ const Step4_Bag = () => {
 
 const Step5_Notes = () => {
     const { occasion, products, notesToCreator, notesToReceiver, addRose, setNotes, setAddRose } = useHamperStore();
-    const { aiEnabled } = usePlatformSettingsStore();
+    const { settings } = usePlatformSettingsStore();
+    const aiEnabled = settings.aiEnabled;
     const [roseSuggestion, setRoseSuggestion] = useState({ shouldSuggest: false, suggestionText: '' });
     const [loadingRoseSuggestion, setLoadingRoseSuggestion] = useState(true);
     const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);

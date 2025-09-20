@@ -2,26 +2,25 @@
 "use client";
 
 import { create } from 'zustand';
+import type { IPlatformSettings } from '@/models/platform.model';
 
 type PlatformSettingsState = {
-  aiEnabled: boolean;
-  hamperFeatureEnabled: boolean;
+  settings: Partial<IPlatformSettings>;
   fetchSettings: () => Promise<void>;
 };
 
 const usePlatformSettingsStore = create<PlatformSettingsState>((set) => ({
-  aiEnabled: true, // Default to true
-  hamperFeatureEnabled: true, // Default to true
+  settings: {
+    aiEnabled: true,
+    hamperFeatureEnabled: true,
+  },
   fetchSettings: async () => {
     try {
       const response = await fetch('/api/platform');
       if (response.ok) {
         const settings = await response.json();
         if (settings) {
-          set({ 
-            aiEnabled: settings.aiEnabled,
-            hamperFeatureEnabled: settings.hamperFeatureEnabled,
-          });
+          set({ settings });
         }
       }
     } catch (error) {

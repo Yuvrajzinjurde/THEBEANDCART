@@ -148,9 +148,9 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
 };
 
 const HamperSection = () => {
-    const { hamperFeatureEnabled } = usePlatformSettingsStore();
+    const { settings } = usePlatformSettingsStore();
     
-    if (!hamperFeatureEnabled) return null;
+    if (!settings.hamperFeatureEnabled) return null;
 
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -253,7 +253,8 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 export default function LandingPage() {
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [platformSettings, setPlatformSettings] = useState<IPlatformSettings | null>(null);
+  const { settings, fetchSettings } = usePlatformSettingsStore();
+  const platformSettings = settings as IPlatformSettings;
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -272,10 +273,10 @@ export default function LandingPage() {
         try {
             setLoading(true);
             // Fetch all products, platform settings, and brands in parallel
-            const [productResponse, settingsResponse, brandResponse] = await Promise.all([
+            const [productResponse, brandResponse] = await Promise.all([
                 fetch('/api/products'),
-                fetch('/api/platform'),
                 fetch('/api/brands'),
+                fetchSettings(), // fetch settings for the store
             ]);
             
             if (!productResponse.ok) throw new Error('Failed to fetch products');
@@ -287,12 +288,7 @@ export default function LandingPage() {
             
             const brandData = await brandResponse.json();
             setBrands(brandData.brands);
-
-            let settingsData: IPlatformSettings | null = null;
-            if (settingsResponse.ok) {
-                settingsData = await settingsResponse.json();
-                setPlatformSettings(settingsData);
-            }
+            
 
             // --- Sort and Slice Products for Carousels ---
             const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
@@ -310,8 +306,8 @@ export default function LandingPage() {
             setNewestProducts(sortedByDate.slice(0, 12));
 
             // Use featured categories from settings, or derive from products as a fallback
-            if (settingsData && settingsData.featuredCategories.length > 0) {
-                setUniqueCategories(settingsData.featuredCategories);
+            if (platformSettings && platformSettings.featuredCategories && platformSettings.featuredCategories.length > 0) {
+                setUniqueCategories(platformSettings.featuredCategories);
             } else {
                 const categories = new Set(fetchedProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
                 setUniqueCategories(Array.from(categories).slice(0, 12));
@@ -324,7 +320,7 @@ export default function LandingPage() {
           }
     }
     fetchData();
-  }, []);
+  }, [fetchSettings, platformSettings]);
 
   const heroBanners = platformSettings?.heroBanners;
 
