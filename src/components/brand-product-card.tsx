@@ -104,7 +104,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const rating = typeof product.rating === 'number' ? product.rating : 0;
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
-  const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
   const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
   return (
@@ -181,36 +180,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           
           <div className="h-5">
             {hasDiscount && (
-              <div className="flex items-center gap-1 text-sm font-semibold text-green-600">
-                  <span>{discountPercentage}% off</span>
-                  <TooltipProvider>
-                      <Tooltip>
-                          <TooltipTrigger asChild>
-                              <button className="cursor-pointer" onClick={(e) => e.preventDefault()}>
-                                  <Info className="h-3 w-3 text-muted-foreground" />
-                              </button>
-                          </TooltipTrigger>
-                          <TooltipContent className="p-3 w-56">
-                              <div className="space-y-2">
-                                  <p className="font-bold text-sm">Price details</p>
-                                  <div className="flex justify-between text-xs">
-                                      <p>MRP</p>
-                                      <p className='line-through'>₹{mrp.toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
-                                  </div>
-                                  <div className="flex justify-between text-xs">
-                                      <p>Discount Price</p>
-                                      <p>₹{sellingPrice.toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
-                                  </div>
-                                  <Separator />
-                                  <div className="flex justify-between text-xs font-semibold text-green-600">
-                                     <p>Overall savings</p>
-                                     <p>₹{amountSaved.toLocaleString('en-IN', {minimumFractionDigits: 2})}</p>
-                                  </div>
-                              </div>
-                          </TooltipContent>
-                      </Tooltip>
-                  </TooltipProvider>
-              </div>
+                <span className="text-sm font-semibold text-green-600">
+                    {discountPercentage}% off
+                </span>
             )}
           </div>
         </div>
