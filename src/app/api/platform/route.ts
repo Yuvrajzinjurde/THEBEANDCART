@@ -20,6 +20,7 @@ const FormSchema = z.object({
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
   offersFeatureEnabled: z.boolean().optional(),
+  promoBannerEnabled: z.boolean().optional(),
   heroBanners: z.array(z.object({
       title: z.string(),
       description: z.string(),

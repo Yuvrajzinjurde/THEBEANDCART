@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv } from 'lucide-react';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +29,7 @@ const staticDefaultValues: PlatformSettingsValues = {
   aiEnabled: true,
   hamperFeatureEnabled: true,
   offersFeatureEnabled: true,
+  promoBannerEnabled: true,
   heroBanners: [
     {
       title: "Elevate Your Style",
@@ -358,6 +359,19 @@ export default function PlatformSettingsPage() {
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+              name="promoBannerEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base flex items-center gap-2"><Tv /> Enable Promotional Banner</FormLabel>
+                    <FormDescription>Show or hide the large promotional banner on the main landing page.</FormDescription>
+                  </div>
+                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
 
@@ -518,5 +532,3 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
-
-    

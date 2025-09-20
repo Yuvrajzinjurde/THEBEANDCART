@@ -84,7 +84,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
 };
 
 const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => {
-    if (!settings?.offers || settings.offers.length === 0) return null;
+    if (!settings?.offersFeatureEnabled || !settings?.offers || settings.offers.length === 0) return null;
     
     const offerIcons = [
         <svg key="0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>,
@@ -122,7 +122,7 @@ const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => 
 
 
 const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }) => {
-    if (!settings?.promoBanner?.imageUrl) return null;
+    if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">

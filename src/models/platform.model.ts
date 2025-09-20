@@ -45,6 +45,7 @@ export interface IPlatformSettings extends Document {
   aiEnabled: boolean;
   hamperFeatureEnabled: boolean;
   offersFeatureEnabled: boolean;
+  promoBannerEnabled: boolean;
   heroBanners: {
     title: string;
     description: string;
@@ -76,6 +77,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   aiEnabled: { type: Boolean, default: true },
   hamperFeatureEnabled: { type: Boolean, default: true },
   offersFeatureEnabled: { type: Boolean, default: true },
+  promoBannerEnabled: { type: Boolean, default: true },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
   promoBanner: PromoBannerSchema,
