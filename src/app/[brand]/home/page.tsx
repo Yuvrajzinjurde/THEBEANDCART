@@ -416,7 +416,7 @@ export default function BrandHomePage() {
   if (authLoading || loading) {
     return (
         <main>
-            <Skeleton className="w-full h-[65px] md:h-[90px]" />
+            <Skeleton className="w-full h-[90px] md:h-[90px]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
@@ -452,7 +452,7 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full text-foreground py-20 sm:py-24 md:py-32">
+                        <div className="relative w-full text-foreground py-24 sm:py-32 md:py-48 flex items-center justify-center">
                             <Image
                                 src={banner.imageUrl}
                                 alt={banner.title}
@@ -463,10 +463,10 @@ export default function BrandHomePage() {
                             />
                             <div className="absolute inset-0 bg-black/50" />
                             <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
-                                <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight">
+                                <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
-                                <p className="mt-4 text-base md:text-lg max-w-2xl">
+                                <p className="mt-4 text-lg md:text-xl max-w-3xl">
                                     {banner.description}
                                 </p>
                             </div>

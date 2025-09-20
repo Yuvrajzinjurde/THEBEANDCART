@@ -377,7 +377,7 @@ export default function LandingPage() {
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
-                            <div className="relative w-full text-foreground py-24 sm:py-32 md:py-48 flex items-center justify-center">
+                            <div className="relative w-full text-foreground flex items-center justify-center py-24 sm:py-32 md:py-48">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title}
@@ -387,7 +387,7 @@ export default function LandingPage() {
                                     priority={index === 0}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                                <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
+                                <div className="relative container h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
                                     <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                         {banner.title}
                                     </h1>
