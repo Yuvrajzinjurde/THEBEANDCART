@@ -44,7 +44,7 @@ const ProductPageSkeleton = () => (
                 <Skeleton className="h-24 w-full" />
             </div>
         </div>
-        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <p className="mt-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 
@@ -65,7 +65,7 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
                         </div>
                     ))}
                 </div>
-                 <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+                 <p className="mt-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         )
     }

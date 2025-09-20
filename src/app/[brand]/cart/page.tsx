@@ -83,14 +83,20 @@ const GiftBoxIcon = () => (
     </svg>
 )
 
-const CartFooter = ({ brandName }: { brandName: string }) => (
+const CartFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
         <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                 <div className="flex items-center gap-2">
+                    {brand?.logoUrl && (
+                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 object-cover rounded-full" />
+                    )}
+                    <span className="text-lg font-bold capitalize">{brand?.displayName}</span>
+                </div>
                  <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
-                    <Link href={`/${brandName}/legal/about-us`} className="hover:text-primary">About Us</Link>
-                    <Link href={`/${brandName}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
-                    <Link href={`/${brandName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
+                    <Link href={`/${brand?.permanentName}/legal/about-us`} className="hover:text-primary">About Us</Link>
+                    <Link href={`/${brand?.permanentName}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
+                    <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
                 </div>
                  <div className="flex space-x-4">
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
@@ -100,7 +106,7 @@ const CartFooter = ({ brandName }: { brandName: string }) => (
                 </div>
             </div>
              <div className="mt-4 border-t pt-4">
-                <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} All rights reserved.</p>
+                <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {brand?.displayName}. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -190,21 +196,30 @@ export default function CartPage() {
   const { cart, setCart, setWishlist } = useUserStore();
   const [loading, setLoading] = useState(true);
   const [allBrands, setAllBrands] = useState<IBrand[]>([]);
+  const [brand, setBrand] = useState<IBrand | null>(null);
 
   useEffect(() => {
-    async function fetchBrands() {
+    async function fetchBrandsAndBrand() {
         try {
-            const response = await fetch('/api/brands');
-            if (response.ok) {
-                const data = await response.json();
+            const [brandsResponse, brandResponse] = await Promise.all([
+                fetch('/api/brands'),
+                fetch(`/api/brands/${brandName}`)
+            ]);
+
+            if (brandsResponse.ok) {
+                const data = await brandsResponse.json();
                 setAllBrands(data.brands);
             }
+            if (brandResponse.ok) {
+                const data = await brandResponse.json();
+                setBrand(data.brand);
+            }
         } catch (error) {
-            console.error("Failed to fetch brands", error);
+            console.error("Failed to fetch brands data", error);
         }
     }
-    fetchBrands();
-  }, []);
+    fetchBrandsAndBrand();
+  }, [brandName]);
 
   useEffect(() => {
     if (!authLoading) {
@@ -348,7 +363,7 @@ export default function CartPage() {
                 </Button>
             </div>
         </main>
-        <CartFooter brandName={brandName} />
+        <CartFooter brand={brand} />
         </>
       );
   }
@@ -539,7 +554,7 @@ export default function CartPage() {
         </div>
       </div>
     </main>
-    <CartFooter brandName={brandName} />
+    <CartFooter brand={brand} />
     </>
   );
 }

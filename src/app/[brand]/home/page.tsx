@@ -37,7 +37,7 @@ const ProductCarouselSkeleton = () => (
     <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8 text-center">
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
         <Separator className="mb-6" />
-        <p className="mb-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
         <div className="flex space-x-4">
             {[...Array(6)].map((_, i) => (
                 <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
