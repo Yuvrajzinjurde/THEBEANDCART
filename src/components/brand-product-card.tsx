@@ -12,13 +12,14 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 
 interface BrandProductCardProps {
@@ -30,6 +31,23 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const router = useRouter();
   const { user, token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
+
+  const [api, setApi] = useState<CarouselApi>()
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!api || !isHovered) return;
+
+    const interval = setInterval(() => {
+        if (api.canScrollNext()) {
+            api.scrollNext();
+        } else {
+            api.scrollTo(0);
+        }
+    }, 1500); // Change image every 1.5 seconds
+
+    return () => clearInterval(interval);
+  }, [api, isHovered]);
 
   const isWishlisted = useMemo(() => {
     if (!wishlist || !wishlist.products) return false;
@@ -104,6 +122,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const rating = typeof product.rating === 'number' ? product.rating : 0;
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
+  const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
   const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
   return (
@@ -111,9 +130,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       href={`/products/${product._id}?storefront=${product.storefront}`} 
       onClick={handleCardClick} 
       className={cn("group block", className)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col h-full">
         <Carousel
+            setApi={setApi}
             opts={{ loop: product.images.length > 1 }}
             className="w-full"
         >
@@ -180,9 +202,38 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           
           <div className="h-5">
             {hasDiscount && (
-                <span className="text-sm font-semibold text-green-600">
-                    {discountPercentage}% off
-                </span>
+                <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-green-600">
+                        {discountPercentage}% off
+                    </span>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
+                                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="p-3 w-64" side="top" align="center">
+                                <div className="space-y-2">
+                                    <p className="font-bold text-base">Price details</p>
+                                    <div className="flex justify-between text-sm">
+                                        <p className="text-muted-foreground">Maximum Retail Price</p>
+                                        <p>₹{mrp.toFixed(2)}</p>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <p className="text-muted-foreground">Selling Price</p>
+                                        <p>₹{sellingPrice.toFixed(2)}</p>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex justify-between text-sm font-semibold text-green-600">
+                                       <p>Overall you save</p>
+                                       <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
+                                    </div>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
             )}
           </div>
         </div>
