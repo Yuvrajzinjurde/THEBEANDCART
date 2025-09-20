@@ -77,7 +77,7 @@ export default function RootLayout({
   const searchParams = useSearchParams();
   const { fetchSettings } = usePlatformSettingsStore();
 
-  const stableFetchSettings = useCallback(fetchSettings, []);
+  const stableFetchSettings = useCallback(fetchSettings, [fetchSettings]);
 
   useEffect(() => {
     // Fetch initial settings on mount

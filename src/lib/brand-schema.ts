@@ -34,7 +34,7 @@ const promoBannerSchema = z.object({
     const filledFields = fields.filter(f => f && f.length > 0).length;
     // It's either all empty (0) or all filled (5).
     if (filledFields > 0 && filledFields < 5) return false;
-    if (data.buttonLink) return z.string().url().safeParse(data.buttonLink).success;
+    if (data.buttonLink && data.buttonLink.length > 0) return z.string().url().safeParse(data.buttonLink).success;
     return true;
 }, {
     message: "To use the promo banner, all fields must be filled out with a valid link.",
