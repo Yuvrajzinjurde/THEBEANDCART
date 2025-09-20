@@ -279,7 +279,6 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 export default function LandingPage() {
   const { settings, fetchSettings } = usePlatformSettingsStore();
-  const platformSettings = settings as IPlatformSettings;
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -300,6 +299,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     async function fetchData() {
+        if (!settings.platformName) return; // Wait for settings to be fetched initially
         try {
             setLoading(true);
             const [productResponse, brandResponse] = await Promise.all([
@@ -330,8 +330,8 @@ export default function LandingPage() {
             const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
             setNewestProducts(sortedByDate.slice(0, 12));
 
-            if (platformSettings && platformSettings.featuredCategories && platformSettings.featuredCategories.length > 0) {
-                setUniqueCategories(platformSettings.featuredCategories);
+            if (settings && settings.featuredCategories && settings.featuredCategories.length > 0) {
+                setUniqueCategories(settings.featuredCategories);
             } else {
                 const categories = new Set(fetchedProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
                 setUniqueCategories(Array.from(categories).slice(0, 12));
@@ -344,11 +344,12 @@ export default function LandingPage() {
           }
     }
     fetchData();
-  }, [platformSettings]);
+  }, [settings]);
 
+  const platformSettings = settings as IPlatformSettings;
   const heroBanners = platformSettings?.heroBanners;
 
-  if (loading || !platformSettings) {
+  if (loading || !platformSettings.platformName) {
       return <LandingPageSkeleton />;
   }
 
