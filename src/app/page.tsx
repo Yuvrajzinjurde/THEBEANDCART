@@ -26,6 +26,31 @@ import { BrandProductCard } from '@/components/brand-product-card';
 import { themeColors } from '@/lib/brand-schema';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+const LandingPageSkeleton = () => (
+    <div className="flex flex-col items-center justify-center h-screen bg-background">
+        <div className="w-full max-w-4xl px-4">
+            <div className="space-y-8 animate-pulse">
+                <div className="flex justify-center">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                </div>
+                <div className="space-y-4 text-center">
+                    <Skeleton className="h-10 w-3/4 mx-auto" />
+                    <Skeleton className="h-6 w-1/2 mx-auto" />
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Skeleton className="h-32 rounded-lg" />
+                    <Skeleton className="h-32 rounded-lg" />
+                    <Skeleton className="h-32 rounded-lg" />
+                    <Skeleton className="h-32 rounded-lg" />
+                </div>
+            </div>
+        </div>
+        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+    </div>
+);
 
 
 const LandingFooter = () => (
@@ -324,12 +349,7 @@ export default function LandingPage() {
   const heroBanners = platformSettings?.heroBanners;
 
   if (loading || !platformSettings) {
-      return (
-        <div className="flex flex-col items-center justify-center h-screen bg-background">
-            <Loader className="h-16 w-16" />
-            <p className="mt-4 text-lg text-muted-foreground animate-pulse">Loading universe of brands...</p>
-        </div>
-      );
+      return <LandingPageSkeleton />;
   }
 
   return (
