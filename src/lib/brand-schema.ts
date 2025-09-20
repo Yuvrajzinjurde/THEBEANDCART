@@ -96,6 +96,7 @@ export const PlatformSettingsValidationSchema = z.object({
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
+  offersFeatureEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
   promoBanner: promoBannerSchema.optional(),
@@ -104,14 +105,10 @@ export const PlatformSettingsValidationSchema = z.object({
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;
 
-const MilestoneSchema = z.object({
-    threshold: z.coerce.number().min(1, "Threshold must be greater than 0."),
-    reward: z.string().min(1, "Reward text is required."),
-});
-
 export const CartSettingsSchema = z.object({
-    freeShippingThreshold: z.coerce.number().min(1),
-    milestones: z.array(MilestoneSchema).max(3, "You can have a maximum of 3 milestones."),
+    freeShippingThreshold: z.coerce.number().min(0, "Threshold must be a positive number"),
+    extraDiscountThreshold: z.coerce.number().min(0, "Threshold must be a positive number"),
+    freeGiftThreshold: z.coerce.number().min(0, "Threshold must be a positive number"),
 });
 
 export type CartSettingsValues = z.infer<typeof CartSettingsSchema>;

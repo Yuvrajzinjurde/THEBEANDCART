@@ -23,10 +23,28 @@ const OfferSchema: Schema = new Schema({
     code: { type: String, required: true },
 }, { _id: false });
 
+const SocialLinksSchema: Schema = new Schema({
+    twitter: { type: String },
+    facebook: { type: String },
+    instagram: { type: String },
+    linkedin: { type: String },
+}, { _id: false });
+
 
 export interface IPlatformSettings extends Document {
+  platformName: string;
+  platformLogoUrl: string;
+  platformFaviconUrl: string;
+  platformThemeName: string;
+  socials?: {
+    twitter?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+  };
   aiEnabled: boolean;
   hamperFeatureEnabled: boolean;
+  offersFeatureEnabled: boolean;
   heroBanners: {
     title: string;
     description: string;
@@ -50,8 +68,14 @@ export interface IPlatformSettings extends Document {
 }
 
 const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
+  platformName: { type: String, default: 'The Brand Cart' },
+  platformLogoUrl: { type: String, default: '' },
+  platformFaviconUrl: { type: String, default: '' },
+  platformThemeName: { type: String, default: 'Blue' },
+  socials: SocialLinksSchema,
   aiEnabled: { type: Boolean, default: true },
   hamperFeatureEnabled: { type: Boolean, default: true },
+  offersFeatureEnabled: { type: Boolean, default: true },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
   promoBanner: PromoBannerSchema,

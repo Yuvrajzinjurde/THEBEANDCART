@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format, subDays } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown, Info, Clock, Briefcase } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -216,7 +216,7 @@ function BusinessDashboardPage() {
 
   return (
     <div className="flex-1 space-y-6">
-      <h1 className="text-2xl font-bold">Business Dashboard</h1>
+      <CardTitle className="flex items-center gap-2"><Briefcase /> Business Dashboard</CardTitle>
       
       <Card>
         <CardHeader>
