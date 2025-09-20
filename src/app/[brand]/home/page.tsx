@@ -452,7 +452,7 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full h-[65px] md:h-[90px] bg-secondary text-foreground">
+                        <div className="relative w-full text-foreground py-20 sm:py-24 md:py-32">
                             <Image
                                 src={banner.imageUrl}
                                 alt={banner.title}
