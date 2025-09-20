@@ -26,22 +26,6 @@ import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { themeColors } from '@/lib/brand-schema';
 
-const LandingHeader = () => (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-            <Link href="/" className="flex items-center space-x-2">
-                <Logo className="h-8 w-8 text-primary" />
-                <span className="font-bold sm:inline-block">The Brand Cart</span>
-            </Link>
-            <nav className="flex items-center gap-4">
-                 <Link href="/admin/dashboard" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                    Admin
-                </Link>
-            </nav>
-        </div>
-    </header>
-);
-
 const LandingFooter = () => (
     <footer className="w-full border-t bg-background mt-16">
         <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -349,7 +333,6 @@ export default function LandingPage() {
 
   return (
     <>
-    <LandingHeader />
     <main className="flex-1 flex flex-col items-center bg-background">
 
         {heroBanners && heroBanners.length > 0 ? (
