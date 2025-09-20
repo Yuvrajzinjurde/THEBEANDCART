@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -30,7 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LandingPageSkeleton = () => (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-4xl px-4">
             <div className="space-y-8 animate-pulse">
                 <div className="flex justify-center">
@@ -299,7 +300,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     async function fetchData() {
-        if (!settings.platformName) return; // Wait for settings to be fetched initially
+        if (!settings || !settings.platformName) return; // Wait for settings to be fetched initially
         try {
             setLoading(true);
             const [productResponse, brandResponse] = await Promise.all([
@@ -347,7 +348,7 @@ export default function LandingPage() {
   }, [settings]);
 
   const platformSettings = settings as IPlatformSettings;
-
+  
   if (loading || !platformSettings || !platformSettings.heroBanners || platformSettings.heroBanners.length === 0) {
       return <LandingPageSkeleton />;
   }
@@ -356,9 +357,9 @@ export default function LandingPage() {
 
   return (
     <>
-    <main className="flex-1 flex flex-col items-center">
+    <main className="flex-1">
 
-        {heroBanners.length > 0 ? (
+        {heroBanners && heroBanners.length > 0 ? (
              <section className="w-full">
                 <Carousel 
                     className="w-full" 

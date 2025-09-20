@@ -122,8 +122,9 @@ const CartSkeleton = () => (
             </div>
         </div>
       </div>
-    <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8 pt-6 text-center">
+    <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8 pt-6">
         <div className="max-w-7xl mx-auto">
+             <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
                 <div className="lg:col-span-2 space-y-4">
                     <Card>
@@ -176,7 +177,6 @@ const CartSkeleton = () => (
                 </div>
             </div>
         </div>
-        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </main>
     </>
 );
