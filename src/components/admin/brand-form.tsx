@@ -643,9 +643,11 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                     </div>
                                 ) : (
                                     <label htmlFor="promo-banner-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                        <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                            <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
+                                        </div>
                                     </label>
                                 )}
                             </div>
@@ -777,3 +779,4 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   );
 }
 
+    

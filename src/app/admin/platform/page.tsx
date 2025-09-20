@@ -62,7 +62,7 @@ export default function PlatformSettingsPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryInput, setCategoryInput] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
-  const { fetchSettings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
 
   const form = useForm<PlatformSettingsValues>({
     resolver: zodResolver(PlatformSettingsValidationSchema),
@@ -78,18 +78,17 @@ export default function PlatformSettingsPage() {
             if (response.ok) {
                 const settings = await response.json();
                 if (settings) {
-                    // Ensure all fields have a defined value to prevent uncontrolled -> controlled error.
                     const sanitizedSettings = {
-                        ...staticDefaultValues, // Start with defaults
-                        ...settings, // Override with fetched settings
-                        // Explicitly ensure nested objects and their properties are not undefined
+                        ...staticDefaultValues,
+                        ...settings,
+                        platformLogoUrl: settings.platformLogoUrl || '',
+                        platformFaviconUrl: settings.platformFaviconUrl || '',
                         socials: {
                             twitter: settings.socials?.twitter || '',
                             facebook: settings.socials?.facebook || '',
                             instagram: settings.socials?.instagram || '',
                             linkedin: settings.socials?.linkedin || '',
                         },
-                        // Ensure arrays are not undefined
                         heroBanners: settings.heroBanners || [],
                         featuredCategories: (settings.featuredCategories || []).map((cat: string) => ({ name: cat })),
                         offers: settings.offers || [],
@@ -179,6 +178,7 @@ export default function PlatformSettingsPage() {
       }
 
       toast.success(`Platform settings saved successfully!`);
+      
       const newDefaults = {
           ...result,
           featuredCategories: result.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
@@ -190,7 +190,6 @@ export default function PlatformSettingsPage() {
           },
       };
       form.reset(newDefaults);
-      // Immediately refetch the settings into the global store after saving.
       await fetchSettings();
 
     } catch (error: any) {
@@ -410,9 +409,11 @@ export default function PlatformSettingsPage() {
                                             </div>
                                         ) : (
                                             <label htmlFor={`banner-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                                <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
+                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                    <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
+                                                </div>
                                             </label>
                                         )}
                                     </div>
@@ -448,9 +449,11 @@ export default function PlatformSettingsPage() {
                                     </div>
                                 ) : (
                                     <label htmlFor="promo-banner-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                        <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                            <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
+                                        </div>
                                     </label>
                                 )}
                             </div>
@@ -544,3 +547,4 @@ export default function PlatformSettingsPage() {
   );
 }
 
+    
