@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette } from 'lucide-react';
-import type { IPlatformSettings } from '@/models/platform.model';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
@@ -77,16 +76,24 @@ export default function PlatformSettingsPage() {
             if (response.ok) {
                 const settings = await response.json();
                 if (settings) {
-                    form.reset({
-                        ...settings,
+                    // Ensure all fields have a defined value to prevent uncontrolled -> controlled error.
+                    const sanitizedSettings = {
+                        ...staticDefaultValues, // Start with defaults
+                        ...settings, // Override with fetched settings
+                        // Explicitly ensure nested objects and their properties are not undefined
                         socials: {
                             twitter: settings.socials?.twitter || '',
                             facebook: settings.socials?.facebook || '',
                             instagram: settings.socials?.instagram || '',
                             linkedin: settings.socials?.linkedin || '',
                         },
-                        featuredCategories: settings.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
-                    });
+                        // Ensure arrays are not undefined
+                        heroBanners: settings.heroBanners || [],
+                        featuredCategories: (settings.featuredCategories || []).map((cat: string) => ({ name: cat })),
+                        offers: settings.offers || [],
+                        promoBanner: settings.promoBanner || staticDefaultValues.promoBanner,
+                    };
+                    form.reset(sanitizedSettings);
                 } else {
                      form.reset(staticDefaultValues);
                 }
@@ -510,5 +517,3 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
-
-    
