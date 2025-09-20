@@ -47,11 +47,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../u
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 
+const mainNavItem = { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" };
+
 const navItems = [
   { href: "/admin/boxes", icon: Box, label: "Boxes & Bags" },
   { href: "/admin/brands", icon: Store, label: "Manage Brands" },
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
-  { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
@@ -154,6 +155,8 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
 
 const SidebarContent = () => {
     const pathname = usePathname();
+    const { href, icon: Icon, label } = mainNavItem;
+
     return (
         <>
         {/* Main Content */}
@@ -161,7 +164,12 @@ const SidebarContent = () => {
             <div className="p-2">
                 <BrandSelector isCollapsed={false} />
             </div>
-            <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
+             <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
+                <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary")}>
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                </Link>
+                <Separator className="my-2" />
                 {navItems.sort((a, b) => a.label.localeCompare(b.label)).map(({ href, icon: Icon, label }) => (
                     <Link key={label} href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary")}>
                         <Icon className="h-4 w-4" />
@@ -240,6 +248,8 @@ export function AdminSidebar() {
     const toggleSidebar = () => {
         setIsCollapsed(!isCollapsed);
     }
+    
+    const { href: mainHref, icon: MainIcon, label: mainLabel } = mainNavItem;
 
     return (
         <aside className={cn(
@@ -263,6 +273,19 @@ export function AdminSidebar() {
                     </div>
                     <div className="flex-1 overflow-auto py-2 no-scrollbar">
                         <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Link
+                                        href={mainHref}
+                                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(mainHref) && "bg-muted text-primary", isCollapsed && "justify-center")}
+                                    >
+                                        <MainIcon className="h-4 w-4" />
+                                        <span className={cn(isCollapsed && "hidden")}>{mainLabel}</span>
+                                    </Link>
+                                </TooltipTrigger>
+                                {isCollapsed && <TooltipContent side="right">{mainLabel}</TooltipContent>}
+                            </Tooltip>
+                            <Separator className="my-2" />
                             {navItems.sort((a, b) => a.label.localeCompare(b.label)).map(({ href, icon: Icon, label }) => (
                                 <Tooltip key={label}>
                                     <TooltipTrigger asChild>
