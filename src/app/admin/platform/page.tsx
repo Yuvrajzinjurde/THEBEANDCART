@@ -76,23 +76,24 @@ export default function PlatformSettingsPage() {
         try {
             const response = await fetch('/api/platform');
             if (response.ok) {
-                const settings = await response.json();
-                if (settings) {
-                    const sanitizedSettings = {
-                        ...staticDefaultValues,
-                        ...settings,
-                        platformLogoUrl: settings.platformLogoUrl || '',
-                        platformFaviconUrl: settings.platformFaviconUrl || '',
-                        socials: {
-                            twitter: settings.socials?.twitter || '',
-                            facebook: settings.socials?.facebook || '',
-                            instagram: settings.socials?.instagram || '',
-                            linkedin: settings.socials?.linkedin || '',
-                        },
-                        heroBanners: settings.heroBanners || [],
-                        featuredCategories: (settings.featuredCategories || []).map((cat: string) => ({ name: cat })),
-                        offers: settings.offers || [],
-                        promoBanner: settings.promoBanner || staticDefaultValues.promoBanner,
+                const settingsData = await response.json();
+                if (settingsData) {
+                    // Ensure all fields have a default value to avoid uncontrolled inputs
+                    const defaultSocials = { twitter: '', facebook: '', instagram: '', linkedin: '' };
+                    const defaultPromoBanner = { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' };
+
+                    const sanitizedSettings: PlatformSettingsValues = {
+                        ...staticDefaultValues, // Start with static defaults
+                        ...settingsData, // Overwrite with fetched data
+                        platformName: settingsData.platformName || '',
+                        platformLogoUrl: settingsData.platformLogoUrl || '',
+                        platformFaviconUrl: settingsData.platformFaviconUrl || '',
+                        platformThemeName: settingsData.platformThemeName || 'Blue',
+                        socials: { ...defaultSocials, ...(settingsData.socials || {}) },
+                        featuredCategories: (settingsData.featuredCategories || []).map((cat: string) => ({ name: cat })),
+                        heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
+                        offers: settingsData.offers && settingsData.offers.length > 0 ? settingsData.offers : staticDefaultValues.offers,
+                        promoBanner: { ...defaultPromoBanner, ...(settingsData.promoBanner || {}) },
                     };
                     form.reset(sanitizedSettings);
                 } else {
@@ -179,6 +180,9 @@ export default function PlatformSettingsPage() {
 
       toast.success(`Platform settings saved successfully!`);
       
+      // Manually trigger a re-fetch of the global settings store
+      await fetchSettings();
+      
       const newDefaults = {
           ...result,
           featuredCategories: result.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
@@ -189,8 +193,7 @@ export default function PlatformSettingsPage() {
               linkedin: result.socials?.linkedin || '',
           },
       };
-      form.reset(newDefaults);
-      await fetchSettings();
+      form.reset(newDefaults, { keepDirty: false });
 
     } catch (error: any) {
       console.error("Submission Error:", error);
@@ -399,6 +402,7 @@ export default function PlatformSettingsPage() {
                          <FormField control={form.control} name={`heroBanners.${index}.imageUrl`} render={({ field: imageField }) => (
                             <FormItem>
                                 <FormLabel>Banner Image</FormLabel>
+                                 <FormDescription>Required dimensions: 1600x400px</FormDescription>
                                 <FormControl>
                                    <div className="w-full">
                                         <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })} />
@@ -412,7 +416,6 @@ export default function PlatformSettingsPage() {
                                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                     <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                     <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                    <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                                 </div>
                                             </label>
                                         )}
@@ -439,6 +442,7 @@ export default function PlatformSettingsPage() {
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
+                        <FormDescription>Required dimensions: 1200x600px</FormDescription>
                          <FormControl>
                            <div className="w-full">
                                 <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
@@ -452,7 +456,6 @@ export default function PlatformSettingsPage() {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                             <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                            <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
                                         </div>
                                     </label>
                                 )}
