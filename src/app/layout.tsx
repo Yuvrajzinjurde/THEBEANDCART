@@ -98,20 +98,26 @@ export default function RootLayout({
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
   
   const getBrandName = () => {
+    // Special pages that use the global platform theme (return null)
     if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
       return null;
     }
     
+    // For product pages, the brand is determined by the `storefront` query parameter
+    if (pathname.startsWith('/products/')) {
+        const storefrontQuery = searchParams.get('storefront');
+        if (storefrontQuery) {
+            return storefrontQuery;
+        }
+    }
+
+    // For brand-specific pages like `/reeva/home`, the brand is the first part of the path
     const pathParts = pathname.split('/');
-    if (pathParts.length > 1 && pathParts[1] && pathParts[1] !== 'products') {
+    if (pathParts.length > 1 && pathParts[1]) {
       return pathParts[1];
     }
 
-    const storefrontQuery = searchParams.get('storefront');
-    if (storefrontQuery) {
-        return storefrontQuery;
-    }
-
+    // Fallback to a default brand if no other logic matches
     return 'reeva';
   }
   
