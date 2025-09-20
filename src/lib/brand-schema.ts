@@ -53,7 +53,7 @@ const categoryBannerSchema = z.object({
 
 export const themeColors = [
     { name: 'Jewelry', primary: '45 90% 55%', background: '0 0% 98%', accent: '45 90% 95%' },
-    { name: 'Blue', primary: '39 80% 55%', background: '40 50% 98%', accent: '39 80% 95%' },
+    { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
     { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
     { name: 'Orange', primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
     { name: 'Purple', primary: '262.1 83.3% 57.8%', background: '0 0% 100%', accent: '260 100% 96.7%' },
@@ -84,11 +84,9 @@ export const PlatformSettingsValidationSchema = z.object({
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
-  featuredCategories: z.array(z.string()).optional(),
+  featuredCategories: z.array(z.object({ name: z.string() })).optional(),
   promoBanner: promoBannerSchema.optional(),
   offers: z.array(offerSchema).optional(),
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;
-
-    

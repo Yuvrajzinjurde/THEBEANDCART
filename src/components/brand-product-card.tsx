@@ -87,7 +87,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     }
   };
 
-  const handleCardClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     // Track the click - fire and forget
     fetch(`/api/products/${product._id}/track`, {
@@ -218,5 +218,3 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
-
-    

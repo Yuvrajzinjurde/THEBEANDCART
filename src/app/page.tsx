@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
@@ -25,6 +25,8 @@ import { Separator } from '@/components/ui/separator';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { themeColors } from '@/lib/brand-schema';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
+import { cn } from '@/lib/utils';
+
 
 const LandingFooter = () => (
     <footer className="w-full border-t bg-background mt-16">
@@ -124,7 +126,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
     return (
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="relative rounded-lg overflow-hidden h-[400px] md:h-[320px] bg-secondary text-foreground flex items-center">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
                  <Image
                     src={imageUrl}
                     alt={title}
@@ -132,9 +134,9 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
                     className="object-cover"
                     data-ai-hint={imageHint}
                 />
-                <div className="absolute inset-0 bg-black/60" />
-                <div className="relative z-10 p-8 md:p-16 max-w-2xl">
-                    <h2 className="text-3xl md:text-5xl font-bold text-white">{title}</h2>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+                <div className="relative z-10 p-8 md:p-16 max-w-2xl text-white flex flex-col items-start h-full justify-center">
+                    <h2 className="text-3xl md:text-5xl font-bold">{title}</h2>
                     <p className="text-lg text-white/90 mt-4">{description}</p>
                     <Button asChild size="lg" className="mt-6">
                         <Link href={buttonLink}>
@@ -251,7 +253,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 
 export default function LandingPage() {
-  const { settings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
   const platformSettings = settings as IPlatformSettings;
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
@@ -265,6 +267,11 @@ export default function LandingPage() {
   const mainCarouselPlugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
+  
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -340,7 +347,7 @@ export default function LandingPage() {
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
-                            <div className="relative w-full h-[125px] md:h-[200px] bg-secondary text-foreground">
+                            <div className="relative w-full h-[65vh] md:h-[80vh] bg-secondary text-foreground">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title}
@@ -349,14 +356,19 @@ export default function LandingPage() {
                                     data-ai-hint={banner.imageHint}
                                     priority={index === 0}
                                 />
-                                <div className="absolute inset-0 bg-black/50" />
-                                <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
-                                    <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                                <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-16 md:pb-24 items-center text-center text-white">
+                                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                         {banner.title}
                                     </h1>
-                                    <p className="mt-4 text-base md:text-lg max-w-2xl">
+                                    <p className="mt-4 text-lg md:text-xl max-w-3xl">
                                         {banner.description}
                                     </p>
+                                     <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+                                        <Button asChild size="lg" className={cn("h-12 text-base")}>
+                                            <Link href="/create-hamper">Start Curating Your Hamper</Link>
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </CarouselItem>
@@ -367,16 +379,20 @@ export default function LandingPage() {
                 </Carousel>
             </section>
         ) : (
-            <section className="w-full py-12 sm:py-20 px-4 sm:px-8 text-center">
-                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground">
-                    Your Universe of Brands
+            <section className="w-full py-20 sm:py-32 px-4 sm:px-8 text-center">
+                 <Logo className="h-16 w-16 mx-auto mb-4" />
+                <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground">
+                    The Brand Cart
                 </h1>
-                <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                    Discover curated products from a constellation of unique brands, all in one place.
-                </p>
+                 <p className="mt-4 text-lg text-muted-foreground">Your Cart, Your Way.</p>
             </section>
         )}
         
+        <section className="py-16 text-center container">
+            <h2 className="text-xl font-semibold text-muted-foreground">A home for curated experiences.</h2>
+            <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
+        </section>
+
         <HamperSection />
         <ShopByBrandSection brands={brands} />
 
@@ -405,7 +421,7 @@ export default function LandingPage() {
                         <div className="text-center mb-10">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             {uniqueCategories.map(category => (
                                 <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
                                     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -419,6 +435,10 @@ export default function LandingPage() {
                         </div>
                     </section>
                 )}
+                 <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+                    <h2 className="text-2xl font-bold text-foreground">A Personalized Experience, Coming Soon</h2>
+                    <p className="mt-2 max-w-xl mx-auto text-muted-foreground">We’ll soon let you design your own cart experience. Stay tuned for AI-driven suggestions and more!</p>
+                </section>
             </>
         )}
 
@@ -427,5 +447,3 @@ export default function LandingPage() {
     </>
   );
 }
-
-    

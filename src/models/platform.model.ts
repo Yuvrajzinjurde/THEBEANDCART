@@ -61,5 +61,3 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
 const PlatformSettings: Model<IPlatformSettings> = mongoose.models.PlatformSettings || mongoose.model<IPlatformSettings>('PlatformSettings', PlatformSettingsSchema);
 
 export default PlatformSettings;
-
-    
