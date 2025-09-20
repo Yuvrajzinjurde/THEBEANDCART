@@ -7,7 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/header';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { IBrand } from '@/models/brand.model';
 import { themeColors } from '@/lib/brand-schema';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
@@ -77,10 +77,12 @@ export default function RootLayout({
   const searchParams = useSearchParams();
   const { fetchSettings } = usePlatformSettingsStore();
 
+  const stableFetchSettings = useCallback(fetchSettings, []);
+
   useEffect(() => {
     // Fetch initial settings on mount
-    fetchSettings();
-  }, [fetchSettings]);
+    stableFetchSettings();
+  }, [stableFetchSettings]);
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
