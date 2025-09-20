@@ -211,10 +211,40 @@ export default function PlatformSettingsPage() {
             )}/>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="platformLogoUrl" render={({ field }) => (
-                    <FormItem><FormLabel>Platform Logo URL</FormLabel><FormControl><Input placeholder="https://example.com/logo.png" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                        <FormLabel>Platform Logo</FormLabel>
+                        <div className="flex items-start gap-4">
+                            {field.value && <Image src={field.value} alt="Logo Preview" width={64} height={64} className="rounded-md border p-1" />}
+                            <div className="w-full space-y-2">
+                                <FormControl>
+                                    <Input placeholder="https://example.com/logo.png" {...field} />
+                                </FormControl>
+                                <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('logo-upload')?.click()}>
+                                    <UploadCloud className="mr-2 h-4 w-4" /> Upload
+                                </Button>
+                                <Input id="logo-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, field.onChange)} />
+                            </div>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
                 )}/>
                 <FormField control={form.control} name="platformFaviconUrl" render={({ field }) => (
-                    <FormItem><FormLabel>Platform Favicon URL</FormLabel><FormControl><Input placeholder="https://example.com/favicon.ico" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                        <FormLabel>Platform Favicon</FormLabel>
+                          <div className="flex items-start gap-4">
+                            {field.value && <Image src={field.value} alt="Favicon Preview" width={64} height={64} className="rounded-md border p-1" />}
+                            <div className="w-full space-y-2">
+                                <FormControl>
+                                    <Input placeholder="https://example.com/favicon.ico" {...field} />
+                                </FormControl>
+                                <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('favicon-upload')?.click()}>
+                                    <UploadCloud className="mr-2 h-4 w-4" /> Upload
+                                </Button>
+                                <Input id="favicon-upload" type="file" className="hidden" accept="image/x-icon, image/png, image/svg+xml" onChange={(e) => handleFileChange(e, field.onChange)} />
+                            </div>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
                 )}/>
              </div>
              <FormField
