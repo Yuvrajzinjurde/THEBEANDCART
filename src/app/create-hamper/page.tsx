@@ -13,7 +13,7 @@ import type { IProduct } from "@/models/product.model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
-import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot, Heart, ShoppingCart } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Package, Sparkles, Trash2, Twitter, Facebook, Instagram, Linkedin, Bot, Heart, ShoppingCart, Home } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -691,11 +691,12 @@ export default function CreateHamperPage() {
         <div className="flex flex-col min-h-screen">
             <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 flex-grow">
                 <div className="max-w-4xl mx-auto pb-24">
-                     <div className="relative mb-8">
-                         <Button variant="link" onClick={() => router.push('/')} className="absolute left-0 top-1/2 -translate-y-1/2 p-0 h-auto hidden sm:flex">
-                            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+                     <div className="relative mb-8 flex items-center justify-between">
+                        <Button variant="outline" size="icon" onClick={() => router.push('/')} className="hidden sm:inline-flex">
+                            <Home className="h-4 w-4" />
+                            <span className="sr-only">Back to Home</span>
                         </Button>
-                        <div className="space-y-4">
+                        <div className="absolute left-1/2 -translate-x-1/2">
                             <HamperProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
                         </div>
                     </div>
