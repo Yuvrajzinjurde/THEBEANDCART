@@ -180,6 +180,7 @@ export default function PlatformSettingsPage() {
           },
       };
       form.reset(newDefaults);
+      // Immediately refetch the settings into the global store after saving.
       await fetchSettings();
 
     } catch (error: any) {
@@ -517,3 +518,5 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
+
+    
