@@ -7,15 +7,17 @@ export interface IProduct extends Document {
   description: string;
   mrp?: number; // Original Price (Maximum Retail Price)
   sellingPrice: number; // Discounted/Selling Price
+  purchasePrice?: number; // Cost price for internal calculations
   category:  string; 
   images: string[];
+  videos?: string[];
   stock: number;
   rating: number;
   brand: string; // The product's actual brand, e.g., "Nike"
   storefront: string; // The storefront this product belongs to, e.g., "reeva"
   views: number;
   clicks: number;
-  keywords: string[]; // New keywords field
+  keywords: string[];
   returnPeriod: number; // Number of days for return
   // New fields for variants
   styleId?: string; // Groups variants together
@@ -28,8 +30,10 @@ const ProductSchema: Schema<IProduct> = new Schema({
   description: { type: String, required: true },
   mrp: { type: Number, min: 0 },
   sellingPrice: { type: Number, required: true, min: 0 },
+  purchasePrice: { type: Number, min: 0 },
   category:  { type: String, required: true },
   images: [{ type: String, required: true }],
+  videos: [{ type: String }],
   stock: { type: Number, required: true, min: 0, default: 0 },
   rating: { type: Number, min: 0, max: 5, default: 0 },
   brand: { type: String, required: true },
