@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,7 @@ export default function PlatformSettingsPage() {
                             instagram: settings.socials?.instagram || '',
                             linkedin: settings.socials?.linkedin || '',
                         },
-                        featuredCategories: settings.featuredCategories?.map((cat: string) => ({name: cat})) || [],
+                        featuredCategories: settings.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
                     });
                 } else {
                      form.reset(staticDefaultValues);
@@ -511,5 +511,4 @@ export default function PlatformSettingsPage() {
   );
 }
 
-    
     
