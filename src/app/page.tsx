@@ -349,13 +349,13 @@ export default function LandingPage() {
   const platformSettings = settings as IPlatformSettings;
   const heroBanners = platformSettings?.heroBanners;
 
-  if (loading || !platformSettings.platformName) {
+  if (loading || !platformSettings || !platformSettings.platformName) {
       return <LandingPageSkeleton />;
   }
 
   return (
     <>
-    <main className="flex-1 flex flex-col items-center bg-background">
+    <main className="flex-1 flex flex-col items-center">
 
         {heroBanners && heroBanners.length > 0 ? (
              <section className="w-full">
