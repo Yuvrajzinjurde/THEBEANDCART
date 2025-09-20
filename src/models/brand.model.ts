@@ -36,6 +36,13 @@ interface ICategoryBanner {
     imageHint: string;
 }
 
+interface ISocialLinks {
+    twitter?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+}
+
 
 export interface IBrand extends Document {
   displayName: string;
@@ -48,6 +55,7 @@ export interface IBrand extends Document {
   promoBanner: IPromoBanner;
   categoryBanners: ICategoryBanner[];
   categories: string[];
+  socials?: ISocialLinks;
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -85,6 +93,13 @@ const CategoryBannerSchema: Schema<ICategoryBanner> = new Schema({
     imageHint: { type: String, required: true },
 }, { _id: false });
 
+const SocialLinksSchema: Schema<ISocialLinks> = new Schema({
+    twitter: { type: String },
+    facebook: { type: String },
+    instagram: { type: String },
+    linkedin: { type: String },
+}, { _id: false });
+
 
 const BrandSchema: Schema<IBrand> = new Schema({
   displayName: { type: String, required: true },
@@ -97,6 +112,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   promoBanner: PromoBannerSchema,
   categoryBanners: [CategoryBannerSchema],
   categories: { type: [String], default: [] },
+  socials: SocialLinksSchema,
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);

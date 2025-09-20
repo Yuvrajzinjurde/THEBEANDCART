@@ -57,6 +57,7 @@ const navItems = [
   { href: "/admin/platform", icon: Home, label: "Platform" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
   { href: "/admin/returns", icon: GitCommitHorizontal, label: "Returns" },
+  { href: "/admin/settings", icon: Settings, label: "Settings" },
   { href: "/admin/users", icon: Users, label: "Users" },
 ];
 
@@ -176,7 +177,6 @@ const SidebarContent = () => {
                     <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button>
                     </div>
                 </div>
             </div>
@@ -282,12 +282,6 @@ export function AdminSidebar() {
                         <div className={cn("p-2", isCollapsed ? "py-2" : "p-2")}>
                                 <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
                                     {!isCollapsed && <span className="text-xs text-muted-foreground">Settings</span>}
-                                    <div className={cn("flex items-center gap-1", isCollapsed && "flex-col")}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="h-4 w-4" /></Button></TooltipTrigger>
-                                            <TooltipContent side={isCollapsed ? "right" : "top"}>Settings</TooltipContent>
-                                        </Tooltip>
-                                    </div>
                                 </div>
                         </div>
                         <Separator className="my-0" />

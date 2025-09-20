@@ -65,6 +65,13 @@ export const themeColors = [
     { name: 'Magenta', primary: '310 75% 50%', background: '0 0% 100%', accent: '310 50% 95%' },
 ] as const;
 
+const SocialLinksSchema = z.object({
+    twitter: z.string().url().optional().or(z.literal('')),
+    facebook: z.string().url().optional().or(z.literal('')),
+    instagram: z.string().url().optional().or(z.literal('')),
+    linkedin: z.string().url().optional().or(z.literal('')),
+});
+
 export const BrandFormSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),
   permanentName: z.string().min(1, "Permanent name is required").regex(/^[a-z0-9-]+$/, "Permanent name can only contain lowercase letters, numbers, and hyphens."),
@@ -76,11 +83,17 @@ export const BrandFormSchema = z.object({
   promoBanner: promoBannerSchema.optional(),
   categoryBanners: z.array(categoryBannerSchema).optional(),
   categories: z.array(z.string()).optional(),
+  socials: SocialLinksSchema.optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;
 
 export const PlatformSettingsValidationSchema = z.object({
+  platformName: z.string().min(1, "Platform name is required.").optional(),
+  platformLogoUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
+  platformFaviconUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
+  platformThemeName: z.string().optional(),
+  socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
@@ -90,3 +103,15 @@ export const PlatformSettingsValidationSchema = z.object({
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;
+
+const MilestoneSchema = z.object({
+    threshold: z.coerce.number().min(1, "Threshold must be greater than 0."),
+    reward: z.string().min(1, "Reward text is required."),
+});
+
+export const CartSettingsSchema = z.object({
+    freeShippingThreshold: z.coerce.number().min(1),
+    milestones: z.array(MilestoneSchema).max(3, "You can have a maximum of 3 milestones."),
+});
+
+export type CartSettingsValues = z.infer<typeof CartSettingsSchema>;
