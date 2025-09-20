@@ -76,13 +76,19 @@ export default function PlatformSettingsPage() {
             const response = await fetch('/api/platform');
             if (response.ok) {
                 const settings = await response.json();
-                if (settings && (settings.heroBanners?.length > 0 || settings.offers?.length > 0)) {
+                if (settings) {
                     form.reset({
                         ...settings,
-                        featuredCategories: settings.featuredCategories.map((cat: string) => ({name: cat})),
+                        socials: {
+                            twitter: settings.socials?.twitter || '',
+                            facebook: settings.socials?.facebook || '',
+                            instagram: settings.socials?.instagram || '',
+                            linkedin: settings.socials?.linkedin || '',
+                        },
+                        featuredCategories: settings.featuredCategories?.map((cat: string) => ({name: cat})) || [],
                     });
                 } else {
-                    form.reset(staticDefaultValues);
+                     form.reset(staticDefaultValues);
                 }
             } else {
                  form.reset(staticDefaultValues);
@@ -158,7 +164,13 @@ export default function PlatformSettingsPage() {
       toast.success(`Platform settings saved successfully!`);
       const newDefaults = {
           ...result,
-          featuredCategories: result.featuredCategories.map((cat: string) => ({ name: cat })),
+          featuredCategories: result.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
+          socials: {
+              twitter: result.socials?.twitter || '',
+              facebook: result.socials?.facebook || '',
+              instagram: result.socials?.instagram || '',
+              linkedin: result.socials?.linkedin || '',
+          },
       };
       form.reset(newDefaults);
       await fetchSettings();
@@ -486,3 +498,5 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
+
+    
