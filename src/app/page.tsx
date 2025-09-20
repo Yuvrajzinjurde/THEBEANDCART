@@ -91,7 +91,7 @@ const LandingFooter = () => {
 const ProductCarouselSection = ({ title, products }: { title: string, products: IProduct[] }) => {
     if (!products || products.length === 0) return null;
     return (
-        <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+        <section className="container pt-12">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
             </div>
@@ -127,7 +127,7 @@ const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => 
 
     return (
         <section className="w-full py-16">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
+            <div className="container py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
                 <div className="text-center mb-10">
                     <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Today's Top Offers</h2>
                 </div>
@@ -158,7 +158,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
     return (
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section className="container py-12">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
                  <Image
                     src={imageUrl}
@@ -188,7 +188,7 @@ const HamperSection = () => {
     if (!settings.hamperFeatureEnabled) return null;
 
     return (
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section className="container py-12">
             <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
                 <div className="relative z-10 p-8 md:p-12 text-center">
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
@@ -255,7 +255,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
     return (
         <section className="w-full py-12">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="container">
                 {useCarousel ? (
                     <Carousel
                         setApi={setApi}
@@ -387,7 +387,7 @@ export default function LandingPage() {
                                     priority={index === 0}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                                <div className="relative container h-full flex flex-col justify-center items-center text-center text-white">
+                                <div className="container relative h-full flex flex-col justify-center items-center text-center text-white">
                                     <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                         {banner.title}
                                     </h1>
@@ -409,7 +409,7 @@ export default function LandingPage() {
                 </Carousel>
             </section>
         ) : (
-            <section className="w-full py-20 sm:py-32 px-4 sm:px-8 text-center">
+            <section className="container text-center py-20 sm:py-32">
                  <Logo className="h-16 w-16 mx-auto mb-4" />
                 <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground">
                     The Brand Cart
@@ -418,7 +418,7 @@ export default function LandingPage() {
             </section>
         )}
         
-        <section className="py-16 text-center container">
+        <section className="container py-16 text-center">
             <h2 className="text-xl font-semibold text-muted-foreground">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
         </section>
@@ -447,7 +447,7 @@ export default function LandingPage() {
                 <ProductCarouselSection title="Newest Arrivals" products={newestProducts} />
                 
                 {uniqueCategories.length > 0 && (
-                    <section className="container mx-auto px-4 pt-16 sm:px-6 lg:px-8">
+                    <section className="container pt-16">
                         <div className="text-center mb-10">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
                         </div>
@@ -465,7 +465,7 @@ export default function LandingPage() {
                         </div>
                     </section>
                 )}
-                 <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+                 <section className="container py-16 text-center">
                     <h2 className="text-2xl font-bold text-foreground">A Personalized Experience, Coming Soon</h2>
                     <p className="mt-2 max-w-xl mx-auto text-muted-foreground">We’ll soon let you design your own cart experience. Stay tuned for AI-driven suggestions and more!</p>
                 </section>

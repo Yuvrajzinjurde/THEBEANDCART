@@ -115,20 +115,18 @@ const CartFooter = ({ brand }: { brand: IBrand | null }) => (
 const CartSkeleton = () => (
     <>
      <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-8 rounded-md" />
-                    <Skeleton className="h-4 w-32 hidden sm:block" />
-                </div>
-                <div className="flex-grow flex justify-center">
-                    <Skeleton className="h-16 w-full max-w-lg" />
-                </div>
-                <div className="w-48 hidden lg:block" />
+        <div className="container flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-4 w-32 hidden sm:block" />
             </div>
+            <div className="flex-grow flex justify-center">
+                <Skeleton className="h-16 w-full max-w-lg" />
+            </div>
+            <div className="w-48 hidden lg:block" />
         </div>
       </div>
-    <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8 pt-6 text-center">
+    <main className="container pt-6 text-center">
         <div className="mx-auto text-center">
           <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
         </div>
@@ -351,7 +349,7 @@ export default function CartPage() {
   if (cartItems.length === 0) {
       return (
         <>
-        <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <main className="container py-8">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">Your Cart is Empty</h2>
@@ -371,41 +369,39 @@ export default function CartPage() {
   return (
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                    <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => router.back()}
-                    >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="sr-only">Back</span>
-                    </Button>
-                    <Breadcrumb className="hidden sm:block">
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                        <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                        <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
-                <div className="flex-grow flex justify-center">
-                    <CartProgressBar currentValue={subtotal} />
-                </div>
-                <div className="w-48 hidden lg:block" />
+        <div className="container flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+                <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => router.back()}
+                >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+                </Button>
+                <Breadcrumb className="hidden sm:block">
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href={`/${brandName}/home`}>Home</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+                </Breadcrumb>
             </div>
+            <div className="flex-grow flex justify-center">
+                <CartProgressBar currentValue={subtotal} />
+            </div>
+            <div className="w-48 hidden lg:block" />
         </div>
       </div>
 
-      <main className="container mx-auto px-4 pb-8 sm:px-6 lg:px-8 pt-6">
+      <main className="container pb-8 pt-6">
       
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
           <div className="lg:col-span-2">
               <Card>

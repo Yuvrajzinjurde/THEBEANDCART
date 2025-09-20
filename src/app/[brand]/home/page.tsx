@@ -34,7 +34,7 @@ type GroupedProducts = {
 };
 
 const ProductCarouselSkeleton = () => (
-    <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8 text-center">
+    <section className="container pt-12 text-center">
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
         <Separator className="mb-6" />
         <div className="mx-auto text-center">
@@ -77,7 +77,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
 
 
     return (
-        <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8">
+        <section className="container pt-12">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
                  <Button variant="link" asChild>
@@ -133,7 +133,7 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
 
     return (
         <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8">
-            <div className="container mx-auto p-4 md:p-8 rounded-2xl">
+            <div className="container p-4 md:p-8 rounded-2xl">
                  <div className="max-w-3xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
                         {columns.map((columnItems, colIndex) => (
@@ -182,7 +182,7 @@ const OffersSection = ({ brand }: { brand: IBrand | null }) => {
 
     return (
         <section className="w-full py-16">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
+            <div className="container py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {brand.offers.map((offer, index) => (
                         <div key={index} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
@@ -209,7 +209,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     if (!brand?.promoBanner) return null;
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section className="container py-12">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
                  <Image
                     src={imageUrl}
@@ -251,7 +251,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
   return (
     <section className="w-full py-12 md:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Your Cheers, Our Motivation</h2>
         </div>
@@ -487,7 +487,7 @@ export default function BrandHomePage() {
       
       <CategoryBannerGrid brand={brand} />
 
-      <div className="container mx-auto px-4 pt-8 sm:px-6 lg:px-8">
+      <div className="container pt-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {productSections.map(([category, items]) => (

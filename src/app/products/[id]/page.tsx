@@ -23,7 +23,7 @@ import type { IReview } from '@/models/review.model';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductPageSkeleton = () => (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
+    <div className="container text-center">
         <div className="grid md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
                 <Skeleton className="aspect-square w-full rounded-lg" />
@@ -44,7 +44,9 @@ const ProductPageSkeleton = () => (
                 <Skeleton className="h-24 w-full" />
             </div>
         </div>
-        <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <div className="mx-auto text-center">
+          <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        </div>
     </div>
 );
 
@@ -65,7 +67,9 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
                         </div>
                     ))}
                 </div>
-                 <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+                 <div className="mx-auto text-center">
+                   <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+                 </div>
             </div>
         )
     }
@@ -121,7 +125,7 @@ const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="container py-8">
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
@@ -276,7 +280,7 @@ export default function ProductPage() {
 
   return (
     <>
-      <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <main className="container py-8">
         <ProductDetails 
           product={product} 
           variants={variants.length > 0 ? variants : [product]} 
