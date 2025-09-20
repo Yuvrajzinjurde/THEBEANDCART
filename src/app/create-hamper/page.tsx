@@ -59,7 +59,7 @@ const LandingFooter = () => {
     const { settings } = usePlatformSettingsStore();
     return (
         <footer className="w-full border-t bg-background mt-16">
-            <div className="mx-auto max-w-7xl px-4 py-8">
+            <div className="container py-8">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         {settings.platformLogoUrl ? (
