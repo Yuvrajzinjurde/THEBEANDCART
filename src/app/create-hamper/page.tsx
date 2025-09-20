@@ -725,7 +725,7 @@ export default function CreateHamperPage() {
                 </AlertDialog>
             </main>
             <footer className="sticky bottom-0 z-10 w-full bg-background/95 border-t backdrop-blur-sm">
-                <div className="container px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+                <div className="container flex h-20 items-center justify-between gap-4">
                         <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1 || isDiscarding}>
                             <ArrowLeft className="mr-2 h-4 w-4"/> Previous
                         </Button>

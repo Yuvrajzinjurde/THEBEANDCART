@@ -47,7 +47,7 @@ const LandingPageSkeleton = () => (
                     <Skeleton className="h-32 rounded-lg" />
                     <Skeleton className="h-32 rounded-lg" />
                 </div>
-                 <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+                 <p className="my-8 text-center text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
             </div>
         </div>
     </div>
@@ -387,7 +387,7 @@ export default function LandingPage() {
                                     priority={index === 0}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                                <div className="relative container h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
+                                <div className="relative container h-full flex flex-col justify-center items-center text-center text-white">
                                     <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                         {banner.title}
                                     </h1>

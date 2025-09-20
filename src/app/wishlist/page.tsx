@@ -90,7 +90,9 @@ const WishlistSkeleton = () => (
                 </Card>
             ))}
         </div>
-        <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <div className="mx-auto text-center">
+          <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        </div>
     </main>
 );
 

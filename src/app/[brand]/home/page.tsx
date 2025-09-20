@@ -37,7 +37,9 @@ const ProductCarouselSkeleton = () => (
     <section className="container mx-auto px-4 pt-12 sm:px-6 lg:px-8 text-center">
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
         <Separator className="mb-6" />
-        <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <div className="mx-auto text-center">
+          <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        </div>
         <div className="flex space-x-4">
             {[...Array(6)].map((_, i) => (
                 <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
@@ -462,7 +464,7 @@ export default function BrandHomePage() {
                                 priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
-                            <div className="container relative h-full mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center text-white">
+                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white">
                                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
