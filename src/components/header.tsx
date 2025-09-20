@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import useUserStore from "@/stores/user-store";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 
 export default function Header() {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ export default function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const { cart, wishlist } = useUserStore();
+  const { settings } = usePlatformSettingsStore();
 
   const [brandName, setBrandName] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -108,7 +110,7 @@ export default function Header() {
     }
   };
   
-  const currentDisplayName = isClient && brand && brandName ? brand.displayName : 'The Brand Cart';
+  const currentDisplayName = isClient && brand && brandName ? brand.displayName : settings.platformName;
   const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
@@ -138,8 +140,10 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-          {isClient && brand?.logoUrl && brandName ? (
+          {isClient && brandName && brand?.logoUrl ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+          ) : isClient && settings.platformLogoUrl ? (
+             <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
           )}
@@ -275,5 +279,3 @@ export default function Header() {
     </header>
   );
 }
-
-    
