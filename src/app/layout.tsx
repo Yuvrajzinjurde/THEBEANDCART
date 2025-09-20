@@ -11,41 +11,38 @@ import { useEffect, useState, useCallback } from 'react';
 import type { IBrand } from '@/models/brand.model';
 import { themeColors } from '@/lib/brand-schema';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
+import type { IPlatformSettings } from '@/models/platform.model';
 
 type Theme = (typeof themeColors)[number];
 
 
 function ThemeInjector({ brandName }: { brandName: string | null }) {
+    const { settings } = usePlatformSettingsStore();
     const [theme, setTheme] = useState<(typeof themeColors)[number] | undefined>(
         themeColors.find(t => t.name === 'Blue')
     );
 
     useEffect(() => {
         async function fetchBrandTheme() {
-            if (!brandName || brandName === 'admin') {
-                const defaultTheme = themeColors.find(t => t.name === 'Blue');
-                setTheme(defaultTheme);
-                return;
+            let selectedThemeName = settings.platformThemeName; // Default to global theme
+
+            if (brandName && brandName !== 'admin') {
+                try {
+                    const res = await fetch(`/api/brands/${brandName}`);
+                    if (res.ok) {
+                        const { brand }: { brand: IBrand } = await res.json();
+                        selectedThemeName = brand.themeName;
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch brand theme", error);
+                }
             }
 
-            try {
-                const res = await fetch(`/api/brands/${brandName}`);
-                if (res.ok) {
-                    const { brand }: { brand: IBrand } = await res.json();
-                    const selectedTheme = themeColors.find(t => t.name === brand.themeName) || themeColors.find(t => t.name === 'Blue');
-                    setTheme(selectedTheme);
-                } else {
-                     const defaultTheme = themeColors.find(t => t.name === 'Blue');
-                     setTheme(defaultTheme);
-                }
-            } catch (error) {
-                console.error("Failed to fetch brand theme", error);
-                const defaultTheme = themeColors.find(t => t.name === 'Blue');
-                setTheme(defaultTheme);
-            }
+            const newTheme = themeColors.find(t => t.name === selectedThemeName) || themeColors.find(t => t.name === 'Blue');
+            setTheme(newTheme);
         }
         fetchBrandTheme();
-    }, [brandName]);
+    }, [brandName, settings.platformThemeName]);
     
     useEffect(() => {
         if (theme) {
@@ -54,7 +51,6 @@ function ThemeInjector({ brandName }: { brandName: string | null }) {
             root.style.setProperty('--background', theme.background);
             root.style.setProperty('--accent', theme.accent);
             
-            // Logic to handle dark mode if the theme is dark
             if (theme.name.includes('(Dark)')) {
                 root.classList.add('dark');
             } else {
@@ -64,7 +60,7 @@ function ThemeInjector({ brandName }: { brandName: string | null }) {
     }, [theme]);
 
 
-  return null; // This component only injects styles
+  return null;
 }
 
 
@@ -75,37 +71,48 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { fetchSettings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
 
-  const stableFetchSettings = useCallback(fetchSettings, [fetchSettings]);
+  const stableFetchSettings = useCallback(fetchSettings, []);
 
   useEffect(() => {
-    // Fetch initial settings on mount
     stableFetchSettings();
   }, [stableFetchSettings]);
+
+  useEffect(() => {
+    if (settings.platformFaviconUrl) {
+        let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.getElementsByTagName('head')[0].appendChild(link);
+        }
+        link.href = settings.platformFaviconUrl;
+    }
+    if (settings.platformName) {
+        document.title = settings.platformName;
+    }
+  }, [settings.platformFaviconUrl, settings.platformName]);
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
   
   const getBrandName = () => {
-    // These pages should use the default theme, not a brand-specific one.
     if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
       return null;
     }
     
-    // First, try to get from the path, e.g., /reeva/home
     const pathParts = pathname.split('/');
     if (pathParts.length > 1 && pathParts[1] && pathParts[1] !== 'products') {
       return pathParts[1];
     }
 
-    // If not in path, try to get from query param, e.g., /products/123?storefront=reeva
     const storefrontQuery = searchParams.get('storefront');
     if (storefrontQuery) {
         return storefrontQuery;
     }
 
-    return 'reeva'; // Default fallback
+    return 'reeva';
   }
   
   const brandName = getBrandName();

@@ -4,9 +4,22 @@ import dbConnect from '@/lib/mongodb';
 import PlatformSettings from '@/models/platform.model';
 import { z } from 'zod';
 
+const SocialLinksSchema = z.object({
+    twitter: z.string().url().optional().or(z.literal('')),
+    facebook: z.string().url().optional().or(z.literal('')),
+    instagram: z.string().url().optional().or(z.literal('')),
+    linkedin: z.string().url().optional().or(z.literal('')),
+});
+
 const FormSchema = z.object({
+  platformName: z.string().min(1),
+  platformLogoUrl: z.string().url().or(z.literal('')),
+  platformFaviconUrl: z.string().url().or(z.literal('')),
+  platformThemeName: z.string(),
+  socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
+  offersFeatureEnabled: z.boolean().optional(),
   heroBanners: z.array(z.object({
       title: z.string(),
       description: z.string(),

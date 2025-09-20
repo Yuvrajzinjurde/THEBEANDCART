@@ -89,10 +89,10 @@ export const BrandFormSchema = z.object({
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;
 
 export const PlatformSettingsValidationSchema = z.object({
-  platformName: z.string().min(1, "Platform name is required.").optional(),
+  platformName: z.string().min(1, "Platform name is required."),
   platformLogoUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformFaviconUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
-  platformThemeName: z.string().optional(),
+  platformThemeName: z.string({ required_error: "Please select a platform theme." }),
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),

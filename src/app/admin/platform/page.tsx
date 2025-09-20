@@ -9,19 +9,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save, Bot, Gift } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette } from 'lucide-react';
 import type { IPlatformSettings } from '@/models/platform.model';
-import { PlatformSettingsValidationSchema, type PlatformSettingsValues } from '@/lib/brand-schema';
+import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 
 const staticDefaultValues: PlatformSettingsValues = {
+  platformName: 'The Brand Cart',
+  platformLogoUrl: '',
+  platformFaviconUrl: '',
+  platformThemeName: 'Blue',
+  socials: { twitter: '', facebook: '', instagram: '', linkedin: '' },
   aiEnabled: true,
   hamperFeatureEnabled: true,
+  offersFeatureEnabled: true,
   heroBanners: [
     {
       title: "Elevate Your Style",
@@ -29,29 +37,8 @@ const staticDefaultValues: PlatformSettingsValues = {
       imageUrl: "https://picsum.photos/seed/style-elevate/1600/400",
       imageHint: "fashion collection",
     },
-    {
-      title: "Tech Redefined",
-      description: "Experience the future with our cutting-edge electronics and gadgets.",
-      imageUrl: "https://picsum.photos/seed/tech-redefined/1600/400",
-      imageHint: "modern gadgets",
-    },
-    {
-      title: "Home & Harmony",
-      description: "Transform your living space with our exquisite home decor and essentials.",
-      imageUrl: "https://picsum.photos/seed/home-harmony/1600/400",
-      imageHint: "living room",
-    },
   ],
-  featuredCategories: [
-    { name: "T-Shirts" },
-    { name: "Sneakers" },
-    { name: "Handbags" },
-    { name: "Watches" },
-    { name: "Sunglasses" },
-    { name: "Home Decor" },
-    { name: "Skincare" },
-    { name: "Gadgets" },
-  ],
+  featuredCategories: [],
   promoBanner: {
     title: "Mid-Season Mega Sale",
     description: "Unbeatable deals on your favorite brands. Get up to 60% off on selected items before they're gone!",
@@ -66,16 +53,6 @@ const staticDefaultValues: PlatformSettingsValues = {
       description: "Get a flat 25% off on your very first order with us.",
       code: "WELCOME25",
     },
-    {
-      title: "App-Exclusive Deal",
-      description: "Download our app and get 30% off your next purchase.",
-      code: "APPONLY30",
-    },
-    {
-      title: "Free & Fast Shipping",
-      description: "Enjoy free shipping on all orders over ₹500.",
-      code: "FREESHIP",
-    },
   ]
 };
 
@@ -88,14 +65,7 @@ export default function PlatformSettingsPage() {
 
   const form = useForm<PlatformSettingsValues>({
     resolver: zodResolver(PlatformSettingsValidationSchema),
-    defaultValues: {
-        aiEnabled: true,
-        hamperFeatureEnabled: true,
-        heroBanners: [],
-        featuredCategories: [],
-        promoBanner: { title: '', description: '', imageUrl: '', imageHint: '', buttonText: '', buttonLink: '' },
-        offers: [],
-    },
+    defaultValues: staticDefaultValues,
     mode: 'onChange',
   });
   
@@ -107,13 +77,11 @@ export default function PlatformSettingsPage() {
             if (response.ok) {
                 const settings = await response.json();
                 if (settings && (settings.heroBanners?.length > 0 || settings.offers?.length > 0)) {
-                    // If settings exist in DB, use them
                     form.reset({
                         ...settings,
                         featuredCategories: settings.featuredCategories.map((cat: string) => ({name: cat})),
                     });
                 } else {
-                    // Otherwise, populate with static defaults
                     form.reset(staticDefaultValues);
                 }
             } else {
@@ -188,13 +156,11 @@ export default function PlatformSettingsPage() {
       }
 
       toast.success(`Platform settings saved successfully!`);
-      // Re-set form with the potentially transformed data to clear dirty state
       const newDefaults = {
           ...result,
           featuredCategories: result.featuredCategories.map((cat: string) => ({ name: cat })),
       };
       form.reset(newDefaults);
-      // Re-fetch settings for the global store
       await fetchSettings();
 
     } catch (error: any) {
@@ -224,7 +190,7 @@ export default function PlatformSettingsPage() {
             <CardHeader className="flex flex-row justify-between items-start">
                 <div>
                     <CardTitle className="flex items-center gap-2"><Home /> Platform Settings</CardTitle>
-                    <CardDescription>Manage the content and appearance of the main public-facing landing page.</CardDescription>
+                    <CardDescription>Manage the global identity, content, and features of your platform.</CardDescription>
                 </div>
                 <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
                     {isSubmitting && <Loader className="mr-2" />}
@@ -234,12 +200,61 @@ export default function PlatformSettingsPage() {
             </CardHeader>
         </Card>
         
+         <Card>
+          <CardHeader>
+            <CardTitle>Global Identity</CardTitle>
+            <CardDescription>Manage your platform's main branding elements.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <FormField control={form.control} name="platformName" render={({ field }) => (
+                <FormItem><FormLabel>Platform Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+            )}/>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="platformLogoUrl" render={({ field }) => (
+                    <FormItem><FormLabel>Platform Logo URL</FormLabel><FormControl><Input placeholder="https://example.com/logo.png" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="platformFaviconUrl" render={({ field }) => (
+                    <FormItem><FormLabel>Platform Favicon URL</FormLabel><FormControl><Input placeholder="https://example.com/favicon.ico" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+             </div>
+             <FormField
+                control={form.control}
+                name="platformThemeName"
+                render={({ field }) => (
+                    <FormItem className="space-y-3">
+                        <FormLabel className="flex items-center gap-2"><Palette/> Platform Theme</FormLabel>
+                        <FormControl>
+                            <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+                            >
+                                {themeColors.map((theme) => (
+                                <FormItem key={theme.name}>
+                                    <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full h-full">
+                                        <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
+                                        <div className="flex items-center gap-2">
+                                            <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
+                                            <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
+                                            <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
+                                        </div>
+                                        <span className="mt-2 text-sm font-medium">{theme.name}</span>
+                                    </FormLabel>
+                                </FormItem>
+                                ))}
+                            </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Feature Controls</CardTitle>
-            <CardDescription>
-              Enable or disable major features across the entire platform.
-            </CardDescription>
+            <CardDescription>Enable or disable major features across the entire platform.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
              <FormField
@@ -248,20 +263,10 @@ export default function PlatformSettingsPage() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base flex items-center gap-2">
-                      <Bot />
-                      Enable AI Features
-                    </FormLabel>
-                    <FormDescription>
-                      Turn off all AI-powered buttons like 'Autofill', 'Suggest', and 'Generate'.
-                    </FormDescription>
+                    <FormLabel className="text-base flex items-center gap-2"><Sparkles /> Enable AI Features</FormLabel>
+                    <FormDescription>Turn on/off AI-powered buttons like 'Autofill', 'Suggest', and 'Generate'.</FormDescription>
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
+                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                 </FormItem>
               )}
             />
@@ -271,20 +276,23 @@ export default function PlatformSettingsPage() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base flex items-center gap-2">
-                        <Gift />
-                        Enable Hamper Creation
-                    </FormLabel>
-                    <FormDescription>
-                      Turn off the 'Create Your Own Hamper' feature on the main landing page.
-                    </FormDescription>
+                    <FormLabel className="text-base flex items-center gap-2"><Gift /> Enable Hamper Creation</FormLabel>
+                    <FormDescription>Show or hide the 'Create Your Own Hamper' section on the main landing page.</FormDescription>
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
+                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="offersFeatureEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base flex items-center gap-2"><Bot /> Enable Offers Section</FormLabel>
+                    <FormDescription>Show or hide the 'Today's Top Offers' section on the main landing page.</FormDescription>
+                  </div>
+                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                 </FormItem>
               )}
             />
@@ -302,69 +310,31 @@ export default function PlatformSettingsPage() {
                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeBanner(index)}>
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <FormField
-                            control={form.control}
-                            name={`heroBanners.${index}.title`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`heroBanners.${index}.description`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name={`heroBanners.${index}.imageUrl`}
-                            render={({ field: imageField }) => (
-                                <FormItem>
-                                    <FormLabel>Banner Image</FormLabel>
-                                    <FormControl>
-                                       <div className="w-full">
-                                            <Input
-                                                id={`banner-upload-${index}`}
-                                                type="file"
-                                                accept="image/png, image/jpeg"
-                                                className="hidden"
-                                                onChange={(e) => handleFileChange(e, imageField.onChange)}
-                                            />
-                                            {imageField.value ? (
-                                                <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
-                                                    <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
-                                                    <Button
-                                                        type="button"
-                                                        variant="destructive"
-                                                        size="icon"
-                                                        className="absolute top-2 right-2 h-6 w-6"
-                                                        onClick={() => imageField.onChange('')}
-                                                    >
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <label htmlFor={`banner-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                                    </div>
-                                                </label>
-                                            )}
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name={`heroBanners.${index}.imageHint`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
+                        <FormField control={form.control} name={`heroBanners.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={`heroBanners.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                         <FormField control={form.control} name={`heroBanners.${index}.imageUrl`} render={({ field: imageField }) => (
+                            <FormItem>
+                                <FormLabel>Banner Image</FormLabel>
+                                <FormControl>
+                                   <div className="w-full">
+                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange)} />
+                                        {imageField.value ? (
+                                            <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
+                                                <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
+                                                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => imageField.onChange('')}><X className="h-4 w-4" /></Button>
+                                            </div>
+                                        ) : (
+                                            <label htmlFor={`banner-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                <p className="text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                            </label>
+                                        )}
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                         <FormField control={form.control} name={`heroBanners.${index}.imageHint`} render={({ field }) => ( <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
@@ -377,12 +347,8 @@ export default function PlatformSettingsPage() {
                 <CardDescription>A large banner to highlight a special campaign or collection. Recommended size: 1200x600px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
-                    <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
-                <FormField control={form.control} name="promoBanner.description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
+                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name="promoBanner.description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
@@ -405,16 +371,10 @@ export default function PlatformSettingsPage() {
                         <FormMessage />
                     </FormItem>
                 )}/>
-                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
-                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
+                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
-                        <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
-                        <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
+                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => ( <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 </div>
             </CardContent>
         </Card>
@@ -430,20 +390,28 @@ export default function PlatformSettingsPage() {
                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeOffer(index)}>
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <FormField control={form.control} name={`offers.${index}.title`} render={({ field }) => (
-                            <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                        <FormField control={form.control} name={`offers.${index}.description`} render={({ field }) => (
-                            <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                        <FormField control={form.control} name={`offers.${index}.code`} render={({ field }) => (
-                            <FormItem><FormLabel>Coupon Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
+                        <FormField control={form.control} name={`offers.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={`offers.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                        <FormField control={form.control} name={`offers.${index}.code`} render={({ field }) => ( <FormItem><FormLabel>Coupon Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => appendOffer({ title: '', description: '', code: '' })}>Add Offer</Button>
             </CardContent>
         </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle>Social Media Links</CardTitle>
+                <CardDescription>Enter the URLs for your main brand's social media profiles.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="socials.twitter" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Twitter/> Twitter</FormLabel><FormControl><Input placeholder="https://twitter.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.facebook" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Facebook/> Facebook</FormLabel><FormControl><Input placeholder="https://facebook.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.instagram" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Instagram/> Instagram</FormLabel><FormControl><Input placeholder="https://instagram.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Linkedin/> LinkedIn</FormLabel><FormControl><Input placeholder="https://linkedin.com/company/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+            </CardContent>
+        </Card>
+
 
         <Card>
             <CardHeader>
