@@ -58,7 +58,7 @@ const LandingFooter = () => {
     const { settings } = usePlatformSettingsStore();
     return (
         <footer className="w-full border-t bg-background mt-16">
-            <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="container mx-auto py-8">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         {settings.platformLogoUrl ? (
@@ -356,7 +356,7 @@ export default function LandingPage() {
 
   const platformSettings = settings as IPlatformSettings;
   
-  if (loading || !platformSettings || !platformSettings.heroBanners || platformSettings.heroBanners.length === 0) {
+  if (loading || !platformSettings || !platformSettings.heroBanners) {
       return <LandingPageSkeleton />;
   }
   
