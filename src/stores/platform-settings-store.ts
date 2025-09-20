@@ -9,7 +9,7 @@ type PlatformSettingsState = {
   fetchSettings: () => Promise<void>;
 };
 
-const usePlatformSettingsStore = create<PlatformSettingsState>((set) => ({
+const usePlatformSettingsStore = create<PlatformSettingsState>((set, get) => ({
   settings: {
     aiEnabled: true,
     hamperFeatureEnabled: true,
@@ -19,7 +19,8 @@ const usePlatformSettingsStore = create<PlatformSettingsState>((set) => ({
       const response = await fetch('/api/platform');
       if (response.ok) {
         const settings = await response.json();
-        if (settings) {
+        // Prevent unnecessary re-renders if settings are the same
+        if (settings && JSON.stringify(settings) !== JSON.stringify(get().settings)) {
           set({ settings });
         }
       }

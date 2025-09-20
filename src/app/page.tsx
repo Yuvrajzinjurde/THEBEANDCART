@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
@@ -268,6 +268,8 @@ export default function LandingPage() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
+  const stableFetchSettings = useCallback(fetchSettings, []);
+
   useEffect(() => {
     async function fetchData() {
         try {
@@ -276,7 +278,7 @@ export default function LandingPage() {
             const [productResponse, brandResponse] = await Promise.all([
                 fetch('/api/products'),
                 fetch('/api/brands'),
-                fetchSettings(), // fetch settings for the store
+                stableFetchSettings(), // fetch settings for the store
             ]);
             
             if (!productResponse.ok) throw new Error('Failed to fetch products');
@@ -320,7 +322,7 @@ export default function LandingPage() {
           }
     }
     fetchData();
-  }, [fetchSettings, platformSettings]);
+  }, [stableFetchSettings, platformSettings]);
 
   const heroBanners = platformSettings?.heroBanners;
 
@@ -435,6 +437,3 @@ export default function LandingPage() {
     </>
   );
 }
-    
-
-    

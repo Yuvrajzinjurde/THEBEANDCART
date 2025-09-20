@@ -75,12 +75,12 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const fetchSettings = usePlatformSettingsStore(state => state.fetchSettings);
+  const { fetchSettings } = usePlatformSettingsStore();
 
   useEffect(() => {
-    // This now runs on every route change, ensuring settings are fresh
+    // Fetch initial settings on mount
     fetchSettings();
-  }, [pathname, searchParams, fetchSettings]);
+  }, [fetchSettings]);
   
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
