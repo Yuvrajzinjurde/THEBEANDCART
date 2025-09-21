@@ -23,7 +23,7 @@ import type { IReview } from '@/models/review.model';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductPageSkeleton = () => (
-    <div className="container text-center">
+    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
         <div className="grid md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
                 <Skeleton className="aspect-square w-full rounded-lg" />
