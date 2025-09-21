@@ -41,15 +41,16 @@ export async function GET(req: Request) {
         query._id = { $ne: exclude };
     }
 
+    // If any filter is provided, use the query.
     if (storefront || category || keyword || keywords) {
         const products = await Product.find(query)
             .sort({ createdAt: -1 })
-            .limit(20) // Limit results for performance
             .lean();
         
         return NextResponse.json({ products }, { status: 200 });
     }
 
+    // If no specific filter, fetch a few products from each brand for the main landing page or all products for hamper creation.
     const products = await Product.find({})
         .sort({ createdAt: -1 })
         .lean();
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
             ...variant,
             styleId,
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+            // Ensure top-level images are not passed to variant products
             images: variant.images,
         }));
 
@@ -103,4 +105,3 @@ export async function POST(req: Request) {
     }
 }
 
-    
