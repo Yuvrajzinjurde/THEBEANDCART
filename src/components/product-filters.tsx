@@ -90,7 +90,13 @@ export function ProductFilters({ activeFilters, onFilterChange }: ProductFilters
     allProducts.forEach(product => {
       if (product.brand) brands.add(product.brand);
       if (product.color) colors.add(product.color);
-      if (product.category) categories.add(product.category);
+      if (product.category) {
+        if (Array.isArray(product.category)) {
+          product.category.forEach(cat => categories.add(cat));
+        } else {
+          categories.add(product.category);
+        }
+      }
     });
 
     return {
