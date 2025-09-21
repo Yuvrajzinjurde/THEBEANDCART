@@ -99,8 +99,9 @@ export default function RootLayout({
   
   const getBrandName = () => {
     // Special pages that use the global platform theme (return null)
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart') {
-      return null;
+    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart'];
+    if (pathname === '/' || globalRoutes.some(route => pathname.startsWith(route))) {
+        return null;
     }
     
     // For product pages, the brand is determined by the `storefront` query parameter
