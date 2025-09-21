@@ -186,8 +186,8 @@ export default function ProductsPage() {
   const updateURL = useCallback((filters: ActiveFilters, page: number) => {
     const query = new URLSearchParams();
     if (filters.categories.length > 0) query.set('category', filters.categories.join(','));
-    if (filters.brands.length > 0) query.set('brand', filters.brands.join(','));
-    if (filters.colors.length > 0) query.set('color', filters.colors.join(','));
+    if (filters.brands.length > 0) query.set('brands', filters.brands.join(','));
+    if (filters.colors.length > 0) query.set('colors', filters.colors.join(','));
     if (filters.keywords.length > 0) query.set('keyword', filters.keywords.join(','));
     if (page > 1) query.set('page', page.toString());
     
@@ -330,7 +330,7 @@ export default function ProductsPage() {
             </Breadcrumb>
         </div>
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-            <div className="hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+            <div className="hidden lg:block sticky top-16 h-[calc(100vh-5rem)] overflow-y-auto">
                 <ProductFilters 
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
