@@ -437,8 +437,8 @@ export default function CartPage() {
                                     const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                                     const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                                     return (
-                                    <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4 py-6 first:pt-0">
-                                        <div className="block flex-shrink-0 w-full sm:w-[120px] aspect-square sm:h-[120px]">
+                                    <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-row gap-4 py-6 first:pt-0">
+                                        <div className="block flex-shrink-0 w-[100px] sm:w-[120px] aspect-square sm:h-[120px]">
                                             {isGift ? (
                                                 <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
                                                     <GiftBoxIcon />
@@ -484,6 +484,7 @@ export default function CartPage() {
                                                 </div>
                                             )}
                                             
+                                            <div className="mt-auto pt-2">
                                             {!isGift ? (
                                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-4">
                                                     <div className="flex items-center gap-1 rounded-full border p-1">
@@ -491,12 +492,13 @@ export default function CartPage() {
                                                         <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
                                                         <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
                                                     </div>
-                                                    <div className="flex items-center gap-4">
+                                                    <div className="flex items-center gap-4 sm:gap-4">
                                                         <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
                                                         <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
                                                     </div>
                                                 </div>
                                             ) : <div className="mt-2 h-8" />}
+                                            </div>
                                         </div>
                                     </div>
                                 )})}
