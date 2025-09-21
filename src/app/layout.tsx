@@ -99,7 +99,7 @@ export default function RootLayout({
   
   const getBrandName = () => {
     // Special pages that use the global platform theme (return null)
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart') {
       return null;
     }
     

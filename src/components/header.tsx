@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from "next/link";
@@ -54,7 +53,7 @@ export default function Header() {
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper') {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart') {
       setBrandName(null);
     } else {
       const determinedBrand = pathBrand || queryBrand || 'reeva';
@@ -129,7 +128,7 @@ export default function Header() {
         </Button>
         <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href={`/${effectiveBrandName}/cart`} className="relative">
+            <Link href={`/cart`} className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
             </Link>
@@ -241,7 +240,7 @@ export default function Header() {
                                 </Link>
                             </Button>
                             <Button variant="ghost" size="icon" asChild>
-                                 <Link href={`/${effectiveBrandName}/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
+                                 <Link href={`/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
                                     <ShoppingCart className="h-6 w-6" />
                                     {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
                                 </Link>
