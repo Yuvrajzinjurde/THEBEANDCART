@@ -247,9 +247,6 @@ function SearchResults() {
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="left" className="w-full max-w-sm p-0">
-                                     <SheetHeader className="p-4 border-b">
-                                        <SheetTitle>Filters</SheetTitle>
-                                    </SheetHeader>
                                     <ProductFilters 
                                         onFilterChange={handleFilterChange}
                                         onClearAll={clearAllFilters}

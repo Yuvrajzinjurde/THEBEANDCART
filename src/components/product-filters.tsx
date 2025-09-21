@@ -98,12 +98,12 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
 
   return (
     <aside className="w-full h-full flex flex-col">
-         <div className="flex items-center justify-between pb-4 border-b pr-4 shrink-0">
-          <h2 className="text-lg font-bold">Filters</h2>
-           <Button variant="link" className="p-0 h-auto text-primary" onClick={onClearAll}>CLEAR ALL</Button>
+        <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-lg font-semibold">Filters</h2>
+            <Button variant="link" className="p-0 h-auto text-primary" onClick={onClearAll}>CLEAR ALL</Button>
         </div>
         <ScrollArea className="flex-grow">
-            <div className="pr-4 pb-4">
+            <div className="pb-4">
               <FilterSection title="Categories" defaultOpen count={allCategories.length}>
                   {allCategories.map(category => (
                       <div key={category} className="flex items-center space-x-2">
