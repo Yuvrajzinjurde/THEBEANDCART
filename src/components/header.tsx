@@ -93,9 +93,9 @@ export default function Header() {
   const allAvailableCategories = useMemo(() => {
     const categorySet = new Set<string>();
     allProducts.forEach(p => {
-        if(p.category && typeof p.category === 'string') {
-            categorySet.add(p.category);
-        }
+      if (p.category && typeof p.category === 'string') {
+        categorySet.add(p.category);
+      }
     });
     return Array.from(categorySet);
   }, [allProducts]);
@@ -397,3 +397,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
