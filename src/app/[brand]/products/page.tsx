@@ -28,7 +28,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
 
@@ -354,6 +354,9 @@ export default function ProductsPage() {
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="left" className="w-full max-w-sm p-0">
+                                    <SheetHeader className="p-4 border-b">
+                                        <SheetTitle>Filters</SheetTitle>
+                                    </SheetHeader>
                                     <ProductFilters 
                                         activeFilters={activeFilters}
                                         onFilterChange={handleFilterChange}
@@ -407,3 +410,5 @@ export default function ProductsPage() {
     </>
   );
 }
+
+    

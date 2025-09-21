@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
@@ -25,7 +26,7 @@ import { ChevronDown, Smile, SlidersHorizontal, ChevronLeft, ChevronRight } from
 import { Skeleton } from '@/components/ui/skeleton';
 import { GlobalFooter } from '@/components/global-footer';
 import { ProductFilters } from '@/components/product-filters';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import type { ActiveFilters } from '@/app/[brand]/products/page';
 
 type Pagination = {
@@ -246,6 +247,9 @@ function SearchResults() {
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="left" className="w-full max-w-sm p-0">
+                                     <SheetHeader className="p-4 border-b">
+                                        <SheetTitle>Filters</SheetTitle>
+                                    </SheetHeader>
                                     <ProductFilters 
                                         onFilterChange={handleFilterChange}
                                         onClearAll={clearAllFilters}
@@ -307,3 +311,5 @@ export default function SearchPage() {
         </Suspense>
     )
 }
+
+    
