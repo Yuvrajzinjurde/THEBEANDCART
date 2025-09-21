@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -441,17 +442,27 @@ export default function CartPage() {
                                     const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                                     return (
                                     <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-row gap-4 py-6 first:pt-0">
-                                        <div className="block flex-shrink-0 w-[100px] sm:w-[120px] aspect-square">
-                                            {isGift ? (
-                                                <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
-                                                    <GiftBoxIcon />
+                                        <div className="flex flex-col items-center w-24 sm:w-28 flex-shrink-0">
+                                            <div className="block flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28">
+                                                {isGift ? (
+                                                    <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
+                                                        <GiftBoxIcon />
+                                                    </div>
+                                                ) : (
+                                                    <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
+                                                        <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
+                                                    </Link>
+                                                )}
+                                            </div>
+                                            {!isGift && (
+                                                <div className="flex items-center gap-1 rounded-full border p-1 mt-2">
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
+                                                    <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
                                                 </div>
-                                            ) : (
-                                                <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
-                                                    <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
-                                                </Link>
                                             )}
                                         </div>
+
                                         <div className="flex flex-col flex-grow gap-1">
                                             <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
                                             <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
@@ -489,16 +500,9 @@ export default function CartPage() {
                                             
                                             <div className="mt-auto pt-2">
                                             {!isGift ? (
-                                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-4">
-                                                    <div className="flex items-center gap-1 rounded-full border p-1">
-                                                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
-                                                        <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                                                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
-                                                    </div>
-                                                    <div className="flex items-center gap-4 sm:gap-4">
-                                                        <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
-                                                        <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
-                                                    </div>
+                                                <div className="flex items-center gap-4 sm:gap-4">
+                                                    <Button variant="ghost" size="icon" className="p-0 h-auto text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="h-5 w-5"/></Button>
+                                                    <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
                                                 </div>
                                             ) : <div className="mt-2 h-8" />}
                                             </div>
