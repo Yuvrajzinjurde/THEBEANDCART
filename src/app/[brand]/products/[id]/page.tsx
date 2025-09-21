@@ -54,7 +54,7 @@ const ProductPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
         return (
-            <div className="pt-12 text-center">
+            <div className="container pt-12 text-center">
                 <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
                 <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
                     {[...Array(6)].map((_, i) => (
@@ -76,7 +76,7 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
 
     if (!products || products.length === 0) return null;
     return (
-        <section className="pt-12">
+        <section className="container pt-12">
             <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
             <Separator className="my-4" />
             <Carousel
@@ -280,7 +280,7 @@ export default function ProductPage() {
 
   return (
     <>
-      <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <main className="container py-8">
         <ProductDetails 
           product={product} 
           variants={variants.length > 0 ? variants : [product]} 

@@ -31,7 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LandingPageSkeleton = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="container flex flex-col items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-4xl px-4">
             <div className="space-y-8 animate-pulse">
                 <div className="flex justify-center">
@@ -427,12 +427,12 @@ export default function LandingPage() {
         <ShopByBrandSection brands={brands} />
 
         {loading ? (
-            <div className="flex flex-col items-center justify-center text-center py-16">
+            <div className="container flex flex-col items-center justify-center text-center py-16">
                 <Loader className="h-12 w-12" />
                 <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         ) : error ? (
-            <div className="text-center text-destructive py-16">
+            <div className="container text-center text-destructive py-16">
                 <p>Could not load products. Please try again later.</p>
             </div>
         ) : (

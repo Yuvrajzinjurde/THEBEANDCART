@@ -61,7 +61,7 @@ export default function LegalPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center">
+      <main className="container flex min-h-screen flex-col items-center justify-center">
         <Loader className="h-12 w-12" />
       </main>
     );
@@ -69,7 +69,7 @@ export default function LegalPage() {
 
   if (error || !document) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center">
+      <main className="container flex min-h-screen flex-col items-center justify-center">
         <h1 className="text-2xl font-bold">Document Not Found</h1>
         <p className="text-muted-foreground">{error || `The requested document could not be found.`}</p>
         <Button variant="link" onClick={() => router.back()}>Go Back</Button>
@@ -78,7 +78,7 @@ export default function LegalPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <main className="container py-8">
         <div className="flex items-center gap-4 mb-4">
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
                 <ArrowLeft className="h-4 w-4" />

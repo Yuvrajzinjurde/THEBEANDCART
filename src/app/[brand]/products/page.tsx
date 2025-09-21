@@ -45,7 +45,7 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6 text-center">
+    <div className="container grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6 text-center">
         <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         {[...Array(12)].map((_, i) => (
             <div key={i} className="space-y-2">
@@ -178,7 +178,7 @@ export default function ProductsPage() {
 
   if (error) {
       return (
-          <main className="flex min-h-screen flex-col items-center justify-center">
+          <main className="container flex min-h-screen flex-col items-center justify-center">
               <h1 className="text-2xl font-bold">Error</h1>
               <p className="text-muted-foreground">{error}</p>
           </main>

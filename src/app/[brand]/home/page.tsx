@@ -443,7 +443,7 @@ export default function BrandHomePage() {
 
   return (
     <>
-    <main className="flex-1">
+    <main className="container flex-1">
         <section className="w-full">
             <Carousel 
                 className="w-full"
@@ -464,7 +464,7 @@ export default function BrandHomePage() {
                                 priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
-                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white">
+                            <div className="relative h-full flex flex-col justify-center items-center text-center text-white">
                                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
