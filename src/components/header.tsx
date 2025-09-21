@@ -93,9 +93,13 @@ export default function Header() {
   const allAvailableCategories = useMemo(() => {
     const categorySet = new Set<string>();
     allProducts.forEach(p => {
-      if (p.category && typeof p.category === 'string') {
-        categorySet.add(p.category);
-      }
+        if (p.category && typeof p.category === 'string') {
+            categorySet.add(p.category);
+        } else if (p.category && Array.isArray(p.category)) {
+            p.category.forEach(cat => {
+                if(typeof cat === 'string') categorySet.add(cat)
+            });
+        }
     });
     return Array.from(categorySet);
   }, [allProducts]);
