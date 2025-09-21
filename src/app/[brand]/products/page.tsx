@@ -330,7 +330,7 @@ export default function ProductsPage() {
             <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
         <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
-             <div className="hidden lg:block">
+             <div className="hidden lg:block sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pr-4">
                 <ProductFilters 
                     productsForCategories={allProducts}
                     productsForOthers={allProducts}
