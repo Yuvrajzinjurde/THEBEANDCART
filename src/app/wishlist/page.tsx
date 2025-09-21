@@ -91,7 +91,7 @@ const WishlistSkeleton = () => (
             ))}
         </div>
         <div className="mx-auto text-center">
-          <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+          <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         </div>
     </main>
 );

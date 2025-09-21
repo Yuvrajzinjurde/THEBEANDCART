@@ -128,7 +128,7 @@ const CartSkeleton = () => (
       </div>
     <main className="container pt-6 text-center">
         <div className="mx-auto text-center">
-          <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+          <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
             <div className="lg:col-span-2 space-y-4">

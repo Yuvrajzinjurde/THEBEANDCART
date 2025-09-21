@@ -38,7 +38,7 @@ const ProductCarouselSkeleton = () => (
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
         <Separator className="mb-6" />
         <div className="mx-auto text-center">
-          <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+          <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         </div>
         <div className="flex space-x-4">
             {[...Array(6)].map((_, i) => (
@@ -428,7 +428,7 @@ export default function BrandHomePage() {
   
   if (error || !brand) {
       return (
-          <main className="flex min-h-screen flex-col items-center justify-center">
+          <main className="container flex min-h-screen flex-col items-center justify-center">
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">{error || 'The requested brand does not exist.'}</p>
           </main>
@@ -443,7 +443,7 @@ export default function BrandHomePage() {
 
   return (
     <>
-    <main className="container flex-1">
+    <main>
         <section className="w-full">
             <Carousel 
                 className="w-full"
@@ -464,7 +464,7 @@ export default function BrandHomePage() {
                                 priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
-                            <div className="relative h-full flex flex-col justify-center items-center text-center text-white">
+                            <div className="relative container h-full flex flex-col justify-center items-center text-center text-white">
                                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>

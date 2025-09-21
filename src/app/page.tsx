@@ -364,7 +364,7 @@ export default function LandingPage() {
 
   return (
     <>
-    <main className="flex-1">
+    <main>
 
         {heroBanners && heroBanners.length > 0 ? (
              <section className="w-full">
