@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
@@ -198,7 +197,7 @@ function SearchResults() {
 
   if (error) {
       return (
-          <main className="container flex min-h-screen flex-col items-center justify-center px-4">
+          <main className="container flex min-h-screen flex-col items-center justify-center px-10">
               <h1 className="text-2xl font-bold">Error</h1>
               <p className="text-muted-foreground">{error}</p>
           </main>
@@ -207,7 +206,7 @@ function SearchResults() {
 
   return (
     <>
-    <main className="container py-8 px-4">
+    <main className="container py-8 px-10">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>
@@ -231,7 +230,7 @@ function SearchResults() {
                 />
             </div>
             <div className="flex-1 min-w-0">
-                <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
+                <div className="sticky top-16 z-10 bg-background pt-4 pb-4 lg:pt-0">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
