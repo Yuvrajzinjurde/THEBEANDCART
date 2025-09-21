@@ -32,13 +32,13 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
     return (
         <Collapsible defaultOpen={defaultOpen}>
             <CollapsibleTrigger className="w-full">
-            <div className="flex w-full items-center justify-between border-b py-3">
+            <div className="flex w-full items-center justify-between border-b py-3 pl-4">
                 <h3 className="text-sm font-semibold uppercase tracking-wider">{title}</h3>
                 <ChevronDown className="h-4 w-4 transition-transform [&[data-state=open]]:rotate-180" />
             </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-                 <div className="py-4 pl-4 space-y-3 pr-4">{children}</div>
+                 <div className="py-4 pl-8 space-y-3 pr-4">{children}</div>
             </CollapsibleContent>
         </Collapsible>
     )
