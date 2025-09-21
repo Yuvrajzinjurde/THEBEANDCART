@@ -14,9 +14,11 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const storefront = searchParams.get('storefront');
     const category = searchParams.get('category');
+    const brands = searchParams.get('brands');
+    const colors = searchParams.get('colors');
     const keyword = searchParams.get('keyword');
-    const keywords = searchParams.get('keywords');
-    const exclude = searchParams.get('exclude');
+    const keywords = searchParams.get('keywords'); // For similar products
+    const exclude = searchParams.get('exclude'); // To exclude current product
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const sortBy = searchParams.get('sortBy');
@@ -28,16 +30,34 @@ export async function GET(req: Request) {
     }
     
     if (category) {
-        query.category = category;
+        query.category = { $in: category.split(',') };
+    }
+
+    if (brands) {
+        query.brand = { $in: brands.split(',') };
+    }
+
+    if (colors) {
+        query.color = { $in: colors.split(',') };
     }
 
     if (keyword) {
-        query.keywords = { $in: [new RegExp(keyword, 'i')] };
+        // Search in name and keywords for a better search experience
+        const regex = new RegExp(keyword, 'i');
+        query.$or = [
+            { name: regex },
+            { keywords: { $in: [regex] } },
+            { brand: regex },
+            { category: regex }
+        ];
     }
 
     if (keywords) {
         const keywordArray = keywords.split(',');
-        query.keywords = { $in: keywordArray.map(k => new RegExp(k, 'i')) };
+        query.$or = [
+            { keywords: { $in: keywordArray.map(k => new RegExp(k, 'i')) } },
+            { name: { $in: keywordArray.map(k => new RegExp(k, 'i')) } },
+        ]
     }
     
     if (exclude) {
@@ -49,8 +69,16 @@ export async function GET(req: Request) {
         query.stock = { $gt: 0 };
         // A simple popularity score. A real app might use orders or a more complex algorithm.
         sortOptions = { clicks: -1, views: -1 };
+    } else if (sortBy === 'price-asc') {
+        sortOptions = { sellingPrice: 1 };
+    } else if (sortBy === 'price-desc') {
+        sortOptions = { sellingPrice: -1 };
+    } else if (sortBy === 'rating') {
+        sortOptions = { rating: -1 };
+    } else if (sortBy === 'newest') {
+        sortOptions = { createdAt: -1 };
     }
-
+    
     const skip = (page - 1) * limit;
 
     const totalProducts = await Product.countDocuments(query);
@@ -61,6 +89,7 @@ export async function GET(req: Request) {
         .skip(skip)
         .limit(limit)
         .lean();
+
 
     return NextResponse.json({
       products,

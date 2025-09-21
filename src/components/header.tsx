@@ -56,7 +56,7 @@ export default function Header() {
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart') {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart' || pathname === '/search') {
       setBrandName(null);
     } else {
       const determinedBrand = pathBrand || queryBrand || 'reeva';
@@ -126,7 +126,13 @@ export default function Header() {
     e.preventDefault();
     const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
     if (query) {
-      router.push(`/${effectiveBrandName}/products?keyword=${encodeURIComponent(query)}`);
+      if (brandName) {
+        // If on a brand page, search within that brand
+        router.push(`/${brandName}/products?keyword=${encodeURIComponent(query)}`);
+      } else {
+        // If on a global page, go to the global search page
+        router.push(`/search?keyword=${encodeURIComponent(query)}`);
+      }
       setIsSheetOpen(false);
     }
   };
