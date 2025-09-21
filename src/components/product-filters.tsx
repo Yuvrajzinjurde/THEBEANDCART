@@ -102,12 +102,11 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
   }, [productsForCategories, brand]);
 
   return (
-    <aside className="w-full">
-      <div className="sticky top-20">
+    <aside className="w-full h-screen sticky top-16">
          <div className="flex items-center justify-between pb-4 border-b">
           <h2 className="text-lg font-bold">Filters</h2>
         </div>
-        <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
+        <ScrollArea className="h-full pb-32">
             <div className="pr-4">
                 <FilterSection title="Categories" defaultOpen count={allCategories.length}>
                     {allCategories.map(category => (
@@ -163,7 +162,6 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
                 </FilterSection>
             </div>
         </ScrollArea>
-      </div>
     </aside>
   );
 }
