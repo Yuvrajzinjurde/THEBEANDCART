@@ -95,7 +95,15 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
     return ["Men", "Women", "Unisex"]; // Static for now
   }, []);
 
-  const allCategories = useMemo(() => (brand?.categories || []).sort(), [brand]);
+  const allCategories = useMemo(() => {
+    const categoryCounts: Record<string, number> = {};
+    productsForCategories.forEach(product => {
+        if (product.category) {
+            categoryCounts[product.category] = (categoryCounts[product.category] || 0) + 1;
+        }
+    });
+    return Object.keys(categoryCounts).sort();
+  }, [productsForCategories]);
 
   return (
     <aside className="w-full">

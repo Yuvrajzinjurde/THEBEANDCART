@@ -1,9 +1,10 @@
 
+
 "use client";
 
 import Link from "next/link";
 import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home as HomeIcon, User, Bell, Package, Box } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -12,6 +13,7 @@ import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { IBrand } from "@/models/brand.model";
+import type { IProduct } from "@/models/product.model";
 import {
   Sheet,
   SheetContent,
@@ -46,6 +48,7 @@ export default function Header() {
 
   const [brandName, setBrandName] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -75,29 +78,52 @@ export default function Header() {
     { href: `/${effectiveBrandName}/products?keyword=home`, icon: HomeIcon, label: "Home Favourites" },
   ];
   
-  const categories = brand?.categories || [];
+  const categories = useMemo(() => {
+    if (!brandName) return [];
+    const categoryCounts: Record<string, number> = {};
+    allProducts.forEach(product => {
+      if (product.storefront === brandName && product.category) {
+        categoryCounts[product.category] = (categoryCounts[product.category] || 0) + 1;
+      }
+    });
+    return Object.keys(categoryCounts).sort();
+  }, [allProducts, brandName]);
 
   useEffect(() => {
-    async function fetchBrandLogo() {
+    async function fetchBrandData() {
       if (!brandName) {
         setBrand(null);
+        setAllProducts([]);
         return;
       };
       try {
-        const res = await fetch(`/api/brands/${brandName}`);
-        if (res.ok) {
-          const { brand: brandData } = await res.json();
+        const [brandRes, productsRes] = await Promise.all([
+          fetch(`/api/brands/${brandName}`),
+          fetch(`/api/products?storefront=${brandName}`)
+        ]);
+
+        if (brandRes.ok) {
+          const { brand: brandData } = await brandRes.json();
           setBrand(brandData);
         } else {
           setBrand(null);
         }
+
+        if (productsRes.ok) {
+          const { products: productData } = await productsRes.json();
+          setAllProducts(productData);
+        } else {
+          setAllProducts([]);
+        }
+
       } catch (error) {
         console.error("Failed to fetch brand data for header", error);
         setBrand(null);
+        setAllProducts([]);
       }
     }
     if (isClient) {
-        fetchBrandLogo();
+        fetchBrandData();
     }
   }, [brandName, isClient]);
   
@@ -225,13 +251,17 @@ export default function Header() {
                                 </Link>
                             )}
                             <Separator />
-                            <h3 className="font-semibold text-muted-foreground">Categories</h3>
-                             {categories.map(cat => (
-                                <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                                    {cat}
-                                </Link>
-                            ))}
-                            <Separator />
+                            {categories.length > 0 && (
+                                <>
+                                <h3 className="font-semibold text-muted-foreground">Categories</h3>
+                                {categories.map(cat => (
+                                    <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                        {cat}
+                                    </Link>
+                                ))}
+                                <Separator />
+                                </>
+                            )}
                             <h3 className="font-semibold text-muted-foreground">Explore</h3>
                             {secondaryNavItems.map((item) => (
                                 <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
