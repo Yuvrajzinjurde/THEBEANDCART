@@ -392,30 +392,33 @@ export default function CartPage() {
   return (
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
-        <div className="container flex items-center justify-between gap-4 px-5">
-            <div className="flex items-center gap-2">
-                <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => router.back()}
-                >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="sr-only">Back</span>
-                </Button>
-                <Breadcrumb className="hidden sm:block">
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                    <BreadcrumbLink href={`/`}>Home</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                    <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
-                    </BreadcrumbItem>
-                </BreadcrumbList>
-                </Breadcrumb>
+        <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-5">
+            <div className="flex items-center justify-between w-full lg:w-auto">
+                <div className="flex items-center gap-2">
+                    <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => router.back()}
+                    >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="sr-only">Back</span>
+                    </Button>
+                    <Breadcrumb className="hidden sm:block">
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                        <BreadcrumbLink href={`/`}>Home</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                        <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                    </Breadcrumb>
+                </div>
+                <div className="lg:hidden w-48" /> {/* Spacer for mobile */}
             </div>
-            <div className="flex-grow flex justify-center">
+            <div className="flex-grow flex justify-center w-full">
                 <CartProgressBar currentValue={subtotal} />
             </div>
             <div className="w-48 hidden lg:block" />
@@ -438,7 +441,7 @@ export default function CartPage() {
                                     const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                                     return (
                                     <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-row gap-4 py-6 first:pt-0">
-                                        <div className="block flex-shrink-0 w-[100px] sm:w-[120px] aspect-square sm:h-[120px]">
+                                        <div className="block flex-shrink-0 w-[100px] sm:w-[120px] aspect-square">
                                             {isGift ? (
                                                 <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
                                                     <GiftBoxIcon />
@@ -564,5 +567,3 @@ export default function CartPage() {
     </>
   );
 }
-
-    
