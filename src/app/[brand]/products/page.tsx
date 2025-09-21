@@ -307,7 +307,7 @@ export default function ProductsPage() {
 
   return (
     <>
-    <main className="container py-8 px-4">
+    <main className="container py-8 px-10">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>
@@ -330,13 +330,13 @@ export default function ProductsPage() {
             </Breadcrumb>
         </div>
         <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
-            <div className="hidden lg:block sticky top-24 h-[calc(100vh-8rem)]">
+            <aside className="hidden lg:block sticky top-24 h-[calc(100vh-8rem)]">
                 <ProductFilters 
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
                     onClearAll={clearAllFilters}
                 />
-            </div>
+            </aside>
             <div className="flex-1 min-w-0">
                  <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">

@@ -223,13 +223,13 @@ function SearchResults() {
         </div>
         
         <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
-            <div className="hidden lg:block sticky top-24 h-[calc(100vh-8rem)]">
+            <aside className="hidden lg:block sticky top-24 h-[calc(100vh-8rem)]">
                 <ProductFilters 
                     onFilterChange={handleFilterChange}
                     onClearAll={clearAllFilters}
                     activeFilters={activeFilters}
                 />
-            </div>
+            </aside>
             <div className="flex-1 min-w-0">
                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4 lg:pt-0">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
