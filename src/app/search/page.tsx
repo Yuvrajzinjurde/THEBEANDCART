@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
@@ -26,7 +25,7 @@ import { ChevronDown, Smile, SlidersHorizontal, ChevronLeft, ChevronRight } from
 import { Skeleton } from '@/components/ui/skeleton';
 import { GlobalFooter } from '@/components/global-footer';
 import { ProductFilters } from '@/components/product-filters';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { ActiveFilters } from '@/app/[brand]/products/page';
 
 type Pagination = {
@@ -234,9 +233,10 @@ function SearchResults() {
                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4 lg:pt-0">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                                Search Results for &quot;{initialKeyword}&quot;
-                            </h1>
+                             <div className="text-lg">
+                                <span className="text-muted-foreground">Search Results for </span> 
+                                <span className="font-bold text-xl">&quot;{initialKeyword}&quot;</span>
+                            </div>
                             <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products found</p>
                         </div>
                         <div className="flex items-center gap-2 self-end">
@@ -311,3 +311,5 @@ export default function SearchPage() {
         </Suspense>
     )
 }
+
+    
