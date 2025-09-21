@@ -25,7 +25,7 @@ import { ChevronDown, Smile, SlidersHorizontal, ChevronLeft, ChevronRight } from
 import { Skeleton } from '@/components/ui/skeleton';
 import { GlobalFooter } from '@/components/global-footer';
 import { ProductFilters } from '@/components/product-filters';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import type { ActiveFilters } from '@/app/[brand]/products/page';
 
 type Pagination = {
@@ -221,15 +221,15 @@ function SearchResults() {
             </Breadcrumb>
         </div>
         
-        <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
-            <aside className="hidden lg:block sticky top-24 h-[calc(100vh-8rem)]">
+        <div className="grid lg:grid-cols-4 lg:gap-8">
+            <aside className="hidden lg:block lg:col-span-1 sticky top-24 h-[calc(100vh-8rem)]">
                 <ProductFilters 
                     onFilterChange={handleFilterChange}
                     onClearAll={clearAllFilters}
                     activeFilters={activeFilters}
                 />
             </aside>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 lg:col-span-3">
                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4 lg:pt-0">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
                         <div>
@@ -280,7 +280,7 @@ function SearchResults() {
                     <ProductGridSkeleton />
                 ) : products.length > 0 ? (
                     <>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 pt-6">
                         {products.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
@@ -311,5 +311,3 @@ export default function SearchPage() {
         </Suspense>
     )
 }
-
-    
