@@ -125,7 +125,7 @@ const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container py-8">
+        <div className="container py-8 px-5">
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
@@ -268,11 +268,11 @@ export default function ProductPage() {
   }
 
   if (error) {
-    return <div className="container text-center text-destructive py-10"><p>{error}</p></div>;
+    return <div className="text-center text-destructive py-10"><p>{error}</p></div>;
   }
   
   if (!product) {
-    return <div className="container text-center text-muted-foreground py-10"><p>Product not found.</p></div>;
+    return <div className="text-center text-muted-foreground py-10"><p>Product not found.</p></div>;
   }
   
   const storefront = searchParams.get('storefront') || product.storefront;

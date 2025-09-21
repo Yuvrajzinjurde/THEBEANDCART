@@ -85,7 +85,7 @@ const GiftBoxIcon = () => (
 
 const CartFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container py-6">
+        <div className="container py-6 px-5">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                  <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
