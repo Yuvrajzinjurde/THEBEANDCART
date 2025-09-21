@@ -16,6 +16,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import type { ActiveFilters } from "@/app/[brand]/products/page";
 import type { IBrand } from "@/models/brand.model";
 import { useParams } from "next/navigation";
+import { Button } from "./ui/button";
 
 
 type FilterSectionProps = {
@@ -49,9 +50,10 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
 interface ProductFiltersProps {
   activeFilters: ActiveFilters;
   onFilterChange: (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => void;
+  onClearAll: () => void;
 }
 
-export function ProductFilters({ activeFilters, onFilterChange }: ProductFiltersProps) {
+export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: ProductFiltersProps) {
   const params = useParams();
   const brandName = params.brand as string;
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
@@ -93,7 +95,7 @@ export function ProductFilters({ activeFilters, onFilterChange }: ProductFilters
       if (product.category) {
         if (Array.isArray(product.category)) {
           product.category.forEach(cat => categories.add(cat));
-        } else {
+        } else if (typeof product.category === 'string') {
           categories.add(product.category);
         }
       }
@@ -107,9 +109,10 @@ export function ProductFilters({ activeFilters, onFilterChange }: ProductFilters
   }, [allProducts]);
 
   return (
-    <aside className="w-full h-[calc(100vh-5rem)] overflow-y-auto pr-4 lg:pr-0">
+    <aside className="w-full h-full pr-4 lg:pr-0">
          <div className="flex items-center justify-between pb-4 border-b">
           <h2 className="text-lg font-bold">Filters</h2>
+           <Button variant="link" className="p-0 h-auto text-primary" onClick={onClearAll}>CLEAR ALL</Button>
         </div>
         <div className="pr-4">
             <FilterSection title="Categories" defaultOpen count={allCategories.length}>

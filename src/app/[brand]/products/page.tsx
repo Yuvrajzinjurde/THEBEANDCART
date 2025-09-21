@@ -186,6 +186,8 @@ export default function ProductsPage() {
   const updateURL = useCallback((filters: ActiveFilters, page: number) => {
     const query = new URLSearchParams();
     if (filters.categories.length > 0) query.set('category', filters.categories.join(','));
+    if (filters.brands.length > 0) query.set('brand', filters.brands.join(','));
+    if (filters.colors.length > 0) query.set('color', filters.colors.join(','));
     if (filters.keywords.length > 0) query.set('keyword', filters.keywords.join(','));
     if (page > 1) query.set('page', page.toString());
     
@@ -326,13 +328,13 @@ export default function ProductsPage() {
                     )}
                 </BreadcrumbList>
             </Breadcrumb>
-            <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
-            <div className="hidden lg:block sticky top-20">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+            <div className="hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
                 <ProductFilters 
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
+                    onClearAll={clearAllFilters}
                 />
             </div>
             <div className="flex-1 min-w-0">
@@ -358,6 +360,7 @@ export default function ProductsPage() {
                                     <ProductFilters 
                                         activeFilters={activeFilters}
                                         onFilterChange={handleFilterChange}
+                                        onClearAll={clearAllFilters}
                                     />
                                 </SheetContent>
                             </Sheet>
