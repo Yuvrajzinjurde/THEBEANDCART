@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState, useMemo, useTransition } from 'react';
+import { useEffect, useState, useMemo, useTransition, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
@@ -23,10 +23,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Smile, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Separator } from '@/components/ui/separator';
 
 export type ActiveFilters = {
   categories: string[];
@@ -35,6 +36,13 @@ export type ActiveFilters = {
   colors: string[];
   keywords: string[];
 };
+
+type Pagination = {
+  currentPage: number;
+  totalPages: number;
+  totalProducts: number;
+  limit: number;
+}
 
 const SORT_OPTIONS: { [key: string]: string } = {
   relevance: "Relevance",
@@ -57,6 +65,67 @@ const ProductGridSkeleton = () => (
     </div>
 );
 
+const PaginationComponent = ({ pagination, onPageChange }: { pagination: Pagination, onPageChange: (page: number) => void }) => {
+    const { currentPage, totalPages } = pagination;
+
+    if (totalPages <= 1) return null;
+
+    return (
+        <div className="flex items-center justify-center gap-2 mt-8">
+            <Button 
+                variant="outline"
+                size="icon"
+                onClick={() => onPageChange(currentPage - 1)} 
+                disabled={currentPage === 1}
+            >
+                <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+            </span>
+            <Button 
+                variant="outline"
+                size="icon"
+                onClick={() => onPageChange(currentPage + 1)} 
+                disabled={currentPage === totalPages}
+            >
+                <ChevronRight className="h-4 w-4" />
+            </Button>
+        </div>
+    );
+};
+
+const ProductCarouselSection = ({ title, products }: { title: string, products: IProduct[] }) => {
+    if (!products || products.length === 0) return null;
+    return (
+        <section className="container pt-12">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
+            </div>
+            <Separator className="mb-6" />
+            <Carousel
+                opts={{
+                    align: "start",
+                    loop: products.length > 6,
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {products.map((product) => (
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                            <div className="p-1">
+                                <BrandProductCard product={product} />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+            </Carousel>
+        </section>
+    );
+};
+
 
 export default function ProductsPage() {
   const params = useParams();
@@ -66,10 +135,13 @@ export default function ProductsPage() {
   const initialKeyword = searchParams.get('keyword');
 
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [pagination, setPagination] = useState<Pagination>({ currentPage: 1, totalPages: 1, totalProducts: 0, limit: 50 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [popularProducts, setPopularProducts] = useState<IProduct[]>([]);
 
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
     categories: initialCategory ? [initialCategory] : [],
@@ -80,81 +152,89 @@ export default function ProductsPage() {
   });
   const [sortOption, setSortOption] = useState<string>('relevance');
 
-  useEffect(() => {
-    async function fetchProducts() {
-        if (!brandName) return;
-        setLoading(true);
-        setError(null);
-        try {
-            const query = new URLSearchParams({ storefront: brandName });
-            // Fetch all products for the storefront initially
-            const productResponse = await fetch(`/api/products?${query.toString()}`);
-            if(!productResponse.ok) {
-                const errorData = await productResponse.json();
-                throw new Error(errorData.message || 'Failed to fetch products');
-            }
-            const productData = await productResponse.json();
-            setAllProducts(productData.products);
-            setFilteredProducts(productData.products); // Initially, all products are filtered products
-
-        } catch (error: any) {
-            console.error(error);
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    }
-    fetchProducts();
-  }, [brandName]);
-
-  useEffect(() => {
-    startTransition(() => {
-        let productsToFilter = [...allProducts];
-
-        // Apply filters
-        productsToFilter = productsToFilter.filter(p => {
-            const categoryMatch = activeFilters.categories.length === 0 || (Array.isArray(p.category) ? activeFilters.categories.some(c => p.category.includes(c)) : activeFilters.categories.includes(p.category));
-            const brandMatch = activeFilters.brands.length === 0 || (p.brand && activeFilters.brands.includes(p.brand));
-            const colorMatch = activeFilters.colors.length === 0 || (p.color && activeFilters.colors.includes(p.color));
-            const keywordMatch = activeFilters.keywords.length === 0 || (p.keywords && activeFilters.keywords.some(filterKeyword => 
-                p.keywords.some(productKeyword => productKeyword.toLowerCase().includes(filterKeyword.toLowerCase()))
-            ));
-            return categoryMatch && brandMatch && colorMatch && keywordMatch;
+  const fetchProducts = useCallback(async (page = 1) => {
+    if (!brandName) return;
+    setLoading(true);
+    setError(null);
+    try {
+        const query = new URLSearchParams({ 
+            storefront: brandName,
+            page: page.toString(),
+            limit: '50',
+            sort: sortOption
         });
 
-        // Apply sorting
-        switch(sortOption) {
-            case 'price-asc':
-                productsToFilter.sort((a, b) => a.sellingPrice - b.sellingPrice);
-                break;
-            case 'price-desc':
-                productsToFilter.sort((a, b) => b.sellingPrice - a.sellingPrice);
-                break;
-            case 'newest':
-                productsToFilter.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-                break;
-            case 'rating':
-                // @ts-ignore
-                productsToFilter.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                break;
-            case 'relevance':
-            default:
-                // Default sort is by creation date (newest first) as fetched from API
-                break;
+        // Add active filters to the query
+        Object.entries(activeFilters).forEach(([key, values]) => {
+            if (values.length > 0) {
+                query.append(key, values.join(','));
+            }
+        });
+
+        const productResponse = await fetch(`/api/products?${query.toString()}`);
+        if(!productResponse.ok) {
+            const errorData = await productResponse.json();
+            throw new Error(errorData.message || 'Failed to fetch products');
         }
-        
-        setFilteredProducts(productsToFilter);
-    });
-  }, [allProducts, activeFilters, sortOption]);
-  
+        const { products, pagination: newPagination } = await productResponse.json();
+        setAllProducts(products);
+        setPagination(newPagination);
+        setCurrentPage(newPagination.currentPage);
+
+    } catch (error: any) {
+        console.error(error);
+        setError(error.message);
+    } finally {
+        setLoading(false);
+    }
+  }, [brandName, sortOption, activeFilters]);
+
+  useEffect(() => {
+    fetchProducts(currentPage);
+  }, [currentPage, fetchProducts]);
+
+  useEffect(() => {
+    // When filters or sorting change, fetch from page 1
+    fetchProducts(1);
+  }, [sortOption, activeFilters]);
+
+
+  useEffect(() => {
+    async function fetchPopularProducts() {
+        if (!brandName) return;
+        try {
+            const query = new URLSearchParams({ 
+                storefront: brandName,
+                limit: '12',
+                sortBy: 'popular'
+            });
+            const response = await fetch(`/api/products?${query.toString()}`);
+            if (response.ok) {
+                const { products } = await response.json();
+                setPopularProducts(products);
+            }
+        } catch (error) {
+            console.error('Failed to fetch popular products:', error);
+        }
+    }
+    fetchPopularProducts();
+  }, [brandName]);
+
+
   const handleFilterChange = (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => {
-    setActiveFilters(prev => {
-        const currentValues = prev[filterType];
-        const newValues = isChecked 
-            ? [...currentValues, value] 
-            : currentValues.filter(v => v !== value);
-        return { ...prev, [filterType]: newValues };
+    startTransition(() => {
+        setActiveFilters(prev => {
+            const currentValues = prev[filterType];
+            const newValues = isChecked 
+                ? [...currentValues, value] 
+                : currentValues.filter(v => v !== value);
+            return { ...prev, [filterType]: newValues };
+        });
     });
+  };
+  
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
   };
 
   const clearAllFilters = () => {
@@ -169,12 +249,6 @@ export default function ProductsPage() {
     if (activeFilters.categories.length === 1) return activeFilters.categories[0];
     return null;
   }, [activeFilters.categories]);
-
-  // Determine which set of products to use for generating filter options
-  // For categories, we always want to show all possible categories from the storefront
-  // For other filters, we want to show options based on the currently filtered products
-  const productsForCategoryFilter = allProducts;
-  const productsForOtherFilters = filteredProducts;
 
   if (error) {
       return (
@@ -212,8 +286,8 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
              <div className="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
                 <ProductFilters 
-                    productsForCategories={productsForCategoryFilter}
-                    productsForOthers={productsForOtherFilters}
+                    productsForCategories={allProducts}
+                    productsForOthers={allProducts}
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
                 />
@@ -225,7 +299,7 @@ export default function ProductsPage() {
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
                                 {currentCategory ? `${currentCategory}` : `All Products`}
                             </h1>
-                            <p className="text-sm text-muted-foreground mt-1">{filteredProducts.length} products</p>
+                            <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products</p>
                         </div>
                         <div className="flex items-center gap-2">
                              <Sheet>
@@ -238,8 +312,8 @@ export default function ProductsPage() {
                                     <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
                                     <div className="p-4">
                                          <ProductFilters 
-                                            productsForCategories={productsForCategoryFilter}
-                                            productsForOthers={productsForOtherFilters}
+                                            productsForCategories={allProducts}
+                                            productsForOthers={allProducts}
                                             activeFilters={activeFilters}
                                             onFilterChange={handleFilterChange}
                                         />
@@ -267,12 +341,15 @@ export default function ProductsPage() {
 
                 {loading || isPending ? (
                      <ProductGridSkeleton />
-                ) : filteredProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
-                        {filteredProducts.map((product) => (
-                            <BrandProductCard key={product._id as string} product={product} />
-                        ))}
-                    </div>
+                ) : allProducts.length > 0 ? (
+                    <>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
+                            {allProducts.map((product) => (
+                                <BrandProductCard key={product._id as string} product={product} />
+                            ))}
+                        </div>
+                        <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
+                    </>
                 ) : (
                     <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
                         <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
@@ -281,6 +358,9 @@ export default function ProductsPage() {
                          <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
                     </div>
                 )}
+                 <div className="mt-16">
+                    <ProductCarouselSection title="Explore Our Popular Products" products={popularProducts} />
+                </div>
             </div>
         </div>
     </main>

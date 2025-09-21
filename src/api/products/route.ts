@@ -15,9 +15,12 @@ export async function GET(req: Request) {
     const storefront = searchParams.get('storefront');
     const category = searchParams.get('category');
     const keyword = searchParams.get('keyword');
-    const keywords = searchParams.get('keywords'); // For similar products
-    const exclude = searchParams.get('exclude'); // To exclude current product
-    
+    const keywords = searchParams.get('keywords');
+    const exclude = searchParams.get('exclude');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const sortBy = searchParams.get('sortBy');
+
     let query: any = {};
 
     if (storefront) {
@@ -41,22 +44,33 @@ export async function GET(req: Request) {
         query._id = { $ne: exclude };
     }
 
-    // If any filter is provided, use the query.
-    if (storefront || category || keyword || keywords) {
-        const products = await Product.find(query)
-            .sort({ createdAt: -1 })
-            .lean();
-        
-        return NextResponse.json({ products }, { status: 200 });
+    let sortOptions: any = { createdAt: -1 };
+    if (sortBy === 'popular') {
+        query.stock = { $gt: 0 };
+        // A simple popularity score. A real app might use orders or a more complex algorithm.
+        sortOptions = { clicks: -1, views: -1 };
     }
 
-    // If no specific filter, fetch a few products from each brand for the main landing page or all products for hamper creation.
-    const products = await Product.find({})
-        .sort({ createdAt: -1 })
+    const skip = (page - 1) * limit;
+
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    const products = await Product.find(query)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
         .lean();
 
-
-    return NextResponse.json({ products }, { status: 200 });
+    return NextResponse.json({
+      products,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalProducts,
+        limit
+      }
+    }, { status: 200 });
 
   } catch (error) {
     console.error('Failed to fetch products:', error);
@@ -104,4 +118,3 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
-
