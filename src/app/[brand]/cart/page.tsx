@@ -44,7 +44,29 @@ import type { IBrand } from "@/models/brand.model";
 import { addDays, format } from 'date-fns';
 import { CartProgressBar } from "@/components/cart-progress-bar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import * as React from "react"
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+import { cn } from "@/lib/utils";
+
+const HiddenScrollArea = React.forwardRef<
+  React.ElementRef<typeof ScrollAreaPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
+>(({ className, children, ...props }, ref) => (
+  <ScrollAreaPrimitive.Root
+    ref={ref}
+    className={cn("relative overflow-hidden", className)}
+    {...props}
+  >
+    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] no-scrollbar">
+      {children}
+    </ScrollAreaPrimitive.Viewport>
+    <ScrollBar className="hidden"/>
+    <ScrollAreaPrimitive.Corner />
+  </ScrollAreaPrimitive.Root>
+))
+HiddenScrollArea.displayName = "HiddenScrollArea"
+
 
 const SHIPPING_COST = 50;
 const FREE_SHIPPING_THRESHOLD = 399;
@@ -408,7 +430,7 @@ export default function CartPage() {
                         <CardTitle>My Cart ({cartItems.length})</CardTitle>
                     </CardHeader>
                     <CardContent className="divide-y p-0">
-                        <ScrollArea className="h-[600px] pr-6 no-scrollbar">
+                        <HiddenScrollArea className="h-[600px] pr-6">
                             {cartItems.map(item => {
                                 const isGift = item.product._id === 'free-gift-id';
                                 const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
@@ -477,12 +499,12 @@ export default function CartPage() {
                                     </div>
                                 </div>
                             )})}
-                        </ScrollArea>
+                        </HiddenScrollArea>
                     </CardContent>
                 </Card>
             </div>
             <aside className="lg:col-span-5 xl:col-span-4">
-                <ScrollArea className="h-[600px] pr-6 no-scrollbar">
+                <HiddenScrollArea className="h-[600px] pr-6">
                     <div className="space-y-6">
                         <Card>
                             <CardHeader>
@@ -546,7 +568,7 @@ export default function CartPage() {
                             </Card>
                         )}
                     </div>
-                </ScrollArea>
+                </HiddenScrollArea>
             </aside>
         </div>
       </main>
