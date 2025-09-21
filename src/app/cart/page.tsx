@@ -33,6 +33,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
+import type { IBrand } from "@/models/brand.model";
 import type { ICartItem } from "@/models/cart.model";
 import { addDays, format } from 'date-fns';
 import { CartProgressBar } from "@/components/cart-progress-bar";
@@ -135,10 +136,7 @@ const CartSkeleton = () => (
             <div className="w-48 hidden lg:block" />
         </div>
       </div>
-    <main className="container pt-6 px-10 text-center">
-        <div className="mx-auto text-center">
-          <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
-        </div>
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
             <div className="lg:col-span-2 space-y-4">
                 <Card>
@@ -193,6 +191,54 @@ const CartSkeleton = () => (
     </main>
     </>
 );
+
+const ExploreBrands = () => {
+    const [brands, setBrands] = useState<IBrand[]>([]);
+
+    useEffect(() => {
+        async function fetchBrands() {
+            try {
+                const response = await fetch('/api/brands');
+                if (response.ok) {
+                    const data = await response.json();
+                    setBrands(data.brands);
+                }
+            } catch (error) {
+                console.error("Failed to fetch brands for exploration", error);
+            }
+        }
+        fetchBrands();
+    }, []);
+
+    if (brands.length === 0) return null;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Explore Our Brands</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                    {brands.map(brand => (
+                         <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="block group flex-shrink-0">
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all duration-300">
+                                    <Image
+                                        src={brand.logoUrl}
+                                        alt={`${brand.displayName} Logo`}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <p className="text-xs font-semibold text-center truncate w-20">{brand.displayName}</p>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
 
 
 export default function CartPage() {
@@ -459,54 +505,53 @@ export default function CartPage() {
                     </Card>
                 </div>
                 <aside className="lg:col-span-5 xl:col-span-4">
-                    <HiddenScrollArea className="h-[600px] pr-6">
-                        <div className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex gap-2">
-                                    <Input placeholder="Enter coupon code"/>
-                                    <Button variant="outline">Apply</Button>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Order Summary</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Subtotal</span>
-                                        <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                    <div className="sticky top-24 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex gap-2">
+                                <Input placeholder="Enter coupon code"/>
+                                <Button variant="outline">Apply</Button>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Order Summary</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Subtotal</span>
+                                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                                </div>
+                                {totalDiscount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-medium">
+                                        <span className="">Product Savings</span>
+                                        <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
                                     </div>
-                                    {totalDiscount > 0 && (
-                                        <div className="flex justify-between text-green-600 font-medium">
-                                            <span className="">Product Savings</span>
-                                            <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
-                                        </div>
-                                    )}
-                                    {milestoneDiscount > 0 && (
-                                        <div className="flex justify-between text-green-600 font-medium">
-                                            <span className="">Milestone Discount</span>
-                                            <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Shipping</span>
-                                        <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
+                                )}
+                                {milestoneDiscount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-medium">
+                                        <span className="">Milestone Discount</span>
+                                        <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
                                     </div>
-                                    <Separator />
-                                    <div className="flex justify-between font-bold text-base">
-                                        <span>Grand Total</span>
-                                        <span>₹{grandTotal.toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <Button size="lg" className="w-full h-12 text-base mt-4">
-                                        Proceed to Checkout
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </HiddenScrollArea>
+                                )}
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Shipping</span>
+                                    <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between font-bold text-base">
+                                    <span>Grand Total</span>
+                                    <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+                                </div>
+                                <Button size="lg" className="w-full h-12 text-base mt-4">
+                                    Proceed to Checkout
+                                </Button>
+                            </CardContent>
+                        </Card>
+                        <ExploreBrands />
+                    </div>
                 </aside>
             </div>
         </div>
