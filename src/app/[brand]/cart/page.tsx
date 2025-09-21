@@ -367,7 +367,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
         <div className="container flex items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2">
@@ -399,14 +399,15 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="container px-10 flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 grid lg:grid-cols-12 lg:gap-8 overflow-hidden">
-            <div className="lg:col-span-7 xl:col-span-8 overflow-y-auto">
+      <main className="container px-10 py-8">
+        <div className="grid lg:grid-cols-12 lg:gap-8 lg:items-start">
+            <div className="lg:col-span-7 xl:col-span-8">
                 <Card className="border-none shadow-none">
                     <CardHeader>
                         <CardTitle>My Cart ({cartItems.length})</CardTitle>
                     </CardHeader>
-                    <CardContent className="divide-y">
+                    <CardContent className="divide-y p-0">
+                        <ScrollArea className="h-[600px] pr-6">
                             {cartItems.map(item => {
                                 const isGift = item.product._id === 'free-gift-id';
                                 const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
@@ -475,10 +476,11 @@ export default function CartPage() {
                                     </div>
                                 </div>
                             )})}
+                        </ScrollArea>
                     </CardContent>
                 </Card>
             </div>
-            <aside className="lg:col-span-5 xl:col-span-4 overflow-y-auto py-6">
+            <aside className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24">
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -545,6 +547,8 @@ export default function CartPage() {
             </aside>
         </div>
       </main>
-    </div>
+    </>
   );
 }
+
+    
