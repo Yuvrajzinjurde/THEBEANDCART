@@ -161,13 +161,14 @@ export default function ProductsPage() {
             storefront: brandName,
             page: page.toString(),
             limit: '50',
-            sort: sortOption
+            sortBy: sortOption
         });
 
         // Add active filters to the query
         Object.entries(activeFilters).forEach(([key, values]) => {
             if (values.length > 0) {
-                query.append(key, values.join(','));
+                const filterKey = key === 'categories' ? 'category' : key;
+                query.append(filterKey, values.join(','));
             }
         });
 
@@ -177,9 +178,12 @@ export default function ProductsPage() {
             throw new Error(errorData.message || 'Failed to fetch products');
         }
         const { products, pagination: newPagination } = await productResponse.json();
+        
         setAllProducts(products);
-        setPagination(newPagination);
-        setCurrentPage(newPagination.currentPage);
+        if (newPagination) {
+            setPagination(newPagination);
+            setCurrentPage(newPagination.currentPage);
+        }
 
     } catch (error: any) {
         console.error(error);
