@@ -43,6 +43,7 @@ import type { IBrand } from "@/models/brand.model";
 import { addDays, format } from 'date-fns';
 import { CartProgressBar } from "@/components/cart-progress-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SHIPPING_COST = 50;
 const FREE_SHIPPING_THRESHOLD = 399;
@@ -366,7 +367,7 @@ export default function CartPage() {
   }
 
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
         <div className="container flex items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2">
@@ -398,153 +399,158 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="container pb-8 pt-6 px-10 flex-grow">
-        <div className="relative lg:grid lg:grid-cols-12 lg:gap-8">
-            <div className="lg:col-span-7 xl:col-span-8">
-              <Card>
-                  <CardHeader>
-                      <CardTitle>My Cart ({cartItems.length})</CardTitle>
-                  </CardHeader>
-                  <CardContent className="divide-y">
-                          {cartItems.map(item => {
-                              const isGift = item.product._id === 'free-gift-id';
-                              const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
-                              const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
-                              return (
-                              <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4 py-6 first:pt-0">
-                                  <div className="block flex-shrink-0 w-full sm:w-[120px] aspect-square sm:h-[120px]">
-                                      {isGift ? (
-                                          <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
-                                              <GiftBoxIcon />
-                                          </div>
-                                      ) : (
-                                          <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
-                                              <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
-                                          </Link>
-                                      )}
-                                  </div>
-                                  <div className="flex flex-col flex-grow gap-1">
-                                      <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
-                                      <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
-                                      
-                                      {isGift && (
-                                          <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">
-                                              <Gift className="h-4 w-4 mt-0.5 shrink-0" />
-                                              <p className="text-xs font-medium">You'll find this surprise gift tucked inside one of your product boxes!</p>
-                                          </div>
-                                      )}
-
-                                      <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                          {item.size && <span>Size: {item.size}</span>}
-                                          {item.color && <span>Color: {item.color}</span>}
-                                      </div>
-                                      
-                                      <div className="flex items-baseline gap-2 mt-1">
-                                          <p className="text-base font-bold text-foreground">
-                                            {isGift ? 'FREE' : `₹${item.product.sellingPrice.toLocaleString('en-IN')}`}
-                                          </p>
-                                          {hasDiscount && !isGift && (
-                                              <>
-                                                  <p className="text-sm font-medium text-muted-foreground line-through">₹{item.product.mrp!.toLocaleString('en-IN')}</p>
-                                                  <p className="text-sm font-semibold text-green-600">{discountPercentage}% off</p>
-                                              </>
-                                          )}
-                                      </div>
-
-                                      {!isGift && (
-                                          <div className="flex items-center gap-2 text-sm mt-1">
-                                              <Truck className="h-4 w-4 text-muted-foreground" />
-                                              <span>Delivery by {deliveryDate}</span>
-                                          </div>
-                                      )}
-                                      
-                                      {!isGift ? (
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-4">
-                                            <div className="flex items-center gap-1 rounded-full border p-1">
-                                                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
-                                                <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
+      <main className="container px-5 flex-grow flex overflow-hidden">
+        <div className="flex-1 grid lg:grid-cols-12 lg:gap-8 overflow-hidden">
+            <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
+              <ScrollArea className="flex-grow">
+                <Card className="border-none shadow-none">
+                    <CardHeader>
+                        <CardTitle>My Cart ({cartItems.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent className="divide-y">
+                            {cartItems.map(item => {
+                                const isGift = item.product._id === 'free-gift-id';
+                                const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
+                                const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
+                                return (
+                                <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4 py-6 first:pt-0">
+                                    <div className="block flex-shrink-0 w-full sm:w-[120px] aspect-square sm:h-[120px]">
+                                        {isGift ? (
+                                            <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
+                                                <GiftBoxIcon />
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
-                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
+                                        ) : (
+                                            <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
+                                                <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
+                                            </Link>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col flex-grow gap-1">
+                                        <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
+                                        <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
+                                        
+                                        {isGift && (
+                                            <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">
+                                                <Gift className="h-4 w-4 mt-0.5 shrink-0" />
+                                                <p className="text-xs font-medium">You'll find this surprise gift tucked inside one of your product boxes!</p>
                                             </div>
+                                        )}
+
+                                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                            {item.size && <span>Size: {item.size}</span>}
+                                            {item.color && <span>Color: {item.color}</span>}
                                         </div>
-                                      ) : <div className="mt-2 h-8" />}
-                                  </div>
-                              </div>
-                          )})}
-                  </CardContent>
-              </Card>
+                                        
+                                        <div className="flex items-baseline gap-2 mt-1">
+                                            <p className="text-base font-bold text-foreground">
+                                                {isGift ? 'FREE' : `₹${item.product.sellingPrice.toLocaleString('en-IN')}`}
+                                            </p>
+                                            {hasDiscount && !isGift && (
+                                                <>
+                                                    <p className="text-sm font-medium text-muted-foreground line-through">₹{item.product.mrp!.toLocaleString('en-IN')}</p>
+                                                    <p className="text-sm font-semibold text-green-600">{discountPercentage}% off</p>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {!isGift && (
+                                            <div className="flex items-center gap-2 text-sm mt-1">
+                                                <Truck className="h-4 w-4 text-muted-foreground" />
+                                                <span>Delivery by {deliveryDate}</span>
+                                            </div>
+                                        )}
+                                        
+                                        {!isGift ? (
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 gap-4">
+                                                <div className="flex items-center gap-1 rounded-full border p-1">
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
+                                                    <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <Button variant="link" className="p-0 h-auto text-sm text-destructive" onClick={() => handleRemoveItem(item.product._id as string)}><Trash2 className="mr-1 h-4 w-4"/>Remove</Button>
+                                                    <Button variant="link" className="p-0 h-auto text-sm" onClick={() => handleMoveToWishlist(item.product._id as string)}><Heart className="mr-1 h-4 w-4"/>Move to Wishlist</Button>
+                                                </div>
+                                            </div>
+                                        ) : <div className="mt-2 h-8" />}
+                                    </div>
+                                </div>
+                            )})}
+                    </CardContent>
+                </Card>
+              </ScrollArea>
             </div>
-            <aside className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 self-start">
-              <div className="space-y-6">
-                  <Card>
-                      <CardHeader>
-                          <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex gap-2">
-                          <Input placeholder="Enter coupon code"/>
-                          <Button variant="outline">Apply</Button>
-                      </CardContent>
-                  </Card>
-                  <Card>
-                      <CardHeader>
-                          <CardTitle>Order Summary</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4 text-sm">
-                          <div className="flex justify-between">
-                              <span className="text-muted-foreground">Subtotal</span>
-                              <span>₹{subtotal.toLocaleString('en-IN')}</span>
-                          </div>
-                          {totalDiscount > 0 && (
-                              <div className="flex justify-between text-green-600 font-medium">
-                                  <span className="">Product Savings</span>
-                                  <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
-                              </div>
-                          )}
-                          {milestoneDiscount > 0 && (
-                              <div className="flex justify-between text-green-600 font-medium">
-                                  <span className="">Milestone Discount</span>
-                                  <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
-                              </div>
-                          )}
-                          <div className="flex justify-between">
-                              <span className="text-muted-foreground">Shipping</span>
-                              <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
-                          </div>
-                          <Separator />
-                          <div className="flex justify-between font-bold text-base">
-                              <span>Grand Total</span>
-                              <span>₹{grandTotal.toLocaleString('en-IN')}</span>
-                          </div>
-                          <Button size="lg" className="w-full h-12 text-base mt-4">
-                              Proceed to Checkout
-                          </Button>
-                      </CardContent>
-                  </Card>
-                  {otherBrands.length > 0 && (
-                      <Card>
-                          <CardHeader>
-                              <CardTitle className="flex items-center gap-2 text-base"><Store className="h-5 w-5"/> Explore Other Brands</CardTitle>
-                          </CardHeader>
-                          <CardContent className="flex justify-around items-start gap-4">
-                              {otherBrands.map(brand => (
-                                  <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="flex flex-col items-center gap-2 group">
-                                      <div className="relative w-20 h-20 rounded-full border-2 border-transparent group-hover:border-primary transition-all duration-300">
-                                          <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="rounded-full object-cover"/>
-                                      </div>
-                                      <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
-                                  </Link>
-                              ))}
-                          </CardContent>
-                      </Card>
-                  )}
-              </div>
+            <aside className="lg:col-span-5 xl:col-span-4 flex flex-col py-6">
+                <ScrollArea className="flex-grow">
+                    <div className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex gap-2">
+                                <Input placeholder="Enter coupon code"/>
+                                <Button variant="outline">Apply</Button>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Order Summary</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Subtotal</span>
+                                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                                </div>
+                                {totalDiscount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-medium">
+                                        <span className="">Product Savings</span>
+                                        <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
+                                    </div>
+                                )}
+                                {milestoneDiscount > 0 && (
+                                    <div className="flex justify-between text-green-600 font-medium">
+                                        <span className="">Milestone Discount</span>
+                                        <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Shipping</span>
+                                    <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between font-bold text-base">
+                                    <span>Grand Total</span>
+                                    <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+                                </div>
+                                <Button size="lg" className="w-full h-12 text-base mt-4">
+                                    Proceed to Checkout
+                                </Button>
+                            </CardContent>
+                        </Card>
+                        {otherBrands.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-base"><Store className="h-5 w-5"/> Explore Other Brands</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex justify-around items-start gap-4">
+                                    {otherBrands.map(brand => (
+                                        <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="flex flex-col items-center gap-2 group">
+                                            <div className="relative w-20 h-20 rounded-full border-2 border-transparent group-hover:border-primary transition-all duration-300">
+                                                <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="rounded-full object-cover"/>
+                                            </div>
+                                            <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
+                                        </Link>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                </ScrollArea>
             </aside>
         </div>
       </main>
-    <CartFooter brand={brand} />
-    </>
+    </div>
   );
 }
+
+    
