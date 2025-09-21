@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -54,21 +55,12 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
   const params = useParams();
   const brandName = params.brand as string;
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [brand, setBrand] = useState<IBrand | null>(null);
 
   useEffect(() => {
     async function fetchFilterData() {
         if (!brandName) return;
         try {
-             const [brandRes, productsRes] = await Promise.all([
-                fetch(`/api/brands/${brandName}`),
-                fetch(`/api/products?storefront=${brandName}&limit=1000`)
-            ]);
-            
-            if (brandRes.ok) {
-                const { brand: brandData } = await brandRes.json();
-                setBrand(brandData);
-            }
+            const productsRes = await fetch(`/api/products?storefront=${brandName}&limit=1000`);
             if (productsRes.ok) {
                 const { products } = await productsRes.json();
                 setAllProducts(products);
@@ -116,42 +108,54 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
         <ScrollArea className="flex-grow">
             <div className="pr-4">
               <FilterSection title="Categories" defaultOpen count={allCategories.length}>
-                  {allCategories.map(category => (
-                      <div key={category} className="flex items-center space-x-2">
-                          <Checkbox 
-                              id={`cat-${category}`} 
-                              checked={activeFilters.categories.includes(category)}
-                              onCheckedChange={(checked) => onFilterChange('categories', category, !!checked)}
-                          />
-                          <Label htmlFor={`cat-${category}`} className="font-normal capitalize">{category}</Label>
+                  <ScrollArea className="max-h-48">
+                      <div className="space-y-3">
+                          {allCategories.map(category => (
+                              <div key={category} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                      id={`cat-${category}`} 
+                                      checked={activeFilters.categories.includes(category)}
+                                      onCheckedChange={(checked) => onFilterChange('categories', category, !!checked)}
+                                  />
+                                  <Label htmlFor={`cat-${category}`} className="font-normal capitalize">{category}</Label>
+                              </div>
+                          ))}
                       </div>
-                  ))}
+                  </ScrollArea>
               </FilterSection>
 
               <FilterSection title="Brand" defaultOpen count={uniqueBrands.length}>
-                  {uniqueBrands.map(brand => (
-                      <div key={brand} className="flex items-center space-x-2">
-                          <Checkbox 
-                              id={`brand-${brand}`} 
-                              checked={activeFilters.brands.includes(brand)}
-                              onCheckedChange={(checked) => onFilterChange('brands', brand, !!checked)}
-                          />
-                          <Label htmlFor={`brand-${brand}`} className="font-normal">{brand}</Label>
-                      </div>
-                  ))}
+                <ScrollArea className="max-h-48">
+                    <div className="space-y-3">
+                      {uniqueBrands.map(brand => (
+                          <div key={brand} className="flex items-center space-x-2">
+                              <Checkbox 
+                                  id={`brand-${brand}`} 
+                                  checked={activeFilters.brands.includes(brand)}
+                                  onCheckedChange={(checked) => onFilterChange('brands', brand, !!checked)}
+                              />
+                              <Label htmlFor={`brand-${brand}`} className="font-normal">{brand}</Label>
+                          </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
               </FilterSection>
 
               <FilterSection title="Color" defaultOpen count={uniqueColors.length}>
-                  {uniqueColors.map(color => (
-                      <div key={color} className="flex items-center space-x-2">
-                          <Checkbox 
-                              id={color} 
-                              checked={activeFilters.colors.includes(color)}
-                              onCheckedChange={(checked) => onFilterChange('colors', color, !!checked)}
-                          />
-                          <Label htmlFor={color} className="font-normal">{color}</Label>
-                      </div>
-                  ))}
+                 <ScrollArea className="max-h-48">
+                    <div className="space-y-3">
+                        {uniqueColors.map(color => (
+                            <div key={color} className="flex items-center space-x-2">
+                                <Checkbox 
+                                    id={color} 
+                                    checked={activeFilters.colors.includes(color)}
+                                    onCheckedChange={(checked) => onFilterChange('colors', color, !!checked)}
+                                />
+                                <Label htmlFor={color} className="font-normal">{color}</Label>
+                            </div>
+                        ))}
+                    </div>
+                  </ScrollArea>
               </FilterSection>
             </div>
         </ScrollArea>

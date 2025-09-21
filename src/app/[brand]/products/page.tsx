@@ -329,8 +329,8 @@ export default function ProductsPage() {
                 </BreadcrumbList>
             </Breadcrumb>
         </div>
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-            <div className="hidden lg:block sticky top-16 h-[calc(100vh-5rem)] overflow-y-auto">
+        <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
+            <div className="hidden lg:block sticky top-16 h-[calc(100vh-5rem)]">
                 <ProductFilters 
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
@@ -339,7 +339,7 @@ export default function ProductsPage() {
             </div>
             <div className="flex-1 min-w-0">
                  <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
-                    <div className="flex items-baseline justify-between">
+                    <div className="flex flex-wrap items-baseline justify-between gap-4">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
                                 {currentCategory ? `${currentCategory}` : `All Products`}
@@ -354,9 +354,6 @@ export default function ProductsPage() {
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="left" className="w-full max-w-sm p-0">
-                                    <SheetHeader className="p-4 border-b">
-                                      <SheetTitle>Filters</SheetTitle>
-                                    </SheetHeader>
                                     <ProductFilters 
                                         activeFilters={activeFilters}
                                         onFilterChange={handleFilterChange}
