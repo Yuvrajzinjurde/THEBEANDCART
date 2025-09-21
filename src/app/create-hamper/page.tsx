@@ -689,7 +689,7 @@ export default function CreateHamperPage() {
     return (
         <>
         <div className="flex flex-col min-h-screen">
-            <main className="container flex-grow py-8">
+            <main className="container flex-grow py-8 px-10">
                 <div className="max-w-4xl mx-auto pb-24">
                      <div className="relative mb-8 flex items-center justify-between">
                         <Button variant="outline" size="icon" onClick={() => router.push('/')} className="hidden sm:inline-flex">

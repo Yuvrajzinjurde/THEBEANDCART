@@ -34,7 +34,7 @@ type GroupedProducts = {
 };
 
 const ProductCarouselSkeleton = () => (
-    <section className="container pt-12 text-center">
+    <section className="container pt-12 px-10 text-center">
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
         <Separator className="mb-6" />
         <div className="mx-auto text-center">
@@ -77,7 +77,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
 
 
     return (
-        <section className="container pt-12">
+        <section className="container pt-12 px-10">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
                  <Button variant="link" asChild>
@@ -209,7 +209,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     if (!brand?.promoBanner) return null;
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
-        <section className="container py-12">
+        <section className="container py-12 px-10">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
                  <Image
                     src={imageUrl}
@@ -428,7 +428,7 @@ export default function BrandHomePage() {
   
   if (error || !brand) {
       return (
-          <main className="container flex min-h-screen flex-col items-center justify-center">
+          <main className="container flex min-h-screen flex-col items-center justify-center px-10">
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">{error || 'The requested brand does not exist.'}</p>
           </main>
@@ -464,7 +464,7 @@ export default function BrandHomePage() {
                                 priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
-                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white">
+                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-10">
                                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
@@ -487,7 +487,7 @@ export default function BrandHomePage() {
       
       <CategoryBannerGrid brand={brand} />
 
-      <div className="container pt-8">
+      <div className="container pt-8 px-10">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {productSections.map(([category, items]) => (

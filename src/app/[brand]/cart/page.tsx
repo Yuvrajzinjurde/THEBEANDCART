@@ -115,7 +115,7 @@ const CartFooter = ({ brand }: { brand: IBrand | null }) => (
 const CartSkeleton = () => (
     <>
      <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
-        <div className="container flex items-center justify-between gap-4">
+        <div className="container flex items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2">
                 <Skeleton className="h-8 w-8 rounded-md" />
                 <Skeleton className="h-4 w-32 hidden sm:block" />
@@ -126,7 +126,7 @@ const CartSkeleton = () => (
             <div className="w-48 hidden lg:block" />
         </div>
       </div>
-    <main className="container pt-6 text-center">
+    <main className="container pt-6 px-10 text-center">
         <div className="mx-auto text-center">
           <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         </div>
@@ -349,7 +349,7 @@ export default function CartPage() {
   if (cartItems.length === 0) {
       return (
         <>
-        <main className="container py-8">
+        <main className="container py-8 px-10">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">Your Cart is Empty</h2>
@@ -369,7 +369,7 @@ export default function CartPage() {
   return (
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm border-b">
-        <div className="container flex items-center justify-between gap-4">
+        <div className="container flex items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2">
                 <Button
                 variant="outline"
@@ -399,7 +399,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="container pb-8 pt-6">
+      <main className="container pb-8 pt-6 px-10">
       
       <div className="mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
