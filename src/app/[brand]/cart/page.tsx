@@ -398,23 +398,20 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="container pb-8 pt-6 px-10">
-      
-      <div className="mx-auto" style={{ margin: '0 3cm' }}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-          <div className="lg:col-span-2">
+      <main className="container pb-8 pt-6 px-10 flex-grow">
+        <div className="relative lg:grid lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-7 xl:col-span-8">
               <Card>
                   <CardHeader>
                       <CardTitle>My Cart ({cartItems.length})</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                      <div className="space-y-6">
+                  <CardContent className="divide-y">
                           {cartItems.map(item => {
                               const isGift = item.product._id === 'free-gift-id';
                               const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                               const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                               return (
-                              <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4">
+                              <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-col sm:flex-row gap-4 py-6 first:pt-0">
                                   <div className="block flex-shrink-0 w-full sm:w-[120px] aspect-square sm:h-[120px]">
                                       {isGift ? (
                                           <div className="w-full h-full p-4 bg-muted/30 rounded-lg flex items-center justify-center">
@@ -477,12 +474,11 @@ export default function CartPage() {
                                   </div>
                               </div>
                           )})}
-                      </div>
                   </CardContent>
               </Card>
-          </div>
-          <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
+            </div>
+            <aside className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 self-start">
+              <div className="space-y-6">
                   <Card>
                       <CardHeader>
                           <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
@@ -545,13 +541,10 @@ export default function CartPage() {
                       </Card>
                   )}
               </div>
-          </div>
+            </aside>
         </div>
-      </div>
-    </main>
+      </main>
     <CartFooter brand={brand} />
     </>
   );
 }
-
-    
