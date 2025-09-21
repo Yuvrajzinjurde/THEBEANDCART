@@ -218,11 +218,11 @@ const ExploreBrands = () => {
                 <CardTitle>Explore Our Brands</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                <div className="grid grid-cols-2 gap-4">
                     {brands.map(brand => (
-                         <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="block group flex-shrink-0">
+                         <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="block group">
                             <div className="flex flex-col items-center gap-2">
-                                <div className="w-16 h-16 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all duration-300">
+                                <div className="w-20 h-20 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all duration-300">
                                     <Image
                                         src={brand.logoUrl}
                                         alt={`${brand.displayName} Logo`}
@@ -230,7 +230,7 @@ const ExploreBrands = () => {
                                         className="object-cover"
                                     />
                                 </div>
-                                <p className="text-xs font-semibold text-center truncate w-20">{brand.displayName}</p>
+                                <p className="text-sm font-semibold text-center truncate w-24">{brand.displayName}</p>
                             </div>
                         </Link>
                     ))}
@@ -426,12 +426,12 @@ export default function CartPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-12 lg:gap-8 lg:items-start">
                 <div className="lg:col-span-7 xl:col-span-8">
-                    <Card className="border-none shadow-none">
-                        <CardHeader>
-                            <CardTitle>My Cart ({cartItems.length})</CardTitle>
-                        </CardHeader>
-                        <CardContent className="divide-y p-0">
-                            <HiddenScrollArea className="h-[600px] pr-6">
+                    <HiddenScrollArea className="h-[600px] pr-6">
+                        <Card className="border-none shadow-none">
+                            <CardHeader>
+                                <CardTitle>My Cart ({cartItems.length})</CardTitle>
+                            </CardHeader>
+                            <CardContent className="divide-y p-0">
                                 {cartItems.map(item => {
                                     const isGift = item.product._id === 'free-gift-id';
                                     const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
@@ -500,58 +500,60 @@ export default function CartPage() {
                                         </div>
                                     </div>
                                 )})}
-                            </HiddenScrollArea>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+                    </HiddenScrollArea>
                 </div>
                 <aside className="lg:col-span-5 xl:col-span-4">
-                    <div className="sticky top-24 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex gap-2">
-                                <Input placeholder="Enter coupon code"/>
-                                <Button variant="outline">Apply</Button>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Order Summary</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Subtotal</span>
-                                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
-                                </div>
-                                {totalDiscount > 0 && (
-                                    <div className="flex justify-between text-green-600 font-medium">
-                                        <span className="">Product Savings</span>
-                                        <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
+                     <HiddenScrollArea className="h-[600px] pr-6">
+                        <div className="space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex gap-2">
+                                    <Input placeholder="Enter coupon code"/>
+                                    <Button variant="outline">Apply</Button>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Order Summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Subtotal</span>
+                                        <span>₹{subtotal.toLocaleString('en-IN')}</span>
                                     </div>
-                                )}
-                                {milestoneDiscount > 0 && (
-                                    <div className="flex justify-between text-green-600 font-medium">
-                                        <span className="">Milestone Discount</span>
-                                        <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
+                                    {totalDiscount > 0 && (
+                                        <div className="flex justify-between text-green-600 font-medium">
+                                            <span className="">Product Savings</span>
+                                            <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
+                                        </div>
+                                    )}
+                                    {milestoneDiscount > 0 && (
+                                        <div className="flex justify-between text-green-600 font-medium">
+                                            <span className="">Milestone Discount</span>
+                                            <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Shipping</span>
+                                        <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
                                     </div>
-                                )}
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Shipping</span>
-                                    <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
-                                </div>
-                                <Separator />
-                                <div className="flex justify-between font-bold text-base">
-                                    <span>Grand Total</span>
-                                    <span>₹{grandTotal.toLocaleString('en-IN')}</span>
-                                </div>
-                                <Button size="lg" className="w-full h-12 text-base mt-4">
-                                    Proceed to Checkout
-                                </Button>
-                            </CardContent>
-                        </Card>
-                        <ExploreBrands />
-                    </div>
+                                    <Separator />
+                                    <div className="flex justify-between font-bold text-base">
+                                        <span>Grand Total</span>
+                                        <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <Button size="lg" className="w-full h-12 text-base mt-4">
+                                        Proceed to Checkout
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                            <ExploreBrands />
+                        </div>
+                    </HiddenScrollArea>
                 </aside>
             </div>
         </div>
