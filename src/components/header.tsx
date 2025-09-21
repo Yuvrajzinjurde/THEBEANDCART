@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home as HomeIcon, User, Bell } from "lucide-react";
+import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home as HomeIcon, User, Bell, Package, Box } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -201,19 +201,29 @@ export default function Header() {
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                                <Logo className="h-8 w-8" />
+                                {isClient && brandName && brand?.logoUrl ? (
+                                    <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+                                ) : isClient && settings.platformLogoUrl ? (
+                                    <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+                                ) : (
+                                    <Logo className="h-8 w-8" />
+                                )}
                                 <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
                     <div className="flex-1 overflow-y-auto p-4">
                         <nav className="flex flex-col gap-4">
-                            <form className="relative w-full" onSubmit={handleSearch}>
-                                <Input name="search" type="search" placeholder="Search..." className="pr-10" />
-                                <Button type="submit" size="icon" variant="ghost" className="absolute right-0 top-0 h-full w-10">
-                                    <Search className="h-4 w-4" />
-                                </Button>
-                            </form>
+                             <Link href={`/${effectiveBrandName}/products`} className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                <Box className="h-5 w-5" />
+                                All Products
+                            </Link>
+                            {user && (
+                                <Link href="#" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                    <Package className="h-5 w-5" />
+                                    My Orders
+                                </Link>
+                            )}
                             <Separator />
                             <h3 className="font-semibold text-muted-foreground">Categories</h3>
                              {categories.map(cat => (
