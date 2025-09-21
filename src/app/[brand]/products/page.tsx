@@ -5,6 +5,9 @@
 import { useEffect, useState, useMemo, useTransition, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
+import type { IBrand } from '@/models/brand.model';
+import Image from 'next/image';
+import Link from 'next/link';
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { ProductFilters } from '@/components/product-filters';
@@ -23,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -126,6 +129,35 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
     );
 };
 
+const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
+    <footer className="w-full border-t bg-background mt-16">
+        <div className="container py-8 px-5">
+             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    {brand?.logoUrl && (
+                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 object-cover rounded-full" />
+                    )}
+                    <span className="text-lg font-bold capitalize">{brand?.displayName}</span>
+                </div>
+                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href={`/${brand?.permanentName}/legal/about-us`} className="hover:text-primary">About Us</Link>
+                    <Link href={`/${brand?.permanentName}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
+                    <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
+                </div>
+                 <div className="flex space-x-4">
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
+                </div>
+            </div>
+            <div className="mt-8 border-t pt-4">
+                <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {brand?.displayName}. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+);
+
 
 export default function ProductsPage() {
   const params = useParams();
@@ -134,6 +166,7 @@ export default function ProductsPage() {
   const initialCategory = searchParams.get('category');
   const initialKeyword = searchParams.get('keyword');
 
+  const [brand, setBrand] = useState<IBrand | null>(null);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -203,26 +236,33 @@ export default function ProductsPage() {
     fetchProducts(1);
   }, [sortOption, activeFilters]);
 
-
   useEffect(() => {
-    async function fetchPopularProducts() {
+    async function fetchInitialData() {
         if (!brandName) return;
         try {
-            const query = new URLSearchParams({ 
+            // Fetch brand data
+            const brandResponse = await fetch(`/api/brands/${brandName}`);
+            if (brandResponse.ok) {
+                const { brand: brandData } = await brandResponse.json();
+                setBrand(brandData);
+            }
+
+            // Fetch popular products
+            const popularQuery = new URLSearchParams({ 
                 storefront: brandName,
                 limit: '12',
                 sortBy: 'popular'
             });
-            const response = await fetch(`/api/products?${query.toString()}`);
-            if (response.ok) {
-                const { products } = await response.json();
+            const popularResponse = await fetch(`/api/products?${popularQuery.toString()}`);
+            if (popularResponse.ok) {
+                const { products } = await popularResponse.json();
                 setPopularProducts(products);
             }
         } catch (error) {
-            console.error('Failed to fetch popular products:', error);
+            console.error('Failed to fetch initial data:', error);
         }
     }
-    fetchPopularProducts();
+    fetchInitialData();
   }, [brandName]);
 
 
@@ -265,6 +305,7 @@ export default function ProductsPage() {
   }
 
   return (
+    <>
     <main className="container py-8 px-4">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
@@ -369,5 +410,7 @@ export default function ProductsPage() {
             </div>
         </div>
     </main>
+    <BrandFooter brand={brand} />
+    </>
   );
 }
