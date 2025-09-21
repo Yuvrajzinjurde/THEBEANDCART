@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -39,7 +40,7 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
             <CollapsibleContent>
                  <ScrollArea className="h-full max-h-48">
                     <div className="py-4 space-y-3 pr-4">{children}</div>
-                    <ScrollBar className="hidden" />
+                    <ScrollBar />
                 </ScrollArea>
             </CollapsibleContent>
         </Collapsible>

@@ -232,14 +232,14 @@ function SearchResults() {
             </div>
             <div className="flex-1 min-w-0">
                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
-                    <div className="flex flex-wrap items-baseline justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                                 Search Results for &quot;{initialKeyword}&quot;
                             </h1>
                             <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products found</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-end">
                              <Sheet>
                                 <SheetTrigger asChild>
                                     <Button variant="outline" className="lg:hidden">
@@ -311,5 +311,3 @@ export default function SearchPage() {
         </Suspense>
     )
 }
-
-    
