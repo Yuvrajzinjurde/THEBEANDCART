@@ -39,9 +39,7 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
             </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-                <ScrollArea className="max-h-48">
-                    <div className="py-4 space-y-3 pr-4">{children}</div>
-                </ScrollArea>
+                <div className="py-4 space-y-3 pr-4">{children}</div>
             </CollapsibleContent>
         </Collapsible>
     )
@@ -102,7 +100,7 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
            <Button variant="link" className="p-0 h-auto text-primary" onClick={onClearAll}>CLEAR ALL</Button>
         </div>
         <ScrollArea className="flex-grow">
-            <div className="pr-4">
+            <div className="pr-4 pb-4">
               <FilterSection title="Categories" defaultOpen count={allCategories.length}>
                   {allCategories.map(category => (
                       <div key={category} className="flex items-center space-x-2">
