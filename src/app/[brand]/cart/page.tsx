@@ -401,7 +401,7 @@ export default function CartPage() {
 
       <main className="container pb-8 pt-6 px-10">
       
-      <div className="mx-auto">
+      <div className="mx-auto" style={{ margin: '0 10cm' }}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
           <div className="lg:col-span-2">
               <Card>
