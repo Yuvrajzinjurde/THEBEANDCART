@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, useCallback } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import type { IBrand } from '@/models/brand.model';
 import Image from 'next/image';
@@ -35,7 +35,6 @@ import { Separator } from '@/components/ui/separator';
 export type ActiveFilters = {
   categories: string[];
   brands: string[];
-  genders: string[];
   colors: string[];
   keywords: string[];
 };
@@ -162,6 +161,7 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
 export default function ProductsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const brandName = params.brand as string;
   const initialCategory = searchParams.get('category');
   const initialKeyword = searchParams.get('keyword');
@@ -173,19 +173,28 @@ export default function ProductsPage() {
   const [isPending, startTransition] = useTransition();
 
   const [pagination, setPagination] = useState<Pagination>({ currentPage: 1, totalPages: 1, totalProducts: 0, limit: 50 });
-  const [currentPage, setCurrentPage] = useState(1);
   const [popularProducts, setPopularProducts] = useState<IProduct[]>([]);
 
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
     categories: initialCategory ? [initialCategory] : [],
     brands: [],
-    genders: [],
     colors: [],
     keywords: initialKeyword ? [initialKeyword] : [],
   });
   const [sortOption, setSortOption] = useState<string>('relevance');
 
-  const fetchProducts = useCallback(async (page = 1) => {
+  const updateURL = useCallback((filters: ActiveFilters, page: number) => {
+    const query = new URLSearchParams();
+    if (filters.categories.length > 0) query.set('category', filters.categories.join(','));
+    if (filters.keywords.length > 0) query.set('keyword', filters.keywords.join(','));
+    if (page > 1) query.set('page', page.toString());
+    
+    // Using router.replace to avoid adding to history stack
+    router.replace(`/${brandName}/products?${query.toString()}`, { scroll: false });
+  }, [brandName, router]);
+
+
+  const fetchProducts = useCallback(async (page: number, filters: ActiveFilters, sortBy: string) => {
     if (!brandName) return;
     setLoading(true);
     setError(null);
@@ -194,16 +203,13 @@ export default function ProductsPage() {
             storefront: brandName,
             page: page.toString(),
             limit: '50',
-            sortBy: sortOption
+            sortBy: sortBy,
         });
 
-        // Add active filters to the query
-        Object.entries(activeFilters).forEach(([key, values]) => {
-            if (values.length > 0) {
-                const filterKey = key === 'categories' ? 'category' : 'keywords';
-                query.append(filterKey, values.join(','));
-            }
-        });
+        if (filters.categories.length > 0) query.append('category', filters.categories.join(','));
+        if (filters.brands.length > 0) query.append('brands', filters.brands.join(','));
+        if (filters.colors.length > 0) query.append('colors', filters.colors.join(','));
+        if (filters.keywords.length > 0) query.append('keywords', filters.keywords.join(','));
 
         const productResponse = await fetch(`/api/products?${query.toString()}`);
         if(!productResponse.ok) {
@@ -215,7 +221,6 @@ export default function ProductsPage() {
         setAllProducts(products);
         if (newPagination) {
             setPagination(newPagination);
-            setCurrentPage(newPagination.currentPage);
         }
 
     } catch (error: any) {
@@ -224,30 +229,25 @@ export default function ProductsPage() {
     } finally {
         setLoading(false);
     }
-  }, [brandName, sortOption, activeFilters]);
+  }, [brandName]);
 
   useEffect(() => {
-    fetchProducts(currentPage);
-  }, [currentPage, fetchProducts]);
-
-  useEffect(() => {
-    // When filters or sorting change, fetch from page 1
-    setCurrentPage(1);
-    fetchProducts(1);
-  }, [sortOption, activeFilters]);
+    startTransition(() => {
+      fetchProducts(1, activeFilters, sortOption);
+      updateURL(activeFilters, 1);
+    });
+  }, [activeFilters, sortOption, fetchProducts, updateURL]);
 
   useEffect(() => {
     async function fetchInitialData() {
         if (!brandName) return;
         try {
-            // Fetch brand data
             const brandResponse = await fetch(`/api/brands/${brandName}`);
             if (brandResponse.ok) {
                 const { brand: brandData } = await brandResponse.json();
                 setBrand(brandData);
             }
 
-            // Fetch popular products
             const popularQuery = new URLSearchParams({ 
                 storefront: brandName,
                 limit: '12',
@@ -267,30 +267,29 @@ export default function ProductsPage() {
 
 
   const handleFilterChange = (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => {
-    startTransition(() => {
-        setActiveFilters(prev => {
-            const currentValues = prev[filterType];
-            const newValues = isChecked 
-                ? [...currentValues, value] 
-                : currentValues.filter(v => v !== value);
-            return { ...prev, [filterType]: newValues };
-        });
+    setActiveFilters(prev => {
+        const currentValues = prev[filterType];
+        const newValues = isChecked 
+            ? [...currentValues, value] 
+            : currentValues.filter(v => v !== value);
+        return { ...prev, [filterType]: newValues };
     });
   };
   
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
+    if (newPage > 0 && newPage <= pagination.totalPages) {
+        startTransition(() => {
+            fetchProducts(newPage, activeFilters, sortOption);
+            updateURL(activeFilters, newPage);
+        })
+    }
   };
 
   const clearAllFilters = () => {
-    setActiveFilters({ categories: [], brands: [], genders: [], colors: [], keywords: [] });
-    // Also clear the URL query param if needed
-    const newUrl = `/${brandName}/products`;
-    window.history.pushState({}, '', newUrl);
+    setActiveFilters({ categories: [], brands: [], colors: [], keywords: [] });
   };
   
   const currentCategory = useMemo(() => {
-    // If there's one category selected, show it. Otherwise, fallback to initial.
     if (activeFilters.categories.length === 1) return activeFilters.categories[0];
     return null;
   }, [activeFilters.categories]);
@@ -329,11 +328,9 @@ export default function ProductsPage() {
             </Breadcrumb>
             <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-             <div className="hidden lg:block">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
+            <div className="hidden lg:block sticky top-20">
                 <ProductFilters 
-                    productsForCategories={allProducts}
-                    productsForOthers={allProducts}
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
                 />
@@ -354,16 +351,14 @@ export default function ProductsPage() {
                                         <SlidersHorizontal className="mr-2 h-4 w-4" /> Filters
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="left" className="w-full max-w-sm">
-                                    <SheetHeader><SheetTitle>Filters</SheetTitle></SheetHeader>
-                                    <div className="p-4">
-                                         <ProductFilters 
-                                            productsForCategories={allProducts}
-                                            productsForOthers={allProducts}
-                                            activeFilters={activeFilters}
-                                            onFilterChange={handleFilterChange}
-                                        />
-                                    </div>
+                                <SheetContent side="left" className="w-full max-w-sm p-0">
+                                    <SheetHeader className="p-4 border-b">
+                                      <SheetTitle>Filters</SheetTitle>
+                                    </SheetHeader>
+                                    <ProductFilters 
+                                        activeFilters={activeFilters}
+                                        onFilterChange={handleFilterChange}
+                                    />
                                 </SheetContent>
                             </Sheet>
                             <DropdownMenu>

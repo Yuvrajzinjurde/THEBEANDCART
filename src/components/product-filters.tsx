@@ -38,71 +38,70 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
             </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-            <div className="py-4 space-y-3">{children}</div>
+                <ScrollArea className="h-full max-h-48">
+                    <div className="py-4 space-y-3 pr-4">{children}</div>
+                </ScrollArea>
             </CollapsibleContent>
         </Collapsible>
     )
 };
 
 interface ProductFiltersProps {
-  productsForCategories: IProduct[];
-  productsForOthers: IProduct[];
   activeFilters: ActiveFilters;
   onFilterChange: (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => void;
 }
 
-export function ProductFilters({ productsForCategories, productsForOthers, activeFilters, onFilterChange }: ProductFiltersProps) {
+export function ProductFilters({ activeFilters, onFilterChange }: ProductFiltersProps) {
   const params = useParams();
   const brandName = params.brand as string;
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [brand, setBrand] = useState<IBrand | null>(null);
 
   useEffect(() => {
-    async function fetchBrand() {
+    async function fetchFilterData() {
         if (!brandName) return;
         try {
-            const res = await fetch(`/api/brands/${brandName}`);
-            if (res.ok) {
-                const { brand: brandData } = await res.json();
+             const [brandRes, productsRes] = await Promise.all([
+                fetch(`/api/brands/${brandName}`),
+                fetch(`/api/products?storefront=${brandName}&limit=1000`)
+            ]);
+            
+            if (brandRes.ok) {
+                const { brand: brandData } = await brandRes.json();
                 setBrand(brandData);
             }
+            if (productsRes.ok) {
+                const { products } = await productsRes.json();
+                setAllProducts(products);
+            }
         } catch (error) {
-            console.error('Failed to fetch brand for filters', error);
+            console.error('Failed to fetch data for filters', error);
         }
     }
-    fetchBrand();
+    fetchFilterData();
   }, [brandName]);
 
 
-  const { uniqueBrands, uniqueColors } = useMemo(() => {
+  const { uniqueBrands, uniqueColors, allCategories } = useMemo(() => {
     const brands = new Set<string>();
     const colors = new Set<string>();
+    const categories = new Set<string>();
 
-    productsForOthers.forEach(product => {
+    allProducts.forEach(product => {
       if (product.brand) brands.add(product.brand);
       if (product.color) colors.add(product.color);
+      if (product.category) categories.add(product.category);
     });
+
     return {
       uniqueBrands: Array.from(brands).sort(),
       uniqueColors: Array.from(colors).sort(),
+      allCategories: Array.from(categories).sort()
     };
-  }, [productsForOthers]);
-  
-  const genders = useMemo(() => {
-    const genderSet = new Set<string>();
-    // Since gender is not in the product model, we can't dynamically generate this.
-    // If it were, the logic would be:
-    // productsForOthers.forEach(p => p.gender && genderSet.add(p.gender));
-    return ["Men", "Women", "Unisex"]; // Static for now
-  }, []);
-
-  const allCategories = useMemo(() => {
-    if (!brand?.categories) return [];
-    const productCategories = new Set(productsForCategories.map(p => p.category));
-    return brand.categories.filter(cat => productCategories.has(cat));
-  }, [productsForCategories, brand]);
+  }, [allProducts]);
 
   return (
-    <aside className="w-full sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pr-4">
+    <aside className="w-full h-[calc(100vh-5rem)] overflow-y-auto pr-4 lg:pr-0">
          <div className="flex items-center justify-between pb-4 border-b">
           <h2 className="text-lg font-bold">Filters</h2>
         </div>
@@ -129,20 +128,6 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
                             onCheckedChange={(checked) => onFilterChange('brands', brand, !!checked)}
                         />
                         <Label htmlFor={`brand-${brand}`} className="font-normal">{brand}</Label>
-                    </div>
-                ))}
-            </FilterSection>
-            
-            <FilterSection title="Gender" count={genders.length}>
-                {genders.map(gender => (
-                    <div key={gender} className="flex items-center space-x-2">
-                       <Checkbox 
-                            id={`gender-${gender}`} 
-                            checked={activeFilters.genders.includes(gender)}
-                            onCheckedChange={(checked) => onFilterChange('genders', gender, !!checked)}
-                            disabled // Disabled until gender data is available in the model
-                        />
-                        <Label htmlFor={`gender-${gender}`} className="font-normal text-muted-foreground">{gender}</Label>
                     </div>
                 ))}
             </FilterSection>
