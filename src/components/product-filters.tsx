@@ -38,10 +38,7 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
             </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-                 <ScrollArea className="h-full max-h-48">
-                    <div className="py-4 space-y-3 pr-4">{children}</div>
-                    <ScrollBar />
-                </ScrollArea>
+                 <div className="py-4 pl-4 space-y-3 pr-4">{children}</div>
             </CollapsibleContent>
         </Collapsible>
     )
@@ -146,6 +143,7 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
                     ))}
               </FilterSection>
             </div>
+             <ScrollBar className="hidden" />
         </ScrollArea>
     </aside>
   );
