@@ -11,7 +11,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { IProduct } from "@/models/product.model";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import type { ActiveFilters } from "@/app/[brand]/products/page";
 import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
@@ -37,7 +37,10 @@ const FilterSection = ({ title, children, defaultOpen = false, count }: FilterSe
             </div>
             </CollapsibleTrigger>
             <CollapsibleContent>
-                <div className="py-4 space-y-3 pr-4">{children}</div>
+                 <ScrollArea className="h-full max-h-48">
+                    <div className="py-4 space-y-3 pr-4">{children}</div>
+                    <ScrollBar className="hidden" />
+                </ScrollArea>
             </CollapsibleContent>
         </Collapsible>
     )
