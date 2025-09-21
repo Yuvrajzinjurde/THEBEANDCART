@@ -399,10 +399,9 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="container px-5 flex-grow flex overflow-hidden">
+      <main className="container px-10 flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 grid lg:grid-cols-12 lg:gap-8 overflow-hidden">
-            <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
-              <ScrollArea className="flex-grow">
+            <div className="lg:col-span-7 xl:col-span-8 overflow-y-auto">
                 <Card className="border-none shadow-none">
                     <CardHeader>
                         <CardTitle>My Cart ({cartItems.length})</CardTitle>
@@ -478,79 +477,74 @@ export default function CartPage() {
                             )})}
                     </CardContent>
                 </Card>
-              </ScrollArea>
             </div>
-            <aside className="lg:col-span-5 xl:col-span-4 flex flex-col py-6">
-                <ScrollArea className="flex-grow">
-                    <div className="space-y-6">
+            <aside className="lg:col-span-5 xl:col-span-4 overflow-y-auto py-6">
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex gap-2">
+                            <Input placeholder="Enter coupon code"/>
+                            <Button variant="outline">Apply</Button>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Order Summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Subtotal</span>
+                                <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                            </div>
+                            {totalDiscount > 0 && (
+                                <div className="flex justify-between text-green-600 font-medium">
+                                    <span className="">Product Savings</span>
+                                    <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
+                                </div>
+                            )}
+                            {milestoneDiscount > 0 && (
+                                <div className="flex justify-between text-green-600 font-medium">
+                                    <span className="">Milestone Discount</span>
+                                    <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Shipping</span>
+                                <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between font-bold text-base">
+                                <span>Grand Total</span>
+                                <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+                            </div>
+                            <Button size="lg" className="w-full h-12 text-base mt-4">
+                                Proceed to Checkout
+                            </Button>
+                        </CardContent>
+                    </Card>
+                    {otherBrands.length > 0 && (
                         <Card>
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5"/> Coupons</CardTitle>
+                                <CardTitle className="flex items-center gap-2 text-base"><Store className="h-5 w-5"/> Explore Other Brands</CardTitle>
                             </CardHeader>
-                            <CardContent className="flex gap-2">
-                                <Input placeholder="Enter coupon code"/>
-                                <Button variant="outline">Apply</Button>
+                            <CardContent className="flex justify-around items-start gap-4">
+                                {otherBrands.map(brand => (
+                                    <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="flex flex-col items-center gap-2 group">
+                                        <div className="relative w-20 h-20 rounded-full border-2 border-transparent group-hover:border-primary transition-all duration-300">
+                                            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="rounded-full object-cover"/>
+                                        </div>
+                                        <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
+                                    </Link>
+                                ))}
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Order Summary</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Subtotal</span>
-                                    <span>₹{subtotal.toLocaleString('en-IN')}</span>
-                                </div>
-                                {totalDiscount > 0 && (
-                                    <div className="flex justify-between text-green-600 font-medium">
-                                        <span className="">Product Savings</span>
-                                        <span>- ₹{totalDiscount.toLocaleString('en-IN')}</span>
-                                    </div>
-                                )}
-                                {milestoneDiscount > 0 && (
-                                    <div className="flex justify-between text-green-600 font-medium">
-                                        <span className="">Milestone Discount</span>
-                                        <span>- ₹{milestoneDiscount.toLocaleString('en-IN')}</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Shipping</span>
-                                    <span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString('en-IN')}`}</span>
-                                </div>
-                                <Separator />
-                                <div className="flex justify-between font-bold text-base">
-                                    <span>Grand Total</span>
-                                    <span>₹{grandTotal.toLocaleString('en-IN')}</span>
-                                </div>
-                                <Button size="lg" className="w-full h-12 text-base mt-4">
-                                    Proceed to Checkout
-                                </Button>
-                            </CardContent>
-                        </Card>
-                        {otherBrands.length > 0 && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-base"><Store className="h-5 w-5"/> Explore Other Brands</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex justify-around items-start gap-4">
-                                    {otherBrands.map(brand => (
-                                        <Link key={brand.permanentName} href={`/${brand.permanentName}/home`} className="flex flex-col items-center gap-2 group">
-                                            <div className="relative w-20 h-20 rounded-full border-2 border-transparent group-hover:border-primary transition-all duration-300">
-                                                <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="rounded-full object-cover"/>
-                                            </div>
-                                            <p className="text-sm font-semibold capitalize">{brand.displayName}</p>
-                                        </Link>
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
-                </ScrollArea>
+                    )}
+                </div>
             </aside>
         </div>
       </main>
     </div>
   );
 }
-
-    
