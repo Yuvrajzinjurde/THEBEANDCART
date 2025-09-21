@@ -408,7 +408,7 @@ export default function CartPage() {
                         <CardTitle>My Cart ({cartItems.length})</CardTitle>
                     </CardHeader>
                     <CardContent className="divide-y p-0">
-                        <ScrollArea className="h-[600px] pr-6">
+                        <ScrollArea className="h-[600px] pr-6 no-scrollbar">
                             {cartItems.map(item => {
                                 const isGift = item.product._id === 'free-gift-id';
                                 const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
@@ -482,7 +482,7 @@ export default function CartPage() {
                 </Card>
             </div>
             <aside className="lg:col-span-5 xl:col-span-4">
-                <ScrollArea className="h-[600px] pr-6">
+                <ScrollArea className="h-[600px] pr-6 no-scrollbar">
                     <div className="space-y-6">
                         <Card>
                             <CardHeader>
