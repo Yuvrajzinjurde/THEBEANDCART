@@ -464,7 +464,7 @@ export default function BrandHomePage() {
                                 priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
-                            <div className="relative container h-full flex flex-col justify-center items-center text-center text-white">
+                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white">
                                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
