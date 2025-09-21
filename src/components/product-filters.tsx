@@ -102,7 +102,7 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
   }, [productsForCategories, brand]);
 
   return (
-    <aside className="w-full">
+    <aside className="w-full sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pr-4">
          <div className="flex items-center justify-between pb-4 border-b">
           <h2 className="text-lg font-bold">Filters</h2>
         </div>

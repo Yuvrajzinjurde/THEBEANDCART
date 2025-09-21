@@ -330,7 +330,7 @@ export default function ProductsPage() {
             <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-             <div className="hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pr-4">
+             <div className="hidden lg:block">
                 <ProductFilters 
                     productsForCategories={allProducts}
                     productsForOthers={allProducts}
@@ -388,14 +388,11 @@ export default function ProductsPage() {
                 {loading || isPending ? (
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
-                    <>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6">
-                            {allProducts.map((product) => (
-                                <BrandProductCard key={product._id as string} product={product} />
-                            ))}
-                        </div>
-                        <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
-                    </>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6">
+                        {allProducts.map((product) => (
+                            <BrandProductCard key={product._id as string} product={product} />
+                        ))}
+                    </div>
                 ) : (
                     <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
                         <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
@@ -404,6 +401,7 @@ export default function ProductsPage() {
                          <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
                     </div>
                 )}
+                 <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
                  <div className="mt-16">
                     <ProductCarouselSection title="Explore Our Popular Products" products={popularProducts} />
                 </div>
