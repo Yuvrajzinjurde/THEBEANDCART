@@ -354,6 +354,9 @@ export default function ProductsPage() {
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="left" className="w-full max-w-sm p-0">
+                                    <SheetHeader className="p-4 border-b">
+                                        <SheetTitle className="sr-only">Filters</SheetTitle>
+                                    </SheetHeader>
                                     <ProductFilters 
                                         activeFilters={activeFilters}
                                         onFilterChange={handleFilterChange}
