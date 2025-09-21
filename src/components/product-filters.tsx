@@ -96,14 +96,10 @@ export function ProductFilters({ productsForCategories, productsForOthers, activ
   }, []);
 
   const allCategories = useMemo(() => {
-    const categoryCounts: Record<string, number> = {};
-    productsForCategories.forEach(product => {
-        if (product.category) {
-            categoryCounts[product.category] = (categoryCounts[product.category] || 0) + 1;
-        }
-    });
-    return Object.keys(categoryCounts).sort();
-  }, [productsForCategories]);
+    if (!brand?.categories) return [];
+    const productCategories = new Set(productsForCategories.map(p => p.category));
+    return brand.categories.filter(cat => productCategories.has(cat));
+  }, [productsForCategories, brand]);
 
   return (
     <aside className="w-full">

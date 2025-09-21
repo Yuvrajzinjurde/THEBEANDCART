@@ -79,15 +79,10 @@ export default function Header() {
   ];
   
   const categories = useMemo(() => {
-    if (!brandName) return [];
-    const categoryCounts: Record<string, number> = {};
-    allProducts.forEach(product => {
-      if (product.storefront === brandName && product.category) {
-        categoryCounts[product.category] = (categoryCounts[product.category] || 0) + 1;
-      }
-    });
-    return Object.keys(categoryCounts).sort();
-  }, [allProducts, brandName]);
+    if (!brandName || !brand?.categories) return [];
+    const productCategories = new Set(allProducts.map(p => p.category));
+    return brand.categories.filter(cat => productCategories.has(cat));
+  }, [allProducts, brand, brandName]);
 
   useEffect(() => {
     async function fetchBrandData() {
