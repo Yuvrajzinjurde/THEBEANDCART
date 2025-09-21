@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import { Heart, ShoppingCart, Menu, X, Search, Gift, Shirt, Home as HomeIcon, User, Bell, Package, Box } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Image from "next/image";
 
 import { useAuth } from "@/hooks/use-auth";
@@ -50,6 +50,13 @@ export default function Header() {
   const [isClient, setIsClient] = useState(false);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
+  // State for search suggestions
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+
   useEffect(() => {
     setIsClient(true);
     
@@ -83,18 +90,37 @@ export default function Header() {
     const productCategories = new Set(allProducts.map(p => p.category));
     return brand.categories.filter(cat => productCategories.has(cat));
   }, [allProducts, brand, brandName]);
+  
+  const allAvailableCategories = useMemo(() => {
+    const categorySet = new Set<string>();
+    allProducts.forEach(p => {
+        if(p.category) {
+            categorySet.add(p.category);
+        }
+    });
+    return Array.from(categorySet);
+  }, [allProducts]);
 
   useEffect(() => {
     async function fetchBrandData() {
       if (!brandName) {
+        // Fetch all products for global pages to power search suggestions
+        try {
+            const productsRes = await fetch(`/api/products?limit=1000`);
+            if (productsRes.ok) {
+                const { products: productData } = await productsRes.json();
+                setAllProducts(productData);
+            }
+        } catch (error) {
+            console.error("Failed to fetch all products for header", error);
+        }
         setBrand(null);
-        setAllProducts([]);
         return;
       };
       try {
         const [brandRes, productsRes] = await Promise.all([
           fetch(`/api/brands/${brandName}`),
-          fetch(`/api/products?storefront=${brandName}`)
+          fetch(`/api/products?storefront=${brandName}&limit=1000`)
         ]);
 
         if (brandRes.ok) {
@@ -122,20 +148,53 @@ export default function Header() {
     }
   }, [brandName, isClient]);
   
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  // Handle search form submission
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
     if (query) {
-      if (brandName) {
-        // If on a brand page, search within that brand
-        router.push(`/${brandName}/products?keyword=${encodeURIComponent(query)}`);
-      } else {
-        // If on a global page, go to the global search page
-        router.push(`/search?keyword=${encodeURIComponent(query)}`);
-      }
-      setIsSheetOpen(false);
+        executeSearch(query);
     }
   };
+  
+  // Execute search based on context
+  const executeSearch = (query: string) => {
+    if (brandName) {
+      router.push(`/${brandName}/products?keyword=${encodeURIComponent(query)}`);
+    } else {
+      router.push(`/search?keyword=${encodeURIComponent(query)}`);
+    }
+    setSearchQuery("");
+    setIsSuggestionsOpen(false);
+  };
+  
+  // Handle search input change for suggestions
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (query.length > 1) {
+      const matchedSuggestions = allAvailableCategories.filter(category =>
+        category.toLowerCase().includes(query.toLowerCase())
+      );
+      setSuggestions(matchedSuggestions);
+      setIsSuggestionsOpen(true);
+    } else {
+      setSuggestions([]);
+      setIsSuggestionsOpen(false);
+    }
+  };
+  
+  // Handle clicks outside search to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSuggestionsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   
   const currentDisplayName = isClient && brand && brandName ? brand.displayName : settings.platformName;
   const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
@@ -196,17 +255,36 @@ export default function Header() {
         )}
 
         {/* Search Bar */}
-        <div className="flex-1 mx-4">
-            <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearch}>
+        <div className="flex-1 mx-4" ref={searchContainerRef}>
+            <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
                 <Input
                     name="search"
                     type="search"
                     placeholder="Search for anything"
                     className="h-11 w-full rounded-full pl-5 pr-12 text-base"
+                    value={searchQuery}
+                    onChange={handleSearchInputChange}
+                    onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
                 />
                  <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
                     <Search className="h-4 w-4" />
                 </Button>
+                 {isSuggestionsOpen && suggestions.length > 0 && (
+                    <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
+                        <ul className="py-1">
+                            {suggestions.map((suggestion, index) => (
+                                <li 
+                                    key={index}
+                                    className="px-4 py-2 hover:bg-accent cursor-pointer flex items-center gap-2"
+                                    onClick={() => executeSearch(suggestion)}
+                                >
+                                    <Search className="h-4 w-4 text-muted-foreground"/>
+                                    <span>{searchQuery} in <span className="font-bold">{suggestion}</span></span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                 )}
             </form>
         </div>
 
