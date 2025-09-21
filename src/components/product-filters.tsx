@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -14,7 +13,6 @@ import {
 import type { IProduct } from "@/models/product.model";
 import { ScrollArea } from "./ui/scroll-area";
 import type { ActiveFilters } from "@/app/[brand]/products/page";
-import type { IBrand } from "@/models/brand.model";
 import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
 
@@ -58,9 +56,13 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
 
   useEffect(() => {
     async function fetchFilterData() {
-        if (!brandName) return;
+        // If there's a brandName, fetch for that brand. Otherwise, fetch all products.
+        const url = brandName 
+            ? `/api/products?storefront=${brandName}&limit=1000`
+            : `/api/products?limit=2000`; // Fetch more for global view
+
         try {
-            const productsRes = await fetch(`/api/products?storefront=${brandName}&limit=1000`);
+            const productsRes = await fetch(url);
             if (productsRes.ok) {
                 const { products } = await productsRes.json();
                 setAllProducts(products);
@@ -81,7 +83,7 @@ export function ProductFilters({ activeFilters, onFilterChange, onClearAll }: Pr
     allProducts.forEach(product => {
       if (product.brand) brands.add(product.brand);
       if (product.color) colors.add(product.color);
-       if (product.category && typeof product.category === 'string') {
+      if (product.category && typeof product.category === 'string') {
         categories.add(product.category);
       }
     });

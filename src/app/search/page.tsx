@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useMemo, useTransition, Suspense } from 'react';
+import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
@@ -14,10 +14,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Smile } from 'lucide-react';
+import { ChevronDown, Smile, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GlobalFooter } from '@/components/global-footer';
+import { ProductFilters } from '@/components/product-filters';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import type { ActiveFilters } from '@/app/[brand]/products/page';
 
 type Pagination = {
   currentPage: number;
@@ -25,6 +34,14 @@ type Pagination = {
   totalProducts: number;
   limit: number;
 }
+
+const SORT_OPTIONS: { [key: string]: string } = {
+  relevance: "Relevance",
+  "price-asc": "Price: Low to High",
+  "price-desc": "Price: High to Low",
+  newest: "Newest",
+  rating: "Rating",
+};
 
 const ProductGridSkeleton = () => (
     <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6 text-center">
@@ -72,7 +89,8 @@ const PaginationComponent = ({ pagination, onPageChange }: { pagination: Paginat
 function SearchResults() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const keyword = searchParams.get('keyword');
+  
+  const initialKeyword = searchParams.get('keyword') || '';
 
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,58 +98,102 @@ function SearchResults() {
   const [isPending, startTransition] = useTransition();
 
   const [pagination, setPagination] = useState<Pagination>({ currentPage: 1, totalPages: 1, totalProducts: 0, limit: 50 });
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({
+    categories: [],
+    brands: [],
+    colors: [],
+    keywords: initialKeyword ? [initialKeyword] : [],
+  });
+  const [sortOption, setSortOption] = useState<string>('relevance');
+  
   const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1', 10), [searchParams]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      if (!keyword) {
-          setProducts([]);
-          setLoading(false);
-          return;
-      };
-      setLoading(true);
-      setError(null);
-      try {
-          const query = new URLSearchParams({ 
-              keyword,
-              page: currentPage.toString(),
-              limit: '50'
-          });
-
-          const response = await fetch(`/api/products?${query.toString()}`);
-          if(!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.message || 'Failed to fetch search results');
-          }
-          const { products, pagination: newPagination } = await response.json();
-          
-          setProducts(products);
-          if (newPagination) {
-              setPagination(newPagination);
-          }
-
-      } catch (error: any) {
-          console.error(error);
-          setError(error.message);
-      } finally {
-          setLoading(false);
-      }
-    };
+  const updateURL = useCallback((filters: ActiveFilters, page: number, sortBy: string) => {
+    const query = new URLSearchParams();
+    if (filters.keywords.length > 0) query.set('keyword', filters.keywords.join(','));
+    if (filters.categories.length > 0) query.set('category', filters.categories.join(','));
+    if (filters.brands.length > 0) query.set('brands', filters.brands.join(','));
+    if (filters.colors.length > 0) query.set('colors', filters.colors.join(','));
+    if (page > 1) query.set('page', page.toString());
+    if (sortBy !== 'relevance') query.set('sortBy', sortBy);
     
-    startTransition(() => {
-        fetchProducts();
-    })
+    router.replace(`/search?${query.toString()}`, { scroll: false });
+  }, [router]);
 
-  }, [keyword, currentPage]);
-  
+  const fetchProducts = useCallback(async (page: number, filters: ActiveFilters, sortBy: string) => {
+    if (!filters.keywords.length) {
+        setProducts([]);
+        setLoading(false);
+        return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+        const query = new URLSearchParams({ 
+            page: page.toString(),
+            limit: '50',
+            sortBy: sortBy,
+        });
+
+        if (filters.keywords.length > 0) query.append('keyword', filters.keywords.join(','));
+        if (filters.categories.length > 0) query.append('category', filters.categories.join(','));
+        if (filters.brands.length > 0) query.append('brands', filters.brands.join(','));
+        if (filters.colors.length > 0) query.append('colors', filters.colors.join(','));
+
+        const response = await fetch(`/api/products?${query.toString()}`);
+        if(!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch search results');
+        }
+        const { products, pagination: newPagination } = await response.json();
+        
+        setProducts(products);
+        if (newPagination) {
+            setPagination(newPagination);
+        }
+
+    } catch (error: any) {
+        console.error(error);
+        setError(error.message);
+    } finally {
+        setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    startTransition(() => {
+      fetchProducts(1, activeFilters, sortOption);
+      updateURL(activeFilters, 1, sortOption);
+    });
+  }, [activeFilters, sortOption, fetchProducts, updateURL]);
+
+  const handleFilterChange = (filterType: keyof ActiveFilters, value: string, isChecked: boolean) => {
+    setActiveFilters(prev => {
+        const currentValues = prev[filterType];
+        const newValues = isChecked 
+            ? [...currentValues, value] 
+            : currentValues.filter(v => v !== value);
+        return { ...prev, [filterType]: newValues };
+    });
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= pagination.totalPages) {
-        const params = new URLSearchParams(window.location.search);
-        params.set('page', newPage.toString());
-        router.push(`/search?${params.toString()}`);
+        startTransition(() => {
+            fetchProducts(newPage, activeFilters, sortOption);
+            updateURL(activeFilters, newPage, sortOption);
+        })
     }
   };
 
+  const clearAllFilters = () => {
+    setActiveFilters({
+      categories: [],
+      brands: [],
+      colors: [],
+      keywords: initialKeyword ? [initialKeyword] : [], // Keep the original keyword
+    });
+  };
 
   if (error) {
       return (
@@ -159,31 +221,78 @@ function SearchResults() {
             </Breadcrumb>
         </div>
         
-        <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                Search Results for &quot;{keyword}&quot;
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products found</p>
-        </div>
+        <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
+            <div className="hidden lg:block sticky top-24 h-[calc(100vh-8rem)]">
+                <ProductFilters 
+                    onFilterChange={handleFilterChange}
+                    onClearAll={clearAllFilters}
+                    activeFilters={activeFilters}
+                />
+            </div>
+            <div className="flex-1 min-w-0">
+                <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                                Search Results for &quot;{initialKeyword}&quot;
+                            </h1>
+                            <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products found</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" className="lg:hidden">
+                                        <SlidersHorizontal className="mr-2 h-4 w-4" /> Filters
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="w-full max-w-sm p-0">
+                                    <ProductFilters 
+                                        onFilterChange={handleFilterChange}
+                                        onClearAll={clearAllFilters}
+                                        activeFilters={activeFilters}
+                                    />
+                                </SheetContent>
+                            </Sheet>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="shrink-0">
+                                        Sort by: <span className="font-semibold ml-1 hidden sm:inline">{SORT_OPTIONS[sortOption]}</span>
+                                        <ChevronDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    {Object.entries(SORT_OPTIONS).map(([key, value]) => (
+                                        <DropdownMenuItem key={key} onClick={() => setSortOption(key)}>
+                                            {value}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
+                </div>
 
-        {loading || isPending ? (
-             <ProductGridSkeleton />
-        ) : products.length > 0 ? (
-            <>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6">
-                {products.map((product) => (
-                    <BrandProductCard key={product._id as string} product={product} />
-                ))}
+                {loading || isPending ? (
+                    <ProductGridSkeleton />
+                ) : products.length > 0 ? (
+                    <>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6">
+                        {products.map((product) => (
+                            <BrandProductCard key={product._id as string} product={product} />
+                        ))}
+                    </div>
+                    <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
+                    </>
+                ) : (
+                    <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
+                        <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                        <p className="text-lg font-semibold">No results found for &quot;{initialKeyword}&quot;</p>
+                        <p className="text-sm text-muted-foreground">Try searching for something else or adjusting your filters.</p>
+                         <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
+                    </div>
+                )}
             </div>
-            <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
-            </>
-        ) : (
-            <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
-                <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
-                <p className="text-lg font-semibold">No results found for &quot;{keyword}&quot;</p>
-                <p className="text-sm text-muted-foreground">Try searching for something else.</p>
-            </div>
-        )}
+        </div>
     </main>
     <GlobalFooter />
     </>
