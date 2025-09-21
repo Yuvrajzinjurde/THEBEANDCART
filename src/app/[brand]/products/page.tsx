@@ -53,9 +53,9 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="container grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6 px-10 text-center">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6 text-center">
         <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
-        {[...Array(12)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
             <div key={i} className="space-y-2">
                 <Skeleton className="aspect-square w-full" />
                 <Skeleton className="h-4 w-2/3" />
@@ -98,7 +98,7 @@ const PaginationComponent = ({ pagination, onPageChange }: { pagination: Paginat
 const ProductCarouselSection = ({ title, products }: { title: string, products: IProduct[] }) => {
     if (!products || products.length === 0) return null;
     return (
-        <section className="container pt-12">
+        <section className="pt-12">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
             </div>
@@ -106,7 +106,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
             <Carousel
                 opts={{
                     align: "start",
-                    loop: products.length > 6,
+                    loop: products.length > 5,
                 }}
                 className="w-full"
             >
@@ -167,7 +167,7 @@ export default function ProductsPage() {
         // Add active filters to the query
         Object.entries(activeFilters).forEach(([key, values]) => {
             if (values.length > 0) {
-                const filterKey = key === 'categories' ? 'category' : key;
+                const filterKey = key === 'categories' ? 'category' : 'keywords';
                 query.append(filterKey, values.join(','));
             }
         });
@@ -199,6 +199,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     // When filters or sorting change, fetch from page 1
+    setCurrentPage(1);
     fetchProducts(1);
   }, [sortOption, activeFilters]);
 
@@ -256,7 +257,7 @@ export default function ProductsPage() {
 
   if (error) {
       return (
-          <main className="container flex min-h-screen flex-col items-center justify-center px-10">
+          <main className="container flex min-h-screen flex-col items-center justify-center px-4">
               <h1 className="text-2xl font-bold">Error</h1>
               <p className="text-muted-foreground">{error}</p>
           </main>
@@ -264,7 +265,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <main className="container py-8 px-10">
+    <main className="container py-8 px-4">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>
@@ -287,8 +288,8 @@ export default function ProductsPage() {
             </Breadcrumb>
             <Button variant="link" className="p-0 h-auto text-primary" onClick={clearAllFilters}>CLEAR ALL</Button>
         </div>
-        <div className="flex flex-col lg:flex-row gap-8">
-             <div className="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
+             <div className="hidden lg:block">
                 <ProductFilters 
                     productsForCategories={allProducts}
                     productsForOthers={allProducts}
@@ -296,7 +297,7 @@ export default function ProductsPage() {
                     onFilterChange={handleFilterChange}
                 />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
                  <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
                     <div className="flex items-baseline justify-between">
                         <div>
@@ -347,7 +348,7 @@ export default function ProductsPage() {
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 pt-6">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 pt-6">
                             {allProducts.map((product) => (
                                 <BrandProductCard key={product._id as string} product={product} />
                             ))}
