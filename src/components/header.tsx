@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from "next/link";
@@ -94,7 +93,7 @@ export default function Header() {
   const allAvailableCategories = useMemo(() => {
     const categorySet = new Set<string>();
     allProducts.forEach(p => {
-        if(p.category) {
+        if(p.category && typeof p.category === 'string') {
             categorySet.add(p.category);
         }
     });
