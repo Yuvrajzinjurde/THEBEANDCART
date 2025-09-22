@@ -178,9 +178,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-2 space-y-1.5 flex flex-col flex-grow">
+        <div className="p-2 space-y-1 flex flex-col flex-grow">
           <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-          <div className="h-10">
+          <div className="min-h-[2.5rem]">
             <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{product.name}</h3>
           </div>
           
@@ -190,7 +190,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           </div>
 
           <div className="flex flex-col mt-auto pt-1">
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-2 flex-wrap">
                 <p className="text-base font-bold text-foreground">
                     ₹{sellingPrice.toLocaleString('en-IN')}
                 </p>
