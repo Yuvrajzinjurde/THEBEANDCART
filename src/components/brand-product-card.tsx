@@ -180,7 +180,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         </div>
         <div className="p-2 flex flex-col flex-grow">
           <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-          <div className="min-h-[2.25rem] mt-0.5">
+          <div className="min-h-[2.5rem] mt-0.5">
             <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{product.name}</h3>
           </div>
           
@@ -189,7 +189,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
               <span>{rating.toFixed(1)}</span>
           </div>
 
-          <div className="flex flex-col mt-auto pt-1.5">
+          <div className="flex flex-col mt-auto pt-1">
             <div className="flex items-baseline gap-2 flex-wrap">
                 <p className="text-base font-bold text-foreground">
                     ₹{sellingPrice.toLocaleString('en-IN')}
