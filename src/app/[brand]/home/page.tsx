@@ -182,7 +182,7 @@ const OffersSection = ({ brand }: { brand: IBrand | null }) => {
 
     return (
         <section className="w-full py-16">
-            <div className="container py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
+            <div className="container py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {brand.offers.map((offer, index) => (
                         <div key={index} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">

@@ -127,7 +127,7 @@ const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => 
 
     return (
         <section className="w-full py-16 px-4 sm:px-6 lg:px-8">
-            <div className="container py-12 bg-gradient-to-r from-teal-50/50 to-blue-50/50 rounded-2xl">
+            <div className="container py-12">
                 <div className="text-center mb-10">
                     <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Today's Top Offers</h2>
                 </div>
@@ -273,7 +273,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                         {canScrollNext && <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
                     </Carousel>
                 ) : (
-                     <div className="flex justify-center items-center gap-8 flex-wrap">
+                     <div className="flex justify-center items-center flex-wrap gap-8">
                          {brands.map((brand) => (
                             <BrandLogo key={brand.permanentName} brand={brand} />
                         ))}
@@ -477,4 +477,3 @@ export default function LandingPage() {
     </>
   );
 }
-
