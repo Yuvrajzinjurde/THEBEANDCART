@@ -52,7 +52,7 @@ const categoryBannerSchema = z.object({
 
 
 export const themeColors = [
-    { name: 'Jewelry', primary: '45 90% 55%', background: '0 0% 98%', accent: '45 90% 95%' },
+    { name: 'Jewelry', primary: '45 90% 55%', background: '45 10% 98%', accent: '45 90% 95%' },
     { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
     { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
     { name: 'Orange', primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
