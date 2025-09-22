@@ -40,9 +40,9 @@ const ProductCarouselSkeleton = () => (
         <div className="mx-auto text-center">
           <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         </div>
-        <div className="flex space-x-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[...Array(6)].map((_, i) => (
-                <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
+                <div key={i}>
                      <div className="space-y-2">
                         <Skeleton className="aspect-square w-full" />
                         <Skeleton className="h-4 w-2/3" />
@@ -77,12 +77,10 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2">
+                <CarouselContent className="-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
-                            <div className="p-1">
-                                <BrandProductCard product={product} />
-                            </div>
+                        <CarouselItem key={product._id as string} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                            <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
                 </CarouselContent>
@@ -110,7 +108,7 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
                         {banners.map((banner, index) => (
                              <CarouselItem key={index} className="basis-1/3 pl-4">
                                 <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-20 h-20 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+                                    <div className="w-20 h-20 relative overflow-hidden border-2 border-transparent group-hover:border-primary transition-all rounded-full">
                                         <Image
                                             src={banner.imageUrl}
                                             alt={banner.categoryName}
@@ -519,7 +517,7 @@ export default function BrandHomePage() {
                         </Button>
                     </div>
                     <Separator className="mb-6" />
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         {items.slice(0, 2).map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}

@@ -129,32 +129,36 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     <Link 
       href={`/products/${product._id}?storefront=${product.storefront}`} 
       onClick={handleCardClick} 
-      className={cn("group block", className)}
+      className={cn("group block w-full", className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col h-full">
-        <Carousel
-            setApi={setApi}
-            opts={{ loop: product.images.length > 1 }}
-            className="w-full"
-        >
-            <CarouselContent>
-            {product.images.map((img, index) => (
-                <CarouselItem key={index}>
-                    <div className="w-full aspect-square relative">
-                        <Image
-                            src={img}
-                            alt={`${product.name} image ${index + 1}`}
-                            fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                    </div>
-                </CarouselItem>
-            ))}
-            </CarouselContent>
-        </Carousel>
+      <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg flex flex-row sm:flex-col h-full">
+        {/* -- Image section -- */}
+        <div className="w-1/3 sm:w-full flex-shrink-0">
+            <Carousel
+                setApi={setApi}
+                opts={{ loop: product.images.length > 1 }}
+                className="w-full h-full"
+            >
+                <CarouselContent className="h-full">
+                {product.images.map((img, index) => (
+                    <CarouselItem key={index} className="h-full">
+                        <div className="w-full aspect-square relative">
+                            <Image
+                                src={img}
+                                alt={`${product.name} image ${index + 1}`}
+                                fill
+                                className="object-cover transition-transform duration-300 sm:group-hover:scale-105"
+                            />
+                        </div>
+                    </CarouselItem>
+                ))}
+                </CarouselContent>
+            </Carousel>
+        </div>
 
+        {/* -- Action Buttons -- */}
         <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Button
             size="icon"
@@ -178,12 +182,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-2 flex flex-col flex-grow">
+
+        {/* -- Content section -- */}
+        <div className="p-2.5 flex flex-col flex-grow w-2/3 sm:w-full">
           <div className="flex-grow">
             <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-            <div className="min-h-[2.5rem] mt-0.5">
-                <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{product.name}</h3>
-            </div>
+            <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2 min-h-[2.5rem] mt-0.5">{product.name}</h3>
             
             <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                 <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
@@ -203,7 +207,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                   )}
               </div>
               
-              <div className="h-4 mt-0.5">
+              <div className="min-h-[16px] mt-0.5">
                   {hasDiscount && (
                       <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-green-600">
@@ -245,3 +249,4 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
+
