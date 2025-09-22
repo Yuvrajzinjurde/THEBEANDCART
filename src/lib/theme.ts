@@ -21,12 +21,15 @@ const getPlatformSettings = cache(async () => {
 
 
 export async function getThemeForRequest(pathname: string, search: string) {
-    let brandName: string | null = null;
+    let themeName: string | undefined;
     const searchParams = new URLSearchParams(search);
+    const settings = await getPlatformSettings();
 
     const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search'];
     const isGlobalRoute = pathname === '/' || globalRoutes.some(route => pathname.startsWith(route));
 
+    let brandName: string | null = null;
+    
     if (!isGlobalRoute) {
         if (pathname.startsWith('/products/')) {
             brandName = searchParams.get('storefront');
@@ -38,12 +41,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
         }
     }
     
-    brandName = brandName || 'reeva';
-
-    const settings = await getPlatformSettings();
-    let themeName = settings?.platformThemeName || 'Blue';
-
-    if (brandName && brandName !== 'admin' && !isGlobalRoute) {
+    if (brandName) {
         try {
             const brand = await getBrand(brandName);
             if (brand) {
@@ -54,6 +52,10 @@ export async function getThemeForRequest(pathname: string, search: string) {
         }
     }
 
+    if (!themeName) {
+        themeName = settings?.platformThemeName || 'Blue';
+    }
+    
     const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue') || themeColors[0];
     
     return { theme, settings };
