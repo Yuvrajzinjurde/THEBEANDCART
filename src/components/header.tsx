@@ -47,6 +47,7 @@ export default function Header() {
 
   const [brandName, setBrandName] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
   // State for search suggestions
@@ -59,12 +60,12 @@ export default function Header() {
   
   useEffect(() => {
     setIsClient(true);
+    setHasMounted(true);
   }, []);
-
 
   const showSecondaryNav = useMemo(() => {
     if (!isClient) return false;
-    
+
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
@@ -76,8 +77,8 @@ export default function Header() {
     }
     
     return pathname === `/${determinedBrand}/home`;
-
   }, [isClient, pathname, params, searchParams]);
+
   
   useEffect(() => {
      if (!isClient) return;
@@ -394,7 +395,7 @@ export default function Header() {
         </div>
       </div>
       
-       {showSecondaryNav && (
+       {hasMounted && showSecondaryNav && (
         <div className="w-full overflow-x-auto no-scrollbar hidden sm:block">
             <Separator />
             <div className="container px-4 sm:px-6">
