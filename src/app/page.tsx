@@ -273,7 +273,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                         {canScrollNext && <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
                     </Carousel>
                 ) : (
-                    <div className="flex justify-center items-center gap-8">
+                    <div className="flex justify-center items-center gap-8 flex-wrap">
                          {brands.map((brand) => (
                             <BrandLogo key={brand.permanentName} brand={brand} />
                         ))}
@@ -419,7 +419,7 @@ export default function LandingPage() {
         )}
         
         <section className="container py-16 px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-xl font-semibold text-muted-foreground">A home for curated experiences.</h2>
+            <h2 className="text-xl font-semibold text-muted-foreground sm:text-2xl">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
         </section>
 
@@ -477,3 +477,4 @@ export default function LandingPage() {
     </>
   );
 }
+
