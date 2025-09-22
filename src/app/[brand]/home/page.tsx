@@ -94,6 +94,42 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
 };
 
 
+const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
+    if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
+        return null;
+    }
+
+    const banners = brand.categoryBanners;
+
+    return (
+        <section className="py-8 md:hidden">
+             <div className="container px-4 sm:px-6">
+                <h2 className="text-lg font-semibold tracking-tight mb-4">Shop by Category</h2>
+                <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
+                    <CarouselContent className="-ml-2">
+                        {banners.map((banner, index) => (
+                            <CarouselItem key={index} className="basis-1/4">
+                                <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
+                                    <div className="w-20 h-20 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+                                        <Image
+                                            src={banner.imageUrl}
+                                            alt={banner.categoryName}
+                                            fill
+                                            className="object-cover"
+                                            data-ai-hint={banner.imageHint}
+                                        />
+                                    </div>
+                                    <p className="text-xs font-medium text-center truncate w-20">{banner.categoryName}</p>
+                                </Link>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                </Carousel>
+            </div>
+        </section>
+    );
+};
+
 const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
     if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
         return null;
@@ -111,7 +147,7 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
     ].map(col => col.filter(Boolean)); // Filter out undefined if banners array is shorter
 
     return (
-        <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8">
+        <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8 hidden md:block">
             <div className="container p-4 md:p-8 rounded-2xl">
                  <div className="max-w-3xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
@@ -189,7 +225,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[2.5/1]">
                  <Image
                     src={imageUrl}
                     alt={title}
@@ -460,6 +496,8 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
+      <CategoryCarousel brand={brand} />
+      
       <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
@@ -505,3 +543,4 @@ export default function BrandHomePage() {
     </>
   );
 }
+
