@@ -48,7 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initializeAuth = async () => {
-      setLoading(true);
       const storedToken = localStorage.getItem('token');
       
       if (storedToken) {
@@ -60,25 +59,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(decoded);
             setToken(storedToken);
             
-            // Only fetch cart/wishlist if user is not already set or token changed
-            if (!user || storedToken !== token) {
-                const [cartRes, wishlistRes] = await Promise.all([
-                  fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
-                  fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
-                ]);
-                
-                if (cartRes.ok) {
-                  const { cart } = await cartRes.json();
-                  setCart(cart);
-                } else {
-                    setCart(null);
-                }
-                if (wishlistRes.ok) {
-                  const { wishlist } = await wishlistRes.json();
-                  setWishlist(wishlist);
-                } else {
-                    setWishlist(null);
-                }
+            // Fetch cart/wishlist
+            const [cartRes, wishlistRes] = await Promise.all([
+              fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
+              fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
+            ]);
+            
+            if (cartRes.ok) {
+              const { cart } = await cartRes.json();
+              setCart(cart);
+            } else {
+                setCart(null);
+            }
+            if (wishlistRes.ok) {
+              const { wishlist } = await wishlistRes.json();
+              setWishlist(wishlist);
+            } else {
+                setWishlist(null);
             }
           }
         } catch (error) {
@@ -94,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
     initializeAuth();
-  }, [logout, setCart, setWishlist, token, user]); 
+  }, [logout, setCart, setWishlist]); 
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>
