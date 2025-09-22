@@ -1,12 +1,9 @@
 
-import { themeColors } from '@/lib/brand-schema';
 import type { IBrand } from '@/models/brand.model';
 import dbConnect from './mongodb';
 import Brand from '@/models/brand.model';
 import PlatformSettings from '@/models/platform.model';
 
-// Database calls from Server Components are automatically memoized within a request.
-// Explicitly using React's cache function here was causing conflicts with client components.
 const getBrand = async (brandName: string): Promise<IBrand | null> => {
     await dbConnect();
     const brand = await Brand.findOne({ permanentName: brandName }).lean();
@@ -21,7 +18,7 @@ const getPlatformSettings = async () => {
 
 
 export async function getThemeForRequest(pathname: string, search: string) {
-    let themeName: string | undefined;
+    let theme: any;
     const searchParams = new URLSearchParams(search);
     const settings = await getPlatformSettings();
 
@@ -45,18 +42,21 @@ export async function getThemeForRequest(pathname: string, search: string) {
         try {
             const brand = await getBrand(brandName);
             if (brand) {
-                themeName = brand.themeName;
+                theme = { ...brand.theme, name: brand.themeName };
             }
         } catch (error) {
             console.error(`Failed to fetch theme for brand "${brandName}"`, error);
         }
     }
 
-    if (!themeName) {
-        themeName = settings?.platformThemeName || 'Blue';
+    if (!theme) {
+        theme = settings?.theme || {
+            name: 'Blue',
+            primary: '217.2 91.2% 59.8%',
+            background: '0 0% 100%',
+            accent: '210 40% 96.1%'
+        };
     }
-    
-    const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue') || themeColors[0];
     
     return { theme, settings };
 }

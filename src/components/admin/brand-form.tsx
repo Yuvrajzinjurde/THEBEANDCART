@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Star, Crop } from 'lucide-react';
+import { Trash, UploadCloud, X, Star, Crop, Palette } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
+import { BrandFormSchema, type BrandFormValues, themeColors, type Theme } from '@/lib/brand-schema';
 import { Separator } from '../ui/separator';
 import { Badge } from '../ui/badge';
 import Cropper, { type Point, type Area } from 'react-easy-crop';
@@ -117,21 +117,15 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
 
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
     existingBrand ? {
-      displayName: existingBrand.displayName,
-      permanentName: existingBrand.permanentName,
-      logoUrl: existingBrand.logoUrl,
-      banners: existingBrand.banners,
+      ...existingBrand,
       themeName: existingBrand.themeName,
-      offers: existingBrand.offers,
-      reviews: existingBrand.reviews,
-      promoBanner: existingBrand.promoBanner,
-      categoryBanners: existingBrand.categoryBanners,
-      categories: existingBrand.categories || [],
+      theme: existingBrand.theme,
     } : {
       displayName: "Aura",
       permanentName: "aura",
       logoUrl: "https://picsum.photos/seed/aurora-logo/200/200",
-      themeName: "Rose",
+      themeName: 'Rose',
+      theme: themeColors.find(t => t.name === 'Rose') as Theme,
       categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
       banners: [
         { title: "Discover Your Natural Glow", description: "Pure ingredients, powerful results. Shop our new arrivals.", imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model" },
@@ -424,7 +418,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x200px.</CardDescription>
+                <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x400px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -473,10 +467,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                 type="file"
                                                 accept="image/png, image/jpeg"
                                                 className="hidden"
-                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 200 })}
+                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })}
                                             />
                                             {imageField.value ? (
-                                                <div className="relative w-full aspect-[8/1] border-2 border-dashed rounded-lg p-2">
+                                                <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                                     <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                     <Button
                                                         type="button"
@@ -493,7 +487,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x200px</p>
+                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                                     </div>
                                                 </label>
                                             )}
@@ -716,7 +710,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         </Card>
 
         <Card>
-            <CardHeader><CardTitle>Theme</CardTitle><CardDescription>Select a color scheme for the brand's storefront.</CardDescription></CardHeader>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Palette/> Theme</CardTitle>
+                <CardDescription>Select a color scheme for the brand's storefront.</CardDescription>
+            </CardHeader>
             <CardContent>
                  <FormField
                     control={form.control}
@@ -725,22 +722,35 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                         <FormItem className="space-y-3">
                              <FormControl>
                                 <RadioGroup
-                                    onValueChange={field.onChange}
+                                    onValueChange={(value) => {
+                                        const selectedTheme = themeColors.find(t => t.name === value);
+                                        if (selectedTheme) {
+                                            field.onChange(selectedTheme.name);
+                                            form.setValue('theme', {
+                                                primary: selectedTheme.primary,
+                                                background: selectedTheme.background,
+                                                accent: selectedTheme.accent,
+                                            });
+                                        }
+                                    }}
                                     value={field.value}
                                     className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
                                 >
                                     {themeColors.map((theme) => (
-                                    <FormItem key={theme.name}>
-                                        <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full">
-                                            <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                            <div className="flex items-center gap-2">
-                                                <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
-                                                <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
-                                                <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
-                                            </div>
-                                            <span className="mt-2 text-sm font-medium">{theme.name}</span>
-                                        </FormLabel>
-                                    </FormItem>
+                                        <FormItem key={theme.name}>
+                                            <FormLabel 
+                                                htmlFor={`theme-${theme.name}`} 
+                                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full"
+                                            >
+                                                <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
+                                                <div className="flex items-center gap-2">
+                                                    <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
+                                                    <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
+                                                    <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
+                                                </div>
+                                                <span className="mt-2 text-sm font-medium">{theme.name}</span>
+                                            </FormLabel>
+                                        </FormItem>
                                     ))}
                                 </RadioGroup>
                             </FormControl>
@@ -778,5 +788,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </>
   );
 }
-
-    

@@ -50,20 +50,13 @@ const categoryBannerSchema = z.object({
   imageHint: z.string().min(1, "Image hint is required"),
 });
 
+export const themeSchema = z.object({
+    primary: z.string(),
+    background: z.string(),
+    accent: z.string(),
+});
 
-export const themeColors = [
-    { name: 'Jewelry', primary: '45 90% 55%', background: '45 10% 98%', accent: '45 90% 95%' },
-    { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
-    { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
-    { name: 'Orange', primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
-    { name: 'Purple', primary: '262.1 83.3% 57.8%', background: '0 0% 100%', accent: '260 100% 96.7%' },
-    { name: 'Teal', primary: '175 75% 40%', background: '0 0% 100%', accent: '175 50% 95%' },
-    { name: 'Rose', primary: '346.8 77.2% 49.8%', background: '0 0% 100%', accent: '350 100% 96.9%' },
-    { name: 'Yellow', primary: '47.9 95.8% 53.1%', background: '0 0% 100%', accent: '50 100% 96.1%' },
-    { name: 'Slate (Dark)', primary: '215.2 79.8% 52%', background: '222.2 84% 4.9%', accent: '217.2 32.6% 17.5%' },
-    { name: 'Red', primary: '0 72.2% 50.6%', background: '0 0% 100%', accent: '0 85.7% 95.9%' },
-    { name: 'Magenta', primary: '310 75% 50%', background: '0 0% 100%', accent: '310 50% 95%' },
-] as const;
+export type Theme = z.infer<typeof themeSchema>;
 
 const SocialLinksSchema = z.object({
     twitter: z.string().url().optional().or(z.literal('')),
@@ -77,7 +70,8 @@ export const BrandFormSchema = z.object({
   permanentName: z.string().min(1, "Permanent name is required").regex(/^[a-z0-9-]+$/, "Permanent name can only contain lowercase letters, numbers, and hyphens."),
   logoUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Logo is required"),
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
-  themeName: z.string({ required_error: "Please select a theme." }),
+  themeName: z.string(),
+  theme: themeSchema,
   offers: z.array(offerSchema).optional(),
   reviews: z.array(reviewSchema).optional(),
   promoBanner: promoBannerSchema.optional(),
@@ -92,7 +86,7 @@ export const PlatformSettingsValidationSchema = z.object({
   platformName: z.string().min(1, "Platform name is required."),
   platformLogoUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformFaviconUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
-  platformThemeName: z.string({ required_error: "Please select a platform theme." }),
+  theme: themeSchema,
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
@@ -113,3 +107,17 @@ export const CartSettingsSchema = z.object({
 });
 
 export type CartSettingsValues = z.infer<typeof CartSettingsSchema>;
+
+export const themeColors: (Theme & { name: string })[] = [
+    { name: 'Jewelry', primary: '45 92% 63%', background: '35 10% 98%', accent: '39 88% 93%' },
+    { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
+    { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
+    { name: 'Orange', primary: '24.6 95% 53.1%', background: '0 0% 100%', accent: '20 92.3% 93.5%' },
+    { name: 'Purple', primary: '262.1 83.3% 57.8%', background: '0 0% 100%', accent: '260 100% 96.7%' },
+    { name: 'Teal', primary: '175 75% 40%', background: '0 0% 100%', accent: '175 50% 95%' },
+    { name: 'Rose', primary: '346.8 77.2% 49.8%', background: '0 0% 100%', accent: '350 100% 96.9%' },
+    { name: 'Yellow', primary: '47.9 95.8% 53.1%', background: '0 0% 100%', accent: '50 100% 96.1%' },
+    { name: 'Slate (Dark)', primary: '215.2 79.8% 52%', background: '222.2 84% 4.9%', accent: '217.2 32.6% 17.5%' },
+    { name: 'Red', primary: '0 72.2% 50.6%', background: '0 0% 100%', accent: '0 85.7% 95.9%' },
+    { name: 'Magenta', primary: '310 75% 50%', background: '0 0% 100%', accent: '310 50% 95%' },
+] as const;

@@ -43,6 +43,12 @@ interface ISocialLinks {
     linkedin?: string;
 }
 
+interface ITheme {
+    primary: string;
+    background: string;
+    accent: string;
+}
+
 
 export interface IBrand extends Document {
   displayName: string;
@@ -50,6 +56,7 @@ export interface IBrand extends Document {
   logoUrl: string;
   banners: IBanner[];
   themeName: string;
+  theme: ITheme;
   offers: IOffer[];
   reviews: IReview[];
   promoBanner: IPromoBanner;
@@ -100,6 +107,12 @@ const SocialLinksSchema: Schema<ISocialLinks> = new Schema({
     linkedin: { type: String },
 }, { _id: false });
 
+const ThemeSchema: Schema<ITheme> = new Schema({
+    primary: { type: String, required: true },
+    background: { type: String, required: true },
+    accent: { type: String, required: true },
+}, { _id: false });
+
 
 const BrandSchema: Schema<IBrand> = new Schema({
   displayName: { type: String, required: true },
@@ -107,6 +120,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   logoUrl: { type: String, required: true },
   banners: [BannerSchema],
   themeName: { type: String, required: true },
+  theme: { type: ThemeSchema, required: true },
   offers: [OfferSchema],
   reviews: [ReviewSchema],
   promoBanner: PromoBannerSchema,

@@ -2,7 +2,52 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import PlatformSettings from '@/models/platform.model';
-import { PlatformSettingsValidationSchema } from '@/lib/brand-schema';
+import { z } from 'zod';
+
+const SocialLinksSchema = z.object({
+    twitter: z.string().url().optional().or(z.literal('')),
+    facebook: z.string().url().optional().or(z.literal('')),
+    instagram: z.string().url().optional().or(z.literal('')),
+    linkedin: z.string().url().optional().or(z.literal('')),
+});
+
+const ThemeSchema = z.object({
+    primary: z.string(),
+    background: z.string(),
+    accent: z.string(),
+});
+
+const FormSchema = z.object({
+  platformName: z.string().min(1),
+  platformLogoUrl: z.string().url().or(z.literal('')),
+  platformFaviconUrl: z.string().url().or(z.literal('')),
+  theme: ThemeSchema,
+  socials: SocialLinksSchema.optional(),
+  aiEnabled: z.boolean().optional(),
+  hamperFeatureEnabled: z.boolean().optional(),
+  offersFeatureEnabled: z.boolean().optional(),
+  promoBannerEnabled: z.boolean().optional(),
+  heroBanners: z.array(z.object({
+      title: z.string(),
+      description: z.string(),
+      imageUrl: z.string(),
+      imageHint: z.string(),
+  })),
+  featuredCategories: z.array(z.string()),
+  promoBanner: z.object({
+      title: z.string(),
+      description: z.string(),
+      imageUrl: z.string(),
+      imageHint: z.string(),
+      buttonText: z.string(),
+      buttonLink: z.string(),
+  }).optional(),
+  offers: z.array(z.object({
+      title: z.string(),
+      description: z.string(),
+      code: z.string(),
+  })).optional(),
+});
 
 // GET the platform settings
 export async function GET() {
@@ -27,11 +72,7 @@ export async function POST(req: Request) {
     await dbConnect();
     const body = await req.json();
 
-    // Use the schema that expects an array of strings for featuredCategories
-    const validation = PlatformSettingsValidationSchema.extend({
-        featuredCategories: z.array(z.string()).optional(),
-    }).safeParse(body);
-    
+    const validation = FormSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }

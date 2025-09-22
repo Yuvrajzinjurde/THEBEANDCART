@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv } from 'lucide-react';
-import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
+import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors, type Theme } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -27,7 +27,7 @@ const staticDefaultValues: PlatformSettingsValues = {
   platformName: 'The Brand Cart',
   platformLogoUrl: '',
   platformFaviconUrl: '',
-  platformThemeName: 'Blue',
+  theme: themeColors.find(t => t.name === 'Blue') as Theme,
   socials: { twitter: '', facebook: '', instagram: '', linkedin: '' },
   aiEnabled: true,
   hamperFeatureEnabled: true,
@@ -113,7 +113,7 @@ export default function PlatformSettingsPage() {
                         platformName: settingsData.platformName || '',
                         platformLogoUrl: settingsData.platformLogoUrl || '',
                         platformFaviconUrl: settingsData.platformFaviconUrl || '',
-                        platformThemeName: settingsData.platformThemeName || 'Blue',
+                        theme: settingsData.theme || themeColors.find(t => t.name === 'Blue'),
                         socials: { ...defaultSocials, ...(settingsData.socials || {}) },
                         featuredCategories: (settingsData.featuredCategories || []).map((cat: string) => ({ name: cat })),
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
@@ -307,29 +307,40 @@ export default function PlatformSettingsPage() {
              </div>
              <FormField
                 control={form.control}
-                name="platformThemeName"
+                name="theme"
                 render={({ field }) => (
                     <FormItem className="space-y-3">
                         <FormLabel className="flex items-center gap-2"><Palette/> Platform Theme</FormLabel>
                         <FormControl>
                             <RadioGroup
-                                onValueChange={field.onChange}
-                                value={field.value}
+                                onValueChange={(value) => {
+                                    const selectedTheme = themeColors.find(t => t.name === value);
+                                    if (selectedTheme) {
+                                        field.onChange({
+                                            primary: selectedTheme.primary,
+                                            background: selectedTheme.background,
+                                            accent: selectedTheme.accent,
+                                        });
+                                    }
+                                }}
                                 className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
                             >
-                                {themeColors.map((theme) => (
-                                <FormItem key={theme.name}>
-                                    <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full h-full">
-                                        <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" />
-                                        <div className="flex items-center gap-2">
-                                            <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
-                                            <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
-                                            <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
-                                        </div>
-                                        <span className="mt-2 text-sm font-medium">{theme.name}</span>
-                                    </FormLabel>
-                                </FormItem>
-                                ))}
+                                {themeColors.map((theme) => {
+                                    const isSelected = field.value && field.value.primary === theme.primary && field.value.background === theme.background && field.value.accent === theme.accent;
+                                    return(
+                                        <FormItem key={theme.name}>
+                                            <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full h-full" data-state={isSelected ? "checked" : "unchecked"}>
+                                                <RadioGroupItem value={theme.name} id={`theme-${theme.name}`} className="sr-only" checked={isSelected} />
+                                                <div className="flex items-center gap-2">
+                                                    <span style={{ backgroundColor: `hsl(${theme.primary})` }} className="h-6 w-6 rounded-full"></span>
+                                                    <span style={{ backgroundColor: `hsl(${theme.accent})` }} className="h-6 w-6 rounded-full"></span>
+                                                    <span style={{ backgroundColor: `hsl(${theme.background})`, border: '1px solid #ccc' }} className="h-6 w-6 rounded-full"></span>
+                                                </div>
+                                                <span className="mt-2 text-sm font-medium">{theme.name}</span>
+                                            </FormLabel>
+                                        </FormItem>
+                                    )
+                                })}
                             </RadioGroup>
                         </FormControl>
                         <FormMessage />
@@ -567,5 +578,3 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
-
-    

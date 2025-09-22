@@ -30,12 +30,22 @@ const SocialLinksSchema: Schema = new Schema({
     linkedin: { type: String },
 }, { _id: false });
 
+const ThemeSchema: Schema = new Schema({
+    primary: { type: String, required: true },
+    background: { type: String, required: true },
+    accent: { type: String, required: true },
+}, { _id: false });
+
 
 export interface IPlatformSettings extends Document {
   platformName: string;
   platformLogoUrl: string;
   platformFaviconUrl: string;
-  platformThemeName: string;
+  theme: {
+    primary: string;
+    background: string;
+    accent: string;
+  };
   socials?: {
     twitter?: string;
     facebook?: string;
@@ -72,7 +82,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   platformName: { type: String, default: 'The Brand Cart' },
   platformLogoUrl: { type: String, default: '' },
   platformFaviconUrl: { type: String, default: '' },
-  platformThemeName: { type: String, default: 'Blue' },
+  theme: { type: ThemeSchema, default: () => ({ primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%'}) },
   socials: SocialLinksSchema,
   aiEnabled: { type: Boolean, default: true },
   hamperFeatureEnabled: { type: Boolean, default: true },

@@ -19,7 +19,7 @@ function ThemeInjector({ theme }: { theme: any }) {
         --background: ${theme.background};
         --accent: ${theme.accent};
     }
-    ${theme.name.includes('(Dark)') ? '.dark {}' : ''}
+    ${theme.name?.includes('(Dark)') ? '.dark {}' : ''}
     `;
 
     return <style dangerouslySetInnerHTML={{ __html: styles }} />;
