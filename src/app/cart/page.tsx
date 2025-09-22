@@ -389,6 +389,10 @@ export default function CartPage() {
         body: JSON.stringify({ amount: grandTotal }),
       });
       const { order } = await res.json();
+      
+      if (!order) {
+        throw new Error("Could not create payment order.");
+      }
 
       // 2. Open Razorpay Checkout
       const options = {
