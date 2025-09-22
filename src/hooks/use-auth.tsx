@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter, usePathname, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 import useUserStore from '@/stores/user-store';
 
@@ -11,7 +11,7 @@ interface User {
   roles: string[];
   name: string;
   exp: number;
-  brand?: string; // Add brand to user type
+  brand?: string;
 }
 
 interface AuthContextType {
@@ -28,27 +28,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
-  const params = useParams();
-  const brandName = params.brand as string || 'reeva';
   const { setCart, setWishlist } = useUserStore();
 
   const logout = useCallback(() => {
+    const currentPathname = window.location.pathname;
+    const brandName = currentPathname.split('/')[1] || 'reeva';
+    
     localStorage.removeItem('token');
     setUser(null);
     setToken(null);
     setCart(null);
     setWishlist(null);
-    const isAuthPage = /login|signup/.test(pathname);
+    
+    const isAuthPage = /login|signup/.test(currentPathname);
     if (!isAuthPage) {
       router.push(`/${brandName}/login`);
     }
-  }, [router, pathname, brandName, setCart, setWishlist]);
+  }, [router, setCart, setWishlist]);
 
   useEffect(() => {
     const initializeAuth = async () => {
       setLoading(true);
       const storedToken = localStorage.getItem('token');
+      
       if (storedToken) {
         try {
           const decoded = jwtDecode<User>(storedToken);
@@ -68,10 +70,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (cartRes.ok) {
                   const { cart } = await cartRes.json();
                   setCart(cart);
+                } else {
+                    setCart(null);
                 }
                 if (wishlistRes.ok) {
                   const { wishlist } = await wishlistRes.json();
                   setWishlist(wishlist);
+                } else {
+                    setWishlist(null);
                 }
             }
           }
@@ -88,8 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
     initializeAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]); // Rerun only on path change to avoid loops
+  }, [logout, setCart, setWishlist, token, user]); 
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>
