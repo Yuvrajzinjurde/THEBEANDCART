@@ -375,16 +375,18 @@ export default function Header() {
         </div>
       </div>
       
-       <div className={cn("overflow-x-auto no-scrollbar", !showSecondaryNav && "hidden")}>
+       <div className={cn("w-full overflow-x-auto no-scrollbar", !showSecondaryNav && "hidden")}>
           <Separator />
-          <nav className="container flex h-12 items-center gap-6 px-4 sm:px-6">
-              {secondaryNavItems.map((item) => (
-                  <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
-                      <item.icon className="h-4 w-4" />
-                      {item.label}
-                  </Link>
-              ))}
-          </nav>
+          <div className="container px-4 sm:px-6">
+            <nav className="flex h-12 items-center gap-6">
+                {secondaryNavItems.map((item) => (
+                    <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                    </Link>
+                ))}
+            </nav>
+          </div>
       </div>
     </header>
   );
