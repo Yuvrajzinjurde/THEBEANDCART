@@ -178,10 +178,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-3 space-y-1.5 flex flex-col flex-grow">
+        <div className="p-2 space-y-1.5 flex flex-col flex-grow">
           <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
           <div className="h-10">
-            <h3 className="text-sm font-semibold text-foreground line-clamp-2">{product.name}</h3>
+            <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{product.name}</h3>
           </div>
           
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -189,52 +189,54 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
               <span>{rating.toFixed(1)}</span>
           </div>
 
-          <div className="flex items-baseline gap-2 flex-wrap min-h-[24px]">
-            <p className="text-base font-bold text-foreground">
-                ₹{sellingPrice.toLocaleString('en-IN')}
-            </p>
-            {hasDiscount && (
-                <p className="text-sm font-medium text-muted-foreground line-through">
-                    ₹{mrp.toLocaleString('en-IN')}
+          <div className="flex flex-col mt-auto pt-1">
+            <div className="flex items-baseline gap-2">
+                <p className="text-base font-bold text-foreground">
+                    ₹{sellingPrice.toLocaleString('en-IN')}
                 </p>
-            )}
-          </div>
-          
-          <div className="h-5">
-            {hasDiscount && (
-                <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-semibold text-green-600">
-                        {discountPercentage}% off
-                    </span>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
-                                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                                </button>
-                            </TooltipTrigger>
-                            <TooltipContent className="p-3 w-64" side="top" align="center">
-                                <div className="space-y-2">
-                                    <p className="font-bold text-base">Price details</p>
-                                    <div className="flex justify-between text-sm">
-                                        <p className="text-muted-foreground">Maximum Retail Price</p>
-                                        <p>₹{mrp.toFixed(2)}</p>
+                {hasDiscount && (
+                    <p className="text-xs font-medium text-muted-foreground line-through">
+                        ₹{mrp.toLocaleString('en-IN')}
+                    </p>
+                )}
+            </div>
+            
+            <div className="h-4">
+                {hasDiscount && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-green-600">
+                            {discountPercentage}% off
+                        </span>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
+                                        <Info className="h-3 w-3 text-muted-foreground" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="p-3 w-64" side="top" align="center">
+                                    <div className="space-y-2">
+                                        <p className="font-bold text-base">Price details</p>
+                                        <div className="flex justify-between text-sm">
+                                            <p className="text-muted-foreground">Maximum Retail Price</p>
+                                            <p>₹{mrp.toFixed(2)}</p>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <p className="text-muted-foreground">Selling Price</p>
+                                            <p>₹{sellingPrice.toFixed(2)}</p>
+                                        </div>
+                                        <Separator />
+                                        <div className="flex justify-between text-sm font-semibold text-green-600">
+                                        <p>Overall you save</p>
+                                        <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between text-sm">
-                                        <p className="text-muted-foreground">Selling Price</p>
-                                        <p>₹{sellingPrice.toFixed(2)}</p>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex justify-between text-sm font-semibold text-green-600">
-                                       <p>Overall you save</p>
-                                       <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
-                                    </div>
-                                </div>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-            )}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                )}
+            </div>
           </div>
         </div>
       </div>

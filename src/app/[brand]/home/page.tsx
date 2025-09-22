@@ -108,7 +108,7 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
                 <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
                     <CarouselContent>
                         {banners.map((banner, index) => (
-                             <CarouselItem key={index} className="basis-1/3">
+                             <CarouselItem key={index} className="basis-1/3 pl-4">
                                 <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
                                     <div className="w-20 h-20 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
                                         <Image
@@ -265,8 +265,8 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
 
   return (
-    <section className="w-full py-12 md:py-16">
-      <div className="container px-4 sm:px-6 lg:px-8">
+    <section className="w-full py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+      <div className="container">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Your Cheers, Our Motivation</h2>
         </div>
