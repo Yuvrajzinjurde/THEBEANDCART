@@ -54,30 +54,49 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-
-
+  
+  const effectiveBrandName = brandName || 'reeva';
+  
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+
+  const showSecondaryNav = useMemo(() => {
+    if (!isClient) return false;
     
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
+    let determinedBrand: string | null = null;
     if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart' || pathname === '/search') {
-      setBrandName(null);
+      determinedBrand = null;
     } else {
-      const determinedBrand = pathBrand || queryBrand || 'reeva';
-      setBrandName(determinedBrand);
+      determinedBrand = pathBrand || queryBrand || 'reeva';
     }
+    
+    return pathname === `/${determinedBrand}/home`;
 
-  }, [pathname, params, searchParams]);
+  }, [isClient, pathname, params, searchParams]);
+  
+  useEffect(() => {
+     if (!isClient) return;
+
+    const pathBrand = params.brand as string;
+    const queryBrand = searchParams.get('storefront');
+    
+    let determinedBrand: string | null = null;
+    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart' || pathname === '/search') {
+      determinedBrand = null;
+    } else {
+      determinedBrand = pathBrand || queryBrand || 'reeva';
+    }
+    setBrandName(determinedBrand);
+  }, [isClient, pathname, params, searchParams]);
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
-  const effectiveBrandName = brandName || 'reeva';
-  const showSecondaryNav = pathname === `/${effectiveBrandName}/home`;
-
-
   const secondaryNavItems = [
     { href: `/${effectiveBrandName}/products?keyword=gift`, icon: Gift, label: "Gifts" },
     { href: `/${effectiveBrandName}/products?keyword=fashion`, icon: Shirt, label: "Fashion Finds" },
@@ -375,19 +394,21 @@ export default function Header() {
         </div>
       </div>
       
-       <div className={cn("w-full overflow-x-auto no-scrollbar hidden sm:block", !showSecondaryNav && "hidden")}>
-          <Separator />
-          <div className="container px-4 sm:px-6">
-            <nav className="flex h-12 items-center gap-6">
-                {secondaryNavItems.map((item) => (
-                    <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
-                    </Link>
-                ))}
-            </nav>
-          </div>
-      </div>
+       {showSecondaryNav && (
+        <div className="w-full overflow-x-auto no-scrollbar hidden sm:block">
+            <Separator />
+            <div className="container px-4 sm:px-6">
+                <nav className="flex h-12 items-center gap-6">
+                    {secondaryNavItems.map((item) => (
+                        <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                        </Link>
+                    ))}
+                </nav>
+            </div>
+        </div>
+       )}
     </header>
   );
 }
