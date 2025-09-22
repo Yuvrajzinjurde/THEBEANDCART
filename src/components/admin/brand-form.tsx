@@ -424,7 +424,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Banners</CardTitle>
-                <CardDescription>Add at least one banner for the homepage carousel.</CardDescription>
+                <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x200px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -473,10 +473,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                 type="file"
                                                 accept="image/png, image/jpeg"
                                                 className="hidden"
-                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })}
+                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 200 })}
                                             />
                                             {imageField.value ? (
-                                                <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
+                                                <div className="relative w-full aspect-[8/1] border-2 border-dashed rounded-lg p-2">
                                                     <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                     <Button
                                                         type="button"
@@ -493,7 +493,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
+                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x200px</p>
                                                     </div>
                                                 </label>
                                             )}

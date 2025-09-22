@@ -367,7 +367,7 @@ export default function LandingPage() {
     <main>
 
         {heroBanners && heroBanners.length > 0 ? (
-             <section className="w-full">
+             <section className="w-full hidden sm:block">
                 <Carousel 
                     className="w-full" 
                     plugins={[mainCarouselPlugin.current]}
@@ -377,7 +377,7 @@ export default function LandingPage() {
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
-                            <div className="relative w-full text-foreground flex items-center justify-center py-24 sm:py-32 md:py-48">
+                            <div className="relative w-full text-foreground flex items-center justify-center py-8 sm:py-10 md:py-14">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title}

@@ -403,7 +403,7 @@ export default function PlatformSettingsPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Hero Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the main landing page. Required dimensions: 1600x400px.</CardDescription>
+                <CardDescription>Manage the carousel banners on the main landing page. Recommended dimensions: 1600x200px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -416,12 +416,12 @@ export default function PlatformSettingsPage() {
                          <FormField control={form.control} name={`heroBanners.${index}.imageUrl`} render={({ field: imageField }) => (
                             <FormItem>
                                 <FormLabel>Banner Image</FormLabel>
-                                <FormDescription>Required dimensions: 1600x400px</FormDescription>
+                                <FormDescription>Required dimensions: 1600x200px</FormDescription>
                                 <FormControl>
                                    <div className="w-full">
-                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })} />
+                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 200 })} />
                                         {imageField.value ? (
-                                            <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
+                                            <div className="relative w-full aspect-[8/1] border-2 border-dashed rounded-lg p-2">
                                                 <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                 <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => imageField.onChange('')}><X className="h-4 w-4" /></Button>
                                             </div>
