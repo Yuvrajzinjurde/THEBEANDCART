@@ -39,13 +39,20 @@ const ProductCarouselSkeleton = () => (
         <div className="mx-auto text-center">
           <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
                 <div key={i}>
-                     <div className="space-y-2">
-                        <Skeleton className="aspect-square w-full" />
-                        <Skeleton className="h-4 w-2/3" />
-                        <Skeleton className="h-6 w-1/2" />
+                     <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <Skeleton className="w-full sm:w-36 h-36 rounded-lg flex-shrink-0" />
+                        <div className="flex-grow space-y-2">
+                            <Skeleton className="h-4 w-1/4" />
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-8 w-1/2 mt-2" />
+                            <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
+                                <Skeleton className="h-10 w-36" />
+                                <Skeleton className="h-10 w-28" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             ))}
@@ -69,16 +76,16 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                 </Button>
             </div>
             <Separator className="mb-6" />
-            <Carousel
+             <Carousel
                 opts={{
                     align: "start",
                     loop: products.length > 2,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2 sm:-ml-4">
+                <CarouselContent className="-ml-2 md:-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
@@ -107,7 +114,7 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
                         {banners.map((banner, index) => (
                              <CarouselItem key={index} className="basis-1/3 pl-4">
                                 <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-24 h-20 relative overflow-hidden border-2 border-transparent group-hover:border-primary transition-all rounded-[2rem]">
+                                    <div className="w-24 h-20 relative overflow-hidden border-2 border-transparent group-hover:border-primary transition-all rounded-[50%]">
                                         <Image
                                             src={banner.imageUrl}
                                             alt={banner.categoryName}
