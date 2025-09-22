@@ -74,13 +74,12 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                 opts={{
                     align: "start",
                     loop: products.length > 2,
-                    slidesToScroll: 2,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2">
+                <CarouselContent className="-ml-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <CarouselItem key={product._id as string}>
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -161,7 +160,7 @@ const OffersSection = ({ brand }: { brand: IBrand | null }) => {
     ];
 
     return (
-        <section className="w-full py-16">
+        <section className="w-full py-16 px-4 sm:px-6 lg:px-8">
             <div className="container py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {brand.offers.map((offer, index) => (
@@ -231,7 +230,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
   return (
     <section className="w-full py-12 md:py-16">
-      <div className="container">
+      <div className="container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Your Cheers, Our Motivation</h2>
         </div>
@@ -267,8 +266,8 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10" />
-          <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10" />
+          <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+          <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
         </Carousel>
       </div>
     </section>
@@ -434,7 +433,7 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full text-foreground py-24 sm:py-32 md:py-48 flex items-center justify-center">
+                        <div className="relative w-full text-foreground py-12 sm:py-16 md:py-20 flex items-center justify-center">
                             <Image
                                 src={banner.imageUrl}
                                 alt={banner.title}
@@ -445,10 +444,10 @@ export default function BrandHomePage() {
                             />
                             <div className="absolute inset-0 bg-black/50" />
                             <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-4 sm:px-6 lg:px-8">
-                                <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
+                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
-                                <p className="mt-4 text-lg md:text-xl max-w-3xl">
+                                <p className="mt-2 text-base md:text-lg max-w-2xl">
                                     {banner.description}
                                 </p>
                             </div>
