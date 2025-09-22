@@ -45,7 +45,6 @@ export default function Header() {
   const { cart, wishlist } = useUserStore();
   const { settings } = usePlatformSettingsStore();
 
-  const [brandName, setBrandName] = useState<string | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
@@ -55,14 +54,12 @@ export default function Header() {
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   
-  const effectiveBrandName = brandName || 'reeva';
-  
   useEffect(() => {
     setHasMounted(true);
   }, []);
   
-  const showSecondaryNav = useMemo(() => {
-    if (!hasMounted) return false;
+  const brandName = useMemo(() => {
+    if (!hasMounted) return null;
 
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
@@ -74,25 +71,12 @@ export default function Header() {
       determinedBrand = pathBrand || queryBrand || 'reeva';
     }
     
-    return pathname === `/${determinedBrand}/home`;
+    return determinedBrand;
   }, [hasMounted, pathname, params, searchParams]);
 
+  const showSecondaryNav = hasMounted && brandName && pathname === `/${brandName}/home`;
+  const effectiveBrandName = brandName || 'reeva';
   
-  useEffect(() => {
-    if (!hasMounted) return;
-
-    const pathBrand = params.brand as string;
-    const queryBrand = searchParams.get('storefront');
-    
-    let determinedBrand: string | null = null;
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart' || pathname === '/search') {
-      determinedBrand = null;
-    } else {
-      determinedBrand = pathBrand || queryBrand || 'reeva';
-    }
-    setBrandName(determinedBrand);
-  }, [hasMounted, pathname, params, searchParams]);
-
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
@@ -412,4 +396,3 @@ export default function Header() {
   );
 }
 
-    
