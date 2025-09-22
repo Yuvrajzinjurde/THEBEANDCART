@@ -83,9 +83,9 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2 md:-ml-4">
+                <CarouselContent className="-ml-2">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 basis-[45%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
