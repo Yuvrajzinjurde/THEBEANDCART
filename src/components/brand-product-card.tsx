@@ -178,18 +178,18 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>
-        <div className="p-2 space-y-1 flex flex-col flex-grow">
+        <div className="p-2 flex flex-col flex-grow">
           <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-          <div className="min-h-[2.5rem]">
-            <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{product.name}</h3>
+          <div className="min-h-[2.25rem] mt-0.5">
+            <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{product.name}</h3>
           </div>
           
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
               <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
               <span>{rating.toFixed(1)}</span>
           </div>
 
-          <div className="flex flex-col mt-auto pt-1">
+          <div className="flex flex-col mt-auto pt-1.5">
             <div className="flex items-baseline gap-2 flex-wrap">
                 <p className="text-base font-bold text-foreground">
                     ₹{sellingPrice.toLocaleString('en-IN')}
@@ -201,7 +201,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 )}
             </div>
             
-            <div className="h-4">
+            <div className="h-4 mt-0.5">
                 {hasDiscount && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-xs font-semibold text-green-600">
