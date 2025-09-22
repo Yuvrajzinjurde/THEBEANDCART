@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -244,9 +243,16 @@ const ExploreBrands = () => {
 
 export default function CartPage() {
   const router = useRouter();
-  const { user, token, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, token } = useAuth();
   const { cart, setCart, setWishlist } = useUserStore();
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   useEffect(() => {
     if (!authLoading) {
@@ -365,6 +371,56 @@ export default function CartPage() {
   const grandTotal = subtotal - milestoneDiscount + shipping;
   
   const deliveryDate = format(addDays(new Date(), 5), 'EEE, MMM d');
+
+  const handleCheckout = async () => {
+    if (!user || !token) {
+      toast.error("Please log in to proceed.");
+      return;
+    }
+
+    try {
+      // 1. Create a Razorpay Order
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ amount: grandTotal }),
+      });
+      const { order } = await res.json();
+
+      // 2. Open Razorpay Checkout
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "The Brand Cart",
+        description: "Order Payment",
+        order_id: order.id,
+        handler: async function (response: any) {
+          // TODO: Verify payment on backend and create order in DB
+          toast.success("Payment Successful!");
+          router.push('/order-confirmation'); // Redirect to a confirmation page
+        },
+        prefill: {
+          name: user.name,
+          email: (user as any).email, // Assuming email is part of user object
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      };
+      
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
+    } catch (error) {
+      console.error("Checkout failed", error);
+      toast.error("Could not initiate payment. Please try again.");
+    }
+  };
+
 
   if (loading || authLoading) {
     return <CartSkeleton />;
@@ -554,7 +610,7 @@ export default function CartPage() {
                                     <span>Grand Total</span>
                                     <span>₹{grandTotal.toLocaleString('en-IN')}</span>
                                 </div>
-                                <Button size="lg" className="w-full h-12 text-base mt-4">
+                                <Button size="lg" className="w-full h-12 text-base mt-4" onClick={handleCheckout}>
                                     Proceed to Checkout
                                 </Button>
                             </CardContent>
