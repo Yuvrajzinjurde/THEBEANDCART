@@ -4,20 +4,20 @@ import type { IBrand } from '@/models/brand.model';
 import dbConnect from './mongodb';
 import Brand from '@/models/brand.model';
 import PlatformSettings from '@/models/platform.model';
-import { cache } from 'react';
 
-// Wrap database calls in React's cache to prevent re-fetching on the same request
-const getBrand = cache(async (brandName: string): Promise<IBrand | null> => {
+// Database calls from Server Components are automatically memoized within a request.
+// Explicitly using React's cache function here was causing conflicts with client components.
+const getBrand = async (brandName: string): Promise<IBrand | null> => {
     await dbConnect();
     const brand = await Brand.findOne({ permanentName: brandName }).lean();
     return brand ? JSON.parse(JSON.stringify(brand)) : null;
-});
+};
 
-const getPlatformSettings = cache(async () => {
+const getPlatformSettings = async () => {
     await dbConnect();
     const settings = await PlatformSettings.findOne({}).lean();
     return settings ? JSON.parse(JSON.stringify(settings)) : null;
-});
+};
 
 
 export async function getThemeForRequest(pathname: string, search: string) {
