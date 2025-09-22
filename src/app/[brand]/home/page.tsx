@@ -170,6 +170,7 @@ const MobileOffersCarousel = ({ brand }: { brand: IBrand | null }) => {
     );
 };
 
+
 const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
     if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
         return null;
