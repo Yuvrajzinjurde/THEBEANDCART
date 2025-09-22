@@ -12,6 +12,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
@@ -36,7 +38,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const [api, setApi] = useState<CarouselApi>();
 
   const autoplay = useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: true })
+    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
   );
 
   useEffect(() => {
@@ -130,9 +132,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-row sm:flex-col h-full"
+        className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
       >
-        <div className="w-2/5 sm:w-full flex-shrink-0">
+        <div className="w-full">
             <Carousel
                 setApi={setApi}
                 plugins={[autoplay.current]}
@@ -182,18 +184,20 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           </Button>
         </div>
 
-        <div className="p-3 flex flex-col flex-grow w-3/5 sm:w-full">
+        <div className="p-3 flex flex-col flex-grow">
           <div className="flex-grow">
             <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-            <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2 mt-0.5">{product.name}</h3>
+            <div className="min-h-[2.5rem] my-0.5">
+                <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{product.name}</h3>
+            </div>
           </div>
           
-          <div className="flex flex-col mt-auto pt-1">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+          <div className="mt-auto pt-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
                 <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
             </div>
-              <div className="flex items-baseline gap-2 flex-wrap mt-2">
+              <div className="flex items-baseline gap-x-2 flex-wrap">
                   <p className="text-base font-bold text-foreground">
                       ₹{sellingPrice.toLocaleString('en-IN')}
                   </p>
@@ -204,7 +208,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                   )}
               </div>
               
-              <div className="min-h-[16px] mt-0.5">
+              <div className="min-h-[16px]">
                   {hasDiscount && (
                       <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-green-600">
