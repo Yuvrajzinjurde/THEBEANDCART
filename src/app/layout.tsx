@@ -19,7 +19,7 @@ function ThemeInjector({ theme }: { theme: any }) {
         --background: ${theme.background};
         --accent: ${theme.accent};
     }
-    ${theme.name?.includes('(Dark)') ? '.dark {}' : ''}
+    ${theme.name && theme.name.includes('(Dark)') ? '.dark {}' : ''}
     `;
 
     return <style dangerouslySetInnerHTML={{ __html: styles }} />;
@@ -38,7 +38,7 @@ export default async function RootLayout({
   const platformSettings = settings as IPlatformSettings | null;
 
   const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
+  const isAuthRoute = /\/(login|signup|forgot-password)/.test(pathname);
   const showHeader = !isAdminRoute && !isAuthRoute;
 
   return (
