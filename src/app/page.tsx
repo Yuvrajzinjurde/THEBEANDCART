@@ -131,7 +131,7 @@ const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => 
                 <div className="text-center mb-10">
                     <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Today's Top Offers</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {settings.offers.map((offer, index) => (
                         <div key={index} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
                             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-100 to-blue-200 p-1">
@@ -211,23 +211,9 @@ const HamperSection = () => {
 
 
 const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
-    const [api, setApi] = useState<CarouselApi>()
-    const [canScrollPrev, setCanScrollPrev] = useState(false)
-    const [canScrollNext, setCanScrollNext] = useState(false)
-
-    useEffect(() => {
-        if (!api) return;
-        setCanScrollPrev(api.canScrollPrev())
-        setCanScrollNext(api.canScrollNext())
-        api.on("select", () => {
-            setCanScrollPrev(api.canScrollPrev())
-            setCanScrollNext(api.canScrollNext())
-        });
-    }, [api]);
+    const autoplay = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
 
     if (!brands || brands.length === 0) return null;
-    
-    const useCarousel = brands.length > 5;
 
     const BrandLogo = ({ brand }: { brand: IBrand }) => {
         const theme = themeColors.find(t => t.name === brand.themeName);
@@ -256,29 +242,21 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12">
             <div className="container">
-                {useCarousel ? (
-                    <Carousel
-                        setApi={setApi}
-                        opts={{ align: "start", loop: brands.length > 6 }}
-                        className="w-full"
-                    >
-                        <CarouselContent>
-                            {brands.map((brand) => (
-                                <CarouselItem key={brand.permanentName} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                                    <BrandLogo brand={brand} />
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        {canScrollPrev && <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
-                        {canScrollNext && <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />}
-                    </Carousel>
-                ) : (
-                     <div className="flex justify-center items-center flex-wrap gap-8">
-                         {brands.map((brand) => (
-                            <BrandLogo key={brand.permanentName} brand={brand} />
+                <Carousel
+                    plugins={[autoplay.current]}
+                    opts={{ align: "start", loop: true }}
+                    className="w-full"
+                >
+                    <CarouselContent>
+                        {brands.map((brand) => (
+                            <CarouselItem key={brand.permanentName} className="basis-full sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                                <BrandLogo brand={brand} />
+                            </CarouselItem>
                         ))}
-                    </div>
-                )}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                    <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                </Carousel>
             </div>
         </section>
     );
