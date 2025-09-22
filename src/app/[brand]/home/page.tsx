@@ -146,7 +146,7 @@ const MobileOffersCarousel = ({ brand }: { brand: IBrand | null }) => {
                     <CarouselContent className="-ml-4">
                         {brand.offers.map((offer, index) => (
                              <CarouselItem key={index} className="basis-auto pl-4">
-                                <div className="w-[280px]">
+                                <div className="w-[250px]">
                                     <CouponCard 
                                         title={offer.title}
                                         description={offer.description}
@@ -461,11 +461,8 @@ export default function BrandHomePage() {
       )
   }
   
-  const productSections = Object.entries(groupedProducts).filter(([_, items]) => {
-    if (items.length < 2) return false;
-    const topTwoProducts = items.slice(0, 2);
-    return topTwoProducts.every(p => p.rating >= 3);
-  });
+  const productSections = Object.entries(groupedProducts).filter(([_, items]) => items.length >= 2);
+
 
   return (
     <>
