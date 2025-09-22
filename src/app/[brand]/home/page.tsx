@@ -110,7 +110,7 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
         <section className="py-8 md:hidden">
              <div className="container px-4 sm:px-6">
                 <h2 className="text-lg font-semibold tracking-tight mb-4">Shop by Category</h2>
-                <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
+                <Carousel opts={{ align: "start", dragFree: true }} className="w-full no-scrollbar">
                     <CarouselContent className="-ml-4">
                         {banners.map((banner, index) => (
                              <CarouselItem key={index} className="basis-1/3 pl-4">
