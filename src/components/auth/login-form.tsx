@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -29,10 +29,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Logo } from "@/components/logo";
 import { Loader } from "../ui/loader";
-import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import Image from "next/image";
+import type { IBrand } from "@/models/brand.model";
 
 interface DecodedToken {
   roles: string[];
@@ -42,18 +41,36 @@ interface DecodedToken {
 export function LoginForm() {
   const router = useRouter();
   const params = useParams();
-  const brand = params.brand as string || 'reeva';
-  const { settings } = usePlatformSettingsStore();
-
+  const brandName = params.brand as string || 'reeva';
+  
+  const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    async function fetchBrandLogo() {
+      if (brandName) {
+        try {
+          const res = await fetch(`/api/brands/${brandName}`);
+          if (res.ok) {
+            const { brand: brandData } = await res.json();
+            setBrand(brandData);
+          }
+        } catch (error) {
+          console.error("Failed to fetch brand logo for login page", error);
+        }
+      }
+    }
+    fetchBrandLogo();
+  }, [brandName]);
+
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
       password: "",
-      brand: brand,
+      brand: brandName,
     },
   });
 
@@ -96,10 +113,10 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
-        {settings.platformLogoUrl ? (
-            <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+        {brand?.logoUrl ? (
+            <Image src={brand.logoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
         ) : (
-            <Logo />
+            <div className="h-14 w-14 rounded-full bg-muted" />
         )}
         <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
         <CardDescription>
@@ -130,7 +147,7 @@ export function LoginForm() {
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
                     <Link
-                      href={`/${brand}/forgot-password`}
+                      href={`/${brandName}/forgot-password`}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Forgot password?
@@ -188,7 +205,7 @@ export function LoginForm() {
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
-            href={`/${brand}/signup`}
+            href={`/${brandName}/signup`}
             className="font-medium text-primary hover:underline"
           >
             Sign up

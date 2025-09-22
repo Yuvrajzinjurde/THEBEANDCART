@@ -1,153 +1,72 @@
 
-"use client";
 
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/header';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
-import type { IBrand } from '@/models/brand.model';
-import { themeColors } from '@/lib/brand-schema';
-import usePlatformSettingsStore from '@/stores/platform-settings-store';
+import { headers } from 'next/headers';
+import { getThemeForRequest } from '@/lib/theme';
 import type { IPlatformSettings } from '@/models/platform.model';
 
-type Theme = (typeof themeColors)[number];
+function ThemeInjector({ theme }: { theme: any }) {
+    if (!theme) return null;
 
+    const styles = `
+    :root {
+        --primary: ${theme.primary};
+        --background: ${theme.background};
+        --accent: ${theme.accent};
+    }
+    ${theme.name.includes('(Dark)') ? '.dark {}' : ''}
+    `;
 
-function ThemeInjector({ brandName }: { brandName: string | null }) {
-    const { settings } = usePlatformSettingsStore();
-    const [theme, setTheme] = useState<(typeof themeColors)[number] | undefined>(
-        themeColors.find(t => t.name === 'Blue')
-    );
-
-    useEffect(() => {
-        async function fetchBrandTheme() {
-            let selectedThemeName = settings.platformThemeName; // Default to global theme
-
-            if (brandName && brandName !== 'admin') {
-                try {
-                    const res = await fetch(`/api/brands/${brandName}`);
-                    if (res.ok) {
-                        const { brand }: { brand: IBrand } = await res.json();
-                        selectedThemeName = brand.themeName;
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch brand theme", error);
-                }
-            }
-
-            const newTheme = themeColors.find(t => t.name === selectedThemeName) || themeColors.find(t => t.name === 'Blue');
-            setTheme(newTheme);
-        }
-        fetchBrandTheme();
-    }, [brandName, settings.platformThemeName]);
-    
-    useEffect(() => {
-        if (theme) {
-            const root = document.documentElement;
-            root.style.setProperty('--primary', theme.primary);
-            root.style.setProperty('--background', theme.background);
-            root.style.setProperty('--accent', theme.accent);
-            
-            if (theme.name.includes('(Dark)')) {
-                root.classList.add('dark');
-            } else {
-                root.classList.remove('dark');
-            }
-        }
-    }, [theme]);
-
-
-  return null;
+    return <style dangerouslySetInnerHTML={{ __html: styles }} />;
 }
 
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const { settings, fetchSettings } = usePlatformSettingsStore();
+  const headersList = headers();
+  const pathname = headersList.get('x-next-pathname') || '';
+  const searchParams = headersList.get('x-next-search') || '';
 
-  const stableFetchSettings = useCallback(fetchSettings, []);
+  const { theme, settings } = await getThemeForRequest(pathname, searchParams);
+  const platformSettings = settings as IPlatformSettings | null;
 
-  useEffect(() => {
-    stableFetchSettings();
-  }, [stableFetchSettings]);
-
-  useEffect(() => {
-    if (settings.platformFaviconUrl) {
-        let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
-        if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.getElementsByTagName('head')[0].appendChild(link);
-        }
-        link.href = settings.platformFaviconUrl;
-    }
-    if (settings.platformName) {
-        document.title = settings.platformName;
-    }
-  }, [settings.platformFaviconUrl, settings.platformName]);
-  
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
-  
-  const getBrandName = () => {
-    // Special pages that use the global platform theme (return null)
-    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart'];
-    if (pathname === '/' || globalRoutes.some(route => pathname.startsWith(route))) {
-        return null;
-    }
-    
-    // For product pages, the brand is determined by the `storefront` query parameter
-    if (pathname.startsWith('/products/')) {
-        const storefrontQuery = searchParams.get('storefront');
-        if (storefrontQuery) {
-            return storefrontQuery;
-        }
-    }
-
-    // For brand-specific pages like `/reeva/home`, the brand is the first part of the path
-    const pathParts = pathname.split('/');
-    if (pathParts.length > 1 && pathParts[1]) {
-      return pathParts[1];
-    }
-
-    // Fallback to a default brand if no other logic matches
-    return 'reeva';
-  }
-  
-  const brandName = getBrandName();
   const showHeader = !isAdminRoute && !isAuthRoute;
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <ThemeInjector brandName={brandName} />
-      </head>
-      <body className="flex min-h-screen flex-col font-body antialiased">
-        <AuthProvider>
-          {showHeader && <Header />}
-          {children}
-        </AuthProvider>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </body>
+        <head>
+            {platformSettings?.platformFaviconUrl && (
+                <link rel="icon" href={platformSettings.platformFaviconUrl} />
+            )}
+            <title>{platformSettings?.platformName || 'The Brand Cart'}</title>
+            <ThemeInjector theme={theme} />
+        </head>
+        <body className="flex min-h-screen flex-col font-body antialiased">
+            <AuthProvider>
+            {showHeader && <Header />}
+            {children}
+            </AuthProvider>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
+        </body>
     </html>
   );
 }
