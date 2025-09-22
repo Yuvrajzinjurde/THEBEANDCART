@@ -110,7 +110,7 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
                         {banners.map((banner, index) => (
                             <CarouselItem key={index} className="basis-1/4">
                                 <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-20 h-20 relative rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+                                    <div className="w-20 h-20 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
                                         <Image
                                             src={banner.imageUrl}
                                             alt={banner.categoryName}
