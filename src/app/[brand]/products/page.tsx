@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, useCallback } from 'react';
@@ -112,9 +111,9 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-4">
+                <CarouselContent className="-ml-2 sm:-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
@@ -384,7 +383,7 @@ export default function ProductsPage() {
                 {loading || isPending ? (
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6">
                         {allProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -77,9 +76,9 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-4">
+                <CarouselContent className="-ml-2 sm:-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
@@ -104,11 +103,11 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
              <div className="container px-4 sm:px-6">
                 <h2 className="text-lg font-semibold tracking-tight mb-4">Shop by Category</h2>
                 <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                    <CarouselContent>
+                    <CarouselContent className="-ml-4">
                         {banners.map((banner, index) => (
                              <CarouselItem key={index} className="basis-1/3 pl-4">
                                 <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-20 h-20 relative overflow-hidden border-2 border-transparent group-hover:border-primary transition-all rounded-full">
+                                    <div className="w-24 h-20 relative overflow-hidden border-2 border-transparent group-hover:border-primary transition-all rounded-[2rem]">
                                         <Image
                                             src={banner.imageUrl}
                                             alt={banner.categoryName}
@@ -251,7 +250,6 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
   useEffect(() => {
     if (brand?.reviews && brand.reviews.length > 0) {
-      // This will only run on the client, after initial hydration
       const shuffled = [...brand.reviews].sort(() => Math.random() - 0.5);
       setShuffledReviews(shuffled);
     }
@@ -364,7 +362,6 @@ export default function BrandHomePage() {
         setLoading(true);
         setError(null);
         try {
-            // Fetch brand data first
             const brandResponse = await fetch(`/api/brands/${brandName}`);
             if (!brandResponse.ok) {
               const errorData = await brandResponse.json();
@@ -373,7 +370,6 @@ export default function BrandHomePage() {
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
 
-            // Then fetch products for that brand
             const productResponse = await fetch(`/api/products?storefront=${brandName}`);
             if(!productResponse.ok) {
                 const errorData = await productResponse.json();
@@ -383,12 +379,10 @@ export default function BrandHomePage() {
             const fetchedProducts: IProduct[] = productData.products;
             setAllProducts(fetchedProducts);
             
-            // --- Sort products for different sections ---
             const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
 
-            // 1. Trending Products (by popularity score)
             const calculatePopularity = (p: IProduct) => {
                 const views = p.views || 0;
                 const clicks = p.clicks || 0;
@@ -398,16 +392,12 @@ export default function BrandHomePage() {
             const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
             setTrendingProducts(sortedByPopularity.slice(0, 12));
 
-            // 2. Top Rated Products (by highest rating)
             const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
             setTopRatedProducts(sortedByRating.slice(0, 12));
             
-            // 3. Newest Arrivals (by creation date)
             const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
             setNewestProducts(sortedByDate.slice(0, 12));
 
-
-            // 4. Group products by category for main sections
             const grouped = fetchedProducts.reduce((acc: GroupedProducts, product: IProduct) => {
                 const category = product.category;
                 if (!acc[category]) {

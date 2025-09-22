@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star, Info } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info, ArrowLeft, ArrowRight } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,9 @@ import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { motion } from "framer-motion";
+import Autoplay from "embla-carousel-autoplay";
 
 
 interface BrandProductCardProps {
@@ -31,23 +33,18 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const router = useRouter();
   const { user, token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
+  const [api, setApi] = useState<CarouselApi>();
 
-  const [api, setApi] = useState<CarouselApi>()
-  const [isHovered, setIsHovered] = useState(false);
+  const autoplay = useRef(
+    Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: true })
+  );
 
   useEffect(() => {
-    if (!api || !isHovered) return;
-
-    const interval = setInterval(() => {
-        if (api.canScrollNext()) {
-            api.scrollNext();
-        } else {
-            api.scrollTo(0);
-        }
-    }, 1500); // Change image every 1.5 seconds
-
-    return () => clearInterval(interval);
-  }, [api, isHovered]);
+    if (api) {
+        autoplay.current.play();
+    }
+  }, [api]);
+  
 
   const isWishlisted = useMemo(() => {
     if (!wishlist || !wishlist.products) return false;
@@ -107,7 +104,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    // Track the click - fire and forget
     fetch(`/api/products/${product._id}/track`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -130,14 +126,16 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       href={`/products/${product._id}?storefront=${product.storefront}`} 
       onClick={handleCardClick} 
       className={cn("group block w-full", className)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-lg flex flex-row sm:flex-col h-full">
-        {/* -- Image section -- */}
-        <div className="w-1/3 sm:w-full flex-shrink-0">
+      <motion.div 
+        whileHover={{ y: -5 }}
+        transition={{ duration: 0.2 }}
+        className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-row sm:flex-col h-full"
+      >
+        <div className="w-2/5 sm:w-full flex-shrink-0">
             <Carousel
                 setApi={setApi}
+                plugins={[autoplay.current]}
                 opts={{ loop: product.images.length > 1 }}
                 className="w-full h-full"
             >
@@ -149,16 +147,17 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                                 src={img}
                                 alt={`${product.name} image ${index + 1}`}
                                 fill
-                                className="object-cover transition-transform duration-300 sm:group-hover:scale-105"
+                                className="object-cover transition-transform duration-300"
                             />
                         </div>
                     </CarouselItem>
                 ))}
                 </CarouselContent>
+                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Carousel>
         </div>
 
-        {/* -- Action Buttons -- */}
         <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Button
             size="icon"
@@ -183,20 +182,18 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
           </Button>
         </div>
 
-        {/* -- Content section -- */}
-        <div className="p-2.5 flex flex-col flex-grow w-2/3 sm:w-full">
+        <div className="p-3 flex flex-col flex-grow w-3/5 sm:w-full">
           <div className="flex-grow">
             <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-            <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2 min-h-[2.5rem] mt-0.5">{product.name}</h3>
-            
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-                <span>{rating.toFixed(1)}</span>
-            </div>
+            <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2 mt-0.5">{product.name}</h3>
           </div>
           
           <div className="flex flex-col mt-auto pt-1">
-              <div className="flex items-baseline gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+                <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
+            </div>
+              <div className="flex items-baseline gap-2 flex-wrap mt-2">
                   <p className="text-base font-bold text-foreground">
                       ₹{sellingPrice.toLocaleString('en-IN')}
                   </p>
@@ -213,7 +210,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                           <span className="text-xs font-semibold text-green-600">
                               {discountPercentage}% off
                           </span>
-                          <TooltipProvider>
+                           <TooltipProvider>
                               <Tooltip>
                                   <TooltipTrigger asChild>
                                       <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
@@ -245,8 +242,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
               </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 }
-

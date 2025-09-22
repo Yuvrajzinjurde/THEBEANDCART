@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
@@ -54,7 +53,7 @@ const ProductPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
         return (
-            <div className="container pt-12 px-10 text-center">
+            <div className="container pt-12 px-4 sm:px-6 lg:px-8 text-center">
                 <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
                 <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
                     {[...Array(6)].map((_, i) => (
@@ -76,19 +75,19 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
 
     if (!products || products.length === 0) return null;
     return (
-        <section className="container pt-12 px-10">
+        <section className="container pt-12 px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
             <Separator className="my-4" />
             <Carousel
                 opts={{
                     align: "start",
-                    loop: products.length > 6,
+                    loop: products.length > 2,
                 }}
                 className="w-full"
             >
-                <CarouselContent>
+                <CarouselContent className="-ml-2 sm:-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -125,7 +124,7 @@ const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container py-8 px-5">
+        <div className="container py-8 px-4 sm:px-6 lg:px-8">
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
@@ -180,7 +179,6 @@ export default function ProductPage() {
     async function fetchProductAndVariants() {
       try {
         setLoading(true);
-        // Fetch main product data and review stats in parallel
         const [productResponse, reviewStatsResponse, reviewsResponse] = await Promise.all([
             fetch(`/api/products/${id}`),
             fetch(`/api/reviews/${id}/stats`),
@@ -193,7 +191,7 @@ export default function ProductPage() {
         const data = await productResponse.json();
         const mainProduct: IProduct = data.product;
         setProduct(mainProduct);
-        addProduct(mainProduct); // Add to recently viewed
+        addProduct(mainProduct); 
 
         if(reviewStatsResponse.ok) {
             const stats = await reviewStatsResponse.json();
@@ -205,7 +203,6 @@ export default function ProductPage() {
             setReviews(reviewsData.reviews);
         }
 
-        // Fetch brand data and coupons in parallel
         if (mainProduct.storefront) {
           const [brandResponse, couponResponse] = await Promise.all([
             fetch(`/api/brands/${mainProduct.storefront}`),
@@ -222,7 +219,6 @@ export default function ProductPage() {
           }
         }
 
-        // If the product has a styleId, fetch its variants
         if (mainProduct.styleId) {
           const variantsResponse = await fetch(`/api/products/variants/${mainProduct.styleId}`);
           if (variantsResponse.ok) {
@@ -231,7 +227,6 @@ export default function ProductPage() {
           }
         }
         
-        // Fetch similar products
         if (mainProduct.keywords && mainProduct.keywords.length > 0) {
             setLoadingSimilar(true);
             const keywordsQuery = mainProduct.keywords.join(',');
@@ -246,7 +241,6 @@ export default function ProductPage() {
             setLoadingSimilar(false);
         }
 
-        // Track the view - fire and forget
         fetch(`/api/products/${id}/track`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -280,7 +274,7 @@ export default function ProductPage() {
 
   return (
     <>
-      <main className="container py-8 px-10">
+      <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <ProductDetails 
           product={product} 
           variants={variants.length > 0 ? variants : [product]} 

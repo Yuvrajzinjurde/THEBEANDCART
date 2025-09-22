@@ -197,7 +197,7 @@ function SearchResults() {
 
   if (error) {
       return (
-          <main className="container flex min-h-screen flex-col items-center justify-center px-10">
+          <main className="container flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
               <h1 className="text-2xl font-bold">Error</h1>
               <p className="text-muted-foreground">{error}</p>
           </main>
@@ -206,7 +206,7 @@ function SearchResults() {
 
   return (
     <>
-    <main className="container py-8 px-10">
+    <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>
@@ -280,7 +280,7 @@ function SearchResults() {
                     <ProductGridSkeleton />
                 ) : products.length > 0 ? (
                     <>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 pt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6">
                         {products.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
