@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -85,7 +86,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
             >
                 <CarouselContent className="-ml-2">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 basis-[45%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
