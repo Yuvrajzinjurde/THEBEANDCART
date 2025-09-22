@@ -8,6 +8,7 @@ import Header from '@/components/header';
 import { headers } from 'next/headers';
 import { getThemeForRequest } from '@/lib/theme';
 import type { IPlatformSettings } from '@/models/platform.model';
+import { cn } from '@/lib/utils';
 
 function ThemeInjector({ theme }: { theme: any }) {
     if (!theme) return null;
@@ -41,7 +42,7 @@ export default async function RootLayout({
   const showHeader = !isAdminRoute && !isAuthRoute;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="no-scrollbar">
         <head>
             {platformSettings?.platformFaviconUrl && (
                 <link rel="icon" href={platformSettings.platformFaviconUrl} />
@@ -49,7 +50,7 @@ export default async function RootLayout({
             <title>{platformSettings?.platformName || 'The Brand Cart'}</title>
             <ThemeInjector theme={theme} />
         </head>
-        <body className="flex min-h-screen flex-col font-body antialiased">
+        <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
             {showHeader && <Header />}
             {children}

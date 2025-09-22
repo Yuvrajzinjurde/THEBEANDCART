@@ -97,15 +97,6 @@
 
 /* Custom Scrollbar Styles */
 @layer utilities {
-    /* For Webkit-based browsers (Chrome, Safari, Edge) */
-    body::-webkit-scrollbar {
-      display: none; /* Hide scrollbar for the whole page */
-    }
-    body {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
-    
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
