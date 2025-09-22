@@ -46,7 +46,6 @@ export default function Header() {
   const { settings } = usePlatformSettingsStore();
 
   const [brandName, setBrandName] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
@@ -59,12 +58,11 @@ export default function Header() {
   const effectiveBrandName = brandName || 'reeva';
   
   useEffect(() => {
-    setIsClient(true);
     setHasMounted(true);
   }, []);
-
+  
   const showSecondaryNav = useMemo(() => {
-    if (!isClient) return false;
+    if (!hasMounted) return false;
 
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
@@ -77,11 +75,11 @@ export default function Header() {
     }
     
     return pathname === `/${determinedBrand}/home`;
-  }, [isClient, pathname, params, searchParams]);
+  }, [hasMounted, pathname, params, searchParams]);
 
   
   useEffect(() => {
-     if (!isClient) return;
+    if (!hasMounted) return;
 
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
@@ -93,7 +91,7 @@ export default function Header() {
       determinedBrand = pathBrand || queryBrand || 'reeva';
     }
     setBrandName(determinedBrand);
-  }, [isClient, pathname, params, searchParams]);
+  }, [hasMounted, pathname, params, searchParams]);
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
@@ -166,10 +164,10 @@ export default function Header() {
         setAllProducts([]);
       }
     }
-    if (isClient) {
+    if (hasMounted) {
         fetchBrandData();
     }
-  }, [brandName, isClient]);
+  }, [brandName, hasMounted]);
   
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -219,8 +217,8 @@ export default function Header() {
   }, []);
 
   
-  const currentDisplayName = isClient && brand && brandName ? brand.displayName : settings.platformName;
-  const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
+  const currentDisplayName = hasMounted && brand && brandName ? brand.displayName : settings.platformName;
+  const homeLink = hasMounted && brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
@@ -249,9 +247,9 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-          {isClient && brandName && brand?.logoUrl ? (
+          {hasMounted && brandName && brand?.logoUrl ? (
             <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-          ) : isClient && settings.platformLogoUrl ? (
+          ) : hasMounted && settings.platformLogoUrl ? (
              <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
             <Logo className="h-8 w-8" />
@@ -329,9 +327,9 @@ export default function Header() {
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                                {isClient && brandName && brand?.logoUrl ? (
+                                {hasMounted && brandName && brand?.logoUrl ? (
                                     <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-                                ) : isClient && settings.platformLogoUrl ? (
+                                ) : hasMounted && settings.platformLogoUrl ? (
                                     <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                                 ) : (
                                     <Logo className="h-8 w-8" />
@@ -413,3 +411,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
