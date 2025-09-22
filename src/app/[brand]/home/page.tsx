@@ -34,7 +34,7 @@ type GroupedProducts = {
 };
 
 const ProductCarouselSkeleton = () => (
-    <section className="container pt-12 px-10 text-center">
+    <section className="container pt-12 px-4 sm:px-6 lg:px-8 text-center">
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
         <Separator className="mb-6" />
         <div className="mx-auto text-center">
@@ -58,26 +58,8 @@ const ProductCarouselSkeleton = () => (
 const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
     if (!products || products.length === 0) return null;
     
-    const [api, setApi] = useState<CarouselApi>()
-    const [isHovered, setIsHovered] = useState(false);
-
-    useEffect(() => {
-        if (!api || !isHovered) return;
-
-        const interval = setInterval(() => {
-            if (api.canScrollNext()) {
-                api.scrollNext();
-            } else {
-                api.scrollTo(0);
-            }
-        }, 2000);
-
-        return () => clearInterval(interval);
-    }, [api, isHovered]);
-
-
     return (
-        <section className="container pt-12 px-10">
+        <section className="container pt-12 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
                  <Button variant="link" asChild>
@@ -89,18 +71,16 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
             </div>
             <Separator className="mb-6" />
             <Carousel
-                setApi={setApi}
                 opts={{
                     align: "start",
-                    loop: true,
+                    loop: products.length > 2,
+                    slidesToScroll: 2,
                 }}
                 className="w-full"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
             >
-                <CarouselContent>
+                <CarouselContent className="-ml-2">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -209,7 +189,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     if (!brand?.promoBanner) return null;
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
-        <section className="container py-12 px-10">
+        <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
                  <Image
                     src={imageUrl}
@@ -298,7 +278,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container py-8 px-5">
+        <div className="container py-8 px-4 sm:px-6 lg:px-8">
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
@@ -428,7 +408,7 @@ export default function BrandHomePage() {
   
   if (error || !brand) {
       return (
-          <main className="container flex min-h-screen flex-col items-center justify-center px-10">
+          <main className="container flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">{error || 'The requested brand does not exist.'}</p>
           </main>
@@ -464,7 +444,7 @@ export default function BrandHomePage() {
                                 priority={index === 0}
                             />
                             <div className="absolute inset-0 bg-black/50" />
-                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-10">
+                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-4 sm:px-6 lg:px-8">
                                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
                                     {banner.title}
                                 </h1>
@@ -487,7 +467,7 @@ export default function BrandHomePage() {
       
       <CategoryBannerGrid brand={brand} />
 
-      <div className="container pt-8 px-10">
+      <div className="container pt-8 px-4 sm:px-6 lg:px-8">
         {productSections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {productSections.map(([category, items]) => (

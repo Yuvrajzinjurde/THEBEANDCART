@@ -130,7 +130,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
 
 const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
     <footer className="w-full border-t bg-background mt-16">
-        <div className="container py-8 px-5">
+        <div className="container py-8 px-4 sm:px-6 lg:px-8">
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
@@ -307,7 +307,7 @@ export default function ProductsPage() {
 
   return (
     <>
-    <main className="container py-8 px-10">
+    <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>
