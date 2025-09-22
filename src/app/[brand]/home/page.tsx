@@ -77,9 +77,9 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2">
+                <CarouselContent className="-ml-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
+                        <CarouselItem key={product._id as string}>
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -106,11 +106,11 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
              <div className="container px-4 sm:px-6">
                 <h2 className="text-lg font-semibold tracking-tight mb-4">Shop by Category</h2>
                 <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                    <CarouselContent className="-ml-2">
+                    <CarouselContent>
                         {banners.map((banner, index) => (
                             <CarouselItem key={index} className="basis-1/4">
                                 <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-20 h-20 relative rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+                                    <div className="w-20 h-20 relative rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
                                         <Image
                                             src={banner.imageUrl}
                                             alt={banner.categoryName}
@@ -543,4 +543,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
