@@ -228,7 +228,7 @@ function BusinessDashboardPage() {
                 {format(currentRange.from, 'do MMM yy')} - {format(currentRange.to, 'do MMM yy')}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-1 p-1 bg-muted rounded-md">
+            <div className="flex items-center gap-1 p-1 bg-muted rounded-md overflow-x-auto">
                 <Button variant={period === 'yesterday' ? 'default' : 'ghost'} size="sm" onClick={() => setPeriod('yesterday')}>Yesterday</Button>
                 <Button variant={period === '7d' ? 'default' : 'ghost'} size="sm" onClick={() => setPeriod('7d')}>Last 7 Days</Button>
                 <Button variant={period === '30d' ? 'default' : 'ghost'} size="sm" onClick={() => setPeriod('30d')}>Last 30 Days</Button>
@@ -295,7 +295,7 @@ function BusinessDashboardPage() {
             <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                 <div>
                     <CardTitle>Product Performance</CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
                         <span>{format(currentRange.from, 'do MMM yy')} - {format(currentRange.to, 'do MMM yy')}</span>
                         <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -311,14 +311,16 @@ function BusinessDashboardPage() {
         </CardHeader>
         <CardContent>
             <Tabs defaultValue="all">
-                <TabsList>
-                    <TabsTrigger value="all">All ({allProducts.length})</TabsTrigger>
-                    <TabsTrigger value="low-orders">Low Orders (0)</TabsTrigger>
-                    <TabsTrigger value="low-views">Low Views (0)</TabsTrigger>
-                    <TabsTrigger value="low-conversion">Low Conversion Rate (0)</TabsTrigger>
-                    <TabsTrigger value="high-returns">High Returns (0)</TabsTrigger>
-                    <TabsTrigger value="low-ratings">Low Ratings (0)</TabsTrigger>
-                </TabsList>
+                 <div className="overflow-x-auto pb-2">
+                    <TabsList>
+                        <TabsTrigger value="all">All ({allProducts.length})</TabsTrigger>
+                        <TabsTrigger value="low-orders">Low Orders (0)</TabsTrigger>
+                        <TabsTrigger value="low-views">Low Views (0)</TabsTrigger>
+                        <TabsTrigger value="low-conversion">Low Conversion Rate (0)</TabsTrigger>
+                        <TabsTrigger value="high-returns">High Returns (0)</TabsTrigger>
+                        <TabsTrigger value="low-ratings">Low Ratings (0)</TabsTrigger>
+                    </TabsList>
+                </div>
                 <TabsContent value="all" className="mt-4">
                     <div className="overflow-x-auto">
                         <Table>

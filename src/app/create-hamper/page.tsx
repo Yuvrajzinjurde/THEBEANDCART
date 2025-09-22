@@ -696,7 +696,7 @@ export default function CreateHamperPage() {
                             <Home className="h-4 w-4" />
                             <span className="sr-only">Back to Home</span>
                         </Button>
-                        <div className="absolute left-1/2 -translate-x-1/2">
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm sm:max-w-md md:max-w-lg px-4">
                             <HamperProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
                         </div>
                     </div>
@@ -749,12 +749,12 @@ export default function CreateHamperPage() {
                                             Review & Checkout
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="max-w-2xl">
+                                    <AlertDialogContent className="max-w-lg w-full">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Your Hamper Summary</AlertDialogTitle>
                                             <AlertDialogDescription>Review your creation before adding it to your cart.</AlertDialogDescription>
                                         </AlertDialogHeader>
-                                        <div className="max-h-[60vh] overflow-y-auto p-1 pr-4">
+                                        <ScrollArea className="max-h-[60vh] pr-4">
                                             <div className="space-y-4">
                                                 <p><span className="font-semibold">Occasion:</span> {hamperState.occasion}</p>
                                                 
@@ -801,7 +801,7 @@ export default function CreateHamperPage() {
                                                 )}
 
                                             </div>
-                                        </div>
+                                        </ScrollArea>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Keep Editing</AlertDialogCancel>
                                             <AlertDialogAction onClick={handleCheckout} disabled={isCheckingOut}>
