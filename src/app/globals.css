@@ -98,21 +98,14 @@
 /* Custom Scrollbar Styles */
 @layer utilities {
     /* For Webkit-based browsers (Chrome, Safari, Edge) */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+    body::-webkit-scrollbar {
+      display: none; /* Hide scrollbar for the whole page */
     }
-    ::-webkit-scrollbar-track {
-        background: hsl(var(--background));
+    body {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
     }
-    ::-webkit-scrollbar-thumb {
-        background: hsl(var(--primary) / 0.5);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: hsl(var(--primary) / 0.8);
-    }
-
+    
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
