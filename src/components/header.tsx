@@ -375,7 +375,7 @@ export default function Header() {
         </div>
       </div>
       
-       <div className={cn("w-full overflow-x-auto no-scrollbar", !showSecondaryNav && "hidden")}>
+       <div className={cn("w-full overflow-x-auto no-scrollbar hidden sm:block", !showSecondaryNav && "hidden")}>
           <Separator />
           <div className="container px-4 sm:px-6">
             <nav className="flex h-12 items-center gap-6">
