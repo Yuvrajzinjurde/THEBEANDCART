@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/form";
 import { Logo } from "@/components/logo";
 import { Loader } from "../ui/loader";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import Image from "next/image";
 
 interface DecodedToken {
   roles: string[];
@@ -41,6 +43,7 @@ export function LoginForm() {
   const router = useRouter();
   const params = useParams();
   const brand = params.brand as string || 'reeva';
+  const { settings } = usePlatformSettingsStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -93,7 +96,11 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
-        <Logo />
+        {settings.platformLogoUrl ? (
+            <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+        ) : (
+            <Logo />
+        )}
         <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
         <CardDescription>
           Enter your credentials to access your account.
