@@ -43,7 +43,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
     const settings = await getPlatformSettings();
     let themeName = settings?.platformThemeName || 'Blue';
 
-    if (brandName && brandName !== 'admin') {
+    if (brandName && brandName !== 'admin' && !isGlobalRoute) {
         try {
             const brand = await getBrand(brandName);
             if (brand) {
@@ -54,7 +54,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
         }
     }
 
-    const theme = themeColors.find(t => t.name === themeName) || themeColors[0];
+    const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue') || themeColors[0];
     
     return { theme, settings };
 }
