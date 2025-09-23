@@ -122,7 +122,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <Link href={buttonLink || '#'}>
-                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[3/1]">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1] lg:aspect-[6/1]">
                      <Image
                         src={imageUrl}
                         alt="Promotional Banner"
@@ -214,12 +214,12 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
             >
                 <CarouselContent>
                     {brands.map((brand) => (
-                        <CarouselItem key={brand.permanentName} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={brand.permanentName} className="basis-auto sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                            <BrandLogo brand={brand} />
                         </CarouselItem>
                     ))}
                     {placeholders.map((_, index) => (
-                        <CarouselItem key={`placeholder-${index}`} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={`placeholder-${index}`} className="basis-auto sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                             <LockedBrandLogo />
                         </CarouselItem>
                     ))}

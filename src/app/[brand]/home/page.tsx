@@ -193,14 +193,14 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
 
 const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandName: string }) => {
     if (!brand?.promoBanner) return null;
-    const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
+    const { imageUrl, imageHint, buttonLink } = brand.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <Link href={buttonLink || '#'}>
-                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[3/1]">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1] lg:aspect-[6/1]">
                      <Image
                         src={imageUrl}
-                        alt={title}
+                        alt="Promotional Banner"
                         fill
                         className="object-cover"
                         data-ai-hint={imageHint}
