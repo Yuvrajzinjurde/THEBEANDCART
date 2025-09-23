@@ -33,7 +33,7 @@ const FormSchema = z.object({
       imageUrl: z.string(),
       imageHint: z.string(),
   })),
-  featuredCategories: z.array(z.string()),
+  featuredCategories: z.array(z.string()).optional(),
   promoBanner: z.object({
       title: z.string(),
       description: z.string(),

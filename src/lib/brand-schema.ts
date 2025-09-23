@@ -86,7 +86,7 @@ export const PlatformSettingsValidationSchema = z.object({
   hamperFeatureEnabled: z.boolean().optional(),
   promoBannerEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
-  featuredCategories: z.array(z.object({ name: z.string() })).optional(),
+  featuredCategories: z.array(z.string()).optional(),
   promoBanner: promoBannerSchema.optional(),
 });
 

@@ -85,7 +85,7 @@ export default function PlatformSettingsPage() {
                 const categoriesWithOptions = Object.entries(categoryCounts)
                     .filter(([, count]) => count > 0)
                     .map(([name, count]) => ({
-                        value: name.toLowerCase(),
+                        value: name,
                         label: `${name} (${count})`,
                         count: count,
                     }));
@@ -107,7 +107,7 @@ export default function PlatformSettingsPage() {
                         platformFaviconUrl: settingsData.platformFaviconUrl || '',
                         theme: settingsData.theme || themeColors.find(t => t.name === 'Blue'),
                         socials: { ...defaultSocials, ...(settingsData.socials || {}) },
-                        featuredCategories: (settingsData.featuredCategories || []).map((cat: string) => ({ name: cat })),
+                        featuredCategories: settingsData.featuredCategories || [],
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
                         promoBanner: { ...defaultPromoBanner, ...(settingsData.promoBanner || {}) },
                     };
@@ -161,16 +161,12 @@ export default function PlatformSettingsPage() {
   
   async function onSubmit(data: PlatformSettingsValues) {
     setIsSubmitting(true);
-    const dataToSubmit = {
-        ...data,
-        featuredCategories: data.featuredCategories?.map(cat => cat.name),
-    };
-
+    
     try {
       const response = await fetch('/api/platform', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSubmit),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -183,17 +179,7 @@ export default function PlatformSettingsPage() {
       
       await fetchSettings();
       
-      const newDefaults = {
-          ...result,
-          featuredCategories: result.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
-          socials: {
-              twitter: result.socials?.twitter || '',
-              facebook: result.socials?.facebook || '',
-              instagram: result.socials?.instagram || '',
-              linkedin: result.socials?.linkedin || '',
-          },
-      };
-      form.reset(newDefaults, { keepDirty: false });
+      form.reset(result, { keepDirty: false });
 
     } catch (error: any) {
       console.error("Submission Error:", error);
@@ -494,7 +480,7 @@ export default function PlatformSettingsPage() {
                 <FormField
                     control={form.control}
                     name="featuredCategories"
-                    render={() => (
+                    render={({ field }) => (
                         <FormItem>
                             <FormLabel>Categories</FormLabel>
                             <FormControl>
@@ -503,16 +489,15 @@ export default function PlatformSettingsPage() {
                                         options={availableCategories}
                                         placeholder="Select a category..."
                                         onSelect={(selectedValue) => {
-                                            const categoryName = availableCategories.find(c => c.value === selectedValue)?.label.split(' (')[0];
-                                            if (categoryName && !categoryFields.some(field => field.name === categoryName)) {
-                                                appendCategory({ name: categoryName });
+                                            if (selectedValue && !field.value?.includes(selectedValue)) {
+                                                appendCategory(selectedValue);
                                             }
                                         }}
                                     />
                                     <div className="flex flex-wrap gap-2 mt-4">
                                         {categoryFields.map((field, index) => (
                                             <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
-                                                {form.getValues('featuredCategories')?.[index].name}
+                                                {form.getValues('featuredCategories')?.[index]}
                                                 <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
                                                     <X className="h-3 w-3" />
                                                 </button>
