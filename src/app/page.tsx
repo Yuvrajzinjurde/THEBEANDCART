@@ -209,18 +209,17 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                 opts={{
                     align: "center",
                     loop: allItems.length > 5,
-                    dragFree: true,
                 }}
                 className="w-full"
             >
                 <CarouselContent>
                     {brands.map((brand) => (
-                        <CarouselItem key={brand.permanentName} className="basis-auto">
+                        <CarouselItem key={brand.permanentName} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                            <BrandLogo brand={brand} />
                         </CarouselItem>
                     ))}
                     {placeholders.map((_, index) => (
-                        <CarouselItem key={`placeholder-${index}`} className="basis-auto">
+                        <CarouselItem key={`placeholder-${index}`} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                             <LockedBrandLogo />
                         </CarouselItem>
                     ))}
