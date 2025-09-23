@@ -12,7 +12,7 @@ import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift, Lock } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -165,15 +165,14 @@ const HamperSection = () => {
 
 
 const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
-    const autoplay = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
-
-    if (!brands || brands.length === 0) return null;
+    const TOTAL_SLOTS = 5;
+    const placeholders = Array.from({ length: Math.max(0, TOTAL_SLOTS - brands.length) });
 
     const BrandLogo = ({ brand }: { brand: IBrand }) => {
         const theme = themeColors.find(t => t.name === brand.themeName);
         const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
         return (
-            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center">
+            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center gap-3">
                 <div 
                     className="w-32 h-32 md:w-36 md:h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
                     style={{ 
@@ -188,34 +187,30 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                         className="object-cover"
                     />
                 </div>
-                 <p className="mt-3 font-semibold text-center">{brand.displayName}</p>
+                 <p className="font-semibold text-center">{brand.displayName}</p>
             </Link>
         );
     };
 
+    const LockedBrandLogo = () => (
+        <div className="flex flex-col items-center gap-3 p-4">
+            <div className="w-32 h-32 md:w-36 md:h-36 relative rounded-full border-2 border-dashed border-muted-foreground/30 bg-muted/50 flex items-center justify-center">
+                <Lock className="h-10 w-10 text-muted-foreground/50" />
+            </div>
+            <p className="font-medium text-center text-muted-foreground">Coming Soon</p>
+        </div>
+    );
+
     return (
         <section className="w-full py-12">
             <div className="container">
-                 <div className="max-w-5xl mx-auto">
-                    <Carousel
-                        plugins={[autoplay.current]}
-                        opts={{ align: "center", loop: brands.length > 5 }}
-                        className="w-full"
-                    >
-                        <CarouselContent>
-                            {brands.map((brand) => (
-                                <CarouselItem key={brand.permanentName} className="basis-auto sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                                    <BrandLogo brand={brand} />
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                         {brands.length > 5 && (
-                            <>
-                                <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                                <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                            </>
-                        )}
-                    </Carousel>
+                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+                    {brands.map((brand) => (
+                        <BrandLogo key={brand.permanentName} brand={brand} />
+                    ))}
+                    {placeholders.map((_, index) => (
+                        <LockedBrandLogo key={`placeholder-${index}`} />
+                    ))}
                 </div>
             </div>
         </section>
