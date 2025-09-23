@@ -46,6 +46,7 @@ import type { IBrand } from "@/models/brand.model";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Logo } from "../logo";
 
 const mainNavItem = { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" };
 
@@ -205,7 +206,7 @@ export function MobileAdminHeader() {
     return (
         <header className="md:hidden flex h-16 items-center justify-between border-b bg-background px-4 shrink-0">
              <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-                <Store className="h-6 w-6 text-primary" />
+                <Logo className="h-6 w-6 text-primary" />
                 <span className="capitalize">{selectedBrand}</span>
             </Link>
             <Sheet open={open} onOpenChange={setOpen}>
@@ -219,7 +220,7 @@ export function MobileAdminHeader() {
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-                                <Store className="h-6 w-6 text-primary" />
+                                <Logo className="h-6 w-6 text-primary" />
                                 <span>Admin Panel</span>
                             </Link>
                         </SheetTitle>
@@ -260,7 +261,7 @@ export function AdminSidebar() {
                 <div className="flex h-full max-h-screen flex-col">
                     <div className={cn("flex items-center h-16 border-b px-4 shrink-0", isCollapsed ? "justify-center" : "justify-between")}>
                         <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                            <Store className="h-6 w-6 text-primary" />
+                            <Logo className="h-6 w-6 text-primary" />
                             <span>Admin Panel</span>
                         </Link>
                         <Button variant="ghost" size="icon" onClick={toggleSidebar}>
@@ -318,3 +319,4 @@ export function AdminSidebar() {
         </aside>
     );
 }
+
