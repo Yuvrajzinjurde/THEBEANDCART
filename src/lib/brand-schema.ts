@@ -80,7 +80,7 @@ export const PlatformSettingsValidationSchema = z.object({
   platformName: z.string().min(1, "Platform name is required."),
   platformLogoUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformFaviconUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
-  theme: themeSchema,
+  platformThemeName: z.string().min(1, "A theme must be selected."),
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),

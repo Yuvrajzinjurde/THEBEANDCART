@@ -27,7 +27,7 @@ const staticDefaultValues: PlatformSettingsValues = {
   platformName: 'The Brand Cart',
   platformLogoUrl: '',
   platformFaviconUrl: '',
-  theme: themeColors.find(t => t.name === 'Blue') as Theme,
+  platformThemeName: 'Blue',
   socials: { twitter: '', facebook: '', instagram: '', linkedin: '' },
   aiEnabled: true,
   hamperFeatureEnabled: true,
@@ -102,7 +102,7 @@ export default function PlatformSettingsPage() {
                         platformName: settingsData.platformName || '',
                         platformLogoUrl: settingsData.platformLogoUrl || '',
                         platformFaviconUrl: settingsData.platformFaviconUrl || '',
-                        theme: settingsData.theme || themeColors.find(t => t.name === 'Blue'),
+                        platformThemeName: settingsData.platformThemeName || 'Blue',
                         socials: { ...defaultSocials, ...(settingsData.socials || {}) },
                         featuredCategories: settingsData.featuredCategories || [],
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
@@ -176,7 +176,7 @@ export default function PlatformSettingsPage() {
       
       await fetchSettings();
       
-      form.reset(result, { keepDirty: false });
+      form.reset(data, { keepDirty: false });
 
     } catch (error: any) {
       console.error("Submission Error:", error);
@@ -276,23 +276,18 @@ export default function PlatformSettingsPage() {
              </div>
              <FormField
                 control={form.control}
-                name="theme"
+                name="platformThemeName"
                 render={({ field }) => (
                     <FormItem className="space-y-3">
                         <FormLabel className="flex items-center gap-2"><Palette/> Platform Theme</FormLabel>
                         <FormControl>
                             <RadioGroup
-                                onValueChange={(value) => {
-                                    const selectedTheme = themeColors.find(t => t.name === value);
-                                    if (selectedTheme) {
-                                        field.onChange(selectedTheme);
-                                    }
-                                }}
-                                value={field.value?.name}
+                                onValueChange={field.onChange}
+                                value={field.value}
                                 className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
                             >
                                 {themeColors.map((theme) => {
-                                    const isSelected = field.value && field.value.name === theme.name;
+                                    const isSelected = field.value === theme.name;
                                     return(
                                         <FormItem key={theme.name}>
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full h-full" data-state={isSelected ? "checked" : "unchecked"}>
@@ -504,8 +499,8 @@ export default function PlatformSettingsPage() {
                                 </Button>
                             </div>
                             <div className="flex flex-wrap gap-2 mt-4">
-                                {categoryFields.map((field, index) => (
-                                    <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
+                                {categoryFields.map((item, index) => (
+                                    <Badge key={item.id} variant="secondary" className="flex items-center gap-1 capitalize">
                                         {form.getValues('featuredCategories')?.[index]}
                                         <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
                                             <X className="h-3 w-3" />

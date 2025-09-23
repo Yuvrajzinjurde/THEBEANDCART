@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import PlatformSettings from '@/models/platform.model';
 import { z } from 'zod';
+import { themeColors } from '@/lib/brand-schema';
 
 const SocialLinksSchema = z.object({
     twitter: z.string().url().optional().or(z.literal('')),
@@ -11,43 +12,36 @@ const SocialLinksSchema = z.object({
     linkedin: z.string().url().optional().or(z.literal('')),
 });
 
-const ThemeSchema = z.object({
-    name: z.string(),
-    primary: z.string(),
-    background: z.string(),
-    accent: z.string(),
+const bannerSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
+  imageHint: z.string().min(1, "Image hint is required"),
 });
+
+const promoBannerSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  imageUrl: z.string(),
+  imageHint: z.string(),
+  buttonText: z.string(),
+  buttonLink: z.string(),
+}).optional();
 
 const FormSchema = z.object({
   platformName: z.string().min(1),
   platformLogoUrl: z.string().url().or(z.literal('')),
   platformFaviconUrl: z.string().url().or(z.literal('')),
-  theme: ThemeSchema,
+  platformThemeName: z.string(),
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
   promoBannerEnabled: z.boolean().optional(),
-  heroBanners: z.array(z.object({
-      title: z.string(),
-      description: z.string(),
-      imageUrl: z.string(),
-      imageHint: z.string(),
-  })),
+  heroBanners: z.array(bannerSchema),
   featuredCategories: z.array(z.string()).optional(),
-  promoBanner: z.object({
-      title: z.string(),
-      description: z.string(),
-      imageUrl: z.string(),
-      imageHint: z.string(),
-      buttonText: z.string(),
-      buttonLink: z.string(),
-  }).optional(),
-  offers: z.array(z.object({
-      title: z.string(),
-      description: z.string(),
-      code: z.string(),
-  })).optional(),
+  promoBanner: promoBannerSchema,
 });
+
 
 // GET the platform settings
 export async function GET() {
@@ -78,10 +72,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
     
+    const { platformThemeName, ...restOfData } = validation.data;
+    const theme = themeColors.find(t => t.name === platformThemeName);
+
+    if (!theme) {
+      return NextResponse.json({ message: 'Invalid theme name' }, { status: 400 });
+    }
+    
+    const dataToSave = {
+      ...restOfData,
+      platformThemeName,
+      theme
+    };
+
     // Use findOneAndUpdate with upsert:true to create if it doesn't exist, or update if it does.
     const settings = await PlatformSettings.findOneAndUpdate(
         {}, // An empty filter will match the first document found or create a new one
-        validation.data,
+        dataToSave,
         { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
     );
 
