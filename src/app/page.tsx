@@ -200,19 +200,34 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
             <p className="font-medium text-center text-muted-foreground">Coming Soon</p>
         </div>
     );
+    
+    const allItems = [...brands, ...placeholders];
 
     return (
         <section className="w-full py-12">
-            <div className="container overflow-x-auto no-scrollbar">
-                <div className="flex flex-nowrap items-center justify-center gap-4 md:gap-8">
+            <Carousel
+                opts={{
+                    align: "center",
+                    loop: allItems.length > 5,
+                    dragFree: true,
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
                     {brands.map((brand) => (
-                        <BrandLogo key={brand.permanentName} brand={brand} />
+                        <CarouselItem key={brand.permanentName} className="basis-auto">
+                           <BrandLogo brand={brand} />
+                        </CarouselItem>
                     ))}
                     {placeholders.map((_, index) => (
-                        <LockedBrandLogo key={`placeholder-${index}`} />
+                        <CarouselItem key={`placeholder-${index}`} className="basis-auto">
+                            <LockedBrandLogo />
+                        </CarouselItem>
                     ))}
-                </div>
-            </div>
+                </CarouselContent>
+                 <CarouselPrevious className={cn("absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex", allItems.length <= 5 && "sm:hidden")} />
+                <CarouselNext className={cn("absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex", allItems.length <= 5 && "sm:hidden")} />
+            </Carousel>
         </section>
     );
 };
