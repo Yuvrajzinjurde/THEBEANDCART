@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
@@ -81,13 +82,13 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
             <Carousel
                 opts={{
                     align: "start",
-                    loop: products.length > 2,
+                    loop: products.length > 6,
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2 sm:-ml-4">
+                <CarouselContent>
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -179,6 +180,7 @@ export default function ProductPage() {
     async function fetchProductAndVariants() {
       try {
         setLoading(true);
+        // Fetch main product data and review stats in parallel
         const [productResponse, reviewStatsResponse, reviewsResponse] = await Promise.all([
             fetch(`/api/products/${id}`),
             fetch(`/api/reviews/${id}/stats`),
@@ -191,7 +193,7 @@ export default function ProductPage() {
         const data = await productResponse.json();
         const mainProduct: IProduct = data.product;
         setProduct(mainProduct);
-        addProduct(mainProduct); 
+        addProduct(mainProduct); // Add to recently viewed
 
         if(reviewStatsResponse.ok) {
             const stats = await reviewStatsResponse.json();
@@ -203,6 +205,7 @@ export default function ProductPage() {
             setReviews(reviewsData.reviews);
         }
 
+        // Fetch brand data and coupons in parallel
         if (mainProduct.storefront) {
           const [brandResponse, couponResponse] = await Promise.all([
             fetch(`/api/brands/${mainProduct.storefront}`),
@@ -219,6 +222,7 @@ export default function ProductPage() {
           }
         }
 
+        // If the product has a styleId, fetch its variants
         if (mainProduct.styleId) {
           const variantsResponse = await fetch(`/api/products/variants/${mainProduct.styleId}`);
           if (variantsResponse.ok) {
@@ -227,6 +231,7 @@ export default function ProductPage() {
           }
         }
         
+        // Fetch similar products
         if (mainProduct.keywords && mainProduct.keywords.length > 0) {
             setLoadingSimilar(true);
             const keywordsQuery = mainProduct.keywords.join(',');
@@ -241,6 +246,7 @@ export default function ProductPage() {
             setLoadingSimilar(false);
         }
 
+        // Track the view - fire and forget
         fetch(`/api/products/${id}/track`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
