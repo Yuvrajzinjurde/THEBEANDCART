@@ -39,6 +39,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import useBrandStore from "@/stores/brand-store";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Button } from "../ui/button";
 import { UserNav } from "../user-nav";
 import { Separator } from "../ui/separator";
@@ -201,13 +202,17 @@ const SidebarContent = () => {
 
 export function MobileAdminHeader() {
     const [open, setOpen] = useState(false);
-     const { selectedBrand } = useBrandStore();
+    const { settings } = usePlatformSettingsStore();
 
     return (
         <header className="md:hidden flex h-16 items-center justify-between border-b bg-background px-4 shrink-0">
              <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-                <Logo className="h-6 w-6 text-primary" />
-                <span className="capitalize">{selectedBrand}</span>
+                {settings.platformLogoUrl ? (
+                    <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7" />
+                ) : (
+                    <Logo className="h-6 w-6 text-primary" />
+                )}
+                <span>{settings.platformName || 'Admin Panel'}</span>
             </Link>
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
@@ -220,8 +225,12 @@ export function MobileAdminHeader() {
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-                                <Logo className="h-6 w-6 text-primary" />
-                                <span>Admin Panel</span>
+                                {settings.platformLogoUrl ? (
+                                    <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7" />
+                                ) : (
+                                    <Logo className="h-6 w-6 text-primary" />
+                                )}
+                                <span>{settings.platformName || 'Admin Panel'}</span>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
@@ -235,6 +244,7 @@ export function MobileAdminHeader() {
 
 export function AdminSidebar() {
     const pathname = usePathname();
+    const { settings } = usePlatformSettingsStore();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
@@ -261,8 +271,12 @@ export function AdminSidebar() {
                 <div className="flex h-full max-h-screen flex-col">
                     <div className={cn("flex items-center h-16 border-b px-4 shrink-0", isCollapsed ? "justify-center" : "justify-between")}>
                         <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                            <Logo className="h-6 w-6 text-primary" />
-                            <span>Admin Panel</span>
+                            {settings.platformLogoUrl ? (
+                                <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7" />
+                            ) : (
+                                <Logo className="h-6 w-6 text-primary" />
+                            )}
+                            <span>{settings.platformName || 'Admin Panel'}</span>
                         </Link>
                         <Button variant="ghost" size="icon" onClick={toggleSidebar}>
                             <PanelLeft className="h-5 w-5" />
@@ -319,4 +333,3 @@ export function AdminSidebar() {
         </aside>
     );
 }
-
