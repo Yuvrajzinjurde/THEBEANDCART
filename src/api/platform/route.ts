@@ -12,6 +12,7 @@ const SocialLinksSchema = z.object({
 });
 
 const ThemeSchema = z.object({
+    name: z.string(),
     primary: z.string(),
     background: z.string(),
     accent: z.string(),

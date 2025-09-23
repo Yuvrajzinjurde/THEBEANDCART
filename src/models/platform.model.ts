@@ -25,6 +25,7 @@ const SocialLinksSchema: Schema = new Schema({
 }, { _id: false });
 
 const ThemeSchema: Schema = new Schema({
+    name: { type: String, required: true },
     primary: { type: String, required: true },
     background: { type: String, required: true },
     accent: { type: String, required: true },
@@ -36,6 +37,7 @@ export interface IPlatformSettings extends Document {
   platformLogoUrl: string;
   platformFaviconUrl: string;
   theme: {
+    name: string;
     primary: string;
     background: string;
     accent: string;
@@ -70,7 +72,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   platformName: { type: String, default: 'The Brand Cart' },
   platformLogoUrl: { type: String, default: '' },
   platformFaviconUrl: { type: String, default: '' },
-  theme: { type: ThemeSchema, default: () => ({ primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%'}) },
+  theme: { type: ThemeSchema, default: () => ({ name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%'}) },
   socials: SocialLinksSchema,
   aiEnabled: { type: Boolean, default: true },
   hamperFeatureEnabled: { type: Boolean, default: true },

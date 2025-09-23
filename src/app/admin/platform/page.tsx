@@ -161,8 +161,13 @@ export default function PlatformSettingsPage() {
   
   async function onSubmit(data: PlatformSettingsValues) {
     setIsSubmitting(true);
+    const themeName = themeColors.find(t => t.primary === data.theme.primary)?.name || 'Blue';
     const dataToSubmit = {
         ...data,
+        theme: {
+            ...data.theme,
+            name: themeName,
+        },
         featuredCategories: data.featuredCategories?.map(cat => cat.name),
     };
 
@@ -303,6 +308,7 @@ export default function PlatformSettingsPage() {
                                     const selectedTheme = themeColors.find(t => t.name === value);
                                     if (selectedTheme) {
                                         field.onChange({
+                                            name: selectedTheme.name,
                                             primary: selectedTheme.primary,
                                             background: selectedTheme.background,
                                             accent: selectedTheme.accent,
@@ -312,7 +318,7 @@ export default function PlatformSettingsPage() {
                                 className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
                             >
                                 {themeColors.map((theme) => {
-                                    const isSelected = field.value && field.value.primary === theme.primary && field.value.background === theme.background && field.value.accent === theme.accent;
+                                    const isSelected = field.value && field.value.name === theme.name;
                                     return(
                                         <FormItem key={theme.name}>
                                             <FormLabel htmlFor={`theme-${theme.name}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary cursor-pointer w-full h-full" data-state={isSelected ? "checked" : "unchecked"}>

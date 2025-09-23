@@ -45,6 +45,7 @@ const categoryBannerSchema = z.object({
 });
 
 export const themeSchema = z.object({
+    name: z.string(),
     primary: z.string(),
     background: z.string(),
     accent: z.string(),
@@ -99,7 +100,7 @@ export const CartSettingsSchema = z.object({
 
 export type CartSettingsValues = z.infer<typeof CartSettingsSchema>;
 
-export const themeColors: (Theme & { name: string })[] = [
+export const themeColors: (Theme)[] = [
     { name: 'Jewelry', primary: '45 92% 63%', background: '35 10% 98%', accent: '39 88% 93%' },
     { name: 'Blue', primary: '217.2 91.2% 59.8%', background: '0 0% 100%', accent: '210 40% 96.1%' },
     { name: 'Green', primary: '142.1 76.2% 36.3%', background: '0 0% 100%', accent: '145 63.4% 92.5%' },
