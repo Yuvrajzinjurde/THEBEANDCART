@@ -118,28 +118,20 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
 
 const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }) => {
     if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
-    const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
+    const { title, imageUrl, imageHint, buttonLink } = settings.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                 <Image
-                    src={imageUrl}
-                    alt={title}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={imageHint}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-                <div className="relative z-10 p-8 md:p-16 max-w-2xl text-white flex flex-col items-start h-full justify-center">
-                    <h2 className="text-3xl md:text-5xl font-bold">{title}</h2>
-                    <p className="text-lg text-white/90 mt-4">{description}</p>
-                    <Button asChild size="lg" className="mt-6">
-                        <Link href={buttonLink}>
-                            {buttonText} <ArrowRight className="ml-2" />
-                        </Link>
-                    </Button>
+            <Link href={buttonLink || '#'}>
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[2.5/1]">
+                     <Image
+                        src={imageUrl}
+                        alt={title}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={imageHint}
+                    />
                 </div>
-            </div>
+            </Link>
         </section>
     )
 };
@@ -317,19 +309,18 @@ export default function LandingPage() {
                     <CarouselContent>
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
-                            <div className="relative w-full text-foreground flex items-center justify-center py-8 sm:py-10 md:py-14">
-                                <Image
-                                    src={banner.imageUrl}
-                                    alt={banner.title}
-                                    fill
-                                    className="object-cover"
-                                    data-ai-hint={banner.imageHint}
-                                    priority={index === 0}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                                <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-4 sm:px-6 lg:px-8">
+                           <Link href="#">
+                                <div className="relative w-full text-foreground flex items-center justify-center py-8 sm:py-10 md:py-14">
+                                    <Image
+                                        src={banner.imageUrl}
+                                        alt={banner.title}
+                                        fill
+                                        className="object-cover"
+                                        data-ai-hint={banner.imageHint}
+                                        priority={index === 0}
+                                    />
                                 </div>
-                            </div>
+                            </Link>
                         </CarouselItem>
                     ))}
                     </CarouselContent>
