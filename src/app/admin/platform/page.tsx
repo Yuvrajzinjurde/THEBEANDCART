@@ -31,7 +31,6 @@ const staticDefaultValues: PlatformSettingsValues = {
   socials: { twitter: '', facebook: '', instagram: '', linkedin: '' },
   aiEnabled: true,
   hamperFeatureEnabled: true,
-  offersFeatureEnabled: true,
   promoBannerEnabled: true,
   heroBanners: [
     {
@@ -50,13 +49,6 @@ const staticDefaultValues: PlatformSettingsValues = {
     buttonText: "Explore Deals",
     buttonLink: "/#",
   },
-  offers: [
-    {
-      title: "First-Time Shopper",
-      description: "Get a flat 25% off on your very first order with us.",
-      code: "WELCOME25",
-    },
-  ]
 };
 
 
@@ -117,7 +109,6 @@ export default function PlatformSettingsPage() {
                         socials: { ...defaultSocials, ...(settingsData.socials || {}) },
                         featuredCategories: (settingsData.featuredCategories || []).map((cat: string) => ({ name: cat })),
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
-                        offers: settingsData.offers && settingsData.offers.length > 0 ? settingsData.offers : staticDefaultValues.offers,
                         promoBanner: { ...defaultPromoBanner, ...(settingsData.promoBanner || {}) },
                     };
                     form.reset(sanitizedSettings);
@@ -146,11 +137,6 @@ export default function PlatformSettingsPage() {
   const { fields: categoryFields, append: appendCategory, remove: removeCategory } = useFieldArray({
     control: form.control,
     name: 'featuredCategories',
-  });
-
-  const { fields: offerFields, append: appendOffer, remove: removeOffer } = useFieldArray({
-    control: form.control,
-    name: 'offers',
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void, dimensions?: { width: number, height: number }) => {
@@ -384,19 +370,6 @@ export default function PlatformSettingsPage() {
             />
              <FormField
               control={form.control}
-              name="offersFeatureEnabled"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base flex items-center gap-2"><Bot /> Enable Offers Section</FormLabel>
-                    <FormDescription>Show or hide the 'Today's Top Offers' section on the main landing page.</FormDescription>
-                  </div>
-                  <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
               name="promoBannerEnabled"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -494,26 +467,6 @@ export default function PlatformSettingsPage() {
                     <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => ( <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                     <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 </div>
-            </CardContent>
-        </Card>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Featured Offers</CardTitle>
-                <CardDescription>Add special offers to display on the main landing page.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {offerFields.map((field, index) => (
-                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
-                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeOffer(index)}>
-                            <Trash className="h-4 w-4" />
-                        </Button>
-                        <FormField control={form.control} name={`offers.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`offers.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`offers.${index}.code`} render={({ field }) => ( <FormItem><FormLabel>Coupon Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => appendOffer({ title: '', description: '', code: '' })}>Add Offer</Button>
             </CardContent>
         </Card>
         

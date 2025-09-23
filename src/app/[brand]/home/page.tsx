@@ -136,33 +136,6 @@ const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
     );
 };
 
-const MobileOffersCarousel = ({ brand }: { brand: IBrand | null }) => {
-    if (!brand?.offers || brand.offers.length === 0) return null;
-
-    return (
-        <section className="py-4 md:hidden">
-            <div className="container px-4 sm:px-6">
-                <Carousel opts={{ align: "start", dragFree: true }} className="w-full no-scrollbar">
-                    <CarouselContent className="-ml-4">
-                        {brand.offers.map((offer, index) => (
-                             <CarouselItem key={index} className="basis-auto pl-4">
-                                <div className="w-[250px]">
-                                    <CouponCard 
-                                        title={offer.title}
-                                        description={offer.description}
-                                        code={offer.code}
-                                    />
-                                </div>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-            </div>
-        </section>
-    );
-};
-
-
 const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
     if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
         return null;
@@ -212,28 +185,6 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
                             </div>
                         ))}
                     </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-
-const OffersSection = ({ brand }: { brand: IBrand | null }) => {
-    if (!brand?.offers || brand.offers.length === 0) return null;
-    
-    return (
-        <section className="w-full py-16 px-4 sm:px-6 lg:px-8 hidden md:block">
-            <div className="container py-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {brand.offers.map((offer, index) => (
-                        <CouponCard 
-                            key={index}
-                            title={offer.title}
-                            description={offer.description}
-                            code={offer.code}
-                        />
-                    ))}
                 </div>
             </div>
         </section>
@@ -500,7 +451,6 @@ export default function BrandHomePage() {
         </section>
       
       <CategoryCarousel brand={brand} />
-      <MobileOffersCarousel brand={brand} />
       
       <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
@@ -534,7 +484,6 @@ export default function BrandHomePage() {
           </div>
       )}
 
-      <OffersSection brand={brand} />
       <PromoBannerSection brand={brand} brandName={brandName} />
       <ReviewsSection brand={brand} />
 
@@ -543,7 +492,3 @@ export default function BrandHomePage() {
     </>
   );
 }
-
-    
-
-    

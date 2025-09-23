@@ -8,12 +8,6 @@ interface IBanner {
     imageHint: string;
 }
 
-interface IOffer {
-    title: string;
-    description: string;
-    code: string;
-}
-
 interface IReview {
     customerName: string;
     rating: number;
@@ -57,7 +51,6 @@ export interface IBrand extends Document {
   banners: IBanner[];
   themeName: string;
   theme: ITheme;
-  offers: IOffer[];
   reviews: IReview[];
   promoBanner: IPromoBanner;
   categoryBanners: ICategoryBanner[];
@@ -70,12 +63,6 @@ const BannerSchema: Schema<IBanner> = new Schema({
     description: { type: String, required: true },
     imageUrl: { type: String, required: true },
     imageHint: { type: String, required: true },
-}, { _id: false });
-
-const OfferSchema: Schema<IOffer> = new Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    code: { type: String, required: true },
 }, { _id: false });
 
 const ReviewSchema: Schema<IReview> = new Schema({
@@ -121,7 +108,6 @@ const BrandSchema: Schema<IBrand> = new Schema({
   banners: [BannerSchema],
   themeName: { type: String, required: true },
   theme: { type: ThemeSchema, required: true },
-  offers: [OfferSchema],
   reviews: [ReviewSchema],
   promoBanner: PromoBannerSchema,
   categoryBanners: [CategoryBannerSchema],

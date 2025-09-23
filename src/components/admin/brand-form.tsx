@@ -150,11 +150,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         buttonText: "Shop Now",
         buttonLink: "#",
       },
-      offers: [
-        { title: "First Purchase Bonus", description: "Get 15% off your first order with us.", code: "AURA15" },
-        { title: "Free Shipping", description: "Enjoy free shipping on all orders over ₹499.", code: "FREESHIP" },
-        { title: "Skincare Special", description: "Buy any 2 serums and get a free face mask.", code: "GLOWUP" },
-      ],
       reviews: [
         { customerName: "Priya S.", rating: 5, reviewText: "The Vitamin C serum is a game changer! My skin has never felt brighter.", customerAvatarUrl: "https://picsum.photos/seed/priya/100/100" },
         { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
@@ -172,11 +167,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
     control: form.control,
     name: 'banners',
-  });
-  
-  const { fields: offerFields, append: appendOffer, remove: removeOffer } = useFieldArray({
-    control: form.control,
-    name: 'offers',
   });
 
   const { fields: reviewFields, append: appendReview, remove: removeReview } = useFieldArray({
@@ -583,32 +573,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => appendCategoryBanner({ categoryName: '', imageUrl: '', imageHint: '' })}>Add Category Banner</Button>
-            </CardContent>
-        </Card>
-        
-        <Card>
-            <CardHeader>
-                <CardTitle>Offers</CardTitle>
-                <CardDescription>Add special offers to display on the homepage.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {offerFields.map((field, index) => (
-                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
-                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeOffer(index)}>
-                            <Trash className="h-4 w-4" />
-                        </Button>
-                        <FormField control={form.control} name={`offers.${index}.title`} render={({ field }) => (
-                            <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                        <FormField control={form.control} name={`offers.${index}.description`} render={({ field }) => (
-                            <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                        <FormField control={form.control} name={`offers.${index}.code`} render={({ field }) => (
-                            <FormItem><FormLabel>Coupon Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                    </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => appendOffer({ title: '', description: '', code: '' })}>Add Offer</Button>
             </CardContent>
         </Card>
         

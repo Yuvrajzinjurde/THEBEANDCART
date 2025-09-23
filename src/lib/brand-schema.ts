@@ -8,12 +8,6 @@ export const bannerSchema = z.object({
   imageHint: z.string().min(1, "Image hint is required"),
 });
 
-const offerSchema = z.object({
-  title: z.string().min(1, "Offer title is required"),
-  description: z.string().min(1, "Offer description is required"),
-  code: z.string().min(1, "Offer code is required"),
-});
-
 const reviewSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
   rating: z.coerce.number().min(1).max(5, "Rating must be between 1 and 5"),
@@ -72,7 +66,6 @@ export const BrandFormSchema = z.object({
   banners: z.array(bannerSchema).min(1, "At least one banner is required"),
   themeName: z.string(),
   theme: themeSchema,
-  offers: z.array(offerSchema).optional(),
   reviews: z.array(reviewSchema).optional(),
   promoBanner: promoBannerSchema.optional(),
   categoryBanners: z.array(categoryBannerSchema).optional(),
@@ -90,12 +83,10 @@ export const PlatformSettingsValidationSchema = z.object({
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
-  offersFeatureEnabled: z.boolean().optional(),
   promoBannerEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
   promoBanner: promoBannerSchema.optional(),
-  offers: z.array(offerSchema).optional(),
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;

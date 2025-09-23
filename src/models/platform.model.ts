@@ -17,12 +17,6 @@ const PromoBannerSchema: Schema = new Schema({
     buttonLink: { type: String },
 }, { _id: false });
 
-const OfferSchema: Schema = new Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    code: { type: String, required: true },
-}, { _id: false });
-
 const SocialLinksSchema: Schema = new Schema({
     twitter: { type: String },
     facebook: { type: String },
@@ -54,7 +48,6 @@ export interface IPlatformSettings extends Document {
   };
   aiEnabled: boolean;
   hamperFeatureEnabled: boolean;
-  offersFeatureEnabled: boolean;
   promoBannerEnabled: boolean;
   heroBanners: {
     title: string;
@@ -71,11 +64,6 @@ export interface IPlatformSettings extends Document {
     buttonText: string;
     buttonLink: string;
   };
-  offers: {
-    title: string;
-    description: string;
-    code: string;
-  }[];
 }
 
 const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
@@ -86,12 +74,10 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   socials: SocialLinksSchema,
   aiEnabled: { type: Boolean, default: true },
   hamperFeatureEnabled: { type: Boolean, default: true },
-  offersFeatureEnabled: { type: Boolean, default: true },
   promoBannerEnabled: { type: Boolean, default: true },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
   promoBanner: PromoBannerSchema,
-  offers: [OfferSchema],
 }, { timestamps: true });
 
 const PlatformSettings: Model<IPlatformSettings> = mongoose.models.PlatformSettings || mongoose.model<IPlatformSettings>('PlatformSettings', PlatformSettingsSchema);
