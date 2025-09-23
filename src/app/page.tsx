@@ -172,7 +172,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
         const theme = themeColors.find(t => t.name === brand.themeName);
         const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
         return (
-            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center gap-3">
+            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center gap-3 flex-shrink-0">
                 <div 
                     className="w-32 h-32 md:w-36 md:h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
                     style={{ 
@@ -193,7 +193,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     };
 
     const LockedBrandLogo = () => (
-        <div className="flex flex-col items-center gap-3 p-4">
+        <div className="flex flex-col items-center gap-3 p-4 flex-shrink-0">
             <div className="w-32 h-32 md:w-36 md:h-36 relative rounded-full border-2 border-dashed border-muted-foreground/30 bg-muted/50 flex items-center justify-center">
                 <Lock className="h-10 w-10 text-muted-foreground/50" />
             </div>
@@ -203,8 +203,8 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
     return (
         <section className="w-full py-12">
-            <div className="container">
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+            <div className="container overflow-x-auto no-scrollbar">
+                <div className="flex flex-nowrap items-center justify-center gap-4 md:gap-8">
                     {brands.map((brand) => (
                         <BrandLogo key={brand.permanentName} brand={brand} />
                     ))}
