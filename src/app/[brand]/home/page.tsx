@@ -15,7 +15,6 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
@@ -28,6 +27,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from 'embla-carousel-autoplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CouponCard } from '@/components/coupon-card';
+import Header from '@/components/header';
 
 
 type GroupedProducts = {
@@ -81,7 +81,7 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
              <Carousel
                 opts={{
                     align: "start",
-                    loop: products.length > 2,
+                    loop: products.length > 6,
                 }}
                 className="w-full"
             >
@@ -387,7 +387,8 @@ export default function BrandHomePage() {
   if (authLoading || loading) {
     return (
         <main>
-            <Skeleton className="w-full h-[90px] md:h-[90px]" />
+            <Header />
+            <Skeleton className="w-full aspect-[4/1] lg:aspect-[6/1]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
@@ -398,6 +399,7 @@ export default function BrandHomePage() {
   if (error || !brand) {
       return (
           <main className="container flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+               <Header />
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">{error || 'The requested brand does not exist.'}</p>
           </main>
@@ -409,6 +411,7 @@ export default function BrandHomePage() {
 
   return (
     <>
+    <Header />
     <main>
         <section className="w-full">
             <Carousel 
@@ -421,7 +424,7 @@ export default function BrandHomePage() {
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
                         <Link href="#">
-                            <div className="relative w-full text-foreground py-12 sm:py-16 md:py-20 flex items-center justify-center">
+                            <div className="relative w-full text-foreground flex items-center justify-center aspect-[4/1] lg:aspect-[6/1]">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title}

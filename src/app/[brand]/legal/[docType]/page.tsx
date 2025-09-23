@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { ArrowLeft } from 'lucide-react';
+import Header from '@/components/header';
 
 // This is defined here to avoid importing server-side code from the model
 interface ILegal {
@@ -80,6 +81,8 @@ export default function LegalPage() {
   }
 
   return (
+    <>
+    <Header />
     <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 px-10">
         <div className="flex items-center gap-4 mb-4">
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
@@ -110,5 +113,6 @@ export default function LegalPage() {
         </CardContent>
       </Card>
     </main>
+    </>
   );
 }

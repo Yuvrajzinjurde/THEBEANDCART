@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, useCallback } from 'react';
@@ -30,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
+import Header from '@/components/header';
 
 export type ActiveFilters = {
   categories: string[];
@@ -107,13 +109,13 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
             <Carousel
                 opts={{
                     align: "start",
-                    loop: products.length > 5,
+                    loop: products.length > 6,
                 }}
                 className="w-full"
             >
                 <CarouselContent className="-ml-2 sm:-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/6">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
@@ -296,6 +298,7 @@ export default function ProductsPage() {
   if (error) {
       return (
           <main className="container flex min-h-screen flex-col items-center justify-center px-4">
+              <Header />
               <h1 className="text-2xl font-bold">Error</h1>
               <p className="text-muted-foreground">{error}</p>
           </main>
@@ -304,6 +307,7 @@ export default function ProductsPage() {
 
   return (
     <>
+    <Header />
     <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
@@ -335,7 +339,7 @@ export default function ProductsPage() {
                 />
             </aside>
             <div className="flex-1 min-w-0">
-                 <div className="sticky top-16 z-10 bg-background pt-4 pb-4">
+                 <div className="sticky top-0 lg:top-16 z-10 bg-background pt-4 pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">

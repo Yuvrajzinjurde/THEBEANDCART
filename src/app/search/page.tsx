@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
@@ -27,6 +28,7 @@ import { GlobalFooter } from '@/components/global-footer';
 import { ProductFilters } from '@/components/product-filters';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import type { ActiveFilters } from '@/app/[brand]/products/page';
+import Header from '@/components/header';
 
 type Pagination = {
   currentPage: number;
@@ -206,6 +208,7 @@ function SearchResults() {
 
   return (
     <>
+    <Header />
     <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
@@ -230,7 +233,7 @@ function SearchResults() {
                 />
             </aside>
             <div className="flex-1 min-w-0">
-                <div className="sticky top-16 z-10 bg-background pt-4 pb-4 lg:pt-0">
+                <div className="sticky top-0 lg:top-16 z-10 bg-background pt-4 pb-4 lg:pt-0">
                     <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
                         <div>
                              <div className="text-lg">
@@ -306,7 +309,7 @@ function SearchResults() {
 
 export default function SearchPage() {
     return (
-        <Suspense fallback={<ProductGridSkeleton />}>
+        <Suspense fallback={<><Header /><ProductGridSkeleton /></>}>
             <SearchResults />
         </Suspense>
     )

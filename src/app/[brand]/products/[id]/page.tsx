@@ -21,6 +21,7 @@ import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import type { IReview } from '@/models/review.model';
 import { Skeleton } from '@/components/ui/skeleton';
+import Header from '@/components/header';
 
 const ProductPageSkeleton = () => (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
@@ -264,15 +265,15 @@ export default function ProductPage() {
   }, [id, addProduct]);
 
   if (loading) {
-    return <ProductPageSkeleton />;
+    return <><Header /><ProductPageSkeleton /></>;
   }
 
   if (error) {
-    return <div className="text-center text-destructive py-10"><p>{error}</p></div>;
+    return <><Header /><div className="text-center text-destructive py-10"><p>{error}</p></div></>;
   }
   
   if (!product) {
-    return <div className="text-center text-muted-foreground py-10"><p>Product not found.</p></div>;
+    return <><Header /><div className="text-center text-muted-foreground py-10"><p>Product not found.</p></div></>;
   }
   
   const storefront = searchParams.get('storefront') || product.storefront;
@@ -280,6 +281,7 @@ export default function ProductPage() {
 
   return (
     <>
+      <Header />
       <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <ProductDetails 
           product={product} 

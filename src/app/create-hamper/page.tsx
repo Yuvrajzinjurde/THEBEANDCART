@@ -41,6 +41,7 @@ import { HamperProgressBar } from "@/components/hamper-progress-bar";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Separator } from "@/components/ui/separator";
 import useUserStore from '@/stores/user-store';
+import Header from "@/components/header";
 
 const TOTAL_STEPS = 5;
 
@@ -660,9 +661,7 @@ export default function CreateHamperPage() {
 
             toast.success("Hamper finalized and added to cart!");
             resetHamper();
-            const firstItem = cart.items?.[0];
-            const storefront = (firstItem?.productId as any)?.storefront;
-            router.push(`/${storefront || 'reeva'}/cart`);
+            router.push(`/cart`);
         } catch (error: any) {
             console.error("Checkout failed:", error);
             toast.error(error.message);
@@ -688,6 +687,7 @@ export default function CreateHamperPage() {
 
     return (
         <>
+        <Header />
         <div className="flex flex-col min-h-screen">
             <main className="container flex-grow py-8 px-10">
                 <div className="max-w-4xl mx-auto pb-24">

@@ -43,6 +43,7 @@ import * as React from "react"
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 import { cn } from "@/lib/utils";
 import { GlobalFooter } from "@/components/global-footer";
+import Header from "@/components/header";
 
 const HiddenScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
@@ -428,12 +429,13 @@ export default function CartPage() {
 
 
   if (loading || authLoading) {
-    return <CartSkeleton />;
+    return <><Header /><CartSkeleton /></>;
   }
   
   if (cartItems.length === 0) {
       return (
         <>
+        <Header />
         <main className="container py-8 px-10">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
@@ -453,7 +455,8 @@ export default function CartPage() {
 
   return (
     <>
-      <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
+      <Header />
+      <div className="sticky top-0 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
         <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-5">
             <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="flex items-center gap-2">

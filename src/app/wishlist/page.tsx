@@ -29,6 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import Header from "@/components/header";
 
 const WishlistFooter = () => {
     const { settings } = usePlatformSettingsStore();
@@ -161,13 +162,14 @@ export default function WishlistPage() {
   };
 
   if (loading || authLoading) {
-    return <WishlistSkeleton />;
+    return <><Header /><WishlistSkeleton /></>;
   }
 
   const wishlistProducts = (wishlist?.products as IProduct[]) || [];
 
   return (
     <>
+    <Header />
     <main className="container py-8 px-10">
       <div className="flex items-center justify-between mb-6">
          <div className="flex items-center gap-4">
@@ -214,12 +216,12 @@ export default function WishlistPage() {
             return (
                 <Card key={product._id as string}>
                     <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
-                        <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="block flex-shrink-0 w-36 aspect-square">
+                        <Link href={`/${product.storefront}/products/${product._id}`} className="block flex-shrink-0 w-36 aspect-square">
                             <Image src={product.images[0]} alt={product.name} width={144} height={144} className="rounded-lg object-cover border w-full h-full"/>
                         </Link>
                         <div className="flex flex-col flex-grow">
                             <p className="text-sm text-muted-foreground font-medium">{product.brand}</p>
-                            <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="font-semibold text-lg hover:underline leading-tight">{product.name}</Link>
+                            <Link href={`/${product.storefront}/products/${product._id}`} className="font-semibold text-lg hover:underline leading-tight">{product.name}</Link>
                             
                             <Badge
                                 variant={availableStock > 0 ? "default" : "destructive"}

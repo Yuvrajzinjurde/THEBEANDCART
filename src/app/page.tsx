@@ -19,7 +19,6 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
@@ -28,6 +27,7 @@ import { themeColors } from '@/lib/brand-schema';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import Header from '@/components/header';
 
 
 const LandingPageSkeleton = () => (
@@ -97,7 +97,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
             </div>
             <Separator className="mb-6" />
             <Carousel
-                opts={{ align: "start", loop: true }}
+                opts={{ align: "start", loop: products.length > 6, }}
                 className="w-full"
             >
                 <CarouselContent>
@@ -304,13 +304,14 @@ export default function LandingPage() {
   const platformSettings = settings as IPlatformSettings;
   
   if (loading || !platformSettings || !Array.isArray(platformSettings.heroBanners) || platformSettings.heroBanners.length === 0) {
-      return <LandingPageSkeleton />;
+      return <><Header /><LandingPageSkeleton /></>;
   }
   
   const heroBanners = platformSettings.heroBanners;
 
   return (
     <>
+    <Header />
     <main>
 
         {heroBanners && heroBanners.length > 0 ? (
@@ -325,7 +326,7 @@ export default function LandingPage() {
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
                            <Link href="#">
-                                <div className="relative w-full text-foreground flex items-center justify-center py-8 sm:py-10 md:py-14">
+                                <div className="relative w-full text-foreground flex items-center justify-center aspect-[4/1] lg:aspect-[6/1]">
                                     <Image
                                         src={banner.imageUrl}
                                         alt={banner.title}

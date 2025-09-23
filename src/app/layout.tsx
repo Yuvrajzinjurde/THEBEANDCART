@@ -4,7 +4,6 @@ import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
-import Header from '@/components/header';
 import { headers } from 'next/headers';
 import { getThemeForRequest } from '@/lib/theme';
 import type { IPlatformSettings } from '@/models/platform.model';
@@ -37,10 +36,6 @@ export default async function RootLayout({
   const { theme, settings } = await getThemeForRequest(pathname, searchParams);
   const platformSettings = settings as IPlatformSettings | null;
 
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthRoute = /\/(login|signup|forgot-password)/.test(pathname);
-  const showHeader = !isAdminRoute && !isAuthRoute;
-
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
         <head>
@@ -52,8 +47,7 @@ export default async function RootLayout({
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
-            {showHeader && <Header />}
-            {children}
+                {children}
             </AuthProvider>
             <ToastContainer
                 position="top-right"
