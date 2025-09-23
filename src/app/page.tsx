@@ -366,12 +366,6 @@ export default function LandingPage() {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                                 <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-4 sm:px-6 lg:px-8">
-                                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter">
-                                        {banner.title}
-                                    </h1>
-                                    <p className="mt-4 text-lg md:text-xl max-w-3xl">
-                                        {banner.description}
-                                    </p>
                                 </div>
                             </div>
                         </CarouselItem>
@@ -450,3 +444,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+    

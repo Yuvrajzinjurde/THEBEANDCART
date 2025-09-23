@@ -488,12 +488,7 @@ export default function BrandHomePage() {
                             />
                             <div className="absolute inset-0 bg-black/50" />
                             <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-4 sm:px-6 lg:px-8">
-                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
-                                    {banner.title}
-                                </h1>
-                                <p className="mt-2 text-base md:text-lg max-w-2xl">
-                                    {banner.description}
-                                </p>
+                                
                             </div>
                         </div>
                     </CarouselItem>
@@ -548,5 +543,7 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
 
     
