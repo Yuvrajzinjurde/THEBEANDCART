@@ -118,14 +118,14 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
 
 const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }) => {
     if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
-    const { title, imageUrl, imageHint, buttonLink } = settings.promoBanner;
+    const { imageUrl, imageHint, buttonLink } = settings.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <Link href={buttonLink || '#'}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[2.5/1]">
                      <Image
                         src={imageUrl}
-                        alt={title}
+                        alt="Promotional Banner"
                         fill
                         className="object-cover"
                         data-ai-hint={imageHint}
@@ -199,12 +199,12 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
                  <div className="max-w-5xl mx-auto">
                     <Carousel
                         plugins={[autoplay.current]}
-                        opts={{ align: "start", loop: brands.length > 5 }}
+                        opts={{ align: "center", loop: brands.length > 5 }}
                         className="w-full"
                     >
                         <CarouselContent>
                             {brands.map((brand) => (
-                                <CarouselItem key={brand.permanentName} className="basis-full sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                                <CarouselItem key={brand.permanentName} className="basis-auto sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                                     <BrandLogo brand={brand} />
                                 </CarouselItem>
                             ))}
