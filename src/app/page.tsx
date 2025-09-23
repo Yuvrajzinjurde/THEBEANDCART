@@ -196,21 +196,27 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12">
             <div className="container">
-                <Carousel
-                    plugins={[autoplay.current]}
-                    opts={{ align: "start", loop: true }}
-                    className="w-full"
-                >
-                    <CarouselContent>
-                        {brands.map((brand) => (
-                            <CarouselItem key={brand.permanentName} className="basis-full sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                                <BrandLogo brand={brand} />
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                    <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                </Carousel>
+                 <div className="max-w-5xl mx-auto">
+                    <Carousel
+                        plugins={[autoplay.current]}
+                        opts={{ align: "start", loop: brands.length > 5 }}
+                        className="w-full"
+                    >
+                        <CarouselContent>
+                            {brands.map((brand) => (
+                                <CarouselItem key={brand.permanentName} className="basis-full sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                                    <BrandLogo brand={brand} />
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                         {brands.length > 5 && (
+                            <>
+                                <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                                <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                            </>
+                        )}
+                    </Carousel>
+                </div>
             </div>
         </section>
     );
