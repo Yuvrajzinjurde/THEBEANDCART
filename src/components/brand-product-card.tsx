@@ -159,8 +159,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                     </CarouselItem>
                 ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover/card:opacity-100 transition-opacity" />
             </Carousel>
         </div>
 
