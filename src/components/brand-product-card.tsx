@@ -38,13 +38,15 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const [api, setApi] = useState<CarouselApi>();
 
   const autoplay = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
+    Autoplay({ delay: 2000, stopOnInteraction: true })
   );
 
   useEffect(() => {
-    if (api) {
-        autoplay.current.play();
+    if (!api) {
+      return;
     }
+    // Stop autoplay initially
+    autoplay.current.stop();
   }, [api]);
   
 
@@ -127,12 +129,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     <Link 
       href={`/products/${product._id}?storefront=${product.storefront}`} 
       onClick={handleCardClick} 
-      className={cn("group block w-full", className)}
+      className={cn("group/card block w-full", className)}
+      onMouseEnter={() => autoplay.current.play()}
+      onMouseLeave={() => autoplay.current.stop()}
     >
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
+        className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover/card:shadow-lg flex flex-col h-full"
       >
         <div className="w-full">
             <Carousel
@@ -155,12 +159,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                     </CarouselItem>
                 ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover/card:opacity-100 transition-opacity" />
             </Carousel>
         </div>
 
-        <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
           <Button
             size="icon"
             variant="secondary"
