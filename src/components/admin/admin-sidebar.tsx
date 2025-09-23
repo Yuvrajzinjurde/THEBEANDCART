@@ -208,11 +208,11 @@ export function MobileAdminHeader() {
         <header className="md:hidden flex h-16 items-center justify-between border-b bg-background px-4 shrink-0">
              <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
                 {settings.platformLogoUrl ? (
-                    <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7" />
+                    <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
                 ) : (
                     <Logo className="h-6 w-6 text-primary" />
                 )}
-                <span>{settings.platformName || 'Admin Panel'}</span>
+                <span>Admin Panel</span>
             </Link>
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
@@ -226,11 +226,11 @@ export function MobileAdminHeader() {
                         <SheetTitle>
                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
                                 {settings.platformLogoUrl ? (
-                                    <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7" />
+                                    <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
                                 ) : (
                                     <Logo className="h-6 w-6 text-primary" />
                                 )}
-                                <span>{settings.platformName || 'Admin Panel'}</span>
+                                <span>Admin Panel</span>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
@@ -271,12 +271,12 @@ export function AdminSidebar() {
                 <div className="flex h-full max-h-screen flex-col">
                     <div className={cn("flex items-center h-16 border-b px-4 shrink-0", isCollapsed ? "justify-center" : "justify-between")}>
                         <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                            {settings.platformLogoUrl ? (
-                                <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7" />
+                             {settings.platformLogoUrl ? (
+                                <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
                             ) : (
                                 <Logo className="h-6 w-6 text-primary" />
                             )}
-                            <span>{settings.platformName || 'Admin Panel'}</span>
+                            <span>Admin Panel</span>
                         </Link>
                         <Button variant="ghost" size="icon" onClick={toggleSidebar}>
                             <PanelLeft className="h-5 w-5" />
