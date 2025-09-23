@@ -197,7 +197,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <Link href={buttonLink || '#'}>
-                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[2.5/1]">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[2/1] lg:aspect-[3/1]">
                      <Image
                         src={imageUrl}
                         alt={title}
