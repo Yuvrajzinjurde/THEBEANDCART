@@ -161,13 +161,8 @@ export default function PlatformSettingsPage() {
   
   async function onSubmit(data: PlatformSettingsValues) {
     setIsSubmitting(true);
-    const themeName = themeColors.find(t => t.primary === data.theme.primary)?.name || 'Blue';
     const dataToSubmit = {
         ...data,
-        theme: {
-            ...data.theme,
-            name: themeName,
-        },
         featuredCategories: data.featuredCategories?.map(cat => cat.name),
     };
 

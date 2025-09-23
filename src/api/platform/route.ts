@@ -74,6 +74,7 @@ export async function POST(req: Request) {
 
     const validation = FormSchema.safeParse(body);
     if (!validation.success) {
+      console.error("Platform Settings Validation Error:", validation.error.flatten());
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
     
