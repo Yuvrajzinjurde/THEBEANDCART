@@ -372,11 +372,6 @@ export default function LandingPage() {
                                     <p className="mt-4 text-lg md:text-xl max-w-3xl">
                                         {banner.description}
                                     </p>
-                                     <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-                                        <Button asChild size="lg" className={cn("h-12 text-base")}>
-                                            <Link href="/create-hamper">Start Curating Your Hamper</Link>
-                                        </Button>
-                                    </div>
                                 </div>
                             </div>
                         </CarouselItem>
