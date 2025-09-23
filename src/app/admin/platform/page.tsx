@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv, PlusCircle } from 'lucide-react';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors, type Theme } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { IProduct } from '@/models/product.model';
-import { Combobox } from '@/components/ui/combobox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const staticDefaultValues: PlatformSettingsValues = {
@@ -57,7 +57,8 @@ export default function PlatformSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const { settings, fetchSettings } = usePlatformSettingsStore();
   
-  const [availableCategories, setAvailableCategories] = useState<{ value: string; label: string; count: number }[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
 
   const form = useForm<PlatformSettingsValues>({
@@ -71,25 +72,21 @@ export default function PlatformSettingsPage() {
         setIsLoading(true);
         try {
             // Fetch products to determine categories
-            const productResponse = await fetch('/api/products');
+            const productResponse = await fetch('/api/products?limit=2000');
             if (productResponse.ok) {
                 const productData = await productResponse.json();
                 const products: IProduct[] = productData.products;
-                const categoryCounts = products.reduce((acc, product) => {
-                    if (product.category) {
-                        acc[product.category] = (acc[product.category] || 0) + 1;
+                const categorySet = new Set<string>();
+                 products.forEach(p => {
+                    if (p.category && typeof p.category === 'string') {
+                        categorySet.add(p.category);
+                    } else if (p.category && Array.isArray(p.category)) {
+                        p.category.forEach(cat => {
+                            if(typeof cat === 'string') categorySet.add(cat)
+                        });
                     }
-                    return acc;
-                }, {} as Record<string, number>);
-
-                const categoriesWithOptions = Object.entries(categoryCounts)
-                    .filter(([, count]) => count > 0)
-                    .map(([name, count]) => ({
-                        value: name,
-                        label: `${name} (${count})`,
-                        count: count,
-                    }));
-                setAvailableCategories(categoriesWithOptions);
+                });
+                setAvailableCategories(Array.from(categorySet).sort());
             }
 
             const response = await fetch('/api/platform');
@@ -161,7 +158,7 @@ export default function PlatformSettingsPage() {
   
   async function onSubmit(data: PlatformSettingsValues) {
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch('/api/platform', {
         method: 'POST',
@@ -288,14 +285,10 @@ export default function PlatformSettingsPage() {
                                 onValueChange={(value) => {
                                     const selectedTheme = themeColors.find(t => t.name === value);
                                     if (selectedTheme) {
-                                        field.onChange({
-                                            name: selectedTheme.name,
-                                            primary: selectedTheme.primary,
-                                            background: selectedTheme.background,
-                                            accent: selectedTheme.accent,
-                                        });
+                                        field.onChange(selectedTheme);
                                     }
                                 }}
+                                value={field.value?.name}
                                 className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
                             >
                                 {themeColors.map((theme) => {
@@ -483,29 +476,43 @@ export default function PlatformSettingsPage() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Categories</FormLabel>
-                            <FormControl>
-                                <div>
-                                    <Combobox
-                                        options={availableCategories}
-                                        placeholder="Select a category..."
-                                        onSelect={(selectedValue) => {
-                                            if (selectedValue && !field.value?.includes(selectedValue)) {
-                                                appendCategory(selectedValue);
-                                            }
-                                        }}
-                                    />
-                                    <div className="flex flex-wrap gap-2 mt-4">
-                                        {categoryFields.map((field, index) => (
-                                            <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
-                                                {form.getValues('featuredCategories')?.[index]}
-                                                <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
-                                                    <X className="h-3 w-3" />
-                                                </button>
-                                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Select onValueChange={setSelectedCategory} value={selectedCategory}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a category to add" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableCategories
+                                            .filter(cat => !field.value?.includes(cat))
+                                            .map(category => (
+                                            <SelectItem key={category} value={category}>{category}</SelectItem>
                                         ))}
-                                    </div>
-                                </div>
-                            </FormControl>
+                                    </SelectContent>
+                                </Select>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => {
+                                        if (selectedCategory && !field.value?.includes(selectedCategory)) {
+                                            appendCategory(selectedCategory);
+                                            setSelectedCategory('');
+                                        }
+                                    }}
+                                >
+                                    <PlusCircle className="h-4 w-4" />
+                                </Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-4">
+                                {categoryFields.map((field, index) => (
+                                    <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
+                                        {form.getValues('featuredCategories')?.[index]}
+                                        <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
                             <FormDescription>These categories will be featured on the main homepage.</FormDescription>
                             <FormMessage />
                         </FormItem>
