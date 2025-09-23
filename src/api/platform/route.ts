@@ -25,7 +25,6 @@ const FormSchema = z.object({
   socials: SocialLinksSchema.optional(),
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
-  offersFeatureEnabled: z.boolean().optional(),
   promoBannerEnabled: z.boolean().optional(),
   heroBanners: z.array(z.object({
       title: z.string(),
