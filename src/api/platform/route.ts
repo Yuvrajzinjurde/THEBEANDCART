@@ -82,7 +82,12 @@ export async function POST(req: Request) {
     const dataToSave = {
       ...restOfData,
       platformThemeName,
-      theme
+      theme: {
+        name: theme.name,
+        primary: theme.primary,
+        background: theme.background,
+        accent: theme.accent,
+      }
     };
 
     // Use findOneAndUpdate with upsert:true to create if it doesn't exist, or update if it does.
