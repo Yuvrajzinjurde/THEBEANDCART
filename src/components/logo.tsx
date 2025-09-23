@@ -15,8 +15,9 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       className="h-14 w-14 text-primary"
       {...props}
     >
-      <path d="M15 6.343a4.5 4.5 0 0 1 0 6.364L10.05 17.657a4.5 4.5 0 1 1-6.364-6.364L8.636 6.343a4.5 4.5 0 0 1 6.364 0Z" />
-      <path d="M9 17.657a4.5 4.5 0 0 1 0-6.364L13.95 6.343a4.5 4.5 0 1 1 6.364 6.364L15.364 17.657a4.5 4.5 0 0 1-6.364 0Z" />
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
     </svg>
   );
 }
