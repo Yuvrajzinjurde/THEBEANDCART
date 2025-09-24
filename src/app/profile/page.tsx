@@ -165,30 +165,34 @@ function ProfilePage() {
                         {activeSection === 'profile' && <ProfileInfo user={user} onUserUpdate={handleUserUpdate} />}
                         {activeSection === 'addresses' && <SavedAddresses user={user} onUserUpdate={handleUserUpdate} />}
                         
-                        <Card>
+                        <Card className="shadow-lg">
                             <CardHeader>
-                                <CardTitle>Frequently Asked Questions</CardTitle>
+                                <CardTitle className="text-xl">Frequently Asked Questions</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Accordion type="single" collapsible className="w-full">
                                     {faqs.map((faq, index) => (
                                         <AccordionItem key={index} value={`item-${index}`}>
                                             <AccordionTrigger>{faq.question}</AccordionTrigger>
-                                            <AccordionContent>{faq.answer}</AccordionContent>
+                                            <AccordionContent className="text-muted-foreground">
+                                                {faq.answer}
+                                            </AccordionContent>
                                         </AccordionItem>
                                     ))}
                                 </Accordion>
                             </CardContent>
                         </Card>
 
-                        <Card className="border-destructive">
+                        <Card className="border-destructive shadow-lg">
                             <CardHeader>
-                                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                                <CardTitle className="text-destructive text-xl">Danger Zone</CardTitle>
                                 <CardDescription>These actions are permanent and cannot be undone.</CardDescription>
                             </CardHeader>
-                            <CardContent className="flex flex-col sm:flex-row gap-4">
-                                <Button variant="outline">Deactivate Account</Button>
-                                <Button variant="destructive">Delete Account</Button>
+                            <CardContent>
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                     <Button variant="outline">Deactivate Account</Button>
+                                    <Button variant="destructive">Delete Account</Button>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
