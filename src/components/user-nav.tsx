@@ -28,14 +28,14 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
   const brandName = (params.brand as string) || 'reeva';
 
   if (loading) {
-    return <Skeleton className="h-9 w-9 rounded-full" />;
+    return <Skeleton className="h-9 w-32" />;
   }
 
   if (!user) {
     return (
-         <Button variant="ghost" size="icon" aria-label="Sign In" asChild>
+         <Button asChild>
             <Link href={`/${brandName}/login`}>
-                <UserIcon className="h-5 w-5" />
+                Login
             </Link>
         </Button>
     );
