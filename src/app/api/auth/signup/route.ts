@@ -1,22 +1,52 @@
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
 import Role from '@/models/role.model';
 import bcrypt from 'bcryptjs';
-import { SignUpSchema } from '@/lib/auth';
+import { z } from "zod";
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('Please define the JWT_SECRET environment variable inside .env');
+}
+
+// Adjusted SignUp schema for this endpoint
+const SecureSignUpSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(8),
+  brand: z.string().min(1),
+  signUpToken: z.string().min(1, "Verification token is required."),
+});
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
 
     const body = await req.json();
-    const validation = SignUpSchema.safeParse(body);
+    const validation = SecureSignUpSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { email, password, firstName, lastName, brand } = validation.data;
+    const { email, password, firstName, lastName, brand, signUpToken } = validation.data;
+
+    // Verify the sign-up token
+    let decodedToken;
+    try {
+        decodedToken = jwt.verify(signUpToken, JWT_SECRET) as { email: string, verified: boolean };
+    } catch (error) {
+        return NextResponse.json({ message: 'Invalid or expired verification token.' }, { status: 401 });
+    }
+    
+    // Check if the token is valid for this email and is marked as verified
+    if (!decodedToken.verified || decodedToken.email !== email) {
+        return NextResponse.json({ message: 'Could not verify your email. Please try again.' }, { status: 401 });
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -39,19 +69,12 @@ export async function POST(req: Request) {
       lastName: lastName || 'User',
       roles: [userRole._id],
       brand: brand, // Save the brand permanent name
-      // Add default empty values for other required fields
-      address: {
-        street: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: '',
-      }
+      isEmailVerified: true, // Mark email as verified
+      addresses: [], // Start with an empty array
     });
 
     await newUser.save();
     
-    // Don't send the password back
     const userResponse = newUser.toObject();
     delete userResponse.password;
 

@@ -8,16 +8,22 @@ import {
 } from "@/ai/flows/password-strength-feedback";
 import { cn } from "@/lib/utils";
 import { Loader } from "../ui/loader";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 
 type PasswordStrengthProps = {
   password?: string;
 };
 
 export function PasswordStrength({ password }: PasswordStrengthProps) {
+  const { settings } = usePlatformSettingsStore();
   const [feedback, setFeedback] = useState<PasswordStrengthFeedbackOutput | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  const aiEnabled = settings.aiEnabled;
 
   useEffect(() => {
+    if (!aiEnabled) return;
+
     const getFeedback = async () => {
       if (!password) {
         setFeedback(null);
@@ -42,10 +48,10 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
     return () => {
       clearTimeout(handler);
     };
-  }, [password]);
+  }, [password, aiEnabled]);
 
   const strengthDetails = useMemo(() => {
-    if (!feedback?.strength) {
+    if (!aiEnabled || !feedback?.strength) {
       return { level: 0, color: "bg-muted", label: "" };
     }
     switch (feedback.strength.toLowerCase()) {
@@ -58,9 +64,9 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
       default:
         return { level: 0, color: "bg-muted", label: "" };
     }
-  }, [feedback]);
+  }, [feedback, aiEnabled]);
 
-  if (!password) {
+  if (!password || !aiEnabled) {
     return null;
   }
 

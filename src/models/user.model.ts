@@ -25,6 +25,7 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
+  isEmailVerified: boolean;
   password?: string; // Password is not always sent back
   phone?: string;
   whatsapp?: string;
@@ -65,6 +66,7 @@ const UserSchema: Schema<IUser> = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true, index: true },
+  isEmailVerified: { type: Boolean, default: false },
   password: { type: String, required: true, select: false },
   phone: { type: String },
   whatsapp: { type: String },
