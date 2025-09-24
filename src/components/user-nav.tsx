@@ -28,12 +28,12 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
   const brandName = (params.brand as string) || 'reeva';
 
   if (loading) {
-    return <Skeleton className="h-9 w-32" />;
+    return <Skeleton className="h-9 w-20" />;
   }
 
   if (!user) {
     return (
-         <Button asChild>
+         <Button variant="ghost" asChild>
             <Link href={`/${brandName}/login`}>
                 Login
             </Link>
