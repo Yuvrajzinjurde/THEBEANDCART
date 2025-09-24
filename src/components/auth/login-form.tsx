@@ -32,6 +32,7 @@ import {
 import { Loader } from "../ui/loader";
 import Image from "next/image";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { useAuth } from "@/hooks/use-auth";
 
 interface DecodedToken {
   roles: string[];
@@ -42,7 +43,7 @@ export function LoginForm() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const brandName = params.brand as string || 'reeva';
+  const { login } = useAuth();
   
   const { settings: platformSettings } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,13 +51,12 @@ export function LoginForm() {
   
   const callbackUrl = searchParams.get('callbackUrl') || null;
 
-
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
       password: "",
-      brand: brandName,
+      brand: 'reeva'
     },
   });
 
@@ -75,10 +75,12 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      localStorage.setItem('token', result.token);
+      login(result.token);
 
       toast.success(`Welcome back, ${result.name}!`);
       
+      router.refresh();
+
       if (callbackUrl) {
           router.push(callbackUrl);
           return;

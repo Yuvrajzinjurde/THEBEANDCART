@@ -17,6 +17,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  login: (token: string) => void;
   logout: () => void;
   token: string | null;
 }
@@ -28,7 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
   const { setCart, setWishlist } = useUserStore();
 
   const logout = useCallback(() => {
@@ -38,10 +38,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart(null);
     setWishlist(null);
     
-    // Redirect to the global login page
+    // Redirect to the global login page and refresh
     router.push(`/login`);
+    router.refresh();
     
   }, [router, setCart, setWishlist]);
+  
+  const login = useCallback((newToken: string) => {
+    localStorage.setItem('token', newToken);
+    try {
+        const decoded = jwtDecode<User>(newToken);
+        setUser(decoded);
+        setToken(newToken);
+    } catch (error) {
+        console.error("Failed to decode token on login:", error);
+        logout();
+    }
+  }, [logout]);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -91,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [logout, setCart, setWishlist]); 
   
   return (
-    <AuthContext.Provider value={{ user, loading, logout, token }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, token }}>
       {children}
     </AuthContext.Provider>
   );
