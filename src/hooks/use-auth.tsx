@@ -38,8 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart(null);
     setWishlist(null);
     
-    // Redirect to the global login page and refresh
-    router.push(`/login`);
+    // Refresh to ensure all states are cleared and user is redirected if needed.
     router.refresh();
     
   }, [router, setCart, setWishlist]);
@@ -58,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initializeAuth = async () => {
+      setLoading(true);
       const storedToken = localStorage.getItem('token');
       
       if (storedToken) {
@@ -65,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const decoded = jwtDecode<User>(storedToken);
           if (decoded.exp * 1000 < Date.now()) {
             logout();
+            setLoading(false);
             return;
           }
           
@@ -78,8 +79,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ]);
           
           if (!cartRes.ok || !wishlistRes.ok) {
-            // If either fetch fails due to auth, logout
+            // If any fetch fails due to auth (e.g., 401), it signifies a bad token. Logout.
+            console.error("Failed to fetch user data, session may be invalid. Logging out.");
             logout();
+            setLoading(false);
             return;
           }
 
