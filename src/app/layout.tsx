@@ -42,7 +42,7 @@ export default async function RootLayout({
             {platformSettings?.platformFaviconUrl && (
                 <link rel="icon" href={platformSettings.platformFaviconUrl} sizes="any" />
             )}
-            <title>{platformSettings?.platformName || 'The Brand Cart'}</title>
+            <title>{platformSettings?.platformName || 'Brand Cart'}</title>
             <ThemeInjector theme={theme} />
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
