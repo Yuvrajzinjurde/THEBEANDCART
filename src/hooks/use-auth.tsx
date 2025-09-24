@@ -64,65 +64,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       const storedToken = localStorage.getItem('token');
       
-      if (storedToken) {
-        try {
-          const decoded = jwtDecode<User>(storedToken);
-          
-          if (decoded.exp * 1000 < Date.now()) {
-            console.log("Session expired, logging out.");
-            logout();
-            setLoading(false);
-            return;
-          }
-
-          setUser(decoded);
-          setToken(storedToken);
-
-          // Fetch user-specific data only if the token is valid
-          const [cartRes, wishlistRes] = await Promise.all([
-            fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
-            fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
-          ]);
-
-          // If any fetch returns unauthorized, the session is invalid.
-          if (!cartRes.ok || !wishlistRes.ok) {
-            if (cartRes.status === 401 || wishlistRes.status === 401) {
-              console.error("Invalid session token. Logging out.");
-              logout();
-            } else {
-              if (!cartRes.ok) console.error("Failed to fetch cart data during init.");
-              if (!wishlistRes.ok) console.error("Failed to fetch wishlist data during init.");
-            }
-          } else {
-            const cartData = await cartRes.json();
-            const wishlistData = await wishlistRes.json();
-            setCart(cartData.cart);
-            setWishlist(wishlistData.wishlist);
-          }
-
-        } catch (error) {
-          console.error("Invalid token during initialization, logging out.", error);
-          logout();
-        }
+      if (!storedToken) {
+        setLoading(false);
+        return;
       }
-      
-      setLoading(false);
-    }
+
+      try {
+        const decoded = jwtDecode<User>(storedToken);
+
+        if (decoded.exp * 1000 < Date.now()) {
+          console.log("Session expired, logging out.");
+          logout();
+          setLoading(false);
+          return;
+        }
+
+        // Set user state first to confirm authentication
+        setUser(decoded);
+        setToken(storedToken);
+
+        // Now, fetch user-specific data
+        try {
+            const [cartRes, wishlistRes] = await Promise.all([
+                fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
+                fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
+            ]);
+
+            if (cartRes.ok) {
+                const cartData = await cartRes.json();
+                setCart(cartData.cart);
+            } else {
+                console.error("Failed to fetch cart data during init.");
+            }
+
+            if (wishlistRes.ok) {
+                const wishlistData = await wishlistRes.json();
+                setWishlist(wishlistData.wishlist);
+            } else {
+                 console.error("Failed to fetch wishlist data during init.");
+            }
+        } catch (fetchError) {
+             console.error("Error fetching user data during init:", fetchError);
+        }
+
+      } catch (error) {
+        console.error("Invalid token during initialization, logging out.", error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
     
     initializeAuth();
   }, [logout, setCart, setWishlist]);
-
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader className="h-12 w-12" />
-      </div>
-    );
-  }
   
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, token }}>
-      {children}
+      {loading ? (
+        <div className="flex h-screen w-full items-center justify-center">
+            <Loader className="h-12 w-12" />
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };
