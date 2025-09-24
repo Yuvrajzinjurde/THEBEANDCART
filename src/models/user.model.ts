@@ -2,19 +2,26 @@
 
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
+export interface IAddress extends Document {
+  name: string;
+  phone: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  type: 'Home' | 'Office' | 'Other';
+  otherType?: string;
+  isDefault: boolean;
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
   password?: string; // Password is not always sent back
   phone?: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  };
+  addresses: IAddress[];
   profilePicUrl?: string;
   roles: Types.ObjectId[];
   brand: string; // The permanent name of the brand the user belongs to
@@ -23,19 +30,27 @@ export interface IUser extends Document {
   updatedAt: string | Date;
 }
 
+const AddressSchema: Schema<IAddress> = new Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  street: { type: String, required: true },
+  city: { type: String, required: true },
+  state: { type: String, required: true },
+  zip: { type: String, required: true },
+  country: { type: String, required: true },
+  type: { type: String, enum: ['Home', 'Office', 'Other'], required: true },
+  otherType: { type: String },
+  isDefault: { type: Boolean, default: false },
+});
+
+
 const UserSchema: Schema<IUser> = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true, select: false },
   phone: { type: String },
-  address: {
-    street: { type: String },
-    city: { type: String },
-    state: { type: String },
-    zip: { type: String },
-    country: { type: String },
-  },
+  addresses: [AddressSchema],
   profilePicUrl: { type: String },
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
   brand: { type: String, index: true, required: true },
