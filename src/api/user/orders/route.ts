@@ -22,10 +22,12 @@ export async function GET(req: Request) {
         try {
             decoded = jwtDecode<DecodedToken>(token);
         } catch (error) {
+             // If token is invalid or expired, return an empty list gracefully
              return NextResponse.json({ orders: [] }, { status: 200 });
         }
         
         if (!Types.ObjectId.isValid(decoded.userId)) {
+             // If the decoded ID is not a valid format, it can't be a real user
             return NextResponse.json({ orders: [] }, { status: 200 });
         }
         const userId = new Types.ObjectId(decoded.userId);
