@@ -26,6 +26,10 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
         const decoded = jwtDecode<DecodedToken>(token);
+        
+        if (!Types.ObjectId.isValid(decoded.userId)) {
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
         const userId = new Types.ObjectId(decoded.userId);
 
         const user = await User.findById(userId);
@@ -52,6 +56,10 @@ export async function PUT(req: Request) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
         const decoded = jwtDecode<DecodedToken>(token);
+
+        if (!Types.ObjectId.isValid(decoded.userId)) {
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
         const userId = new Types.ObjectId(decoded.userId);
 
         const body = await req.json();
