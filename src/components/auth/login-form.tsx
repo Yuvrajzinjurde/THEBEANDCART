@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/form";
 import { Loader } from "../ui/loader";
 import Image from "next/image";
-import type { IBrand } from "@/models/brand.model";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 
 interface DecodedToken {
   roles: string[];
@@ -43,27 +43,9 @@ export function LoginForm() {
   const params = useParams();
   const brandName = params.brand as string || 'reeva';
   
-  const [brand, setBrand] = useState<IBrand | null>(null);
+  const { settings: platformSettings } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    async function fetchBrandLogo() {
-      if (brandName) {
-        try {
-          const res = await fetch(`/api/brands/${brandName}`);
-          if (res.ok) {
-            const { brand: brandData } = await res.json();
-            setBrand(brandData);
-          }
-        } catch (error) {
-          console.error("Failed to fetch brand logo for login page", error);
-        }
-      }
-    }
-    fetchBrandLogo();
-  }, [brandName]);
-
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -113,8 +95,8 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
-        {brand?.logoUrl ? (
-            <Image src={brand.logoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+        {platformSettings?.platformLogoUrl ? (
+            <Image src={platformSettings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
         ) : (
             <div className="h-14 w-14 rounded-full bg-muted" />
         )}
