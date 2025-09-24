@@ -12,10 +12,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { UploadCloud, X, Edit, Instagram, Linkedin, ShieldCheck, Checkbox } from "lucide-react";
+import { UploadCloud, X, Edit, Instagram, Linkedin, ShieldCheck } from "lucide-react";
 import type { IUser } from "@/models/user.model";
 import { useAuth } from '@/hooks/use-auth';
 import { Separator } from '../ui/separator';
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 const MOCK_OTP = "123456";
 
