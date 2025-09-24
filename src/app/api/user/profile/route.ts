@@ -18,9 +18,9 @@ interface DecodedToken {
 }
 
 const socialsSchema = z.object({
-  twitter: z.string().optional(),
-  linkedin: z.string().optional(),
-  instagram: z.string().optional(),
+  twitter: z.string().url().optional().or(z.literal('')),
+  linkedin: z.string().url().optional().or(z.literal('')),
+  instagram: z.string().url().optional().or(z.literal('')),
 });
 
 const profileFormSchema = z.object({
@@ -28,7 +28,7 @@ const profileFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
-  profilePicUrl: z.string().url().or(z.literal('')).or(z.string().startsWith('data:image/')),
+  profilePicUrl: z.string().url("Must be a valid URL or data URI.").or(z.literal('')).optional(),
   socials: socialsSchema.optional(),
 });
 
@@ -73,7 +73,7 @@ export async function GET(req: Request) {
         }
         const userId = new Types.ObjectId(decoded.userId);
 
-        const user = await User.findById(userId).populate('roles');
+        const user = await User.findById(userId);
 
         if (!user || user.isDeleted) {
             return NextResponse.json({ message: 'User not found.' }, { status: 404 });
