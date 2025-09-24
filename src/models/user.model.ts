@@ -15,13 +15,21 @@ export interface IAddress extends Document {
   isDefault: boolean;
 }
 
+export interface ISocials {
+    twitter?: string;
+    linkedin?: string;
+    instagram?: string;
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
   password?: string; // Password is not always sent back
   phone?: string;
+  whatsapp?: string;
   addresses: IAddress[];
+  socials?: ISocials;
   profilePicUrl?: string;
   roles: Types.ObjectId[];
   brand: string; // The permanent name of the brand the user belongs to
@@ -43,6 +51,12 @@ const AddressSchema: Schema<IAddress> = new Schema({
   isDefault: { type: Boolean, default: false },
 });
 
+const SocialsSchema: Schema<ISocials> = new Schema({
+    twitter: { type: String },
+    linkedin: { type: String },
+    instagram: { type: String },
+}, { _id: false });
+
 
 const UserSchema: Schema<IUser> = new Schema({
   firstName: { type: String, required: true },
@@ -50,7 +64,9 @@ const UserSchema: Schema<IUser> = new Schema({
   email: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true, select: false },
   phone: { type: String },
+  whatsapp: { type: String },
   addresses: [AddressSchema],
+  socials: SocialsSchema,
   profilePicUrl: { type: String },
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
   brand: { type: String, index: true, required: true },

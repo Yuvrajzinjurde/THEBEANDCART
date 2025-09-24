@@ -17,11 +17,19 @@ interface DecodedToken {
   userId: string;
 }
 
+const socialsSchema = z.object({
+  twitter: z.string().optional(),
+  linkedin: z.string().optional(),
+  instagram: z.string().optional(),
+});
+
 const profileFormSchema = z.object({
   firstName: z.string().min(1, "First name is required."),
   lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
-  profilePicUrl: z.string().optional(), // Allow any string, including data URIs or empty strings
+  whatsapp: z.string().optional(),
+  profilePicUrl: z.string().url().or(z.literal('')).optional(),
+  socials: socialsSchema.optional(),
 });
 
 const addressSchema = z.object({
@@ -121,7 +129,9 @@ export async function PUT(req: Request) {
             user.firstName = profile.firstName;
             user.lastName = profile.lastName;
             user.phone = profile.phone;
+            user.whatsapp = profile.whatsapp;
             user.profilePicUrl = profile.profilePicUrl;
+            user.socials = profile.socials;
         }
 
         if (addresses) {
