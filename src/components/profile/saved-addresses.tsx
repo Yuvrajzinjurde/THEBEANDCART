@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState } from 'react';
@@ -12,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PlusCircle, Trash2, Edit, Home, Briefcase, Star, X } from "lucide-react";
 import {
   Dialog,
@@ -269,3 +269,5 @@ export function SavedAddresses({ user, onUserUpdate }: SavedAddressesProps) {
         </Card>
     );
 }
+
+    
