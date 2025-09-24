@@ -247,7 +247,7 @@ function ProfilePage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleAccountAction('deactivate')} disabled={isActionLoading}>
+                        <AlertDialogAction onClick={() => handleAccountAction('deactivate')} disabled={isActionLoading} className={buttonVariants({ variant: 'destructive' })}>
                             {isActionLoading && <Loader className="mr-2"/>}
                             Deactivate
                         </AlertDialogAction>
