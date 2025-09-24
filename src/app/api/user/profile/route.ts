@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
@@ -10,10 +11,30 @@ interface DecodedToken {
   userId: string;
 }
 
-const profileSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+const profileFormSchema = z.object({
+  firstName: z.string().min(1, "First name is required."),
+  lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
+  profilePicUrl: z.string().optional(), // Allow any string, including data URIs or empty strings
+});
+
+const addressSchema = z.object({
+  _id: z.string().optional(), // Can be undefined for new addresses
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().min(10, "Phone number is required"),
+  street: z.string().min(1, "Street is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zip: z.string().min(1, "ZIP code is required"),
+  country: z.string().min(1, "Country is required"),
+  type: z.enum(['Home', 'Office', 'Other']),
+  otherType: z.string().optional(),
+  isDefault: z.boolean(),
+});
+
+const updateProfileSchema = z.object({
+    profile: profileFormSchema.optional(),
+    addresses: z.array(addressSchema).optional(),
 });
 
 
@@ -76,17 +97,40 @@ export async function PUT(req: Request) {
         const userId = new Types.ObjectId(decoded.userId);
 
         const body = await req.json();
-        const validation = profileSchema.safeParse(body);
-
+        const validation = updateProfileSchema.safeParse(body);
+        
         if (!validation.success) {
+            console.error("Profile update validation error:", validation.error.flatten());
             return NextResponse.json({ message: 'Invalid data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
-        
-        const updatedUser = await User.findByIdAndUpdate(userId, validation.data, { new: true });
 
-        if (!updatedUser) {
+        const user = await User.findById(userId);
+        if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
+        
+        const { profile, addresses } = validation.data;
+
+        if (profile) {
+            user.firstName = profile.firstName;
+            user.lastName = profile.lastName;
+            user.phone = profile.phone;
+            user.profilePicUrl = profile.profilePicUrl;
+        }
+
+        if (addresses) {
+            // If default is being set, ensure only one is default
+            const defaultAddressIndex = addresses.findIndex(addr => addr.isDefault);
+            if (defaultAddressIndex !== -1) {
+                addresses.forEach((addr, index) => {
+                    addr.isDefault = index === defaultAddressIndex;
+                });
+            }
+            
+            user.addresses = addresses.map(addr => ({ ...addr, _id: addr._id ? new Types.ObjectId(addr._id) : new Types.ObjectId() })) as any;
+        }
+
+        const updatedUser = await user.save();
         
         return NextResponse.json({ message: 'Profile updated successfully', user: updatedUser }, { status: 200 });
 
