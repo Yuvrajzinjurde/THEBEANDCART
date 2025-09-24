@@ -21,7 +21,14 @@ export async function GET(req: Request) {
         if (!token) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
+
+        let decoded;
+        try {
+            decoded = jwtDecode<DecodedToken>(token);
+        } catch (error) {
+            return NextResponse.json({ message: 'Invalid or expired token.' }, { status: 401 });
+        }
+        
         const userId = decoded.userId;
 
         const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
@@ -33,9 +40,6 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error('Get Cart Error:', error);
-        if (error instanceof Error && error.name === 'ExpiredSignatureError') {
-            return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
-        }
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
