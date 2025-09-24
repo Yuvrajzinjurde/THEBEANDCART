@@ -15,6 +15,11 @@ const twilioClient = new Twilio(
 
 export async function POST(req: Request) {
   try {
+
+    if (!process.env.TWILIO_PHONE_NUMBER) {
+        throw new Error('Twilio phone number is not configured in environment variables.');
+    }
+
     const body = await req.json();
     const validation = sendOtpSchema.safeParse(body);
 
@@ -30,7 +35,7 @@ export async function POST(req: Request) {
     // Use the Twilio client to send the SMS
     await twilioClient.messages.create({
       body: `Your OTP is: ${otp}`,
-      from: process.env.TWILIO_PHONE_NUMBER!,
+      from: process.env.TWILIO_PHONE_NUMBER,
       to: phone, 
     });
 
@@ -39,8 +44,12 @@ export async function POST(req: Request) {
       message: `OTP sent successfully to ${phone}.`,
     }, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Send OTP Error:', error);
+    // Provide a more specific message if the error is from Twilio configuration
+    if (error.message.includes('Twilio phone number is not configured')) {
+        return NextResponse.json({ message: 'The application is not configured to send SMS. Please contact support.' }, { status: 500 });
+    }
     return NextResponse.json({ message: 'An internal server error occurred while sending OTP' }, { status: 500 });
   }
 }
