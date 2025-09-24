@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader } from "@/components/ui/loader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User as UserIcon, MapPin, Edit } from "lucide-react";
+import { ArrowLeft, User as UserIcon, MapPin, Edit, AlertCircle } from "lucide-react";
 import Header from "@/components/header";
 import { GlobalFooter } from "@/components/global-footer";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import type { IUser } from "@/models/user.model";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
 
 const profileFormSchema = z.object({
   firstName: z.string().min(1, "First name is required."),
@@ -29,10 +31,11 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 function ProfilePage() {
-    const { user: authUser, token, loading: authLoading, logout } = useAuth();
+    const { token, loading: authLoading, logout } = useAuth();
     const router = useRouter();
     const [user, setUser] = useState<IUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,11 +52,14 @@ function ProfilePage() {
     useEffect(() => {
         const fetchProfile = async () => {
             if (!token) {
+                // This case should be handled by withAuth, but as a safeguard:
                 setLoading(false);
+                logout(); // Ensure clean state and trigger redirect
                 return;
             };
 
             setLoading(true);
+            setError(null);
             try {
                 const response = await fetch('/api/user/profile', {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -70,7 +76,7 @@ function ProfilePage() {
                             throw new Error(errorData.message || 'Failed to fetch profile.');
                         }
                     } catch (e) {
-                        throw new Error('Failed to fetch profile. The server returned an invalid response.');
+                         throw new Error('Failed to fetch profile. The server returned an invalid response.');
                     }
                     return; 
                 }
@@ -84,14 +90,13 @@ function ProfilePage() {
                     phone: data.user.phone || '',
                 });
             } catch (err: any) {
-                toast.error(err.message);
+                setError(err.message);
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
         
-        // Only fetch if auth is resolved and token exists
         if (!authLoading) {
             fetchProfile();
         }
@@ -167,7 +172,7 @@ function ProfilePage() {
         </Form>
     );
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <Loader className="h-12 w-12" />
@@ -175,9 +180,29 @@ function ProfilePage() {
         );
     }
     
+    if (error) {
+        return (
+            <>
+            <Header />
+            <main className="container flex-grow py-8 px-10">
+                 <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            </main>
+            <GlobalFooter />
+            </>
+        )
+    }
+
     if (!user) {
-        // This should not be reached if `withAuth` is working correctly, but it's a safe fallback.
-        return null;
+        // This should theoretically not be reached if withAuth works, but it's a fallback.
+        return (
+             <div className="flex h-screen w-full items-center justify-center">
+                <p>Could not load profile. You may be logged out.</p>
+            </div>
+        );
     }
 
     return (

@@ -61,7 +61,14 @@ export async function PUT(req: Request) {
         if (!token) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
+
+        let decoded;
+        try {
+            decoded = jwtDecode<DecodedToken>(token);
+        } catch (error) {
+             return NextResponse.json({ message: 'Invalid or expired token.' }, { status: 401 });
+        }
+
 
         if (!Types.ObjectId.isValid(decoded.userId)) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
