@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { suggestDriedRose } from '@/ai/flows/suggest-dried-rose-flow';
+import { suggestBoxes } from '@/ai/flows/suggest-boxes-flow';
 import PlatformSettings from '@/models/platform.model';
 import dbConnect from '@/lib/mongodb';
 
@@ -9,21 +9,21 @@ export async function POST(req: Request) {
     await dbConnect();
     const settings = await PlatformSettings.findOne({});
     if (!settings || !settings.aiEnabled) {
-      return NextResponse.json({ shouldSuggest: false, suggestionText: '' });
+      return NextResponse.json({ suggestedBoxIds: [] });
     }
 
-    const { occasion } = await req.json();
+    const { occasion, boxes } = await req.json();
 
-    if (!occasion) {
-      return NextResponse.json({ message: 'Occasion is required' }, { status: 400 });
+    if (!occasion || !boxes) {
+      return NextResponse.json({ message: 'Occasion and boxes are required' }, { status: 400 });
     }
     
-    const suggestion = await suggestDriedRose({ occasion });
+    const suggestion = await suggestBoxes({ occasion, boxes });
     
     return NextResponse.json(suggestion, { status: 200 });
 
   } catch (error: any) {
-    console.error('AI Suggestion Error:', error);
+    console.error('AI Box Suggestion Error:', error);
     return NextResponse.json({ message: error.message || 'An internal server error occurred' }, { status: 500 });
   }
 }
