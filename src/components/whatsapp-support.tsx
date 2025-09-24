@@ -27,6 +27,7 @@ import { Label } from "./ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import type { IOrder } from "@/models/order.model";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 
 type HelpTopic = "order" | "payment" | "general";
 
@@ -65,25 +66,13 @@ export function WhatsAppSupport() {
     let finalMessage = "";
     switch (topic) {
         case "order":
-            if (!selectedOrderId) {
-                toast.error("Please select an order.");
-                return;
-            }
             finalMessage = `Hello, I need help with my order.\n\nOrder ID: ${selectedOrderId}\n\nMy issue is: ${message}`;
             break;
         case "payment":
-             if (!message) {
-                toast.error("Please describe your payment issue.");
-                return;
-            }
             finalMessage = `Hello, I have a payment query.\n\nDetails: ${message}`;
             break;
         case "general":
         default:
-             if (!message) {
-                toast.error("Please enter your question.");
-                return;
-            }
             finalMessage = `Hello, I have a question: ${message}`;
             break;
     }
@@ -95,6 +84,13 @@ export function WhatsAppSupport() {
     setTopic("general");
     setSelectedOrderId("");
     setMessage("");
+  };
+
+  const isFormValid = () => {
+    if (topic === 'order') {
+        return !!selectedOrderId && !!message;
+    }
+    return !!message;
   };
 
   return (
@@ -174,7 +170,13 @@ export function WhatsAppSupport() {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSend}>Send on WhatsApp</Button>
+          <Button 
+            onClick={handleSend}
+            disabled={!isFormValid()}
+            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400"
+          >
+            Send on WhatsApp
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
