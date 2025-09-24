@@ -52,9 +52,9 @@ function ProfilePage() {
     useEffect(() => {
         const fetchProfile = async () => {
             if (!token) {
-                // This case should be handled by withAuth, but as a safeguard:
+                // withAuth should prevent this, but as a safeguard.
                 setLoading(false);
-                logout(); // Ensure clean state and trigger redirect
+                setError("Authentication token is missing. Please log in.");
                 return;
             };
 
@@ -65,23 +65,13 @@ function ProfilePage() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
+                const data = await response.json();
+
                 if (!response.ok) {
-                    let errorData;
-                    try {
-                        errorData = await response.json();
-                        if (response.status === 401) {
-                            toast.error("Your session has expired. Please log in again.");
-                            logout();
-                        } else {
-                            throw new Error(errorData.message || 'Failed to fetch profile.');
-                        }
-                    } catch (e) {
-                         throw new Error('Failed to fetch profile. The server returned an invalid response.');
-                    }
-                    return; 
+                    // Always expect JSON, even for errors.
+                    throw new Error(data.message || 'Failed to fetch profile.');
                 }
 
-                const data = await response.json();
                 setUser(data.user);
                 form.reset({
                     firstName: data.user.firstName,
@@ -89,9 +79,11 @@ function ProfilePage() {
                     email: data.user.email,
                     phone: data.user.phone || '',
                 });
+
             } catch (err: any) {
-                setError(err.message);
-                console.error(err);
+                // Catch both network errors and JSON parsing errors
+                console.error("Profile fetch error:", err);
+                setError(err.message || "An unexpected error occurred while fetching your profile.");
             } finally {
                 setLoading(false);
             }
@@ -101,7 +93,7 @@ function ProfilePage() {
             fetchProfile();
         }
 
-    }, [token, authLoading, form, logout]);
+    }, [token, authLoading, form]);
 
     async function onSubmit(data: ProfileFormValues) {
         setIsSubmitting(true);
@@ -172,35 +164,64 @@ function ProfilePage() {
         </Form>
     );
 
-    if (loading || authLoading) {
-        return (
-            <div className="flex h-screen w-full items-center justify-center">
-                <Loader className="h-12 w-12" />
-            </div>
-        );
-    }
-    
-    if (error) {
-        return (
-            <>
-            <Header />
-            <main className="container flex-grow py-8 px-10">
+    const renderContent = () => {
+        if (loading || authLoading) {
+            return (
+                <div className="flex h-64 w-full items-center justify-center">
+                    <Loader className="h-12 w-12" />
+                </div>
+            );
+        }
+        
+        if (error) {
+            return (
                  <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Error</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
-            </main>
-            <GlobalFooter />
-            </>
-        )
-    }
+            )
+        }
 
-    if (!user) {
-        // This should theoretically not be reached if withAuth works, but it's a fallback.
+        if (!user) {
+            return (
+                 <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>No Profile Data</AlertTitle>
+                    <AlertDescription>Could not load user profile data.</AlertDescription>
+                </Alert>
+            );
+        }
+
         return (
-             <div className="flex h-screen w-full items-center justify-center">
-                <p>Could not load profile. You may be logged out.</p>
+            <div className="grid md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 space-y-8">
+                     <Card>
+                        <CardHeader className="flex flex-row justify-between items-start">
+                            <div>
+                                <CardTitle className="flex items-center gap-2"><UserIcon /> Personal Information</CardTitle>
+                                <CardDescription>View and edit your personal details.</CardDescription>
+                            </div>
+                            {!isEditing && (
+                                <Button variant="outline" onClick={() => setIsEditing(true)}><Edit className="mr-2 h-4 w-4" />Edit</Button>
+                            )}
+                        </CardHeader>
+                        <CardContent>
+                            {isEditing ? <ProfileForm /> : <UserDetails user={user} />}
+                        </CardContent>
+                    </Card>
+                </div>
+                 <div className="md:col-span-1">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><MapPin/>Saved Addresses</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground py-10">
+                            <p>No saved addresses yet.</p>
+                            <Button variant="link">Add a new address</Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         );
     }
@@ -216,36 +237,7 @@ function ProfilePage() {
                     </Button>
                     <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
                 </div>
-
-                <div className="grid md:grid-cols-3 gap-8">
-                    <div className="md:col-span-2 space-y-8">
-                         <Card>
-                            <CardHeader className="flex flex-row justify-between items-start">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2"><UserIcon /> Personal Information</CardTitle>
-                                    <CardDescription>View and edit your personal details.</CardDescription>
-                                </div>
-                                {!isEditing && (
-                                    <Button variant="outline" onClick={() => setIsEditing(true)}><Edit className="mr-2 h-4 w-4" />Edit</Button>
-                                )}
-                            </CardHeader>
-                            <CardContent>
-                                {isEditing ? <ProfileForm /> : <UserDetails user={user} />}
-                            </CardContent>
-                        </Card>
-                    </div>
-                     <div className="md:col-span-1">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><MapPin/>Saved Addresses</CardTitle>
-                            </CardHeader>
-                            <CardContent className="text-center text-muted-foreground py-10">
-                                <p>No saved addresses yet.</p>
-                                <Button variant="link">Add a new address</Button>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                {renderContent()}
             </main>
             <GlobalFooter />
         </>

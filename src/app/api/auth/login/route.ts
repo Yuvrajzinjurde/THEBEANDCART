@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
+    // If a user exists but has no password (e.g. social login in future), this prevents a crash.
     if (!user.password) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
