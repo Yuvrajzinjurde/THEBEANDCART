@@ -18,9 +18,22 @@ export async function GET(req: Request) {
 
         const token = req.headers.get('authorization')?.split(' ')[1];
         if (!token) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+            // If not logged in, return an empty wishlist structure, not an error
+            return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
+        
+        let decoded;
+        try {
+             decoded = jwtDecode<DecodedToken>(token);
+        } catch (error) {
+            // If token is invalid, return empty wishlist
+            return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
+        }
+
+        if (!Types.ObjectId.isValid(decoded.userId)) {
+             return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
+        }
+        
         const userId = decoded.userId;
 
         const wishlist = await Wishlist.findOne({ userId }).populate({
@@ -38,9 +51,6 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error('Get Wishlist Error:', error);
-        if (error instanceof Error && error.name === 'ExpiredSignatureError') {
-            return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
-        }
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
@@ -116,8 +126,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
-
-
-
-
-
