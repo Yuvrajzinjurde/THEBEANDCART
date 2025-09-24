@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
-import { CreditCard, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { CreditCard, LogOut, User as UserIcon, Settings, Package } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { usePathname } from "next/navigation";
 
@@ -41,7 +41,6 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
   }
 
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "U";
-  const userBrand = user.brand || 'reeva';
 
   if (isCollapsed) {
     return (
@@ -64,18 +63,26 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                  <DropdownMenuGroup>
                     {user.roles.includes('admin') ? (
                         <DropdownMenuItem asChild>
-                                <Link href="/admin/dashboard">
-                                    <UserIcon className="mr-2 h-4 w-4" />
-                                    <span>Dashboard</span>
-                                </Link>
-                            </DropdownMenuItem>
+                            <Link href="/admin/dashboard">
+                                <UserIcon className="mr-2 h-4 w-4" />
+                                <span>Dashboard</span>
+                            </Link>
+                        </DropdownMenuItem>
                     ) : (
+                        <>
                             <DropdownMenuItem asChild>
-                                <Link href={`/${userBrand}/home`}>
+                                <Link href="/profile">
                                     <UserIcon className="mr-2 h-4 w-4" />
                                     <span>Profile</span>
                                 </Link>
                             </DropdownMenuItem>
+                             <DropdownMenuItem asChild>
+                                <Link href="/orders">
+                                    <Package className="mr-2 h-4 w-4" />
+                                    <span>My Orders</span>
+                                </Link>
+                            </DropdownMenuItem>
+                        </>
                     )}
                     <DropdownMenuItem asChild>
                         <Link href="#">
@@ -129,12 +136,20 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                             </Link>
                         </DropdownMenuItem>
                 ) : (
+                    <>
                         <DropdownMenuItem asChild>
-                            <Link href={`/${userBrand}/home`}>
+                            <Link href="/profile">
                                 <UserIcon className="mr-2 h-4 w-4" />
                                 <span>Profile</span>
                             </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href="/orders">
+                                <Package className="mr-2 h-4 w-4" />
+                                <span>My Orders</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    </>
                 )}
                 <DropdownMenuItem asChild>
                     <Link href="#">
