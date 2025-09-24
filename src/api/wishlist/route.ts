@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
         const token = req.headers.get('authorization')?.split(' ')[1];
         if (!token) {
-            // If not logged in, return an empty wishlist structure, not an error
+            // Return empty list for guests, not an error
             return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
         }
         
@@ -26,12 +26,13 @@ export async function GET(req: Request) {
         try {
              decoded = jwtDecode<DecodedToken>(token);
         } catch (error) {
-            // If token is invalid, return empty wishlist
-            return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
+            // If token is invalid or expired, it's an auth error
+            return NextResponse.json({ message: "Invalid or expired token." }, { status: 401 });
         }
 
         if (!Types.ObjectId.isValid(decoded.userId)) {
-             return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
+             // Invalid user ID format in token
+             return NextResponse.json({ message: "Invalid user ID in token." }, { status: 401 });
         }
         
         const userId = decoded.userId;
@@ -39,7 +40,6 @@ export async function GET(req: Request) {
         const wishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products',
             model: Product,
-            // Explicitly select the stock field
             select: 'name images sellingPrice mrp category rating storefront stock brand',
         });
         

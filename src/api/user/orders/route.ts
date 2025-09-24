@@ -22,13 +22,13 @@ export async function GET(req: Request) {
         try {
             decoded = jwtDecode<DecodedToken>(token);
         } catch (error) {
-             // If token is invalid or expired, return an empty list gracefully
-             return NextResponse.json({ orders: [] }, { status: 200 });
+             // If token is invalid or expired, it's an auth error
+             return NextResponse.json({ message: "Invalid or expired token." }, { status: 401 });
         }
         
         if (!Types.ObjectId.isValid(decoded.userId)) {
-             // If the decoded ID is not a valid format, it can't be a real user
-            return NextResponse.json({ orders: [] }, { status: 200 });
+             // Invalid user ID format in token
+             return NextResponse.json({ message: "Invalid user ID in token." }, { status: 401 });
         }
         const userId = new Types.ObjectId(decoded.userId);
 
