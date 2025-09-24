@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -18,8 +19,6 @@ import { useAuth } from '@/hooks/use-auth';
 import { Separator } from '../ui/separator';
 import { Checkbox } from "@/components/ui/checkbox";
 
-
-const MOCK_OTP = "123456";
 
 const socialsSchema = z.object({
   twitter: z.string().optional(),
@@ -53,7 +52,9 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
 
     const [otpSentTo, setOtpSentTo] = useState<'phone' | 'whatsapp' | null>(null);
     const [otpValue, setOtpValue] = useState('');
+    const [generatedOtp, setGeneratedOtp] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
+    const [isSendingOtp, setIsSendingOtp] = useState(false);
 
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
@@ -132,21 +133,39 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
         setIsEditing(false);
     };
 
-    const handleSendOtp = (type: 'phone' | 'whatsapp') => {
+    const handleSendOtp = async (type: 'phone' | 'whatsapp') => {
         const number = type === 'phone' ? phoneValue : whatsappValue;
         if (!number || number.length < 10) {
             toast.warn(`Please enter a valid ${type} number.`);
             return;
         }
-        setOtpSentTo(type);
-        toast.info(`OTP sent to ${number}. Please use ${MOCK_OTP} to verify.`);
+        setIsSendingOtp(true);
+        try {
+            const response = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: number }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            
+            setGeneratedOtp(result.otp); // In a real app, this wouldn't be returned
+            setOtpSentTo(type);
+            // This toast is for simulation. In a real app, the user would check their phone.
+            toast.info(`OTP sent to ${number}. Please use ${result.otp} to verify.`);
+
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to send OTP.');
+        } finally {
+            setIsSendingOtp(false);
+        }
     };
 
     const handleVerifyOtp = () => {
         if (!otpSentTo) return;
         setIsVerifying(true);
-        setTimeout(() => { // Mock OTP verification
-            if (otpValue === MOCK_OTP) {
+        setTimeout(() => {
+            if (otpValue === generatedOtp) {
                 if (otpSentTo === 'phone') {
                     form.setValue('isPhoneVerified', true, { shouldDirty: true });
                 } else {
@@ -155,11 +174,12 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                 toast.success(`${otpSentTo.charAt(0).toUpperCase() + otpSentTo.slice(1)} number verified!`);
                 setOtpSentTo(null);
                 setOtpValue('');
+                setGeneratedOtp('');
             } else {
                 toast.error("Invalid OTP. Please try again.");
             }
             setIsVerifying(false);
-        }, 1000);
+        }, 500); // Mock verification delay
     };
 
 
@@ -186,7 +206,7 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                             </Button>
                         )}
                     </CardHeader>
-                    <fieldset disabled={!isEditing || isSubmitting}>
+                    <fieldset disabled={!isEditing || isSubmitting} className="group">
                         <CardContent className="space-y-8">
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-1">
@@ -254,7 +274,10 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                                     {isPhoneVerified ? (
                                                         <ShieldCheck className="h-6 w-6 text-green-500" />
                                                     ) : phoneValue && phoneValue.length >= 10 && otpSentTo !== 'phone' && (
-                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleSendOtp('phone')}>Verify</Button>
+                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleSendOtp('phone')} disabled={isSendingOtp}>
+                                                            {isSendingOtp && <Loader className="mr-1 h-4 w-4" />}
+                                                            Verify
+                                                        </Button>
                                                     )}
                                                 </div>
                                                 <FormMessage />
@@ -268,7 +291,10 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                                     {isWhatsappVerified ? (
                                                         <ShieldCheck className="h-6 w-6 text-green-500" />
                                                     ) : whatsappValue && whatsappValue.length >= 10 && otpSentTo !== 'whatsapp' && (
-                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleSendOtp('whatsapp')}>Verify</Button>
+                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleSendOtp('whatsapp')} disabled={isSendingOtp}>
+                                                            {isSendingOtp && <Loader className="mr-1 h-4 w-4" />}
+                                                            Verify
+                                                        </Button>
                                                     )}
                                                 </div>
                                                 <FormMessage />

@@ -13,5 +13,6 @@ import '@/ai/flows/suggest-product-price-flow.ts';
 import '@/ai/flows/suggest-dried-rose-flow.ts';
 import '@/ai/flows/suggest-boxes-flow.ts';
 import '@/ai/flows/suggest-hamper-message-flow.ts';
+import '@/ai/flows/generate-otp-flow.ts';
 
 
