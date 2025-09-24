@@ -65,7 +65,7 @@ export default function Header() {
     const queryBrand = searchParams.get('storefront');
     
     const globalRoutes = ['/admin', '/legal', '/', '/wishlist', '/create-hamper', '/cart', '/search', '/orders', '/profile'];
-    const isGlobalRoute = globalRoutes.some(route => pathname.startsWith(route));
+    const isGlobalRoute = globalRoutes.some(route => pathname.startsWith(route)) || pathname === '/';
 
     if (isGlobalRoute) {
         return null;
@@ -109,50 +109,51 @@ export default function Header() {
 
   useEffect(() => {
     async function fetchBrandData() {
-      if (!brandName) {
-        // Fetch all products for global pages to power search suggestions
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        if (!brandName) {
+            // Fetch all products for global pages to power search suggestions
+            try {
+                const productsRes = await fetch(`${origin}/api/products?limit=1000`);
+                if (productsRes.ok) {
+                    const { products: productData } = await productsRes.json();
+                    setAllProducts(productData);
+                }
+            } catch (error) {
+                console.error("Failed to fetch all products for header", error);
+            }
+            setBrand(null);
+            return;
+        };
         try {
-            const productsRes = await fetch(`/api/products?limit=1000`);
+            const [brandRes, productsRes] = await Promise.all([
+                fetch(`${origin}/api/brands/${brandName}`),
+                fetch(`${origin}/api/products?storefront=${brandName}&limit=1000`)
+            ]);
+
+            if (brandRes.ok) {
+                const { brand: brandData } = await brandRes.json();
+                setBrand(brandData);
+            } else {
+                setBrand(null);
+            }
+
             if (productsRes.ok) {
                 const { products: productData } = await productsRes.json();
                 setAllProducts(productData);
+            } else {
+                setAllProducts([]);
             }
+
         } catch (error) {
-            console.error("Failed to fetch all products for header", error);
+            console.error("Failed to fetch brand data for header:", error);
+            setBrand(null);
+            setAllProducts([]);
         }
-        setBrand(null);
-        return;
-      };
-      try {
-        const [brandRes, productsRes] = await Promise.all([
-          fetch(`/api/brands/${brandName}`),
-          fetch(`/api/products?storefront=${brandName}&limit=1000`)
-        ]);
-
-        if (brandRes.ok) {
-          const { brand: brandData } = await brandRes.json();
-          setBrand(brandData);
-        } else {
-          setBrand(null);
-        }
-
-        if (productsRes.ok) {
-          const { products: productData } = await productsRes.json();
-          setAllProducts(productData);
-        } else {
-          setAllProducts([]);
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch brand data for header", error);
-        setBrand(null);
-        setAllProducts([]);
-      }
     }
     if (hasMounted) {
         fetchBrandData();
     }
-  }, [brandName, hasMounted]);
+}, [brandName, hasMounted]);
   
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
