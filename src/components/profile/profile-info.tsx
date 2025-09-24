@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -117,27 +116,27 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <fieldset disabled={!isEditing || isSubmitting}>
-                    <Card className="shadow-lg">
-                        <CardHeader className="flex flex-row items-start justify-between">
-                            <div>
-                                <CardTitle>My Profile</CardTitle>
-                                <CardDescription>Manage your personal and contact information.</CardDescription>
-                            </div>
-                             {isEditing ? (
-                                <div className="flex gap-2">
-                                    <Button type="button" variant="ghost" onClick={handleCancel}>Cancel</Button>
-                                    <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
-                                        {isSubmitting && <Loader className="mr-2" />}
-                                        Save Changes
-                                    </Button>
-                                </div>
-                            ) : (
-                                <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
-                                    <Edit className="mr-2 h-4 w-4"/> Edit Profile
+                <Card className="shadow-lg">
+                    <CardHeader className="flex flex-row items-start justify-between">
+                        <div>
+                            <CardTitle>My Profile</CardTitle>
+                            <CardDescription>Manage your personal and contact information.</CardDescription>
+                        </div>
+                        {isEditing ? (
+                            <div className="flex gap-2">
+                                <Button type="button" variant="ghost" onClick={handleCancel}>Cancel</Button>
+                                <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
+                                    {isSubmitting && <Loader className="mr-2" />}
+                                    Save Changes
                                 </Button>
-                            )}
-                        </CardHeader>
+                            </div>
+                        ) : (
+                            <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
+                                <Edit className="mr-2 h-4 w-4"/> Edit Profile
+                            </Button>
+                        )}
+                    </CardHeader>
+                    <fieldset disabled={!isEditing || isSubmitting}>
                         <CardContent className="space-y-8">
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-1">
@@ -255,10 +254,9 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                     />
                                 </div>
                             </div>
-
                         </CardContent>
-                    </Card>
-                </fieldset>
+                    </fieldset>
+                </Card>
             </form>
         </Form>
     );
