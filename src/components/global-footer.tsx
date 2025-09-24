@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -7,6 +8,7 @@ import { Twitter, Facebook, Instagram, Linkedin } from "lucide-react";
 
 import { Logo } from "@/components/logo";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { Skeleton } from "./ui/skeleton";
 
 export const GlobalFooter = () => {
     const { settings } = usePlatformSettingsStore();
@@ -18,9 +20,9 @@ export const GlobalFooter = () => {
                         {settings.platformLogoUrl ? (
                             <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                         ) : (
-                            <Logo className="h-6 w-6 text-primary" />
+                            <Skeleton className="h-8 w-8 rounded-full" />
                         )}
-                        <span className="font-bold">{settings.platformName || 'The Brand Cart'}</span>
+                        <span className="font-bold">{settings.platformName || <Skeleton className="h-6 w-24" />}</span>
                     </div>
                     <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
                         <Link href="/legal/about-us" className="hover:text-primary">About Us</Link>

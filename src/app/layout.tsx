@@ -40,7 +40,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
         <head>
             {platformSettings?.platformFaviconUrl && (
-                <link rel="icon" href={platformSettings.platformFaviconUrl} />
+                <link rel="icon" href={platformSettings.platformFaviconUrl} sizes="any" />
             )}
             <title>{platformSettings?.platformName || 'The Brand Cart'}</title>
             <ThemeInjector theme={theme} />

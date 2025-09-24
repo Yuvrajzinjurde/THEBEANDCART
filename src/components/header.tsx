@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -31,6 +32,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import useUserStore from "@/stores/user-store";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { Skeleton } from "./ui/skeleton";
 
 export default function Header() {
   const { user } = useAuth();
@@ -43,7 +45,7 @@ export default function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const { cart, wishlist } = useUserStore();
-  const { settings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
 
   const [hasMounted, setHasMounted] = useState(false);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
@@ -56,7 +58,8 @@ export default function Header() {
   
   useEffect(() => {
     setHasMounted(true);
-  }, []);
+    fetchSettings();
+  }, [fetchSettings]);
   
   const brandName = useMemo(() => {
     if (!hasMounted) return null;
@@ -205,6 +208,7 @@ export default function Header() {
   
   const currentDisplayName = hasMounted && brand && brandName ? brand.displayName : settings.platformName;
   const homeLink = hasMounted && brandName ? `/${brandName}/home` : '/';
+  const logoUrl = hasMounted && brandName ? brand?.logoUrl : settings.platformLogoUrl;
 
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
@@ -233,14 +237,12 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-          {hasMounted && brandName && brand?.logoUrl ? (
-            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-          ) : hasMounted && settings.platformLogoUrl ? (
-             <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+          {logoUrl ? (
+            <Image src={logoUrl} alt={`${currentDisplayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
           ) : (
-            <Logo className="h-8 w-8" />
+            <Skeleton className="h-8 w-8 rounded-full" />
           )}
-          <span className="hidden font-bold text-lg sm:inline-block capitalize">{currentDisplayName}</span>
+          <span className="hidden font-bold text-lg sm:inline-block capitalize">{currentDisplayName || <Skeleton className="h-6 w-24" />}</span>
         </Link>
 
         {brandName && categories.length > 0 && (
@@ -313,12 +315,10 @@ export default function Header() {
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                                {hasMounted && brandName && brand?.logoUrl ? (
-                                    <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-                                ) : hasMounted && settings.platformLogoUrl ? (
-                                    <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+                                {logoUrl ? (
+                                    <Image src={logoUrl} alt={`${currentDisplayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                                 ) : (
-                                    <Logo className="h-8 w-8" />
+                                    <Skeleton className="h-8 w-8 rounded-full" />
                                 )}
                                 <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
                             </Link>
