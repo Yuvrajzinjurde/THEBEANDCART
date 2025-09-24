@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
@@ -63,49 +62,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initializeAuth = async () => {
-      setLoading(true);
       const storedToken = localStorage.getItem('token');
       
       if (storedToken) {
         try {
           const decoded = jwtDecode<User>(storedToken);
           if (decoded.exp * 1000 < Date.now()) {
+            // Token is expired, perform a clean logout
             logout();
-            return; // Explicitly return after logout
+            return;
           }
           
+          // Token is valid, set user and token state first
           setUser(decoded);
           setToken(storedToken);
           
-          // Fetch user-specific data
+          // Now, fetch user-specific data
           const [cartRes, wishlistRes] = await Promise.all([
             fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
             fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
           ]);
           
-          if (cartRes.ok && wishlistRes.ok) {
-            const { cart } = await cartRes.json();
-            setCart(cart);
-            const { wishlist } = await wishlistRes.json();
-            setWishlist(wishlist);
-          } else {
-            // If fetching data fails (e.g. 401), it indicates a session issue.
-            // Instead of logging out immediately which causes a jarring refresh,
-            // we just clear the client-side state. The user will appear logged out.
-            console.error("Failed to fetch user data, session may be invalid. Logging out.");
-            localStorage.removeItem('token');
-            setUser(null);
-            setToken(null);
-            setCart(null);
-            setWishlist(null);
+          // Check if fetches were successful. If not, it means session is invalid on the server.
+          if (!cartRes.ok || !wishlistRes.ok) {
+              console.error("Failed to fetch user data, session may be invalid. Logging out.");
+              logout();
+              return;
           }
+
+          const { cart } = await cartRes.json();
+          setCart(cart);
+          const { wishlist } = await wishlistRes.json();
+          setWishlist(wishlist);
 
         } catch (error) {
           console.error("Invalid token during initialization:", error);
-          logout(); // This handles cases where the token is malformed
+          logout(); 
         }
       }
-      setLoading(false); // Ensure loading is always set to false at the end
+      setLoading(false); 
     }
     initializeAuth();
   }, [logout, setCart, setWishlist]); 
