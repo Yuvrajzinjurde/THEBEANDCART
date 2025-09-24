@@ -68,7 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const decoded = jwtDecode<User>(storedToken);
           
-          // **THE FIX**: Only call logout if the token is definitively expired.
           if (decoded.exp * 1000 < Date.now()) {
             console.log("Session expired, logging out.");
             logout();
@@ -76,28 +75,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
 
-          // If token is valid, set user state and then fetch data.
           setUser(decoded);
           setToken(storedToken);
 
+          // Fetch user-specific data only if the token is valid
           const [cartRes, wishlistRes] = await Promise.all([
             fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
             fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
           ]);
 
-          // Gracefully handle API errors without logging out.
-          if (cartRes.ok) {
-            const { cart } = await cartRes.json();
-            setCart(cart);
+          // If any fetch returns unauthorized, the session is invalid.
+          if (!cartRes.ok || !wishlistRes.ok) {
+            if (cartRes.status === 401 || wishlistRes.status === 401) {
+              console.error("Invalid session token. Logging out.");
+              logout();
+            } else {
+              if (!cartRes.ok) console.error("Failed to fetch cart data during init.");
+              if (!wishlistRes.ok) console.error("Failed to fetch wishlist data during init.");
+            }
           } else {
-            console.error("Failed to fetch cart data during init.");
-          }
-
-          if (wishlistRes.ok) {
-            const { wishlist } = await wishlistRes.json();
-            setWishlist(wishlist);
-          } else {
-            console.error("Failed to fetch wishlist data during init.");
+            const cartData = await cartRes.json();
+            const wishlistData = await wishlistRes.json();
+            setCart(cartData.cart);
+            setWishlist(wishlistData.wishlist);
           }
 
         } catch (error) {
