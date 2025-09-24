@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { UploadCloud, X, Edit, Instagram, Linkedin, ShieldCheck } from "lucide-react";
+import { UploadCloud, X, Edit, Instagram, Linkedin, ShieldCheck, Twitter } from "lucide-react";
 import type { IUser } from "@/models/user.model";
 import { useAuth } from '@/hooks/use-auth';
 import { Separator } from '../ui/separator';
@@ -52,9 +52,11 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
 
     const [otpSentTo, setOtpSentTo] = useState<'phone' | 'whatsapp' | null>(null);
     const [otpValue, setOtpValue] = useState('');
-    const [generatedOtp, setGeneratedOtp] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
     const [isSendingOtp, setIsSendingOtp] = useState(false);
+    
+    // For simulation: in a real app, this would not exist on the client.
+    const STATIC_OTP_FOR_VERIFICATION = "123456";
 
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
@@ -149,10 +151,8 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
             
-            setGeneratedOtp(result.otp); // In a real app, this wouldn't be returned
             setOtpSentTo(type);
-            // This toast is for simulation. In a real app, the user would check their phone.
-            toast.info(`OTP sent to ${number}. Please use ${result.otp} to verify.`);
+            toast.info(`An OTP has been sent to ${number}.`);
 
         } catch (error: any) {
             toast.error(error.message || 'Failed to send OTP.');
@@ -164,8 +164,11 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
     const handleVerifyOtp = () => {
         if (!otpSentTo) return;
         setIsVerifying(true);
+        
+        // This is a simulation. In a real app, you would send the OTP
+        // to your backend for verification against a stored value.
         setTimeout(() => {
-            if (otpValue === generatedOtp) {
+            if (otpValue === STATIC_OTP_FOR_VERIFICATION) {
                 if (otpSentTo === 'phone') {
                     form.setValue('isPhoneVerified', true, { shouldDirty: true });
                 } else {
@@ -174,7 +177,6 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                 toast.success(`${otpSentTo.charAt(0).toUpperCase() + otpSentTo.slice(1)} number verified!`);
                 setOtpSentTo(null);
                 setOtpValue('');
-                setGeneratedOtp('');
             } else {
                 toast.error("Invalid OTP. Please try again.");
             }
@@ -344,9 +346,9 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                             <FormItem>
                                                 <div className="relative">
                                                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16"><path fill="currentColor" d="M9.737 5.562L14.656 0h-1.39L9.032 4.887L5.88 0H1.5l5.21 7.46L1.5 14h1.39l4.63-5.562L11.12 14h4.38zm-1.055 1.5l-.656-.937L3.03 1.333h2.295l3.815 5.45l.656.937l5.24 7.48h-2.296z"/></svg>
+                                                        <Twitter className="h-5 w-5 text-muted-foreground" />
                                                     </div>
-                                                    <FormControl><Input placeholder="https://x.com/username" {...field} className="pl-10" /></FormControl>
+                                                    <FormControl><Input placeholder="https://twitter.com/username" {...field} className="pl-10" /></FormControl>
                                                 </div>
                                             </FormItem>
                                         )}
