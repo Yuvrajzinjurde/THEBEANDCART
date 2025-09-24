@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
@@ -41,11 +41,15 @@ interface DecodedToken {
 export function LoginForm() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const brandName = params.brand as string || 'reeva';
   
   const { settings: platformSettings } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  const callbackUrl = searchParams.get('callbackUrl') || null;
+
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -74,6 +78,11 @@ export function LoginForm() {
       localStorage.setItem('token', result.token);
 
       toast.success(`Welcome back, ${result.name}!`);
+      
+      if (callbackUrl) {
+          router.push(callbackUrl);
+          return;
+      }
 
       // Decode token to get roles and redirect
       const decoded = jwtDecode<DecodedToken>(result.token);
@@ -129,7 +138,7 @@ export function LoginForm() {
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
                     <Link
-                      href={`/${brandName}/forgot-password`}
+                      href={`/forgot-password`}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Forgot password?
@@ -187,7 +196,7 @@ export function LoginForm() {
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
-            href={`/${brandName}/signup`}
+            href={`/signup${callbackUrl ? `?callbackUrl=${callbackUrl}`: ''}`}
             className="font-medium text-primary hover:underline"
           >
             Sign up

@@ -1,9 +1,8 @@
 
-
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -99,6 +98,7 @@ const WishlistSkeleton = () => (
 
 export default function WishlistPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, token, loading: authLoading } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
   const [loading, setLoading] = useState(true);
@@ -106,13 +106,12 @@ export default function WishlistPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        const currentBrand = router.pathname?.split('/')[1] || 'reeva';
-        router.replace(`/${currentBrand}/login`);
+        router.replace(`/login?callbackUrl=${pathname}`);
         return;
       }
       setLoading(false);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, pathname]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
     try {

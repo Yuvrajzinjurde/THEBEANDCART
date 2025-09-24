@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader } from '../ui/loader';
 
@@ -12,6 +12,7 @@ const withAuth = <P extends object>(
 ) => {
   const Wrapper = (props: P) => {
     const router = useRouter();
+    const pathname = usePathname();
     const { user, loading } = useAuth();
 
     useEffect(() => {
@@ -20,8 +21,8 @@ const withAuth = <P extends object>(
       }
 
       if (!user) {
-        // If not logged in, redirect to login page
-        router.replace('/admin/login');
+        // If not logged in, redirect to global login page with a callback
+        router.replace(`/login?callbackUrl=${pathname}`);
         return;
       }
 
@@ -33,10 +34,11 @@ const withAuth = <P extends object>(
         if (userRoles.includes('admin')) {
           router.replace('/admin/dashboard');
         } else {
-          router.replace('/dashboard');
+          // Redirect to main homepage as a default for unauthorized users
+          router.replace('/');
         }
       }
-    }, [user, loading, router]);
+    }, [user, loading, router, pathname]);
 
     // While loading or if user is not yet determined, show a loader
     if (loading || !user) {

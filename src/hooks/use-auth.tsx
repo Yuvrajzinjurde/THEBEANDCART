@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 import useUserStore from '@/stores/user-store';
 
@@ -28,22 +28,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const { setCart, setWishlist } = useUserStore();
 
   const logout = useCallback(() => {
-    const currentPathname = window.location.pathname;
-    const brandName = currentPathname.split('/')[1] || 'reeva';
-    
     localStorage.removeItem('token');
     setUser(null);
     setToken(null);
     setCart(null);
     setWishlist(null);
     
-    const isAuthPage = /login|signup/.test(currentPathname);
-    if (!isAuthPage) {
-      router.push(`/${brandName}/login`);
-    }
+    // Redirect to the global login page
+    router.push(`/login`);
+    
   }, [router, setCart, setWishlist]);
 
   useEffect(() => {

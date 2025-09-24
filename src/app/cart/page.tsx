@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -259,7 +258,7 @@ export default function CartPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.replace(`/reeva/login`);
+        router.replace(`/login`);
         return;
       }
       setLoading(false);
@@ -444,7 +443,7 @@ export default function CartPage() {
                     Add items you want to buy to your cart.
                 </p>
                 <Button asChild className="mt-6">
-                    <Link href={`/reeva/home`}>Continue Shopping</Link>
+                    <Link href={`/`}>Continue Shopping</Link>
                 </Button>
             </div>
         </main>
@@ -513,7 +512,7 @@ export default function CartPage() {
                                                         <GiftBoxIcon />
                                                     </div>
                                                 ) : (
-                                                    <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
+                                                    <Link href={`/${item.product.storefront}/products/${item.product._id}`} className="block h-full w-full">
                                                         <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
                                                     </Link>
                                                 )}
@@ -529,7 +528,7 @@ export default function CartPage() {
 
                                         <div className="flex flex-col flex-grow gap-1">
                                             <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
-                                            <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
+                                            <Link href={isGift ? '#' : `/${item.product.storefront}/products/${item.product._id}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
                                             
                                             {isGift && (
                                                 <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">

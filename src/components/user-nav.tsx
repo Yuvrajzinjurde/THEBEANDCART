@@ -16,7 +16,7 @@ import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
 import { CreditCard, LogOut, User as UserIcon, Settings } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
-import { useParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 interface UserNavProps {
     isCollapsed?: boolean;
@@ -24,8 +24,7 @@ interface UserNavProps {
 
 export function UserNav({ isCollapsed = false }: UserNavProps) {
   const { user, loading, logout } = useAuth();
-  const params = useParams();
-  const brandName = (params.brand as string) || 'reeva';
+  const pathname = usePathname();
 
   if (loading) {
     return <Skeleton className="h-9 w-20" />;
@@ -34,7 +33,7 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
   if (!user) {
     return (
          <Button variant="ghost" asChild>
-            <Link href={`/${brandName}/login`}>
+            <Link href={`/login?callbackUrl=${pathname}`}>
                 Login
             </Link>
         </Button>
