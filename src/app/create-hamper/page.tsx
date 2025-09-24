@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -34,13 +35,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { HamperProgressBar } from "@/components/hamper-progress-bar";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Separator } from "@/components/ui/separator";
 import useUserStore from '@/stores/user-store';
 import Header from "@/components/header";
+import { Logo } from "@/components/logo";
 
 const TOTAL_STEPS = 5;
 

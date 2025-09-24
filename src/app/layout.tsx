@@ -3,11 +3,11 @@
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from '@/hooks/use-auth';
 import { headers } from 'next/headers';
 import { getThemeForRequest } from '@/lib/theme';
 import type { IPlatformSettings } from '@/models/platform.model';
 import { cn } from '@/lib/utils';
+import { Providers } from './providers';
 
 function ThemeInjector({ theme }: { theme: any }) {
     if (!theme) return null;
@@ -46,9 +46,9 @@ export default async function RootLayout({
             <ThemeInjector theme={theme} />
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
-            <AuthProvider>
+            <Providers>
                 {children}
-            </AuthProvider>
+            </Providers>
             <ToastContainer
                 position="top-right"
                 autoClose={5000}

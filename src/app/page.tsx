@@ -10,7 +10,6 @@ import type { IPlatformSettings } from '@/models/platform.model';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift, Lock } from 'lucide-react';
 import {
@@ -28,6 +27,7 @@ import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Header from '@/components/header';
+import { Logo } from '@/components/logo';
 
 
 const LandingPageSkeleton = () => (

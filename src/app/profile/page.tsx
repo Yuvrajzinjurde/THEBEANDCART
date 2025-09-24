@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import withAuth from "@/components/auth/with-auth";
-import { Header } from "@/components/header";
+import Header from "@/components/header";
 import { GlobalFooter } from "@/components/global-footer";
 import { Loader } from "@/components/ui/loader";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";

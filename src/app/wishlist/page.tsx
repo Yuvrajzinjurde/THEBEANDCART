@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -21,7 +22,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
-import { Logo } from "@/components/logo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import Header from "@/components/header";
 import withAuth from "@/components/auth/with-auth";
+import { Logo } from "@/components/logo";
 
 const WishlistFooter = () => {
     const { settings } = usePlatformSettingsStore();
