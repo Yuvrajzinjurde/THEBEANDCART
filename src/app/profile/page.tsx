@@ -29,7 +29,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 function ProfilePage() {
-    const { token, logout } = useAuth();
+    const { user: authUser, token, loading: authLoading, logout } = useAuth();
     const router = useRouter();
     const [user, setUser] = useState<IUser | null>(null);
     const [loading, setLoading] = useState(true);
@@ -48,23 +48,34 @@ function ProfilePage() {
     
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!token) {
-                setLoading(false);
+            // Only fetch if authentication is resolved and a token exists.
+            if (authLoading || !token) {
                 return;
             };
+
+            setLoading(true);
             try {
                 const response = await fetch('/api/user/profile', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                
                 if (!response.ok) {
-                    // If token is invalid/expired, the API will return 401
                     if (response.status === 401) {
                         toast.error("Your session has expired. Please log in again.");
                         logout();
+                    } else {
+                        // Try to get a message from the JSON body, but don't fail if it's not JSON
+                        let errorData;
+                        try {
+                           errorData = await response.json();
+                        } catch (e) {
+                           throw new Error('Failed to fetch profile. The server returned an invalid response.');
+                        }
+                        throw new Error(errorData.message || 'Failed to fetch profile.');
                     }
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to fetch profile.');
+                    return; // Stop execution if response is not ok
                 }
+
                 const data = await response.json();
                 setUser(data.user);
                 form.reset({
@@ -81,7 +92,7 @@ function ProfilePage() {
             }
         };
         fetchProfile();
-    }, [token, form, logout]);
+    }, [token, authLoading, form, logout]);
 
     async function onSubmit(data: ProfileFormValues) {
         setIsSubmitting(true);
@@ -152,7 +163,7 @@ function ProfilePage() {
         </Form>
     );
 
-    if (loading) {
+    if (authLoading || (loading && token)) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <Loader className="h-12 w-12" />
@@ -160,8 +171,7 @@ function ProfilePage() {
         );
     }
     
-    if (!user) {
-        // This case will likely be handled by the withAuth HOC, but it's a good fallback.
+    if (!authUser || !user) {
         return (
              <div className="flex h-screen w-full items-center justify-center">
                 <p>Please log in to view your profile.</p>
