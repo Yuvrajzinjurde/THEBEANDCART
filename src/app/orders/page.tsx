@@ -51,7 +51,7 @@ function MyOrdersPage() {
     return (
         <>
             <Header />
-            <main className="container py-8 px-10 flex-grow">
+            <main className="container py-8 px-4 sm:px-6 lg:px-8 flex-grow">
                 <div className="flex items-center gap-4 mb-6">
                     <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
                         <ArrowLeft className="h-4 w-4" />
@@ -86,34 +86,36 @@ function MyOrdersPage() {
                                 </Button>
                             </div>
                         ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Order ID</TableHead>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Brand</TableHead>
-                                        <TableHead>Total</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Action</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {orders.map((order) => (
-                                        <TableRow key={order._id as string}>
-                                            <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
-                                            <TableCell>{format(new Date(order.createdAt), 'dd MMM, yyyy')}</TableCell>
-                                            <TableCell className="capitalize">{order.brand}</TableCell>
-                                            <TableCell>₹{order.totalAmount.toLocaleString('en-IN')}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="secondary" className="capitalize">{order.status}</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button variant="outline" size="sm">View Details</Button>
-                                            </TableCell>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Order ID</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Brand</TableHead>
+                                            <TableHead>Total</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Action</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {orders.map((order) => (
+                                            <TableRow key={order._id as string}>
+                                                <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
+                                                <TableCell>{format(new Date(order.createdAt), 'dd MMM, yyyy')}</TableCell>
+                                                <TableCell className="capitalize">{order.brand}</TableCell>
+                                                <TableCell>₹{order.totalAmount.toLocaleString('en-IN')}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant="secondary" className="capitalize">{order.status}</Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button variant="outline" size="sm">View Details</Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         )}
                     </CardContent>
                 </Card>

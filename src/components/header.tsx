@@ -64,14 +64,15 @@ export default function Header() {
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
-    let determinedBrand: string | null = null;
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart' || pathname === '/search') {
-      determinedBrand = null;
-    } else {
-      determinedBrand = pathBrand || queryBrand || 'reeva';
+    const globalRoutes = ['/admin', '/legal', '/', '/wishlist', '/create-hamper', '/cart', '/search', '/orders', '/profile'];
+    const isGlobalRoute = globalRoutes.some(route => pathname.startsWith(route));
+
+    if (isGlobalRoute) {
+        return null;
     }
     
-    return determinedBrand;
+    return pathBrand || queryBrand || 'reeva';
+
   }, [hasMounted, pathname, params, searchParams]);
 
   const showSecondaryNav = hasMounted && brandName && pathname === `/${brandName}/home`;
@@ -395,4 +396,3 @@ export default function Header() {
     </header>
   );
 }
-

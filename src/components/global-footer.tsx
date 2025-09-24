@@ -35,7 +35,7 @@ export const GlobalFooter = () => {
                     </div>
                 </div>
                  <div className="mt-4 border-t pt-4">
-                    <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {settings.platformName}. All rights reserved.</p>
+                    <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {settings.platformName || 'The Brand Cart'}. All rights reserved.</p>
                 </div>
             </div>
         </footer>
