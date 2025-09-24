@@ -17,9 +17,26 @@ import type { IUser } from "@/models/user.model";
 import { ProfileInfo } from '@/components/profile/profile-info';
 import { SavedAddresses } from '@/components/profile/saved-addresses';
 import { cn } from '@/lib/utils';
-
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 
 type ProfileSection = 'profile' | 'addresses';
+
+const faqs = [
+    {
+        question: "What happens when I update my email address (or mobile number)?",
+        answer: "Your login email ID (or mobile number) changes. You'll receive all your account-related communication on your updated email address (or mobile number)."
+    },
+    {
+        question: "When will my account be updated with the new email address (or mobile number)?",
+        answer: "It happens as soon as you confirm the verification code sent to your email (or mobile) and save the changes."
+    },
+    {
+        question: "What happens to my existing account when I update my details?",
+        answer: "Updating your details doesn't invalidate your account. Your account remains fully functional. You'll continue to see your order history, saved information, and personal details."
+    }
+];
 
 function ProfilePage() {
     const { token, loading: authLoading, logout } = useAuth();
@@ -144,9 +161,36 @@ function ProfilePage() {
                             </button>
                         </div>
                     </aside>
-                     <div className="md:col-span-3">
+                    <div className="md:col-span-3 space-y-8">
                         {activeSection === 'profile' && <ProfileInfo user={user} onUserUpdate={handleUserUpdate} />}
                         {activeSection === 'addresses' && <SavedAddresses user={user} onUserUpdate={handleUserUpdate} />}
+                        
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Frequently Asked Questions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Accordion type="single" collapsible className="w-full">
+                                    {faqs.map((faq, index) => (
+                                        <AccordionItem key={index} value={`item-${index}`}>
+                                            <AccordionTrigger>{faq.question}</AccordionTrigger>
+                                            <AccordionContent>{faq.answer}</AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border-destructive">
+                            <CardHeader>
+                                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                                <CardDescription>These actions are permanent and cannot be undone.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-col sm:flex-row gap-4">
+                                <Button variant="outline">Deactivate Account</Button>
+                                <Button variant="destructive">Delete Account</Button>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </main>
