@@ -34,6 +34,7 @@ export interface IUser extends Document {
   roles: Types.ObjectId[];
   brand: string; // The permanent name of the brand the user belongs to
   status: 'active' | 'blocked';
+  isDeleted: boolean; // New field for soft delete
   createdAt: string | Date;
   updatedAt: string | Date;
 }
@@ -71,6 +72,7 @@ const UserSchema: Schema<IUser> = new Schema({
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
   brand: { type: String, index: true, required: true },
   status: { type: String, enum: ['active', 'blocked'], default: 'active', index: true },
+  isDeleted: { type: Boolean, default: false, index: true },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

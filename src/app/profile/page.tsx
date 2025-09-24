@@ -20,6 +20,16 @@ import { cn } from '@/lib/utils';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ProfileSection = 'profile' | 'addresses';
 
@@ -45,6 +55,10 @@ function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeSection, setActiveSection] = useState<ProfileSection>('profile');
+    
+    const [isActionLoading, setIsActionLoading] = useState(false);
+    const [isDeactivateAlertOpen, setIsDeactivateAlertOpen] = useState(false);
+    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -89,6 +103,29 @@ function ProfilePage() {
     const handleUserUpdate = (updatedUser: IUser) => {
         setUser(updatedUser);
     };
+    
+    const handleAccountAction = async (action: 'deactivate' | 'delete') => {
+        setIsActionLoading(true);
+        try {
+            const response = await fetch(`/api/user/profile?action=${action}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+
+            toast.success(result.message);
+            logout();
+            router.push('/');
+        } catch (error: any) {
+            toast.error(error.message || `Failed to ${action} account.`);
+        } finally {
+            setIsActionLoading(false);
+            setIsDeactivateAlertOpen(false);
+            setIsDeleteAlertOpen(false);
+        }
+    };
+
 
     if (loading || authLoading) {
         return (
@@ -174,7 +211,7 @@ function ProfilePage() {
                                     {faqs.map((faq, index) => (
                                         <AccordionItem key={index} value={`item-${index}`}>
                                             <AccordionTrigger className="text-left font-normal text-base hover:no-underline">{faq.question}</AccordionTrigger>
-                                            <AccordionContent className="text-muted-foreground">
+                                            <AccordionContent className="text-muted-foreground pt-2 text-base">
                                                 {faq.answer}
                                             </AccordionContent>
                                         </AccordionItem>
@@ -190,8 +227,8 @@ function ProfilePage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="flex flex-col sm:flex-row gap-4">
-                                     <Button variant="outline">Deactivate Account</Button>
-                                    <Button variant="destructive">Delete Account</Button>
+                                     <Button variant="outline" onClick={() => setIsDeactivateAlertOpen(true)}>Deactivate Account</Button>
+                                    <Button variant="destructive" onClick={() => setIsDeleteAlertOpen(true)}>Delete Account</Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -199,6 +236,42 @@ function ProfilePage() {
                 </div>
             </main>
             <GlobalFooter />
+            
+            <AlertDialog open={isDeactivateAlertOpen} onOpenChange={setIsDeactivateAlertOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to deactivate?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Your account will be temporarily disabled, and you will be logged out. You can reactivate it by logging in again later.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleAccountAction('deactivate')} disabled={isActionLoading}>
+                            {isActionLoading && <Loader className="mr-2"/>}
+                            Deactivate
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            
+            <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to permanently delete?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action is permanent and cannot be undone. All your data will be removed, but your order history will be kept for our records.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleAccountAction('delete')} disabled={isActionLoading} className={buttonVariants({ variant: 'destructive' })}>
+                             {isActionLoading && <Loader className="mr-2"/>}
+                            Delete Permanently
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -6,16 +6,30 @@ import User from '@/models/user.model';
 import { jwtDecode } from 'jwt-decode';
 import { Types } from 'mongoose';
 import { z } from 'zod';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('Please define the JWT_SECRET environment variable inside .env');
+}
 
 interface DecodedToken {
   userId: string;
 }
 
+const socialsSchema = z.object({
+  twitter: z.string().optional(),
+  linkedin: z.string().optional(),
+  instagram: z.string().optional(),
+});
+
 const profileFormSchema = z.object({
   firstName: z.string().min(1, "First name is required."),
   lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
-  profilePicUrl: z.string().optional(), // Allow any string, including data URIs or empty strings
+  whatsapp: z.string().optional(),
+  profilePicUrl: z.string().url().or(z.literal('')).or(z.string().startsWith('data:image/')),
+  socials: socialsSchema.optional(),
 });
 
 const addressSchema = z.object({
@@ -59,9 +73,9 @@ export async function GET(req: Request) {
         }
         const userId = new Types.ObjectId(decoded.userId);
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate('roles');
 
-        if (!user) {
+        if (!user || user.isDeleted) {
             return NextResponse.json({ message: 'User not found.' }, { status: 404 });
         }
 
@@ -104,8 +118,8 @@ export async function PUT(req: Request) {
             return NextResponse.json({ message: 'Invalid data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const user = await User.findById(userId);
-        if (!user) {
+        const user = await User.findById(userId).populate('roles');
+        if (!user || user.isDeleted) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
         
@@ -115,7 +129,9 @@ export async function PUT(req: Request) {
             user.firstName = profile.firstName;
             user.lastName = profile.lastName;
             user.phone = profile.phone;
+            user.whatsapp = profile.whatsapp;
             user.profilePicUrl = profile.profilePicUrl;
+            user.socials = profile.socials;
         }
 
         if (addresses) {
@@ -131,11 +147,61 @@ export async function PUT(req: Request) {
         }
 
         const updatedUser = await user.save();
+
+        const userRoles = updatedUser.roles.map((role: any) => role.name);
+
+        const newToken = jwt.sign(
+            { 
+                userId: updatedUser._id, 
+                roles: userRoles, 
+                name: updatedUser.firstName, 
+                brand: updatedUser.brand, 
+                profilePicUrl: updatedUser.profilePicUrl 
+            },
+            JWT_SECRET,
+            { expiresIn: '1d' }
+        );
         
-        return NextResponse.json({ message: 'Profile updated successfully', user: updatedUser }, { status: 200 });
+        return NextResponse.json({ message: 'Profile updated successfully', user: updatedUser, token: newToken }, { status: 200 });
 
     } catch (error) {
         console.error('Failed to update user profile:', error);
+        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    }
+}
+
+
+export async function DELETE(req: Request) {
+    try {
+        await dbConnect();
+        
+        const token = req.headers.get('authorization')?.split(' ')[1];
+        if (!token) {
+            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        }
+        
+        const decoded = jwtDecode<DecodedToken>(token);
+        const userId = decoded.userId;
+
+        if (!userId || !Types.ObjectId.isValid(userId)) {
+            return NextResponse.json({ message: 'Invalid user ID' }, { status: 400 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const action = searchParams.get('action'); // 'deactivate' or 'delete'
+
+        if (action === 'deactivate') {
+            await User.findByIdAndUpdate(userId, { isDeleted: true, status: 'blocked' });
+            return NextResponse.json({ message: 'Account deactivated successfully.' }, { status: 200 });
+        } else if (action === 'delete') {
+            await User.findByIdAndDelete(userId);
+            // Note: Orders, reviews etc. will still exist with the userId, they are not deleted.
+            return NextResponse.json({ message: 'Account permanently deleted.' }, { status: 200 });
+        } else {
+            return NextResponse.json({ message: "Invalid action specified. Use 'deactivate' or 'delete'." }, { status: 400 });
+        }
+    } catch (error) {
+        console.error('Failed to delete/deactivate user:', error);
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
