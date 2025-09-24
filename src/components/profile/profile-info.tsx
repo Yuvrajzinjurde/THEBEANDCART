@@ -22,7 +22,7 @@ const profileFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required."),
   email: z.string().email(),
   phone: z.string().optional(),
-  profilePicUrl: z.string().url().optional().or(z.literal('')),
+  profilePicUrl: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -33,7 +33,7 @@ interface ProfileInfoProps {
 }
 
 export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
-    const { token } = useAuth();
+    const { token, login } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<ProfileFormValues>({
@@ -78,6 +78,11 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
+            
+            // Update auth state with new token
+            if (result.token) {
+                login(result.token);
+            }
             onUserUpdate(result.user);
             toast.success("Profile updated successfully!");
         } catch (error: any) {

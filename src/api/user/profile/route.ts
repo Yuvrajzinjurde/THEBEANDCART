@@ -6,6 +6,12 @@ import User from '@/models/user.model';
 import { jwtDecode } from 'jwt-decode';
 import { Types } from 'mongoose';
 import { z } from 'zod';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('Please define the JWT_SECRET environment variable inside .env');
+}
 
 interface DecodedToken {
   userId: string;
@@ -15,7 +21,7 @@ const profileFormSchema = z.object({
   firstName: z.string().min(1, "First name is required."),
   lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
-  profilePicUrl: z.string().url().optional().or(z.literal('')),
+  profilePicUrl: z.string().optional(), // Allow any string, including data URIs or empty strings
 });
 
 const addressSchema = z.object({
@@ -59,7 +65,7 @@ export async function GET(req: Request) {
         }
         const userId = new Types.ObjectId(decoded.userId);
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate('roles');
 
         if (!user) {
             return NextResponse.json({ message: 'User not found.' }, { status: 404 });
@@ -104,7 +110,7 @@ export async function PUT(req: Request) {
             return NextResponse.json({ message: 'Invalid data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate('roles');
         if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
@@ -131,8 +137,22 @@ export async function PUT(req: Request) {
         }
 
         const updatedUser = await user.save();
+
+        const userRoles = updatedUser.roles.map((role: any) => role.name);
+
+        const newToken = jwt.sign(
+            { 
+                userId: updatedUser._id, 
+                roles: userRoles, 
+                name: updatedUser.firstName, 
+                brand: updatedUser.brand, 
+                profilePicUrl: updatedUser.profilePicUrl 
+            },
+            JWT_SECRET,
+            { expiresIn: '1d' }
+        );
         
-        return NextResponse.json({ message: 'Profile updated successfully', user: updatedUser }, { status: 200 });
+        return NextResponse.json({ message: 'Profile updated successfully', user: updatedUser, token: newToken }, { status: 200 });
 
     } catch (error) {
         console.error('Failed to update user profile:', error);
