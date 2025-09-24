@@ -435,7 +435,7 @@ export default function CartPage() {
       return (
         <>
         <Header />
-        <main className="container py-8 px-10">
+        <main className="container py-8 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">Your Cart is Empty</h2>
@@ -455,42 +455,42 @@ export default function CartPage() {
   return (
     <>
       <Header />
-      <div className="sticky top-0 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
-        <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-5">
-            <div className="flex items-center justify-between w-full lg:w-auto">
-                <div className="flex items-center gap-2">
-                    <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => router.back()}
-                    >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="sr-only">Back</span>
-                    </Button>
-                    <Breadcrumb className="hidden sm:block">
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                        <BreadcrumbLink href={`/`}>Home</BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                        <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                    </Breadcrumb>
+      <main className="flex-grow">
+        <div className="sticky top-0 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
+            <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between w-full lg:w-auto">
+                    <div className="flex items-center gap-2">
+                        <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => router.back()}
+                        >
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="sr-only">Back</span>
+                        </Button>
+                        <Breadcrumb className="hidden sm:block">
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                            <BreadcrumbLink href={`/`}>Home</BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                            <BreadcrumbPage>Shopping Cart</BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                        </Breadcrumb>
+                    </div>
+                    <div className="lg:hidden w-48" /> {/* Spacer for mobile */}
                 </div>
-                <div className="lg:hidden w-48" /> {/* Spacer for mobile */}
+                <div className="flex-grow flex justify-center w-full">
+                    <CartProgressBar currentValue={subtotal} />
+                </div>
+                <div className="w-48 hidden lg:block" />
             </div>
-            <div className="flex-grow flex justify-center w-full">
-                <CartProgressBar currentValue={subtotal} />
-            </div>
-            <div className="w-48 hidden lg:block" />
         </div>
-      </div>
 
-      <main className="py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid lg:grid-cols-12 lg:gap-8 lg:items-start">
                 <div className="lg:col-span-7 xl:col-span-8">
                     <HiddenScrollArea className="h-auto lg:h-[600px] lg:pr-6">
