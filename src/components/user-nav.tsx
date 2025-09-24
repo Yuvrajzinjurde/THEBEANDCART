@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
 import { CreditCard, LogOut, User as UserIcon, Settings, Package, LayoutDashboard } from "lucide-react";
@@ -48,6 +48,7 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-10 w-10">
+                        {user.profilePicUrl && <AvatarImage src={user.profilePicUrl} alt={user.name} />}
                         <AvatarFallback>{userInitial}</AvatarFallback>
                     </Avatar>
                 </Button>
@@ -109,6 +110,7 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-9 w-9">
+                        {user.profilePicUrl && <AvatarImage src={user.profilePicUrl} alt={user.name} />}
                         <AvatarFallback>{userInitial}</AvatarFallback>
                     </Avatar>
                 </Button>

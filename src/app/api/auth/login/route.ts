@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     }
     
     const token = jwt.sign(
-      { userId: user._id, roles: userRoles, name: user.firstName, brand: user.brand },
+      { userId: user._id, roles: userRoles, name: user.firstName, brand: user.brand, profilePicUrl: user.profilePicUrl },
       JWT_SECRET,
       { expiresIn: '1d' } // Token expires in 1 day
     );

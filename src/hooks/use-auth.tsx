@@ -6,12 +6,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 import useUserStore from '@/stores/user-store';
 
-interface User {
+export interface User {
   userId: string;
   roles: string[];
   name: string;
   exp: number;
   brand?: string;
+  profilePicUrl?: string;
 }
 
 interface AuthContextType {
