@@ -8,6 +8,7 @@ import { getThemeForRequest } from '@/lib/theme';
 import type { IPlatformSettings } from '@/models/platform.model';
 import { cn } from '@/lib/utils';
 import { Providers } from './providers';
+import { WhatsAppSupport } from '@/components/whatsapp-support';
 
 function ThemeInjector({ theme }: { theme: any }) {
     if (!theme) return null;
@@ -48,6 +49,7 @@ export default async function RootLayout({
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <Providers>
                 {children}
+                <WhatsAppSupport />
             </Providers>
             <ToastContainer
                 position="top-right"
