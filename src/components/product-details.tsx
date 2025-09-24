@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -29,7 +28,6 @@ import { Badge } from './ui/badge';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
-import { summarizeLegalDocument } from '@/ai/flows/summarize-legal-doc-flow';
 import RatingsAndReviews from './ratings-and-reviews';
 
 interface ProductDetailsProps {
@@ -92,26 +90,24 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   // Fetch and summarize the return policy
   useEffect(() => {
-    const fetchReturnPolicy = async () => {
+    const fetchReturnPolicySummary = async () => {
       setLoadingReturnPolicy(true);
       try {
-        const response = await fetch(`/api/legals?docType=return-policy`);
+        const response = await fetch(`/api/summarize-legal`);
         if (response.ok) {
           const data = await response.json();
-          if (data.documents.length > 0) {
-            const policyContent = data.documents[0].content;
-            const summaryResult = await summarizeLegalDocument({ documentContent: policyContent });
-            setReturnPolicySummary(summaryResult.summary);
-          }
+          setReturnPolicySummary(data.summary);
+        } else {
+            throw new Error('Failed to get summary');
         }
       } catch (error) {
         console.error("Failed to fetch or summarize return policy", error);
-        setReturnPolicySummary("Could not load return policy summary.");
+        setReturnPolicySummary("<p>View our return policy for details.</p>"); // Fallback
       } finally {
         setLoadingReturnPolicy(false);
       }
     };
-    fetchReturnPolicy();
+    fetchReturnPolicySummary();
   }, []);
 
   // Memoize variant options
