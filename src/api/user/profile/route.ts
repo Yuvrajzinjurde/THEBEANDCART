@@ -18,9 +18,9 @@ interface DecodedToken {
 }
 
 const socialsSchema = z.object({
-  twitter: z.string().optional(),
-  linkedin: z.string().optional(),
-  instagram: z.string().optional(),
+  twitter: z.string().url().optional().or(z.literal('')),
+  linkedin: z.string().url().optional().or(z.literal('')),
+  instagram: z.string().url().optional().or(z.literal('')),
 });
 
 const profileFormSchema = z.object({
@@ -28,7 +28,9 @@ const profileFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
-  profilePicUrl: z.string().url().or(z.literal('')).optional(),
+  isPhoneVerified: z.boolean().optional(),
+  isWhatsappVerified: z.boolean().optional(),
+  profilePicUrl: z.string().url("Must be a valid URL or data URI.").or(z.literal('')).optional(),
   socials: socialsSchema.optional(),
 });
 
@@ -73,9 +75,9 @@ export async function GET(req: Request) {
         }
         const userId = new Types.ObjectId(decoded.userId);
 
-        const user = await User.findById(userId).populate('roles');
+        const user = await User.findById(userId);
 
-        if (!user) {
+        if (!user || user.isDeleted) {
             return NextResponse.json({ message: 'User not found.' }, { status: 404 });
         }
 
@@ -119,7 +121,7 @@ export async function PUT(req: Request) {
         }
 
         const user = await User.findById(userId).populate('roles');
-        if (!user) {
+        if (!user || user.isDeleted) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
         
@@ -130,6 +132,8 @@ export async function PUT(req: Request) {
             user.lastName = profile.lastName;
             user.phone = profile.phone;
             user.whatsapp = profile.whatsapp;
+            user.isPhoneVerified = profile.isPhoneVerified;
+            user.isWhatsappVerified = profile.isWhatsappVerified;
             user.profilePicUrl = profile.profilePicUrl;
             user.socials = profile.socials;
         }
@@ -166,6 +170,42 @@ export async function PUT(req: Request) {
 
     } catch (error) {
         console.error('Failed to update user profile:', error);
+        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    }
+}
+
+
+export async function DELETE(req: Request) {
+    try {
+        await dbConnect();
+        
+        const token = req.headers.get('authorization')?.split(' ')[1];
+        if (!token) {
+            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        }
+        
+        const decoded = jwtDecode<DecodedToken>(token);
+        const userId = decoded.userId;
+
+        if (!userId || !Types.ObjectId.isValid(userId)) {
+            return NextResponse.json({ message: 'Invalid user ID' }, { status: 400 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const action = searchParams.get('action'); // 'deactivate' or 'delete'
+
+        if (action === 'deactivate') {
+            await User.findByIdAndUpdate(userId, { isDeleted: true, status: 'blocked' });
+            return NextResponse.json({ message: 'Account deactivated successfully.' }, { status: 200 });
+        } else if (action === 'delete') {
+            await User.findByIdAndDelete(userId);
+            // Note: Orders, reviews etc. will still exist with the userId, they are not deleted.
+            return NextResponse.json({ message: 'Account permanently deleted.' }, { status: 200 });
+        } else {
+            return NextResponse.json({ message: "Invalid action specified. Use 'deactivate' or 'delete'." }, { status: 400 });
+        }
+    } catch (error) {
+        console.error('Failed to delete/deactivate user:', error);
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
