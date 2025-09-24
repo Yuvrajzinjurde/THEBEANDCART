@@ -35,7 +35,6 @@ export async function POST(req: Request) {
     });
 
     // IMPORTANT: For security, the OTP is NOT returned in the API response.
-    // The frontend will use a static OTP for verification in this prototype.
     return NextResponse.json({ 
       message: `OTP sent successfully to ${phone}.`,
     }, { status: 200 });

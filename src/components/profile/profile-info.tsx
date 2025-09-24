@@ -21,9 +21,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 
 const socialsSchema = z.object({
-  twitter: z.string().optional(),
-  linkedin: z.string().optional(),
-  instagram: z.string().optional(),
+  twitter: z.string().url().optional().or(z.literal('')),
+  linkedin: z.string().url().optional().or(z.literal('')),
+  instagram: z.string().url().optional().or(z.literal('')),
 });
 
 const profileFormSchema = z.object({
@@ -34,7 +34,7 @@ const profileFormSchema = z.object({
   whatsapp: z.string().optional(),
   isPhoneVerified: z.boolean().optional(),
   isWhatsappVerified: z.boolean().optional(),
-  profilePicUrl: z.string().url().or(z.literal('')).optional(),
+  profilePicUrl: z.string().url("Must be a valid URL or data URI.").or(z.literal('')).optional(),
   socials: socialsSchema.optional(),
 });
 
@@ -82,8 +82,8 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                 email: user.email,
                 phone: user.phone || '',
                 whatsapp: user.whatsapp || '',
-                isPhoneVerified: (user as any).isPhoneVerified || false,
-                isWhatsappVerified: (user as any).isWhatsappVerified || false,
+                isPhoneVerified: user.isPhoneVerified || false,
+                isWhatsappVerified: user.isWhatsappVerified || false,
                 profilePicUrl: user.profilePicUrl || "",
                 socials: user.socials || { twitter: '', linkedin: '', instagram: '' }
             });

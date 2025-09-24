@@ -63,13 +63,14 @@ export function ForgotPasswordForm() {
 
   async function onEmailSubmit(data: ForgotPasswordInput) {
     setIsSubmitting(true);
-    // In a real app, you'd call an API. Here we just move to the next step.
+    // In a real app, you'd call an API to send the OTP. Here we just move to the next step.
+    // For this prototype, we assume the user has a number associated with their email.
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // We keep the email in the form state, but move to the next step
     setStep("reset");
     setIsSubmitting(false);
-    toast.info("Please enter the OTP and your new password.");
+    toast.info("An OTP has been sent. Please enter it and your new password.");
   }
   
   async function onResetSubmit(data: ResetPasswordInput) {
@@ -109,8 +110,8 @@ export function ForgotPasswordForm() {
               </CardTitle>
               <CardDescription>
                  {step === 'email' 
-                    ? "No worries, we'll help you reset it."
-                    : "Enter the OTP (use 123456) and set a new password."
+                    ? "No worries, we'll send you reset instructions."
+                    : "Enter the OTP sent to your number and set a new password."
                 }
               </CardDescription>
             </CardHeader>
@@ -138,7 +139,7 @@ export function ForgotPasswordForm() {
                       <FormItem>
                         <FormLabel>One-Time Password (OTP)</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter OTP" {...field} />
+                          <Input placeholder="Enter 6-digit OTP" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -184,26 +185,15 @@ export function ForgotPasswordForm() {
               )}
                <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                {step === 'email' ? 'Continue' : 'Reset Password'}
+                {step === 'email' ? 'Send OTP' : 'Reset Password'}
               </Button>
             </CardContent>
              <CardFooter className="justify-center">
-                {step === 'email' ? (
-                     <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
-                        <Link href={`/login`} className="font-medium text-primary hover:underline">
-                        Back to Log in
-                        </Link>
-                    </Button>
-                ) : (
-                    <Button variant="link" asChild className="p-0 text-sm text-muted-foreground" onClick={() => {
-                        setStep('email');
-                        form.reset(); // Reset form state when going back
-                    }}>
-                        <Link href="#" className="font-medium text-primary hover:underline">
-                        Back to email entry
-                        </Link>
-                    </Button>
-                )}
+                <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
+                    <Link href={`/login`} className="font-medium text-primary hover:underline">
+                    Back to Log in
+                    </Link>
+                </Button>
             </CardFooter>
           </form>
         </Form>
