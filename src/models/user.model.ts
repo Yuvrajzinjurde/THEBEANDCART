@@ -28,6 +28,8 @@ export interface IUser extends Document {
   password?: string; // Password is not always sent back
   phone?: string;
   whatsapp?: string;
+  isPhoneVerified: boolean;
+  isWhatsappVerified: boolean;
   addresses: IAddress[];
   socials?: ISocials;
   profilePicUrl?: string;
@@ -66,6 +68,8 @@ const UserSchema: Schema<IUser> = new Schema({
   password: { type: String, required: true, select: false },
   phone: { type: String },
   whatsapp: { type: String },
+  isPhoneVerified: { type: Boolean, default: false },
+  isWhatsappVerified: { type: Boolean, default: false },
   addresses: [AddressSchema],
   socials: SocialsSchema,
   profilePicUrl: { type: String },

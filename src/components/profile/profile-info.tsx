@@ -12,10 +12,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { UploadCloud, X, Edit, Instagram, Linkedin } from "lucide-react";
+import { UploadCloud, X, Edit, Instagram, Linkedin, ShieldCheck, Checkbox } from "lucide-react";
 import type { IUser } from "@/models/user.model";
 import { useAuth } from '@/hooks/use-auth';
 import { Separator } from '../ui/separator';
+
+const MOCK_OTP = "123456";
 
 const socialsSchema = z.object({
   twitter: z.string().optional(),
@@ -29,6 +31,8 @@ const profileFormSchema = z.object({
   email: z.string().email(),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
+  isPhoneVerified: z.boolean().optional(),
+  isWhatsappVerified: z.boolean().optional(),
   profilePicUrl: z.string().url().or(z.literal('')).optional(),
   socials: socialsSchema.optional(),
 });
@@ -45,14 +49,25 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
+    const [otpSentTo, setOtpSentTo] = useState<'phone' | 'whatsapp' | null>(null);
+    const [otpValue, setOtpValue] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
             firstName: '', lastName: '', email: '', phone: '', whatsapp: '',
+            isPhoneVerified: false, isWhatsappVerified: false,
             profilePicUrl: '',
             socials: { twitter: '', linkedin: '', instagram: '' }
         },
     });
+    
+    const phoneValue = form.watch('phone');
+    const whatsappValue = form.watch('whatsapp');
+    const isPhoneVerified = form.watch('isPhoneVerified');
+    const isWhatsappVerified = form.watch('isWhatsappVerified');
+
 
      useEffect(() => {
         if (user) {
@@ -62,6 +77,8 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                 email: user.email,
                 phone: user.phone || '',
                 whatsapp: user.whatsapp || '',
+                isPhoneVerified: (user as any).isPhoneVerified || false,
+                isWhatsappVerified: (user as any).isWhatsappVerified || false,
                 profilePicUrl: user.profilePicUrl || "",
                 socials: user.socials || { twitter: '', linkedin: '', instagram: '' }
             });
@@ -112,6 +129,37 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
         form.reset(); // Revert changes
         setIsEditing(false);
     };
+
+    const handleSendOtp = (type: 'phone' | 'whatsapp') => {
+        const number = type === 'phone' ? phoneValue : whatsappValue;
+        if (!number || number.length < 10) {
+            toast.warn(`Please enter a valid ${type} number.`);
+            return;
+        }
+        setOtpSentTo(type);
+        toast.info(`OTP sent to ${number}. Please use ${MOCK_OTP} to verify.`);
+    };
+
+    const handleVerifyOtp = () => {
+        if (!otpSentTo) return;
+        setIsVerifying(true);
+        setTimeout(() => { // Mock OTP verification
+            if (otpValue === MOCK_OTP) {
+                if (otpSentTo === 'phone') {
+                    form.setValue('isPhoneVerified', true, { shouldDirty: true });
+                } else {
+                    form.setValue('isWhatsappVerified', true, { shouldDirty: true });
+                }
+                toast.success(`${otpSentTo.charAt(0).toUpperCase() + otpSentTo.slice(1)} number verified!`);
+                setOtpSentTo(null);
+                setOtpValue('');
+            } else {
+                toast.error("Invalid OTP. Please try again.");
+            }
+            setIsVerifying(false);
+        }, 1000);
+    };
+
 
     return (
         <Form {...form}>
@@ -197,11 +245,62 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                     )} />
                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <FormField control={form.control} name="phone" render={({ field }) => (
-                                            <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl></FormItem>
+                                            <FormItem>
+                                                <FormLabel>Phone</FormLabel>
+                                                <div className="flex items-center gap-2">
+                                                    <FormControl><Input type="tel" {...field} /></FormControl>
+                                                    {isPhoneVerified ? (
+                                                        <ShieldCheck className="h-6 w-6 text-green-500" />
+                                                    ) : phoneValue && phoneValue.length >= 10 && otpSentTo !== 'phone' && (
+                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleSendOtp('phone')}>Verify</Button>
+                                                    )}
+                                                </div>
+                                                <FormMessage />
+                                            </FormItem>
                                         )} />
                                          <FormField control={form.control} name="whatsapp" render={({ field }) => (
-                                            <FormItem><FormLabel>WhatsApp Number</FormLabel><FormControl><Input type="tel" {...field} /></FormControl></FormItem>
+                                            <FormItem>
+                                                <FormLabel>WhatsApp Number</FormLabel>
+                                                <div className="flex items-center gap-2">
+                                                    <FormControl><Input type="tel" {...field} /></FormControl>
+                                                    {isWhatsappVerified ? (
+                                                        <ShieldCheck className="h-6 w-6 text-green-500" />
+                                                    ) : whatsappValue && whatsappValue.length >= 10 && otpSentTo !== 'whatsapp' && (
+                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleSendOtp('whatsapp')}>Verify</Button>
+                                                    )}
+                                                </div>
+                                                <FormMessage />
+                                            </FormItem>
                                         )} />
+                                    </div>
+                                    
+                                     {otpSentTo && (
+                                        <Card className="bg-slate-50 p-4">
+                                            <FormLabel>Enter OTP for {otpSentTo} number</FormLabel>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <Input value={otpValue} onChange={(e) => setOtpValue(e.target.value)} placeholder="6-digit OTP" maxLength={6} />
+                                                <Button type="button" onClick={handleVerifyOtp} disabled={isVerifying}>
+                                                    {isVerifying && <Loader className="mr-2" />}
+                                                    Confirm
+                                                </Button>
+                                                <Button type="button" variant="ghost" size="icon" onClick={() => setOtpSentTo(null)}><X className="h-4 w-4" /></Button>
+                                            </div>
+                                        </Card>
+                                     )}
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="same-as-phone"
+                                            onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                    form.setValue('whatsapp', phoneValue || '');
+                                                    form.setValue('isWhatsappVerified', isPhoneVerified || false);
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor="same-as-phone" className="text-sm font-medium leading-none">
+                                            My WhatsApp number is the same as my phone number.
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -217,7 +316,7 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                             <FormItem>
                                                 <div className="relative">
                                                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                        <X className="h-5 w-5 text-muted-foreground" />
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16"><path fill="currentColor" d="M9.737 5.562L14.656 0h-1.39L9.032 4.887L5.88 0H1.5l5.21 7.46L1.5 14h1.39l4.63-5.562L11.12 14h4.38zm-1.055 1.5l-.656-.937L3.03 1.333h2.295l3.815 5.45l.656.937l5.24 7.48h-2.296z"/></svg>
                                                     </div>
                                                     <FormControl><Input placeholder="https://x.com/username" {...field} className="pl-10" /></FormControl>
                                                 </div>
@@ -261,5 +360,3 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
         </Form>
     );
 }
-
-    

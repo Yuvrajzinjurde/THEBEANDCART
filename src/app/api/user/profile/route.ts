@@ -28,6 +28,8 @@ const profileFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required."),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
+  isPhoneVerified: z.boolean().optional(),
+  isWhatsappVerified: z.boolean().optional(),
   profilePicUrl: z.string().url("Must be a valid URL or data URI.").or(z.literal('')).optional(),
   socials: socialsSchema.optional(),
 });
@@ -130,6 +132,8 @@ export async function PUT(req: Request) {
             user.lastName = profile.lastName;
             user.phone = profile.phone;
             user.whatsapp = profile.whatsapp;
+            user.isPhoneVerified = profile.isPhoneVerified;
+            user.isWhatsappVerified = profile.isWhatsappVerified;
             user.profilePicUrl = profile.profilePicUrl;
             user.socials = profile.socials;
         }
