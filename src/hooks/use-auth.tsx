@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
@@ -66,47 +67,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (storedToken) {
         try {
           const decoded = jwtDecode<User>(storedToken);
+          
+          // **THE FIX**: Only call logout if the token is definitively expired.
           if (decoded.exp * 1000 < Date.now()) {
-            // Token is expired, clear it but don't cause a full error state.
-            localStorage.removeItem('token');
-            setUser(null);
-            setToken(null);
-          } else {
-            // Token is valid, set user and token state first
-            setUser(decoded);
-            setToken(storedToken);
-            
-            // Now, fetch user-specific data
-            const [cartRes, wishlistRes] = await Promise.all([
-              fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
-              fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
-            ]);
-            
-            // Only proceed if API calls are successful. If not, it means the server session is invalid.
-            if (cartRes.ok && wishlistRes.ok) {
-                const { cart } = await cartRes.json();
-                setCart(cart);
-                const { wishlist } = await wishlistRes.json();
-                setWishlist(wishlist);
-            } else {
-                // If API calls fail, it means the server session is invalid. Log out cleanly.
-                console.error("Failed to fetch user data, session may be invalid. Logging out.");
-                logout();
-            }
+            console.log("Session expired, logging out.");
+            logout();
+            setLoading(false);
+            return;
           }
+
+          // If token is valid, set user state and then fetch data.
+          setUser(decoded);
+          setToken(storedToken);
+
+          const [cartRes, wishlistRes] = await Promise.all([
+            fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
+            fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
+          ]);
+
+          // Gracefully handle API errors without logging out.
+          if (cartRes.ok) {
+            const { cart } = await cartRes.json();
+            setCart(cart);
+          } else {
+            console.error("Failed to fetch cart data during init.");
+          }
+
+          if (wishlistRes.ok) {
+            const { wishlist } = await wishlistRes.json();
+            setWishlist(wishlist);
+          } else {
+            console.error("Failed to fetch wishlist data during init.");
+          }
+
         } catch (error) {
-          console.error("Invalid token during initialization:", error);
-          logout(); 
+          console.error("Invalid token during initialization, logging out.", error);
+          logout();
         }
       }
-      // Finished loading, regardless of outcome.
-      setLoading(false); 
+      
+      setLoading(false);
     }
+    
     initializeAuth();
-  }, [logout, setCart, setWishlist]); 
+  }, [logout, setCart, setWishlist]);
 
-  // While checking for the token, show a full-page loader.
-  // This prevents the rest of the app from rendering and making premature API calls.
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
