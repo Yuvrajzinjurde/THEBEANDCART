@@ -29,7 +29,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 function ProfilePage() {
-    const { token } = useAuth();
+    const { token, logout } = useAuth();
     const router = useRouter();
     const [user, setUser] = useState<IUser | null>(null);
     const [loading, setLoading] = useState(true);
@@ -57,6 +57,11 @@ function ProfilePage() {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) {
+                    // If token is invalid/expired, the API will return 401
+                    if (response.status === 401) {
+                        toast.error("Your session has expired. Please log in again.");
+                        logout();
+                    }
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'Failed to fetch profile.');
                 }
@@ -76,7 +81,7 @@ function ProfilePage() {
             }
         };
         fetchProfile();
-    }, [token, form]);
+    }, [token, form, logout]);
 
     async function onSubmit(data: ProfileFormValues) {
         setIsSubmitting(true);
@@ -156,7 +161,12 @@ function ProfilePage() {
     }
     
     if (!user) {
-        return <p>User not found.</p>
+        // This case will likely be handled by the withAuth HOC, but it's a good fallback.
+        return (
+             <div className="flex h-screen w-full items-center justify-center">
+                <p>Please log in to view your profile.</p>
+            </div>
+        )
     }
 
     return (

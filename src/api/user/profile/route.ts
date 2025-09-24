@@ -23,25 +23,25 @@ export async function GET(req: Request) {
         
         const token = req.headers.get('authorization')?.split(' ')[1];
         if (!token) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+            return NextResponse.json({ message: 'Authentication required. No token provided.' }, { status: 401 });
         }
         
         let decoded;
         try {
             decoded = jwtDecode<DecodedToken>(token);
         } catch (error) {
-            return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+            return NextResponse.json({ message: 'Invalid or expired token.' }, { status: 401 });
         }
         
         if (!Types.ObjectId.isValid(decoded.userId)) {
-            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+            return NextResponse.json({ message: 'User not found. Invalid ID format.' }, { status: 404 });
         }
         const userId = new Types.ObjectId(decoded.userId);
 
         const user = await User.findById(userId);
 
         if (!user) {
-            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+            return NextResponse.json({ message: 'User not found.' }, { status: 404 });
         }
 
         return NextResponse.json({ user }, { status: 200 });
