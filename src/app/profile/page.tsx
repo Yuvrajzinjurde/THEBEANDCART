@@ -48,8 +48,8 @@ function ProfilePage() {
     
     useEffect(() => {
         const fetchProfile = async () => {
-            // Only fetch if authentication is resolved and a token exists.
-            if (authLoading || !token) {
+            if (!token) {
+                setLoading(false);
                 return;
             };
 
@@ -60,20 +60,19 @@ function ProfilePage() {
                 });
                 
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        toast.error("Your session has expired. Please log in again.");
-                        logout();
-                    } else {
-                        // Try to get a message from the JSON body, but don't fail if it's not JSON
-                        let errorData;
-                        try {
-                           errorData = await response.json();
-                        } catch (e) {
-                           throw new Error('Failed to fetch profile. The server returned an invalid response.');
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                        if (response.status === 401) {
+                            toast.error("Your session has expired. Please log in again.");
+                            logout();
+                        } else {
+                            throw new Error(errorData.message || 'Failed to fetch profile.');
                         }
-                        throw new Error(errorData.message || 'Failed to fetch profile.');
+                    } catch (e) {
+                        throw new Error('Failed to fetch profile. The server returned an invalid response.');
                     }
-                    return; // Stop execution if response is not ok
+                    return; 
                 }
 
                 const data = await response.json();
@@ -91,7 +90,12 @@ function ProfilePage() {
                 setLoading(false);
             }
         };
-        fetchProfile();
+        
+        // Only fetch if auth is resolved and token exists
+        if (!authLoading) {
+            fetchProfile();
+        }
+
     }, [token, authLoading, form, logout]);
 
     async function onSubmit(data: ProfileFormValues) {
@@ -163,7 +167,7 @@ function ProfilePage() {
         </Form>
     );
 
-    if (authLoading || (loading && token)) {
+    if (loading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <Loader className="h-12 w-12" />
@@ -171,12 +175,9 @@ function ProfilePage() {
         );
     }
     
-    if (!authUser || !user) {
-        return (
-             <div className="flex h-screen w-full items-center justify-center">
-                <p>Please log in to view your profile.</p>
-            </div>
-        )
+    if (!user) {
+        // This should not be reached if `withAuth` is working correctly, but it's a safe fallback.
+        return null;
     }
 
     return (

@@ -124,38 +124,38 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                {user.roles.includes('admin') && (
+                    {user.roles.includes('admin') && (
+                        <DropdownMenuItem asChild>
+                            <Link href="/admin/dashboard">
+                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                <span>Dashboard</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
-                        <Link href="/admin/dashboard">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            <span>Dashboard</span>
+                        <Link href="/profile">
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
                         </Link>
                     </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                    <Link href="/profile">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="/orders">
-                        <Package className="mr-2 h-4 w-4" />
-                        <span>My Orders</span>
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="#">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    <span>Billing</span>
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="#">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                    </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/orders">
+                            <Package className="mr-2 h-4 w-4" />
+                            <span>My Orders</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="#">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        <span>Billing</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="#">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                        </Link>
+                    </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
