@@ -27,7 +27,10 @@ function MyOrdersPage() {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            if (!token) return;
+            if (!token) {
+                setLoading(false);
+                return;
+            };
             try {
                 const response = await fetch('/api/user/orders', {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -102,7 +105,7 @@ function MyOrdersPage() {
                                         {orders.map((order) => (
                                             <TableRow key={order._id as string}>
                                                 <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
-                                                <TableCell>{format(new Date(order.createdAt), 'dd MMM, yyyy')}</TableCell>
+                                                <TableCell>{format(new Date(order.createdAt as string), 'dd MMM, yyyy')}</TableCell>
                                                 <TableCell className="capitalize">{order.brand}</TableCell>
                                                 <TableCell>₹{order.totalAmount.toLocaleString('en-IN')}</TableCell>
                                                 <TableCell>

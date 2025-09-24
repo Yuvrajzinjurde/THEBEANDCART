@@ -38,7 +38,7 @@ const withAuth = <P extends object>(
           router.replace('/');
         }
       }
-    }, [user, loading, router, pathname]);
+    }, [user, loading, router, pathname, allowedRoles]);
 
     // While loading or if user is not yet determined, show a loader
     if (loading || !user) {

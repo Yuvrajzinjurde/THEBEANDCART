@@ -3,11 +3,11 @@
 
 import { useEffect, useState } from "react";
 import withAuth from "@/components/auth/with-auth";
-import { useAuth, type User as AuthUser } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Loader } from "@/components/ui/loader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User as UserIcon, MapPin, Edit, Save } from "lucide-react";
+import { ArrowLeft, User as UserIcon, MapPin, Edit } from "lucide-react";
 import Header from "@/components/header";
 import { GlobalFooter } from "@/components/global-footer";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 function ProfilePage() {
-    const { user: authUser, token } = useAuth();
+    const { token } = useAuth();
     const router = useRouter();
     const [user, setUser] = useState<IUser | null>(null);
     const [loading, setLoading] = useState(true);
@@ -48,12 +48,18 @@ function ProfilePage() {
     
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!token) return;
+            if (!token) {
+                setLoading(false);
+                return;
+            };
             try {
                 const response = await fetch('/api/user/profile', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (!response.ok) throw new Error('Failed to fetch profile.');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch profile.');
+                }
                 const data = await response.json();
                 setUser(data.user);
                 form.reset({
@@ -62,7 +68,8 @@ function ProfilePage() {
                     email: data.user.email,
                     phone: data.user.phone || '',
                 });
-            } catch (err) {
+            } catch (err: any) {
+                toast.error(err.message);
                 console.error(err);
             } finally {
                 setLoading(false);

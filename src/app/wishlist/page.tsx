@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import Header from "@/components/header";
+import withAuth from "@/components/auth/with-auth";
 
 const WishlistFooter = () => {
     const { settings } = usePlatformSettingsStore();
@@ -96,24 +97,13 @@ const WishlistSkeleton = () => (
     </main>
 );
 
-export default function WishlistPage() {
+function WishlistPage() {
   const router = useRouter();
-  const pathname = usePathname();
-  const { user, token, loading: authLoading } = useAuth();
+  const { token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.replace(`/login?callbackUrl=${pathname}`);
-        return;
-      }
-      setLoading(false);
-    }
-  }, [user, authLoading, router, pathname]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
+    if (!token) return;
     try {
       const response = await fetch('/api/wishlist', {
         method: 'POST',
@@ -132,6 +122,7 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = async (product: IProduct) => {
+    if (!token) return;
     const availableStock = product.stock ?? 0;
     if (availableStock === 0) {
       toast.error("This item is out of stock.");
@@ -159,10 +150,6 @@ export default function WishlistPage() {
       toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
-
-  if (loading || authLoading) {
-    return <><Header /><WishlistSkeleton /></>;
-  }
 
   const wishlistProducts = (wishlist?.products as IProduct[]) || [];
 
@@ -277,3 +264,5 @@ export default function WishlistPage() {
     </>
   );
 }
+
+export default withAuth(WishlistPage, ['user', 'admin']);
