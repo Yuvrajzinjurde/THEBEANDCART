@@ -165,7 +165,7 @@ function ProfilePage() {
                         {activeSection === 'profile' && <ProfileInfo user={user} onUserUpdate={handleUserUpdate} />}
                         {activeSection === 'addresses' && <SavedAddresses user={user} onUserUpdate={handleUserUpdate} />}
                         
-                        <Card className="shadow-lg">
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <CardTitle className="text-xl">Frequently Asked Questions</CardTitle>
                             </CardHeader>
@@ -173,7 +173,7 @@ function ProfilePage() {
                                 <Accordion type="single" collapsible className="w-full">
                                     {faqs.map((faq, index) => (
                                         <AccordionItem key={index} value={`item-${index}`}>
-                                            <AccordionTrigger>{faq.question}</AccordionTrigger>
+                                            <AccordionTrigger className="text-left font-normal text-base hover:no-underline">{faq.question}</AccordionTrigger>
                                             <AccordionContent className="text-muted-foreground">
                                                 {faq.answer}
                                             </AccordionContent>
@@ -183,7 +183,7 @@ function ProfilePage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="border-destructive shadow-lg">
+                        <Card className="border-destructive shadow-sm">
                             <CardHeader>
                                 <CardTitle className="text-destructive text-xl">Danger Zone</CardTitle>
                                 <CardDescription>These actions are permanent and cannot be undone.</CardDescription>
