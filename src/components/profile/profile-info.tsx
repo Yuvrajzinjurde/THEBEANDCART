@@ -13,8 +13,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { UploadCloud, X } from "lucide-react";
 import type { IUser } from "@/models/user.model";
 import { useAuth } from '@/hooks/use-auth';
@@ -24,13 +22,6 @@ const profileFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required."),
   email: z.string().email(),
   phone: z.string().optional(),
-  username: z.string().optional(),
-  nickname: z.string().optional(),
-  displayName: z.string().optional(),
-  website: z.string().optional(),
-  whatsapp: z.string().optional(),
-  telegram: z.string().optional(),
-  bio: z.string().optional(),
   profilePicUrl: z.string().url().optional().or(z.literal('')),
 });
 
@@ -49,8 +40,6 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
         resolver: zodResolver(profileFormSchema),
         defaultValues: {
             firstName: '', lastName: '', email: '', phone: '',
-            username: '', nickname: '', displayName: '',
-            website: '', whatsapp: '', telegram: '', bio: '',
             profilePicUrl: ''
         },
     });
@@ -62,14 +51,7 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                 lastName: user.lastName,
                 email: user.email,
                 phone: user.phone || '',
-                username: user.email.split('@')[0],
-                nickname: user.firstName.toLowerCase(),
-                displayName: user.firstName,
                 profilePicUrl: user.profilePicUrl || "",
-                 website: 'https://example.com',
-                whatsapp: '@example',
-                telegram: '@example',
-                bio: 'This is a sample bio.'
             });
         }
     }, [user, form]);
@@ -194,52 +176,22 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
 
                          {/* Right Column for Profile Info */}
                         <div className="lg:col-span-2 space-y-6">
-                            <h3 className="text-lg font-semibold text-gray-800">Profile Information</h3>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField control={form.control} name="username" render={({ field }) => (
-                                    <FormItem><FormLabel>Username</FormLabel><FormControl><Input {...field} disabled /></FormControl></FormItem>
-                                )} />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <FormField control={form.control} name="firstName" render={({ field }) => (
                                     <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                )} />
-                                <FormField control={form.control} name="nickname" render={({ field }) => (
-                                    <FormItem><FormLabel>Nickname</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
                                 )} />
                                 <FormField control={form.control} name="lastName" render={({ field }) => (
                                     <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
-                            <FormField control={form.control} name="displayName" render={({ field }) => (
-                                <FormItem><FormLabel>Display Name Publicly as</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                            )} />
-
-                            <Separator />
-
-                            <h3 className="text-lg font-semibold text-gray-800">Contact Info</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <FormField control={form.control} name="email" render={({ field }) => (
-                                    <FormItem><FormLabel>Email (required)</FormLabel><FormControl><Input type="email" {...field} disabled /></FormControl></FormItem>
+                                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled /></FormControl></FormItem>
                                 )} />
                                  <FormField control={form.control} name="phone" render={({ field }) => (
                                     <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl></FormItem>
                                 )} />
-                                <FormField control={form.control} name="whatsapp" render={({ field }) => (
-                                    <FormItem><FormLabel>WhatsApp</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                                )} />
-                                <FormField control={form.control} name="website" render={({ field }) => (
-                                    <FormItem><FormLabel>Website</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                                )} />
-                                <FormField control={form.control} name="telegram" render={({ field }) => (
-                                    <FormItem><FormLabel>Telegram</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                                )} />
                             </div>
-
-                             <Separator />
-
-                            <h3 className="text-lg font-semibold text-gray-800">About Yourself</h3>
-                            <FormField control={form.control} name="bio" render={({ field }) => (
-                                <FormItem><FormLabel>Biographical Info</FormLabel><FormControl><Textarea className="min-h-[100px]" {...field} /></FormControl></FormItem>
-                            )} />
                         </div>
                     </CardContent>
                 </Card>
