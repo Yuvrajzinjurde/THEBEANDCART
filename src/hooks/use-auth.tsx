@@ -65,31 +65,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const decoded = jwtDecode<User>(storedToken);
           if (decoded.exp * 1000 < Date.now()) {
             logout();
-          } else {
-            setUser(decoded);
-            setToken(storedToken);
-            
-            // Fetch cart/wishlist
-            const [cartRes, wishlistRes] = await Promise.all([
-              fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
-              fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
-            ]);
-            
-            if (cartRes.ok) {
-              const { cart } = await cartRes.json();
-              setCart(cart);
-            } else {
-                setCart(null);
-            }
-            if (wishlistRes.ok) {
-              const { wishlist } = await wishlistRes.json();
-              setWishlist(wishlist);
-            } else {
-                setWishlist(null);
-            }
+            return;
           }
+          
+          setUser(decoded);
+          setToken(storedToken);
+          
+          // Fetch cart/wishlist
+          const [cartRes, wishlistRes] = await Promise.all([
+            fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
+            fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
+          ]);
+          
+          if (!cartRes.ok || !wishlistRes.ok) {
+            // If either fetch fails due to auth, logout
+            logout();
+            return;
+          }
+
+          const { cart } = await cartRes.json();
+          setCart(cart);
+
+          const { wishlist } = await wishlistRes.json();
+          setWishlist(wishlist);
+
         } catch (error) {
-          console.error("Invalid token:", error);
+          console.error("Invalid token or failed to fetch user data:", error);
           logout();
         }
       } else {
