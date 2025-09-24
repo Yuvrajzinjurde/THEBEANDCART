@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight, X, Facebook, Instagram, Linkedin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -143,7 +143,7 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
                     <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
                 </div>
                  <div className="flex space-x-4">
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
@@ -411,3 +411,5 @@ export default function ProductsPage() {
     </>
   );
 }
+
+    

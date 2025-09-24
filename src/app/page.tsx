@@ -11,7 +11,7 @@ import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift, Lock } from 'lucide-react';
+import { X, Facebook, Instagram, Linkedin, ArrowRight, Gift, Lock } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -74,7 +74,7 @@ const LandingFooter = () => {
                         <Link href="/legal/contact-us" className="hover:text-primary">Contact Us</Link>
                     </div>
                     <div className="flex space-x-4">
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                        <Link href="#" className="text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></Link>
                         <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
                         <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
                         <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
@@ -411,3 +411,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+    

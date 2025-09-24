@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import { UploadCloud, X, Edit, Instagram, Linkedin, Twitter } from "lucide-react";
+import { UploadCloud, X, Edit, Instagram, Linkedin } from "lucide-react";
 import type { IUser } from "@/models/user.model";
 import { useAuth } from '@/hooks/use-auth';
 import { Separator } from '../ui/separator';
@@ -217,9 +217,9 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
                                             <FormItem>
                                                 <div className="relative">
                                                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                        <Twitter className="h-5 w-5 text-muted-foreground" />
+                                                        <X className="h-5 w-5 text-muted-foreground" />
                                                     </div>
-                                                    <FormControl><Input placeholder="https://twitter.com/username" {...field} className="pl-10" /></FormControl>
+                                                    <FormControl><Input placeholder="https://x.com/username" {...field} className="pl-10" /></FormControl>
                                                 </div>
                                             </FormItem>
                                         )}
@@ -261,3 +261,5 @@ export function ProfileInfo({ user, onUserUpdate }: ProfileInfoProps) {
         </Form>
     );
 }
+
+    

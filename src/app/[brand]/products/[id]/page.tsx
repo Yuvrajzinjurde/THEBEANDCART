@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { X, Facebook, Instagram, Linkedin } from 'lucide-react';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import type { IReview } from '@/models/review.model';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -140,7 +140,7 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
                     <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
                 </div>
                  <div className="flex space-x-4">
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
@@ -303,3 +303,5 @@ export default function ProductPage() {
     </>
   );
 }
+
+    

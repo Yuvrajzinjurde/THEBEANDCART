@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star, Gift } from 'lucide-react';
+import { X, Facebook, Instagram, Linkedin, ArrowRight, Star, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -289,7 +289,7 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
                     <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
                 </div>
                  <div className="flex space-x-4">
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
+                    <Link href="#" className="text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
                     <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
@@ -485,3 +485,5 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
