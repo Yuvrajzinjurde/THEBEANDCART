@@ -79,8 +79,6 @@ export function LoginForm() {
 
       toast.success(`Welcome back, ${result.name}!`);
       
-      router.refresh();
-
       if (callbackUrl) {
           router.push(callbackUrl);
           return;
