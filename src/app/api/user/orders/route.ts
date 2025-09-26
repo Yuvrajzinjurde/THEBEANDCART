@@ -15,7 +15,7 @@ export async function GET(req: Request) {
         
         const token = req.headers.get('authorization')?.split(' ')[1];
         if (!token) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+            return NextResponse.json({ orders: [] }, { status: 200 });
         }
 
         let decoded;
