@@ -64,51 +64,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       const storedToken = localStorage.getItem('token');
       
-      if (!storedToken) {
-        setLoading(false);
-        return;
-      }
+      if (storedToken) {
+        try {
+          const decoded = jwtDecode<User>(storedToken);
+          if (decoded.exp * 1000 < Date.now()) {
+            console.log("Session expired, logging out.");
+            logout();
+          } else {
+            setUser(decoded);
+            setToken(storedToken);
+            
+            // Fetch cart and wishlist data here, after user is confirmed
+            const cartRes = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } });
+            if (cartRes.ok) {
+                const cartData = await cartRes.json();
+                setCart(cartData.cart);
+            } else {
+                console.error("Failed to fetch cart data during init.");
+                // If fetching cart fails due to auth, logout
+                if (cartRes.status === 401 || cartRes.status === 403) {
+                  logout();
+                }
+            }
 
-      try {
-        const decoded = jwtDecode<User>(storedToken);
-
-        if (decoded.exp * 1000 < Date.now()) {
-          console.log("Session expired, logging out.");
+            const wishlistRes = await fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } });
+            if (wishlistRes.ok) {
+                const wishlistData = await wishlistRes.json();
+                setWishlist(wishlistData.wishlist);
+            } else {
+                console.error("Failed to fetch wishlist data during init.");
+                 if (wishlistRes.status === 401 || wishlistRes.status === 403) {
+                  logout();
+                }
+            }
+          }
+        } catch (error) {
+          console.error("Invalid token found, logging out.", error);
           logout();
-          setLoading(false);
-          return;
         }
-
-        setUser(decoded);
-        setToken(storedToken);
-
-        // Sequentially fetch user data
-        const cartRes = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } });
-        if (cartRes.ok) {
-            const cartData = await cartRes.json();
-            setCart(cartData.cart);
-        } else {
-            console.error("Failed to fetch cart data during init.");
-        }
-
-        const wishlistRes = await fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } });
-        if (wishlistRes.ok) {
-            const wishlistData = await wishlistRes.json();
-            setWishlist(wishlistData.wishlist);
-        } else {
-            console.error("Failed to fetch wishlist data during init.");
-        }
-
-      } catch (error) {
-        console.error("Invalid token during initialization, logging out.", error);
-        logout();
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
     
     initializeAuth();
-  }, [login, logout, setCart, setWishlist]);
+  }, [logout, setCart, setWishlist]);
   
   if (loading) {
     return (
@@ -120,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, token }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
