@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -134,12 +135,12 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   useEffect(() => {
     const variant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
     if (variant && variant._id !== product._id) {
-        router.replace(`/products/${variant._id}?storefront=${storefront}`);
+        router.push(`/${storefront}/products/${variant._id}`);
     } else if (!variant && selectedColor) {
       // If a color is selected but not a size yet, find the first available variant of that color
       const firstVariantOfColor = variants.find(v => v.color === selectedColor);
       if (firstVariantOfColor && firstVariantOfColor._id !== product._id) {
-        router.replace(`/products/${firstVariantOfColor._id}?storefront=${storefront}`);
+        router.push(`/${storefront}/products/${firstVariantOfColor._id}`);
       }
     }
   }, [selectedColor, selectedSize, variants, product._id, router, storefront]);
@@ -211,8 +212,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         setCart(result.cart);
+        toast.success("Added to cart!");
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        toast.error(error.message || "Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
 
@@ -231,8 +233,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         setWishlist(result.wishlist);
+        toast.success("Added to wishlist!");
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        toast.error(error.message || "Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
 
