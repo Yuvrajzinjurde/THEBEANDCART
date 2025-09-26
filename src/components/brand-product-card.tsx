@@ -127,8 +127,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         setCart(result.cart);
+        toast.success("Added to cart!");
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        toast.error(error.message || "Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
 
