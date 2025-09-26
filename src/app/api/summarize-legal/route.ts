@@ -19,20 +19,20 @@ export async function GET(req: Request) {
         const returnPolicy = await Legal.findOne({ docType: 'return-policy' });
 
         if (!returnPolicy) {
-            return NextResponse.json({ summary: '<p>Return policy details not available.</p>' });
+            return NextResponse.json({ summary: '<p>Return policy details not available.</p>' }, { status: 200 });
         }
 
         // 3. If AI is not enabled, return a default message with a link
         if (!aiEnabled) {
             return NextResponse.json({
                 summary: '<p>Please refer to our full return policy for details. <a href="/legal/return-policy" class="text-primary underline">Click here</a>.</p>'
-            });
+            }, { status: 200 });
         }
         
         // 4. If AI is enabled, proceed with summarization
         const summaryResult = await summarizeLegalDocument({ documentContent: returnPolicy.content });
         
-        return NextResponse.json({ summary: summaryResult.summary });
+        return NextResponse.json({ summary: summaryResult.summary }, { status: 200 });
 
     } catch (error: any) {
         console.error('Failed to summarize legal document:', error);
