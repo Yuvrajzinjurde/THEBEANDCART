@@ -19,14 +19,16 @@ export async function GET(req: Request) {
         
         const token = req.headers.get('authorization')?.split(' ')[1];
         if (!token) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+            // Return empty cart for guests, not an error
+            return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
 
         let decoded;
         try {
             decoded = jwtDecode<DecodedToken>(token);
         } catch (error) {
-            return NextResponse.json({ message: 'Invalid or expired token.' }, { status: 401 });
+            // If token is invalid or expired, also return empty cart
+            return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
         
         const userId = decoded.userId;
