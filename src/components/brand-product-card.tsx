@@ -36,6 +36,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const { user, token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
+  const [hasVariants, setHasVariants] = useState(false);
 
   const autoplay = useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true })
@@ -48,6 +49,25 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     // Stop autoplay initially
     autoplay.current.stop();
   }, [api]);
+
+  useEffect(() => {
+    async function checkVariants() {
+      if (product.styleId) {
+        try {
+          const res = await fetch(`/api/products/variants/${product.styleId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.variants && data.variants.length > 1) {
+              setHasVariants(true);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to check for variants:", error);
+        }
+      }
+    }
+    checkVariants();
+  }, [product.styleId]);
   
 
   const isWishlisted = useMemo(() => {
@@ -84,6 +104,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const handleCartClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (hasVariants) {
+        router.push(`/${product.storefront}/products/${product._id}`);
+        return;
+    }
+
      if (!user) {
         toast.info("Please log in to add items to your cart.");
         router.push(`/login?callbackUrl=/${product.storefront}/home`);
