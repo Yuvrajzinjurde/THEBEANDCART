@@ -159,7 +159,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = settings.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[3/1]">
                  <Image
                     src={imageUrl}
                     alt={title}
@@ -168,7 +168,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
                     data-ai-hint={imageHint}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-                <div className="relative z-10 p-8 md:p-16 max-w-2xl text-white flex flex-col items-start h-full justify-center">
+                <div className="relative z-10 p-8 md:p-12 max-w-2xl text-white flex flex-col items-start h-full justify-center">
                     <h2 className="text-3xl md:text-5xl font-bold">{title}</h2>
                     <p className="text-lg text-white/90 mt-4">{description}</p>
                     <Button asChild size="lg" className="mt-6">
