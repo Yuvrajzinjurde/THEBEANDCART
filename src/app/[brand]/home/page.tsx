@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -230,7 +229,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[5/1] lg:aspect-[5/1]">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[3/1]">
                  <Image
                     src={imageUrl}
                     alt={title}
@@ -482,3 +481,5 @@ export default function BrandHomePage() {
     </>
   );
 }
+
+    
