@@ -126,7 +126,7 @@ const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => 
     ];
 
     return (
-        <section className="w-full py-16 px-4 sm:px-6 lg:px-8">
+        <section className="w-full py-16 px-4 sm:px-6 lg:px-8 hidden md:block">
             <div className="container py-12">
                 <div className="text-center mb-10">
                     <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Today's Top Offers</h2>
