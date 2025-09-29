@@ -201,7 +201,7 @@ const OffersSection = ({ brand }: { brand: IBrand | null }) => {
     ];
 
     return (
-        <section className="w-full py-16 px-4 sm:px-6 lg:px-8">
+        <section className="w-full py-16 px-4 sm:px-6 lg:px-8 hidden md:block">
             <div className="container py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {brand.offers.map((offer, index) => (
@@ -350,8 +350,6 @@ export default function BrandHomePage() {
   const brandName = params.brand as string;
 
   const [brand, setBrand] = useState<IBrand | null>(null);
-  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [groupedProducts, setGroupedProducts] = useState<GroupedProducts>({});
   
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
@@ -378,43 +376,24 @@ export default function BrandHomePage() {
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
 
-            const productResponse = await fetch(`/api/products?storefront=${brandName}`);
-            if(!productResponse.ok) {
-                const errorData = await productResponse.json();
-                throw new Error(errorData.message || 'Failed to fetch products');
+            const [trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
+                fetch(`/api/products?storefront=${brandName}&sortBy=popular&limit=12`),
+                fetch(`/api/products?storefront=${brandName}&sortBy=rating&limit=12`),
+                fetch(`/api/products?storefront=${brandName}&sortBy=newest&limit=12`)
+            ]);
+
+            if (trendingResponse.ok) {
+                const { products } = await trendingResponse.json();
+                setTrendingProducts(products);
             }
-            const productData = await productResponse.json();
-            const fetchedProducts: IProduct[] = productData.products;
-            setAllProducts(fetchedProducts);
-            
-            const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
-            const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
-            const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
-
-            const calculatePopularity = (p: IProduct) => {
-                const views = p.views || 0;
-                const clicks = p.clicks || 0;
-                const rating = p.rating || 0;
-                return (views * 0.2) + (clicks * 0.5) + (rating * 0.3);
-            };
-            const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
-            setTrendingProducts(sortedByPopularity.slice(0, 12));
-
-            const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
-            setTopRatedProducts(sortedByRating.slice(0, 12));
-            
-            const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-            setNewestProducts(sortedByDate.slice(0, 12));
-
-            const grouped = fetchedProducts.reduce((acc: GroupedProducts, product: IProduct) => {
-                const category = product.category;
-                if (!acc[category]) {
-                    acc[category] = [];
-                }
-                acc[category].push(product);
-                return acc;
-            }, {});
-            setGroupedProducts(grouped);
+             if (topRatedResponse.ok) {
+                const { products } = await topRatedResponse.json();
+                setTopRatedProducts(products);
+            }
+            if (newestResponse.ok) {
+                const { products } = await newestResponse.json();
+                setNewestProducts(products);
+            }
 
         } catch (error: any) {
             console.error(error);
@@ -446,12 +425,6 @@ export default function BrandHomePage() {
       )
   }
   
-  const productSections = Object.entries(groupedProducts).filter(([_, items]) => {
-    if (items.length < 2) return false;
-    const topTwoProducts = items.slice(0, 2);
-    return topTwoProducts.every(p => p.rating >= 3);
-  });
-
   return (
     <>
     <main>
@@ -499,32 +472,6 @@ export default function BrandHomePage() {
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
       
       <CategoryBannerGrid brand={brand} />
-
-      {productSections.length > 0 && (
-          <div className="container pt-8 px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {productSections.map(([category, items]) => (
-                    <div key={category} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold tracking-tight">{category}</h2>
-                            <Button variant="link" asChild>
-                                <Link href={`/${brandName}/products?category=${encodeURIComponent(category)}`}>
-                                    Discover All
-                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                            </Button>
-                        </div>
-                        <Separator className="mb-6" />
-                        <div className="grid grid-cols-1 gap-4">
-                            {items.slice(0, 2).map((product) => (
-                                <BrandProductCard key={product._id as string} product={product} />
-                            ))}
-                        </div>
-                    </div>
-                ))}
-              </div>
-          </div>
-      )}
 
       <OffersSection brand={brand} />
       <PromoBannerSection brand={brand} brandName={brandName} />
