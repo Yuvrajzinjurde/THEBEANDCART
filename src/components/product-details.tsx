@@ -29,7 +29,6 @@ import { Badge } from './ui/badge';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
-import { summarizeLegalDocument } from '@/ai/flows/summarize-legal-doc-flow';
 import RatingsAndReviews from './ratings-and-reviews';
 
 interface ProductDetailsProps {
@@ -70,8 +69,14 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   
   const [product, setProduct] = useState(initialProduct);
   
-  const [returnPolicySummary, setReturnPolicySummary] = useState<string | null>(null);
-  const [loadingReturnPolicy, setLoadingReturnPolicy] = useState(true);
+  const returnPolicySummary = `
+    <ul>
+      <li>Returns accepted within <strong>${initialProduct.returnPeriod || 10} days</strong> of delivery.</li>
+      <li>Item must be in unused condition with original packaging.</li>
+      <li>Some items like innerwear and consumables may not be returnable.</li>
+    </ul>
+    <p><a href="/legal/return-policy" style="color:hsl(var(--primary));">Click here for details.</a></p>
+  `;
 
   const [selectedColor, setSelectedColor] = useState<string | undefined>(initialProduct.color);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(initialProduct.size);
@@ -89,30 +94,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     setSelectedColor(initialProduct.color);
     setSelectedSize(initialProduct.size);
   }, [initialProduct]);
-
-  // Fetch and summarize the return policy
-  useEffect(() => {
-    const fetchReturnPolicy = async () => {
-      setLoadingReturnPolicy(true);
-      try {
-        const response = await fetch(`/api/legals?docType=return-policy`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.documents.length > 0) {
-            const policyContent = data.documents[0].content;
-            const summaryResult = await summarizeLegalDocument({ documentContent: policyContent });
-            setReturnPolicySummary(summaryResult.summary);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch or summarize return policy", error);
-        setReturnPolicySummary("Could not load return policy summary.");
-      } finally {
-        setLoadingReturnPolicy(false);
-      }
-    };
-    fetchReturnPolicy();
-  }, []);
 
   // Memoize variant options
   const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
@@ -138,12 +119,12 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   useEffect(() => {
     const variant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
     if (variant && variant._id !== product._id) {
-        router.replace(`/products/${variant._id}?storefront=${storefront}`);
+        router.replace(`/${storefront}/products/${variant._id}`);
     } else if (!variant && selectedColor) {
       // If a color is selected but not a size yet, find the first available variant of that color
       const firstVariantOfColor = variants.find(v => v.color === selectedColor);
       if (firstVariantOfColor && firstVariantOfColor._id !== product._id) {
-        router.replace(`/products/${firstVariantOfColor._id}?storefront=${storefront}`);
+        router.replace(`/${storefront}/products/${firstVariantOfColor._id}`);
       }
     }
   }, [selectedColor, selectedSize, variants, product._id, router, storefront]);
@@ -465,9 +446,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                         <Tooltip>
                             <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger>
                             <TooltipContent className="p-4 max-w-sm">
-                                {loadingReturnPolicy ? <Loader /> : returnPolicySummary ? (
-                                    <div className="prose prose-sm"><div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} /></div>
-                                ) : <p>Return policy not available.</p>}
+                                <div className="prose prose-sm"><div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} /></div>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
