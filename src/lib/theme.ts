@@ -9,7 +9,8 @@ import { cache } from 'react';
 // Wrap database calls in React's cache to prevent re-fetching on the same request
 const getBrand = cache(async (brandName: string): Promise<IBrand | null> => {
     await dbConnect();
-    const brand = await Brand.findOne({ permanentName: brandName }).lean();
+    // Use a case-insensitive regex to find the brand, which is more robust.
+    const brand = await Brand.findOne({ permanentName: { $regex: new RegExp(`^${brandName}$`, 'i') } }).lean();
     return brand ? JSON.parse(JSON.stringify(brand)) : null;
 });
 
@@ -25,22 +26,27 @@ export async function getThemeForRequest(pathname: string, search: string) {
     const searchParams = new URLSearchParams(search);
     const settings = await getPlatformSettings();
 
+    // Define routes that should always use the global platform theme.
     const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search', '/login', '/signup', '/forgot-password'];
     const isGlobalRoute = pathname === '/' || globalRoutes.some(route => pathname.startsWith(route));
 
     let brandName: string | null = null;
     
     if (!isGlobalRoute) {
-        if (pathname.startsWith('/products/')) {
-            brandName = searchParams.get('storefront');
-        } else {
-            const pathParts = pathname.split('/');
-            if (pathParts.length > 1 && pathParts[1]) {
-                brandName = pathParts[1];
-            }
+        const pathParts = pathname.split('/');
+        // The brand name is typically the first part of the path after the initial slash.
+        // e.g., /reeva/home -> reeva
+        if (pathParts.length > 1 && pathParts[1]) {
+            brandName = pathParts[1];
+        }
+        
+        // For product pages, the storefront might be in a query param as a fallback.
+        if (pathname.includes('/products/') && !brandName) {
+             brandName = searchParams.get('storefront');
         }
     }
     
+    // If we've identified a brand for the current route, fetch its theme.
     if (brandName) {
         try {
             const brand = await getBrand(brandName);
@@ -52,11 +58,13 @@ export async function getThemeForRequest(pathname: string, search: string) {
         }
     }
 
+    // If no brand-specific theme is found, or if it's a global route, use the platform's default theme.
     if (!themeName) {
         themeName = settings?.platformThemeName || 'Blue';
     }
     
-    const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue') || themeColors[0];
+    // Find the theme object from our predefined list, falling back to a default 'Blue' theme if not found.
+    const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue');
     
     return { theme, settings };
 }
