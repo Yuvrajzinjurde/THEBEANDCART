@@ -118,7 +118,9 @@ export function LoginForm() {
         {loading ? (
           <Skeleton className="h-14 w-14 rounded-full" />
         ) : settings?.platformLogoUrl ? (
-            <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+            <div className="relative h-14 w-14 rounded-full">
+                <Image src={settings.platformLogoUrl} alt="Logo" fill className="object-cover" />
+            </div>
         ) : (
             <Logo className="h-14 w-14" />
         )}
@@ -219,3 +221,5 @@ export function LoginForm() {
     </Card>
   );
 }
+
+    

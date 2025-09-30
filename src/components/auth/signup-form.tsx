@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -83,7 +84,9 @@ export function SignUpForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
         {settings?.platformLogoUrl ? (
-            <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+            <div className="relative h-14 w-14 rounded-full">
+                <Image src={settings.platformLogoUrl} alt="Logo" fill className="object-cover" />
+            </div>
         ) : (
             <div className="h-14 w-14 rounded-full bg-muted" />
         )}
@@ -239,3 +242,5 @@ export function SignUpForm() {
     </Card>
   );
 }
+
+    

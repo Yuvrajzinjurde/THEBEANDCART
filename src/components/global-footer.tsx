@@ -16,7 +16,9 @@ export const GlobalFooter = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                      <div className="flex items-center gap-2">
                         {settings.platformLogoUrl ? (
-                            <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
+                            <div className="relative h-8 w-8 rounded-full">
+                                <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} fill className="object-cover" />
+                            </div>
                         ) : (
                             <Logo className="h-6 w-6 text-primary" />
                         )}
@@ -41,3 +43,5 @@ export const GlobalFooter = () => {
         </footer>
     );
 };
+
+    
