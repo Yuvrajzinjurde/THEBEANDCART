@@ -25,7 +25,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
     const searchParams = new URLSearchParams(search);
     const settings = await getPlatformSettings();
 
-    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search'];
+    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search', '/login', '/signup', '/forgot-password'];
     const isGlobalRoute = pathname === '/' || globalRoutes.some(route => pathname.startsWith(route));
 
     let brandName: string | null = null;

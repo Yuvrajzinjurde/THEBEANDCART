@@ -62,7 +62,10 @@ export default function Header() {
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
-    if (pathname.startsWith('/admin') || pathname.startsWith('/legal') || pathname === '/' || pathname === '/wishlist' || pathname === '/create-hamper' || pathname === '/cart' || pathname === '/search') {
+    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search', '/login', '/signup', '/forgot-password'];
+    const isGlobalRoute = pathname === '/' || globalRoutes.some(route => pathname.startsWith(route));
+
+    if (isGlobalRoute) {
       setBrandName(null);
     } else {
       const determinedBrand = pathBrand || queryBrand || 'reeva';
