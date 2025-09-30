@@ -33,10 +33,8 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
 
   if (!user) {
     return (
-         <Button variant="ghost" size="icon" aria-label="Sign In" asChild>
-            <Link href={`/${brandName}/login`}>
-                <UserIcon className="h-5 w-5" />
-            </Link>
+         <Button variant="ghost" asChild>
+            <Link href="/login">Login</Link>
         </Button>
     );
   }
