@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
@@ -30,19 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { setCart, setWishlist } = useUserStore();
 
   const logout = useCallback(() => {
-    const currentPathname = window.location.pathname;
-    const brandName = currentPathname.split('/')[1] || 'reeva';
-    
     localStorage.removeItem('token');
     setUser(null);
     setToken(null);
     setCart(null);
     setWishlist(null);
-    
-    const isAuthPage = /login|signup/.test(currentPathname);
-    if (!isAuthPage) {
-      router.push(`/${brandName}/login`);
-    }
+    router.push('/login');
   }, [router, setCart, setWishlist]);
 
   useEffect(() => {

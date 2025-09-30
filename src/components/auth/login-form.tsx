@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
@@ -32,6 +32,7 @@ import {
 import { Loader } from "../ui/loader";
 import Image from "next/image";
 import type { IBrand } from "@/models/brand.model";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 
 interface DecodedToken {
   roles: string[];
@@ -40,30 +41,12 @@ interface DecodedToken {
 
 export function LoginForm() {
   const router = useRouter();
-  const params = useParams();
-  const brandName = params.brand as string || 'reeva';
+  const searchParams = useSearchParams();
+  const brandName = searchParams.get('brand') || 'reeva';
+  const { settings } = usePlatformSettingsStore();
   
-  const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    async function fetchBrandLogo() {
-      if (brandName) {
-        try {
-          const res = await fetch(`/api/brands/${brandName}`);
-          if (res.ok) {
-            const { brand: brandData } = await res.json();
-            setBrand(brandData);
-          }
-        } catch (error) {
-          console.error("Failed to fetch brand logo for login page", error);
-        }
-      }
-    }
-    fetchBrandLogo();
-  }, [brandName]);
-
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -98,7 +81,7 @@ export function LoginForm() {
       if (decoded.roles.includes('admin')) {
         router.push("/admin/dashboard");
       } else {
-        const userBrand = decoded.brand || 'reeva'; // Default to reeva if no brand
+        const userBrand = decoded.brand || 'reeva';
         router.push(`/${userBrand}/home`);
       }
 
@@ -113,8 +96,8 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
-        {brand?.logoUrl ? (
-            <Image src={brand.logoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+        {settings?.platformLogoUrl ? (
+            <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
         ) : (
             <div className="h-14 w-14 rounded-full bg-muted" />
         )}
@@ -147,7 +130,7 @@ export function LoginForm() {
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
                     <Link
-                      href={`/${brandName}/forgot-password`}
+                      href={`/forgot-password`}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Forgot password?
@@ -205,7 +188,7 @@ export function LoginForm() {
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
-            href={`/${brandName}/signup`}
+            href={`/signup`}
             className="font-medium text-primary hover:underline"
           >
             Sign up

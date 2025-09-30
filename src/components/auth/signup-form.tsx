@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -34,8 +34,8 @@ import { Loader } from "../ui/loader";
 
 export function SignUpForm() {
   const router = useRouter();
-  const params = useParams();
-  const brand = params.brand as string;
+  const searchParams = useSearchParams();
+  const brand = searchParams.get('brand') || 'reeva';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,7 +48,7 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
-      brand: brand || "reeva", // Default to reeva if no brand in URL
+      brand: brand,
     },
     mode: 'onChange',
   });
@@ -71,7 +71,7 @@ export function SignUpForm() {
       }
 
       toast.success("Account created successfully. Please log in.");
-      router.push(`/${brand}/login`);
+      router.push(`/login`);
     } catch (error: any) {
       console.error("Sign Up Error:", error);
       toast.error(error.message || "An unexpected error occurred. Please try again.");
@@ -86,7 +86,7 @@ export function SignUpForm() {
         <Logo />
         <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
         <CardDescription>
-          Get started with Reeva and secure your account.
+          Get started with your new account.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -226,7 +226,7 @@ export function SignUpForm() {
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link
-            href={`/${brand}/login`}
+            href={`/login`}
             className="font-medium text-primary hover:underline"
           >
             Log in

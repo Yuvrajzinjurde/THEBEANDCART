@@ -59,7 +59,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     e.stopPropagation();
     if (!user) {
         toast.info("Please log in to add items to your wishlist.");
-        router.push(`/${product.storefront}/login`);
+        router.push(`/login`);
         return;
     }
     try {
@@ -84,7 +84,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     e.stopPropagation();
      if (!user) {
         toast.info("Please log in to add items to your cart.");
-        router.push(`/${product.storefront}/login`);
+        router.push(`/login`);
         return;
     }
     try {
@@ -112,7 +112,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         body: JSON.stringify({ metric: 'clicks' }),
     }).catch(err => console.error("Failed to track click:", err));
     
-    router.push(`/products/${product._id}?storefront=${product.storefront}`);
+    router.push(`/${product.storefront}/products/${product._id}`);
   };
   
   const sellingPrice = typeof product.sellingPrice === 'number' ? product.sellingPrice : 0;
@@ -125,7 +125,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
   return (
     <Link 
-      href={`/products/${product._id}?storefront=${product.storefront}`} 
+      href={`/${product.storefront}/products/${product._id}`} 
       onClick={handleCardClick} 
       className={cn("group block w-full", className)}
     >
