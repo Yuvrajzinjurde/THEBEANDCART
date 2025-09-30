@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -28,14 +27,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Logo } from "@/components/logo";
 import { Loader } from "../ui/loader";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import Image from "next/image";
 
 type FormStep = "email" | "reset";
 type CombinedFormData = ForgotPasswordInput & ResetPasswordInput;
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+  const { settings } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<FormStep>("email");
   const [showPassword, setShowPassword] = useState(false);
@@ -103,7 +104,11 @@ export function ForgotPasswordForm() {
        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
             <CardHeader className="items-center text-center">
-              <Logo />
+              {settings?.platformLogoUrl ? (
+                <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+              ) : (
+                  <div className="h-14 w-14 rounded-full bg-muted" />
+              )}
               <CardTitle className="text-2xl font-bold">
                 {step === 'email' ? 'Forgot Password?' : 'Reset Your Password'}
               </CardTitle>

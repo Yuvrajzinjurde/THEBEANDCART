@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -41,12 +40,21 @@ interface DecodedToken {
 
 export function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const brandName = searchParams.get('brand') || 'reeva';
   const { settings } = usePlatformSettingsStore();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [brandName, setBrandName] = useState('reeva');
+
+  useEffect(() => {
+    // Since this is a global login, we can't rely on URL params.
+    // We'll set a default or use logic to determine the brand if needed.
+    // For now, let's default to a primary brand.
+    const urlBrand = new URLSearchParams(window.location.search).get('brand');
+    if (urlBrand) {
+        setBrandName(urlBrand);
+    }
+  }, []);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -56,6 +64,10 @@ export function LoginForm() {
       brand: brandName,
     },
   });
+  
+  useEffect(() => {
+    form.setValue('brand', brandName);
+  }, [brandName, form]);
 
   async function onSubmit(data: LoginInput) {
     setIsSubmitting(true);

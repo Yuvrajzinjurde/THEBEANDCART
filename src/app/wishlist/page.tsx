@@ -29,40 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
-
-const WishlistFooter = () => {
-    const { settings } = usePlatformSettingsStore();
-    return (
-        <footer className="w-full border-t bg-background mt-16">
-            <div className="container py-8 px-5">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                     <div className="flex items-center gap-2">
-                        {settings.platformLogoUrl ? (
-                            <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-                        ) : (
-                            <Logo className="h-6 w-6 text-primary" />
-                        )}
-                        <span className="font-bold">{settings.platformName || 'The Brand Cart'}</span>
-                    </div>
-                    <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
-                        <Link href="/legal/about-us" className="hover:text-primary">About Us</Link>
-                        <Link href="/legal/privacy-policy" className="hover:text-primary">Policies</Link>
-                        <Link href="/legal/contact-us" className="hover:text-primary">Contact Us</Link>
-                    </div>
-                    <div className="flex space-x-4">
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
-                        <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
-                    </div>
-                </div>
-                <div className="mt-8 border-t pt-4">
-                    <p className="text-center text-sm text-muted-foreground">&copy; {new Date().getFullYear()} {settings.platformName || 'The Brand Cart'}. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
-    )
-};
+import { GlobalFooter } from "@/components/global-footer";
 
 const WishlistSkeleton = () => (
     <main className="container py-8 px-10 text-center">
@@ -105,8 +72,7 @@ export default function WishlistPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        const currentBrand = router.pathname?.split('/')[1] || 'reeva';
-        router.replace(`/${currentBrand}/login`);
+        router.replace(`/login`);
         return;
       }
       setLoading(false);
@@ -168,7 +134,7 @@ export default function WishlistPage() {
 
   return (
     <>
-    <main className="container py-8 px-10">
+    <main className="container py-8 px-10 flex-1">
       <div className="flex items-center justify-between mb-6">
          <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
@@ -214,12 +180,12 @@ export default function WishlistPage() {
             return (
                 <Card key={product._id as string}>
                     <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
-                        <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="block flex-shrink-0 w-36 aspect-square">
+                        <Link href={`/${product.storefront}/products/${product._id}`} className="block flex-shrink-0 w-36 aspect-square">
                             <Image src={product.images[0]} alt={product.name} width={144} height={144} className="rounded-lg object-cover border w-full h-full"/>
                         </Link>
                         <div className="flex flex-col flex-grow">
                             <p className="text-sm text-muted-foreground font-medium">{product.brand}</p>
-                            <Link href={`/products/${product._id}?storefront=${product.storefront}`} className="font-semibold text-lg hover:underline leading-tight">{product.name}</Link>
+                            <Link href={`/${product.storefront}/products/${product._id}`} className="font-semibold text-lg hover:underline leading-tight">{product.name}</Link>
                             
                             <Badge
                                 variant={availableStock > 0 ? "default" : "destructive"}
@@ -272,7 +238,7 @@ export default function WishlistPage() {
         </div>
       )}
     </main>
-    <WishlistFooter />
+    <GlobalFooter />
     </>
   );
 }

@@ -1,27 +1,27 @@
 "use client";
 
+import { SignUpForm } from "@/components/auth/signup-form";
 import { GlobalFooter } from "@/components/global-footer";
-import { LoginForm } from "@/components/auth/login-form";
 import { Suspense } from "react";
 import { Loader } from "@/components/ui/loader";
 
-function LoginPageContent() {
+function SignUpPageContent() {
     return (
         <main className="flex flex-1 items-center justify-center p-4">
-            <LoginForm />
+            <SignUpForm />
         </main>
     )
 }
 
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <Suspense fallback={
         <div className="flex h-screen w-full items-center justify-center">
             <Loader className="h-8 w-8" />
         </div>
     }>
-      <LoginPageContent />
+      <SignUpPageContent />
       <GlobalFooter />
     </Suspense>
   );

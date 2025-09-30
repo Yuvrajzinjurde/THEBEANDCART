@@ -258,7 +258,7 @@ export default function CartPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.replace(`/reeva/login`);
+        router.replace(`/login`);
         return;
       }
       setLoading(false);
@@ -434,7 +434,7 @@ export default function CartPage() {
   if (cartItems.length === 0) {
       return (
         <>
-        <main className="container py-8 px-10">
+        <main className="container py-8 px-10 flex-1">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">Your Cart is Empty</h2>
@@ -442,7 +442,7 @@ export default function CartPage() {
                     Add items you want to buy to your cart.
                 </p>
                 <Button asChild className="mt-6">
-                    <Link href={`/reeva/home`}>Continue Shopping</Link>
+                    <Link href={`/`}>Continue Shopping</Link>
                 </Button>
             </div>
         </main>
@@ -487,7 +487,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="py-8">
+      <main className="py-8 flex-1">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-12 lg:gap-8 lg:items-start">
                 <div className="lg:col-span-7 xl:col-span-8">
@@ -510,7 +510,7 @@ export default function CartPage() {
                                                         <GiftBoxIcon />
                                                     </div>
                                                 ) : (
-                                                    <Link href={`/products/${item.product._id}?storefront=${item.product.storefront}`} className="block h-full w-full">
+                                                    <Link href={`/${item.product.storefront}/products/${item.product._id}`} className="block h-full w-full">
                                                         <Image src={item.product.images[0]} alt={item.product.name} width={120} height={120} className="rounded-lg object-cover border h-full w-full"/>
                                                     </Link>
                                                 )}
@@ -526,7 +526,7 @@ export default function CartPage() {
 
                                         <div className="flex flex-col flex-grow gap-1">
                                             <p className="text-sm text-muted-foreground font-medium">{item.product.brand}</p>
-                                            <Link href={isGift ? '#' : `/products/${item.product._id}?storefront=${item.product.storefront}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
+                                            <Link href={isGift ? '#' : `/${item.product.storefront}/products/${item.product._id}`} className={`font-semibold text-base sm:text-lg hover:underline leading-tight ${isGift ? 'pointer-events-none' : ''}`}>{item.product.name}</Link>
                                             
                                             {isGift && (
                                                 <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">

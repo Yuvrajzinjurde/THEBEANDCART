@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -28,14 +27,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Logo } from "@/components/logo";
 import { PasswordStrength } from "./password-strength";
 import { Loader } from "../ui/loader";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import Image from "next/image";
 
 export function SignUpForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const brand = searchParams.get('brand') || 'reeva';
+  const { settings } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,7 +47,7 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
-      brand: brand,
+      brand: "reeva", // Default brand for new signups
     },
     mode: 'onChange',
   });
@@ -83,7 +82,11 @@ export function SignUpForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
-        <Logo />
+        {settings?.platformLogoUrl ? (
+            <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+        ) : (
+            <div className="h-14 w-14 rounded-full bg-muted" />
+        )}
         <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
         <CardDescription>
           Get started with your new account.

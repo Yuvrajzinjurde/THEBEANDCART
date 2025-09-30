@@ -38,8 +38,7 @@ export default async function RootLayout({
   const platformSettings = settings as IPlatformSettings | null;
 
   const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthRoute = /\/login|\/signup|\/forgot-password/.test(pathname);
-  const showHeader = !isAdminRoute && !isAuthRoute;
+  const showHeader = !isAdminRoute;
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
