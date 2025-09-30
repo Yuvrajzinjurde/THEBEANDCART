@@ -1,9 +1,9 @@
 
 'use client';
 
-import { usePathname } from 'next/navigation';
 import Header from '@/components/header';
 import { GlobalFooter } from '@/components/global-footer';
+import { usePathname } from 'next/navigation';
 
 export default function GlobalLayout({
   children,
@@ -11,11 +11,8 @@ export default function GlobalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
   const authRoutes = ['/login', '/signup', '/forgot-password'];
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-
-  // The login page has its own footer, so we don't show the global one there.
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
   const showFooter = !isAuthRoute;
 
   return (
