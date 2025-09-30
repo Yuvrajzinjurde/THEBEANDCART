@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "../dashboard/actions";
 import { Loader } from "@/components/ui/loader";
@@ -108,6 +108,7 @@ function BusinessDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('7d');
   const [chartView, setChartView] = useState<ChartView>('orders');
+  const [isPending, startTransition] = useTransition();
   
   const now = new Date();
   const dateRanges = {
@@ -120,16 +121,17 @@ function BusinessDashboardPage() {
   
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const dashboardData = await getDashboardStats(selectedBrand);
-        setData(dashboardData);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch dashboard data');
-      } finally {
-        setLoading(false);
-      }
+      startTransition(async () => {
+        setError(null);
+        try {
+          const dashboardData = await getDashboardStats(selectedBrand);
+          setData(dashboardData);
+        } catch (err: any) {
+          setError(err.message || 'Failed to fetch dashboard data');
+        } finally {
+          setLoading(false);
+        }
+      });
     };
 
     fetchData();
@@ -243,7 +245,9 @@ function BusinessDashboardPage() {
             </div>
 
             <div className="h-[300px] w-full">
-            {hasChartData ? (
+            {isPending ? (
+              <DashboardSkeleton />
+            ) : hasChartData ? (
                <ChartContainer config={chartConfig} className="h-full w-full">
                     <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />

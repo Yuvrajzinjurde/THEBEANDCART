@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, ShoppingCart, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -103,6 +103,7 @@ export default function UserDetailsPage() {
     const [details, setDetails] = useState<UserDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isPending, startTransition] = useTransition();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -111,7 +112,7 @@ export default function UserDetailsPage() {
         if (!userId) return;
 
         const fetchDetails = async () => {
-            setLoading(true);
+          startTransition(async () => {
             setError(null);
             try {
                 const userDetails = await getUserDetails(userId);
@@ -121,6 +122,7 @@ export default function UserDetailsPage() {
             } finally {
                 setLoading(false);
             }
+          });
         };
 
         fetchDetails();
@@ -281,45 +283,48 @@ export default function UserDetailsPage() {
                             </Button>
                         </div>
                     </div>
-
-                    <div className="overflow-x-auto border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Order ID</TableHead>
-                                    <TableHead>Date & Time</TableHead>
-                                    <TableHead>Cart</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredOrders.length > 0 ? (
-                                    filteredOrders.map((order) => (
-                                        <TableRow key={order._id as string}>
-                                            <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
-                                            <TableCell>{format(new Date(order.createdAt as string), 'dd MMM yyyy, hh:mm a')}</TableCell>
-                                            <TableCell>{order.products.length} items</TableCell>
-                                            <TableCell>₹{order.totalAmount.toFixed(2)}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="secondary">{order.status}</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button variant="outline" size="sm">View</Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center">
-                                            No Orders Available
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                    {isPending ? (
+                      <UserDetailsSkeleton />
+                    ) : (
+                      <div className="overflow-x-auto border rounded-md">
+                          <Table>
+                              <TableHeader>
+                                  <TableRow>
+                                      <TableHead>Order ID</TableHead>
+                                      <TableHead>Date & Time</TableHead>
+                                      <TableHead>Cart</TableHead>
+                                      <TableHead>Total</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead>Action</TableHead>
+                                  </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                  {filteredOrders.length > 0 ? (
+                                      filteredOrders.map((order) => (
+                                          <TableRow key={order._id as string}>
+                                              <TableCell className="font-mono text-xs">#{(order._id as string).slice(-8).toUpperCase()}</TableCell>
+                                              <TableCell>{format(new Date(order.createdAt as string), 'dd MMM yyyy, hh:mm a')}</TableCell>
+                                              <TableCell>{order.products.length} items</TableCell>
+                                              <TableCell>₹{order.totalAmount.toFixed(2)}</TableCell>
+                                              <TableCell>
+                                                  <Badge variant="secondary">{order.status}</Badge>
+                                              </TableCell>
+                                              <TableCell>
+                                                  <Button variant="outline" size="sm">View</Button>
+                                              </TableCell>
+                                          </TableRow>
+                                      ))
+                                  ) : (
+                                      <TableRow>
+                                          <TableCell colSpan={6} className="h-24 text-center">
+                                              No Orders Available
+                                          </TableCell>
+                                      </TableRow>
+                                  )}
+                              </TableBody>
+                          </Table>
+                      </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
