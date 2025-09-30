@@ -36,7 +36,7 @@ const suggestHamperMessagePrompt = ai.definePrompt({
   name: 'suggestHamperMessagePrompt',
   input: { schema: SuggestHamperMessageInputSchema },
   output: { schema: SuggestHamperMessageOutputSchema },
-  model: 'googleai/gemini-pro',
+  model: 'gemini-pro',
   prompt: `You are an expert gift-giver with a talent for writing heartfelt, witty, and creative messages. Your task is to generate a short message (around 20-30 words) for a gift hamper recipient.
 
 The message should be tailored to the specific occasion and the items inside the hamper.

@@ -35,7 +35,7 @@ const parseLegalDocPrompt = ai.definePrompt({
   name: 'parseLegalDocPrompt',
   input: {schema: ParseLegalDocInputSchema},
   output: {schema: ParseLegalDocOutputSchema},
-  model: 'googleai/gemini-pro',
+  model: 'gemini-pro',
   prompt: `You are an expert legal document formatter. Your task is to take the raw text content from a document and convert it into clean, well-structured HTML.
 
   The user will provide the raw text and the type of document. Use the document type to understand the context.

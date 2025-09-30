@@ -33,7 +33,7 @@ const suggestDriedRosePrompt = ai.definePrompt({
   name: 'suggestDriedRosePrompt',
   input: { schema: SuggestDriedRoseInputSchema },
   output: { schema: SuggestDriedRoseOutputSchema },
-  model: 'googleai/gemini-pro',
+  model: 'gemini-pro',
   prompt: `You are a thoughtful gift-giving assistant. Your task is to decide whether to suggest adding a hand-pressed dried rose to a gift hamper based on the occasion.
 
   A dried rose symbolizes love, memory, and lasting beauty. It's a premium, thoughtful addition.
