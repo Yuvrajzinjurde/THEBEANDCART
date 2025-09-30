@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import useUserStore from "@/stores/user-store";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { Skeleton } from "./ui/skeleton";
 
 export default function Header() {
   const { user } = useAuth();
@@ -43,10 +44,11 @@ export default function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const { cart, wishlist } = useUserStore();
-  const { settings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
 
   const [brandName, setBrandName] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
   // State for search suggestions
@@ -58,6 +60,7 @@ export default function Header() {
 
   useEffect(() => {
     setIsClient(true);
+    fetchSettings();
     
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
@@ -72,7 +75,7 @@ export default function Header() {
       setBrandName(determinedBrand);
     }
 
-  }, [pathname, params, searchParams]);
+  }, [pathname, params, searchParams, fetchSettings]);
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
@@ -109,6 +112,7 @@ export default function Header() {
 
   useEffect(() => {
     async function fetchBrandData() {
+      setIsLoading(true);
       if (!brandName) {
         // Fetch all products for global pages to power search suggestions
         try {
@@ -121,6 +125,7 @@ export default function Header() {
             console.error("Failed to fetch all products for header", error);
         }
         setBrand(null);
+        setIsLoading(false);
         return;
       };
       try {
@@ -147,6 +152,8 @@ export default function Header() {
         console.error("Failed to fetch brand data for header", error);
         setBrand(null);
         setAllProducts([]);
+      } finally {
+        setIsLoading(false);
       }
     }
     if (isClient) {
@@ -202,7 +209,7 @@ export default function Header() {
   }, []);
 
   
-  const currentDisplayName = isClient && brand && brandName ? brand.displayName : settings.platformName;
+  const currentDisplayName = isClient && !isLoading && (brand && brandName ? brand.displayName : settings.platformName);
   const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
@@ -227,19 +234,29 @@ export default function Header() {
         </Button>
     </div>
   );
+  
+  const renderLogo = () => {
+    const logoUrl = brandName && brand?.logoUrl ? brand.logoUrl : settings.platformLogoUrl;
+    
+    if (isLoading) {
+      return <Skeleton className="h-8 w-8 rounded-full" />;
+    }
+    
+    if (logoUrl) {
+      return <Image src={logoUrl} alt="Logo" width={32} height={32} className="h-8 w-8 rounded-full object-cover" />;
+    }
+    
+    return <Logo className="h-8 w-8" />;
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-          {isClient && brandName && brand?.logoUrl ? (
-            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-          ) : isClient && settings.platformLogoUrl ? (
-             <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-          ) : (
-            <Logo className="h-8 w-8" />
-          )}
-          <span className="hidden font-bold text-lg sm:inline-block capitalize">{currentDisplayName}</span>
+            {renderLogo()}
+            <span className="hidden font-bold text-lg sm:inline-block capitalize">
+                {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
+            </span>
         </Link>
 
         {brandName && categories.length > 0 && (
@@ -312,13 +329,7 @@ export default function Header() {
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                             <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                                {isClient && brandName && brand?.logoUrl ? (
-                                    <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-                                ) : isClient && settings.platformLogoUrl ? (
-                                    <Image src={settings.platformLogoUrl} alt={`${settings.platformName} Logo`} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
-                                ) : (
-                                    <Logo className="h-8 w-8" />
-                                )}
+                                {renderLogo()}
                                 <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
                             </Link>
                         </SheetTitle>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -32,6 +33,8 @@ import { Loader } from "../ui/loader";
 import Image from "next/image";
 import type { IBrand } from "@/models/brand.model";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { Logo } from "../logo";
+import { Skeleton } from "../ui/skeleton";
 
 interface DecodedToken {
   roles: string[];
@@ -45,6 +48,7 @@ export function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [brandName, setBrandName] = useState('reeva');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Since this is a global login, we can't rely on URL params.
@@ -54,7 +58,10 @@ export function LoginForm() {
     if (urlBrand) {
         setBrandName(urlBrand);
     }
-  }, []);
+    if (settings.platformName) {
+        setLoading(false);
+    }
+  }, [settings]);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -108,10 +115,12 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
-        {settings?.platformLogoUrl ? (
+        {loading ? (
+          <Skeleton className="h-14 w-14 rounded-full" />
+        ) : settings?.platformLogoUrl ? (
             <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
         ) : (
-            <div className="h-14 w-14 rounded-full bg-muted" />
+            <Logo className="h-14 w-14" />
         )}
         <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
         <CardDescription>
