@@ -54,13 +54,13 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-6 text-center">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6 text-center">
         <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
-        {[...Array(10)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
             <div key={i} className="space-y-2">
                 <Skeleton className="aspect-square w-full" />
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-4 w-2/3 mx-auto" />
+                <Skeleton className="h-6 w-1/2 mx-auto" />
             </div>
         ))}
     </div>
@@ -131,7 +131,9 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                     {brand?.logoUrl && (
-                        <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} width={32} height={32} className="h-8 w-8 object-cover rounded-full" />
+                        <div className="relative h-8 w-8 rounded-full">
+                            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="object-cover" />
+                        </div>
                     )}
                     <span className="text-lg font-bold capitalize">{brand?.displayName}</span>
                 </div>
@@ -165,7 +167,7 @@ export default function ProductsPage() {
 
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -180,12 +182,13 @@ export default function ProductsPage() {
   });
   const [sortOption, setSortOption] = useState<string>('relevance');
 
-  const updateURL = useCallback((filters: ActiveFilters, page: number) => {
+  const updateURL = useCallback((filters: ActiveFilters, page: number, sortBy: string) => {
     const query = new URLSearchParams();
     if (filters.categories.length > 0) query.set('category', filters.categories.join(','));
     if (filters.brands.length > 0) query.set('brands', filters.brands.join(','));
     if (filters.colors.length > 0) query.set('colors', filters.colors.join(','));
     if (filters.keywords.length > 0) query.set('keyword', filters.keywords.join(','));
+    if (sortBy !== 'relevance') query.set('sortBy', sortBy);
     if (page > 1) query.set('page', page.toString());
     
     // Using router.replace to avoid adding to history stack
@@ -193,72 +196,72 @@ export default function ProductsPage() {
   }, [brandName, router]);
 
 
-  const fetchProducts = useCallback(async (page: number, filters: ActiveFilters, sortBy: string) => {
+  const fetchProducts = useCallback((page: number, filters: ActiveFilters, sortBy: string) => {
     if (!brandName) return;
-    setLoading(true);
-    setError(null);
-    try {
-        const query = new URLSearchParams({ 
-            storefront: brandName,
-            page: page.toString(),
-            limit: '50',
-            sortBy: sortBy,
-        });
+    
+    startTransition(async () => {
+        setError(null);
+        try {
+            const query = new URLSearchParams({ 
+                storefront: brandName,
+                page: page.toString(),
+                limit: '50',
+                sortBy: sortBy,
+            });
 
-        if (filters.categories.length > 0) query.append('category', filters.categories.join(','));
-        if (filters.brands.length > 0) query.append('brands', filters.brands.join(','));
-        if (filters.colors.length > 0) query.append('colors', filters.colors.join(','));
-        if (filters.keywords.length > 0) query.append('keywords', filters.keywords.join(','));
+            if (filters.categories.length > 0) query.append('category', filters.categories.join(','));
+            if (filters.brands.length > 0) query.append('brands', filters.brands.join(','));
+            if (filters.colors.length > 0) query.append('colors', filters.colors.join(','));
+            if (filters.keywords.length > 0) query.append('keywords', filters.keywords.join(','));
 
-        const productResponse = await fetch(`/api/products?${query.toString()}`);
-        if(!productResponse.ok) {
-            const errorData = await productResponse.json();
-            throw new Error(errorData.message || 'Failed to fetch products');
+            const productResponse = await fetch(`/api/products?${query.toString()}`);
+            if(!productResponse.ok) {
+                const errorData = await productResponse.json();
+                throw new Error(errorData.message || 'Failed to fetch products');
+            }
+            const { products, pagination: newPagination } = await productResponse.json();
+            
+            setAllProducts(products);
+            if (newPagination) {
+                setPagination(newPagination);
+            }
+
+        } catch (error: any) {
+            console.error(error);
+            setError(error.message);
         }
-        const { products, pagination: newPagination } = await productResponse.json();
-        
-        setAllProducts(products);
-        if (newPagination) {
-            setPagination(newPagination);
-        }
-
-    } catch (error: any) {
-        console.error(error);
-        setError(error.message);
-    } finally {
-        setLoading(false);
-    }
-  }, [brandName]);
-
-  useEffect(() => {
-    startTransition(() => {
-      fetchProducts(1, activeFilters, sortOption);
-      updateURL(activeFilters, 1);
     });
+  }, [brandName]);
+  
+  useEffect(() => {
+    fetchProducts(1, activeFilters, sortOption);
+    updateURL(activeFilters, 1, sortOption);
   }, [activeFilters, sortOption, fetchProducts, updateURL]);
 
   useEffect(() => {
     async function fetchInitialData() {
         if (!brandName) return;
+        setIsInitialLoading(true);
         try {
-            const brandResponse = await fetch(`/api/brands/${brandName}`);
+            const [brandResponse, popularResponse] = await Promise.all([
+                fetch(`/api/brands/${brandName}`),
+                fetch(`/api/products?${new URLSearchParams({ storefront: brandName, limit: '12', sortBy: 'popular' })}`)
+            ]);
+
             if (brandResponse.ok) {
                 const { brand: brandData } = await brandResponse.json();
                 setBrand(brandData);
             }
 
-            const popularQuery = new URLSearchParams({ 
-                storefront: brandName,
-                limit: '12',
-                sortBy: 'popular'
-            });
-            const popularResponse = await fetch(`/api/products?${popularQuery.toString()}`);
             if (popularResponse.ok) {
                 const { products } = await popularResponse.json();
                 setPopularProducts(products);
             }
         } catch (error) {
             console.error('Failed to fetch initial data:', error);
+            setError('Could not load brand information.');
+        } finally {
+            setIsInitialLoading(false);
         }
     }
     fetchInitialData();
@@ -277,10 +280,8 @@ export default function ProductsPage() {
   
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= pagination.totalPages) {
-        startTransition(() => {
-            fetchProducts(newPage, activeFilters, sortOption);
-            updateURL(activeFilters, newPage);
-        })
+        fetchProducts(newPage, activeFilters, sortOption);
+        updateURL(activeFilters, newPage, sortOption);
     }
   };
 
@@ -292,6 +293,18 @@ export default function ProductsPage() {
     if (activeFilters.categories.length === 1) return activeFilters.categories[0];
     return null;
   }, [activeFilters.categories]);
+
+  if (isInitialLoading) {
+      return (
+           <main className="container py-8 px-4 sm:px-6 lg:px-8">
+                <Skeleton className="h-8 w-64 mb-4" />
+                <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
+                    <Skeleton className="hidden lg:block h-[600px] w-full" />
+                    <ProductGridSkeleton />
+                </div>
+           </main>
+      )
+  }
 
   if (error) {
       return (
@@ -341,7 +354,7 @@ export default function ProductsPage() {
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
                                 {currentCategory ? `${currentCategory}` : `All Products`}
                             </h1>
-                            <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products</p>
+                            <p className="text-sm text-muted-foreground mt-1">{isPending ? <Loader className="inline-block h-4 w-4" /> : `${pagination.totalProducts} products`}</p>
                         </div>
                         <div className="flex items-center gap-2 self-end">
                              <Sheet>
@@ -380,7 +393,7 @@ export default function ProductsPage() {
                     </div>
                 </div>
 
-                {loading || isPending ? (
+                {isPending ? (
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6">
