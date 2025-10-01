@@ -39,11 +39,6 @@ export async function getThemeForRequest(pathname: string, search: string) {
         if (pathParts.length > 1 && pathParts[1]) {
             brandName = pathParts[1];
         }
-        
-        // For product pages, the storefront might be in a query param as a fallback.
-        if (pathname.includes('/products/') && !brandName) {
-             brandName = searchParams.get('storefront');
-        }
     }
     
     // If we've identified a brand for the current route, fetch its theme.
