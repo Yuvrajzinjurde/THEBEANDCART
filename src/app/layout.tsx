@@ -38,11 +38,9 @@ export default async function RootLayout({
   const platformSettings = settings as IPlatformSettings | null;
   
   const isAdminRoute = pathname.startsWith('/admin');
+  const isBrandRoute = !isAdminRoute && !pathname.startsWith('/legal') && !pathname.startsWith('/wishlist') && !pathname.startsWith('/cart') && !pathname.startsWith('/search') && !pathname.startsWith('/login') && !pathname.startsWith('/signup') && !pathname.startsWith('/forgot-password') && pathname !== '/' && !pathname.startsWith('/create-hamper');
   const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.includes(route));
 
-  // Determine if it's a brand-specific route by checking if it's not a global or admin route.
-  const isBrandRoute = !isAdminRoute && !isAuthRoute && pathname !== '/' && !['/legal', '/wishlist', '/create-hamper', '/cart', '/search'].some(p => pathname.startsWith(p));
-  
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
@@ -56,7 +54,7 @@ export default async function RootLayout({
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
                 {!isAdminRoute && <Header />}
-                <main className="flex-1 flex flex-col">{children}</main>
+                <div className="flex-1 flex flex-col">{children}</div>
                 {!isAdminRoute && !isBrandRoute && !isAuthRoute && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
