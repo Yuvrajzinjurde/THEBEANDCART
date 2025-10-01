@@ -38,13 +38,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const [api, setApi] = useState<CarouselApi>();
 
   const autoplay = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
+    Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
   );
 
   useEffect(() => {
-    if (api) {
-        autoplay.current.play();
+    if (!api) {
+      return;
     }
+    // This is just to satisfy the dependency array, autoplay is handled by the plugin.
   }, [api]);
   
 
