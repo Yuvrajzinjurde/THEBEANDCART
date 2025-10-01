@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-        <Card>
+        <Card className="shadow-md">
             <CardHeader className="flex flex-row items-start justify-between">
                 <div>
                     <CardTitle>My Profile</CardTitle>
@@ -76,7 +76,7 @@ export default function ProfilePage() {
                         </>
                     )}
                     {!isEditing && (
-                        <Button onClick={() => setIsEditing(true)}>
+                        <Button variant="outline" onClick={() => setIsEditing(true)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Profile
                         </Button>
