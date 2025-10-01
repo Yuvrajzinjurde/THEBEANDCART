@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
-import { CreditCard, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { LogOut, User as UserIcon, Settings, Package, Bell, MapPin } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { useParams } from "next/navigation";
 
@@ -42,6 +42,44 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "U";
   const userBrand = user.brand || 'reeva';
 
+  const userMenuItems = (
+    <>
+        <DropdownMenuItem asChild>
+            <Link href="/dashboard/profile">
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+            </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+            <Link href="/dashboard/orders">
+                <Package className="mr-2 h-4 w-4" />
+                <span>My Orders</span>
+            </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+            <Link href="/dashboard/addresses">
+                <MapPin className="mr-2 h-4 w-4" />
+                <span>Saved Addresses</span>
+            </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+            <Link href="/dashboard/notifications">
+                <Bell className="mr-2 h-4 w-4" />
+                <span>Notifications</span>
+            </Link>
+        </DropdownMenuItem>
+    </>
+  );
+
+  const adminMenuItem = (
+      <DropdownMenuItem asChild>
+          <Link href="/admin/dashboard">
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Admin Dashboard</span>
+          </Link>
+      </DropdownMenuItem>
+  );
+
   if (isCollapsed) {
     return (
        <DropdownMenu>
@@ -53,7 +91,6 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
-                {/* Collapsed content is same as expanded, but triggered by avatar */}
                 <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -61,34 +98,8 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                  <DropdownMenuGroup>
-                    {user.roles.includes('admin') ? (
-                        <DropdownMenuItem asChild>
-                                <Link href="/admin/dashboard">
-                                    <UserIcon className="mr-2 h-4 w-4" />
-                                    <span>Dashboard</span>
-                                </Link>
-                            </DropdownMenuItem>
-                    ) : (
-                            <DropdownMenuItem asChild>
-                                <Link href={`/${userBrand}/home`}>
-                                    <UserIcon className="mr-2 h-4 w-4" />
-                                    <span>Profile</span>
-                                </Link>
-                            </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                        <Link href="#">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        <span>Billing</span>
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href="#">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                        </Link>
-                    </DropdownMenuItem>
-                    </DropdownMenuGroup>
+                    {user.roles.includes('admin') ? adminMenuItem : userMenuItems}
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -99,7 +110,6 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
     );
   }
   
-    // Expanded view for regular header
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -120,33 +130,7 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                {user.roles.includes('admin') ? (
-                    <DropdownMenuItem asChild>
-                            <Link href="/admin/dashboard">
-                                <UserIcon className="mr-2 h-4 w-4" />
-                                <span>Dashboard</span>
-                            </Link>
-                        </DropdownMenuItem>
-                ) : (
-                        <DropdownMenuItem asChild>
-                            <Link href={`/${userBrand}/home`}>
-                                <UserIcon className="mr-2 h-4 w-4" />
-                                <span>Profile</span>
-                            </Link>
-                        </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                    <Link href="#">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    <span>Billing</span>
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="#">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                    </Link>
-                </DropdownMenuItem>
+                    {user.roles.includes('admin') ? adminMenuItem : userMenuItems}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
