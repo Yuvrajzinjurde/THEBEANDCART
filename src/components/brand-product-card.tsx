@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star, Info, ArrowLeft, ArrowRight } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -12,8 +12,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
@@ -36,17 +34,28 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const { user, token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
+  
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  const autoplay = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: true })
   );
 
   useEffect(() => {
-    if (!api) {
-      return;
+    const carouselEl = carouselRef.current;
+    if (!carouselEl) return;
+
+    const startAutoplay = () => autoplayPlugin.current.play();
+    const stopAutoplay = () => autoplayPlugin.current.stop();
+
+    carouselEl.addEventListener('mouseenter', startAutoplay);
+    carouselEl.addEventListener('mouseleave', stopAutoplay);
+
+    return () => {
+      carouselEl.removeEventListener('mouseenter', startAutoplay);
+      carouselEl.removeEventListener('mouseleave', stopAutoplay);
     }
-    // This is just to satisfy the dependency array, autoplay is handled by the plugin.
-  }, [api]);
+  }, []);
   
 
   const isWishlisted = useMemo(() => {
@@ -134,11 +143,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
         className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
+        ref={carouselRef}
       >
         <div className="w-full">
             <Carousel
                 setApi={setApi}
-                plugins={[autoplay.current]}
+                plugins={[autoplayPlugin.current]}
                 opts={{ loop: product.images.length > 1 }}
                 className="w-full h-full"
             >
@@ -156,8 +166,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                     </CarouselItem>
                 ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Carousel>
         </div>
 
