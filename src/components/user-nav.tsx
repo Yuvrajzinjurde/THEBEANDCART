@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
-import { LogOut, User as UserIcon, Settings, CreditCard } from "lucide-react";
+import { LogOut, User as UserIcon, Settings, CreditCard, Package } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { useParams } from "next/navigation";
 
@@ -48,6 +48,12 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
             <Link href="/dashboard/profile">
                 <UserIcon className="mr-2 h-4 w-4" />
                 <span>Profile</span>
+            </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+            <Link href="/dashboard/orders">
+                <Package className="mr-2 h-4 w-4" />
+                <span>Orders</span>
             </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
