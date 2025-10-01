@@ -26,22 +26,24 @@ function DashboardLayout({
 
   return (
     <div className="flex w-full bg-muted/40 min-h-[calc(100vh-4rem)]">
-      <aside className="hidden md:flex flex-col w-64 border-r bg-background">
-          <nav className="flex flex-col gap-2 p-4">
-            {sidebarNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                  pathname === item.href && "bg-muted text-primary font-semibold"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+      <aside className="hidden md:flex flex-col w-64 border-r bg-background h-screen sticky top-16">
+          <div className="flex-1 overflow-y-auto">
+            <nav className="flex flex-col gap-2 p-4">
+              {sidebarNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                    pathname === item.href && "bg-muted text-primary font-semibold"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
           <div className="mt-auto border-t p-4">
                <Button
                   variant="ghost"
@@ -53,7 +55,7 @@ function DashboardLayout({
               </Button>
             </div>
         </aside>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         {children}
       </main>
     </div>
