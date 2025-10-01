@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Package, MapPin, Bell, LogOut } from "lucide-react";
+import { User, CreditCard, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import withAuth from "@/components/auth/with-auth";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,8 @@ import { useAuth } from "@/hooks/use-auth";
 
 const sidebarNavItems = [
   { href: "/dashboard/profile", icon: User, label: "Profile" },
-  { href: "/dashboard/orders", icon: Package, label: "My Orders" },
-  { href: "/dashboard/addresses", icon: MapPin, label: "Saved Addresses" },
-  { href: "/dashboard/notifications", icon: Bell, label: "Notifications" },
+  { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
+  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
 function DashboardLayout({
