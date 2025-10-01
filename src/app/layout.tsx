@@ -7,6 +7,8 @@ import { headers } from 'next/headers';
 import { getThemeForRequest } from '@/lib/theme';
 import type { IPlatformSettings } from '@/models/platform.model';
 import { cn } from '@/lib/utils';
+import Header from '@/components/header';
+import { GlobalFooter } from '@/components/global-footer';
 
 function ThemeInjector({ theme }: { theme: any }) {
     if (!theme) return null;
@@ -34,6 +36,9 @@ export default async function RootLayout({
 
   const { theme, settings } = await getThemeForRequest(pathname, searchParams);
   const platformSettings = settings as IPlatformSettings | null;
+  
+  const isAdminRoute = pathname.startsWith('/admin');
+  const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.startsWith(route));
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
@@ -46,7 +51,9 @@ export default async function RootLayout({
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
-                {children}
+                {!isAdminRoute && <Header />}
+                <main className="flex-1 flex flex-col">{children}</main>
+                {!isAdminRoute && !isAuthRoute && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
                 position="top-right"
