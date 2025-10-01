@@ -38,7 +38,11 @@ export default async function RootLayout({
   const platformSettings = settings as IPlatformSettings | null;
   
   const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.startsWith(route));
+  const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.includes(route));
+
+  // Determine if it's a brand-specific route by checking if it's not a global or admin route.
+  const isBrandRoute = !isAdminRoute && !isAuthRoute && pathname !== '/' && !['/legal', '/wishlist', '/create-hamper', '/cart', '/search'].some(p => pathname.startsWith(p));
+  
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
@@ -53,7 +57,7 @@ export default async function RootLayout({
             <AuthProvider>
                 {!isAdminRoute && <Header />}
                 <main className="flex-1 flex flex-col">{children}</main>
-                {!isAdminRoute && !isAuthRoute && <GlobalFooter />}
+                {!isAdminRoute && !isBrandRoute && !isAuthRoute && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
                 position="top-right"

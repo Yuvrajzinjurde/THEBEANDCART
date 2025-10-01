@@ -125,37 +125,6 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
     );
 };
 
-const BrandFooter = ({ brand }: { brand: IBrand | null }) => (
-    <footer className="w-full border-t bg-background mt-16">
-        <div className="container py-8 px-4 sm:px-6 lg:px-8">
-             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
-                    {brand?.logoUrl && (
-                        <div className="relative h-8 w-8 rounded-full">
-                            <Image src={brand.logoUrl} alt={`${brand.displayName} Logo`} fill className="object-cover" />
-                        </div>
-                    )}
-                    <span className="text-lg font-bold capitalize">{brand?.displayName}</span>
-                </div>
-                 <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
-                    <Link href={`/${brand?.permanentName}/legal/about-us`} className="hover:text-primary">About Us</Link>
-                    <Link href={`/${brand?.permanentName}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
-                    <Link href={`/${brand?.permanentName}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
-                </div>
-                 <div className="flex space-x-4">
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Twitter className="h-5 w-5" /></Link>
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Facebook className="h-5 w-5" /></Link>
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Instagram className="h-5 w-5" /></Link>
-                    <Link href="#" className="text-muted-foreground hover:text-primary"><Linkedin className="h-5 w-5" /></Link>
-                </div>
-            </div>
-            <div className="mt-8 border-t pt-4">
-                <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {brand?.displayName}. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-);
-
 
 export default function ProductsPage() {
   const params = useParams();
@@ -316,7 +285,6 @@ export default function ProductsPage() {
   }
 
   return (
-    <>
     <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
@@ -416,7 +384,5 @@ export default function ProductsPage() {
             </div>
         </div>
     </main>
-    <BrandFooter brand={brand} />
-    </>
   );
 }
