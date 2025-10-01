@@ -23,7 +23,6 @@ const getPlatformSettings = cache(async () => {
 
 export async function getThemeForRequest(pathname: string, search: string) {
     let themeName: string | undefined;
-    const searchParams = new URLSearchParams(search);
     const settings = await getPlatformSettings();
 
     // Define routes that should always use the global platform theme.
@@ -33,11 +32,11 @@ export async function getThemeForRequest(pathname: string, search: string) {
     let brandName: string | null = null;
     
     if (!isGlobalRoute) {
-        const pathParts = pathname.split('/');
-        // The brand name is typically the first part of the path after the initial slash.
+        const pathParts = pathname.split('/').filter(p => p); // filter out empty strings
+        // The brand name is typically the first part of the path.
         // e.g., /reeva/home -> reeva
-        if (pathParts.length > 1 && pathParts[1]) {
-            brandName = pathParts[1];
+        if (pathParts.length > 0) {
+            brandName = pathParts[0];
         }
     }
     
