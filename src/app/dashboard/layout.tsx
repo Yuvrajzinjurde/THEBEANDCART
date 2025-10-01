@@ -25,10 +25,9 @@ function DashboardLayout({
   const { logout } = useAuth();
 
   return (
-    <div className="flex w-full bg-muted/40 min-h-screen">
-      <div className="container grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8 py-8">
-        <aside className="md:sticky top-24 h-fit border-r pr-6">
-          <nav className="flex flex-col gap-2">
+    <div className="flex w-full bg-muted/40 min-h-[calc(100vh-4rem)]">
+      <aside className="hidden md:flex flex-col w-64 border-r bg-background">
+          <nav className="flex flex-col gap-2 p-4">
             {sidebarNavItems.map((item) => (
               <Link
                 key={item.href}
@@ -42,7 +41,8 @@ function DashboardLayout({
                 <span>{item.label}</span>
               </Link>
             ))}
-            <div className="border-t mt-2 pt-2">
+          </nav>
+          <div className="mt-auto border-t p-4">
                <Button
                   variant="ghost"
                   onClick={logout}
@@ -52,12 +52,10 @@ function DashboardLayout({
                   <span>Log out</span>
               </Button>
             </div>
-          </nav>
         </aside>
-        <main className="flex-1">
-          {children}
-        </main>
-      </div>
+      <main className="flex-1 p-8">
+        {children}
+      </main>
     </div>
   );
 }
