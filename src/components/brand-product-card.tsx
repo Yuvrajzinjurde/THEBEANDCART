@@ -37,8 +37,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  // Each card needs its own instance of the autoplay plugin.
   const autoplayPlugin = useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true, stopOnMouseEnter: true })
+    Autoplay({ delay: 1000, stopOnInteraction: false, playOnInit: false })
   );
 
   useEffect(() => {
@@ -52,8 +53,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     carouselEl.addEventListener('mouseleave', stopAutoplay);
 
     return () => {
-      carouselEl.removeEventListener('mouseenter', startAutoplay);
-      carouselEl.removeEventListener('mouseleave', stopAutoplay);
+      if (carouselEl) {
+        carouselEl.removeEventListener('mouseenter', startAutoplay);
+        carouselEl.removeEventListener('mouseleave', stopAutoplay);
+      }
     }
   }, []);
   
