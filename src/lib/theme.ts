@@ -28,24 +28,19 @@ export async function getThemeForRequest(pathname: string, search: string) {
 
     const pathParts = pathname.split('/').filter(p => p);
 
-    // If the path starts with 'admin' or is one of the global app routes, it's not a brand page.
+    // More specific check for global/admin routes.
+    // If the path does NOT start with a known global route, assume it's a brand page.
+    const globalPrefixes = [
+      'admin', 'legal', 'wishlist', 'cart', 'search',
+      'login', 'signup', 'forgot-password', 'dashboard', 'create-hamper'
+    ];
+
     const isGlobalOrAdmin =
       pathname === '/' ||
       pathParts.length === 0 ||
-      pathParts[0] === 'admin' ||
-      [
-        'legal',
-        'wishlist',
-        'cart',
-        'search',
-        'login',
-        'signup',
-        'forgot-password',
-        'dashboard',
-        'create-hamper',
-      ].includes(pathParts[0]);
+      globalPrefixes.includes(pathParts[0]);
 
-    if (!isGlobalOrAdmin) {
+    if (!isGlobalOrAdmin && pathParts.length > 0) {
       // For brand pages, the brand name is the first part of the path. e.g., "/reeva/home"
       brandName = pathParts[0];
     }
