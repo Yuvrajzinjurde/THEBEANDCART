@@ -31,7 +31,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = headers();
-  const pathname = headersList.get('x-next-pathname') || '';
+  // Using 'x-invoke-path' as a more reliable way to get the path on the server.
+  const pathname = headersList.get('x-invoke-path') || '/';
   const searchParams = headersList.get('x-next-search') || '';
 
   const { theme, settings } = await getThemeForRequest(pathname, searchParams);
