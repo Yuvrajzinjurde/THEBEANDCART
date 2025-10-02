@@ -207,29 +207,6 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  if (!isClient) {
-    return (
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-            <Skeleton className="h-8 w-8 rounded-full mr-4" />
-            <Skeleton className="h-6 w-24 hidden sm:inline-block" />
-             <div className="flex-1 mx-4">
-                <div className="relative w-full max-w-lg mx-auto">
-                     <Skeleton className="h-11 w-full rounded-full" />
-                </div>
-            </div>
-            <div className="flex items-center gap-1">
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-9 w-9 rounded-full" />
-                <Skeleton className="h-9 w-9" />
-            </div>
-        </div>
-      </header>
-    )
-  }
-
   
   const currentDisplayName = !isLoading && (brand && brandName ? brand.displayName : settings.platformName);
   const homeLink = brandName ? `/${brandName}/home` : '/';
@@ -260,7 +237,7 @@ export default function Header() {
   const renderLogo = () => {
     const logoUrl = brandName && brand?.logoUrl ? brand.logoUrl : settings.platformLogoUrl;
     
-    if (isLoading) {
+    if (isLoading || !isClient) {
       return <Skeleton className="h-8 w-8 rounded-full" />;
     }
     
@@ -277,7 +254,7 @@ export default function Header() {
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
             {renderLogo()}
             <span className="hidden font-bold text-lg sm:inline-block capitalize">
-                {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
+                {(isLoading || !isClient) ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
             </span>
         </Link>
 
@@ -302,18 +279,24 @@ export default function Header() {
         {/* Search Bar */}
         <div className="flex-1 mx-4" ref={searchContainerRef}>
             <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
-                <Input
-                    name="search"
-                    type="search"
-                    placeholder="Search for anything"
-                    className="h-11 w-full rounded-full pl-5 pr-12 text-base"
-                    value={searchQuery}
-                    onChange={handleSearchInputChange}
-                    onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
-                />
-                 <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
-                    <Search className="h-4 w-4" />
-                </Button>
+                {(isLoading || !isClient) ? (
+                    <Skeleton className="h-11 w-full rounded-full" />
+                ) : (
+                    <>
+                        <Input
+                            name="search"
+                            type="search"
+                            placeholder="Search for anything"
+                            className="h-11 w-full rounded-full pl-5 pr-12 text-base"
+                            value={searchQuery}
+                            onChange={handleSearchInputChange}
+                            onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
+                        />
+                        <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
+                            <Search className="h-4 w-4" />
+                        </Button>
+                    </>
+                )}
                  {isSuggestionsOpen && suggestions.length > 0 && (
                     <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
                         <ul className="py-1">
@@ -335,7 +318,16 @@ export default function Header() {
 
         {/* Actions */}
         <div className="hidden md:flex">
-            <DesktopNavActions />
+            {(isLoading || !isClient) ? (
+                <div className="flex items-center gap-1">
+                    <Skeleton className="h-9 w-9" />
+                    <Skeleton className="h-9 w-9" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <Skeleton className="h-9 w-9" />
+                </div>
+            ) : (
+                <DesktopNavActions />
+            )}
         </div>
 
         {/* Mobile Navigation */}
