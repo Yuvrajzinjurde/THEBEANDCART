@@ -134,8 +134,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       themeName: "Rose",
       categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
       banners: [
-        { title: "Discover Your Natural Glow", description: "Pure ingredients, powerful results. Shop our new arrivals.", imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model" },
-        { title: "Summer Radiance Collection", description: "Lightweight formulas for a sun-kissed look. Limited edition.", imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach" },
+        { title: "Discover Your Natural Glow", description: "Pure ingredients, powerful results. Shop our new arrivals.", imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
+        { title: "Summer Radiance Collection", description: "Lightweight formulas for a sun-kissed look. Limited edition.", imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
       ],
       categoryBanners: [
         { categoryName: "Skincare", imageUrl: "https://picsum.photos/seed/cat-skincare/400/600", imageHint: "face serum" },
@@ -424,7 +424,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x200px.</CardDescription>
+                <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x400px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -450,14 +450,21 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             control={form.control}
                             name={`banners.${index}.title`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Title (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
                             name={`banners.${index}.description`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name={`banners.${index}.buttonLink`}
+                            render={({ field }) => (
+                                <FormItem><FormLabel>Banner Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/collection" {...field} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                          <FormField
@@ -473,10 +480,10 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                 type="file"
                                                 accept="image/png, image/jpeg"
                                                 className="hidden"
-                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 200 })}
+                                                onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })}
                                             />
                                             {imageField.value ? (
-                                                <div className="relative w-full aspect-[8/1] border-2 border-dashed rounded-lg p-2">
+                                                <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                                     <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                     <Button
                                                         type="button"
@@ -493,7 +500,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x200px</p>
+                                                        <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                                     </div>
                                                 </label>
                                             )}
@@ -512,7 +519,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                         />
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
+                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
 
@@ -625,10 +632,16 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
                  <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
-                    <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Title (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
+                     <FormItem><FormLabel>Button Text (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
+                    <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/sale" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
@@ -658,14 +671,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
                     <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
-                        <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
-                        <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                </div>
             </CardContent>
         </Card>
 
@@ -778,5 +783,3 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     </>
   );
 }
-
-    

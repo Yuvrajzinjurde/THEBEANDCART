@@ -2,10 +2,11 @@
 import { z } from 'zod';
 
 export const bannerSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
+  title: z.string().optional(),
+  description: z.string().optional(),
   imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
   imageHint: z.string().min(1, "Image hint is required"),
+  buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
 const offerSchema = z.object({
@@ -22,25 +23,12 @@ const reviewSchema = z.object({
 });
 
 const promoBannerSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  imageUrl: z.string(),
-  imageHint: z.string(),
-  buttonText: z.string(),
-  buttonLink: z.string(),
-}).refine(data => {
-    // If any field is filled, all fields (except optionals like imageHint) must be filled.
-    const fields = [data.title, data.description, data.imageUrl, data.buttonText, data.buttonLink];
-    const filledFields = fields.filter(f => f && f.length > 0).length;
-    // It's either all empty (0) or all filled (5).
-    if (filledFields > 0 && filledFields < 5) return false;
-    if (data.buttonLink && data.buttonLink.length > 0) {
-        if (!z.string().url().safeParse(data.buttonLink).success) return false;
-    }
-    return true;
-}, {
-    message: "To use the promo banner, all fields must be filled out with a valid link.",
-    path: ['buttonLink'],
+  title: z.string().optional(),
+  description: z.string().optional(),
+  imageUrl: z.string().optional(),
+  imageHint: z.string().optional(),
+  buttonText: z.string().optional(),
+  buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
 

@@ -2,10 +2,11 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 interface IBanner {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     imageUrl: string;
     imageHint: string;
+    buttonLink?: string;
 }
 
 interface IOffer {
@@ -22,12 +23,12 @@ interface IReview {
 }
 
 interface IPromoBanner {
-    title: string;
-    description: string;
-    imageUrl: string;
-    imageHint: string;
-    buttonText: string;
-    buttonLink: string;
+    title?: string;
+    description?: string;
+    imageUrl?: string;
+    imageHint?: string;
+    buttonText?: string;
+    buttonLink?: string;
 }
 
 interface ICategoryBanner {
@@ -59,10 +60,11 @@ export interface IBrand extends Document {
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
+    title: { type: String },
+    description: { type: String },
     imageUrl: { type: String, required: true },
     imageHint: { type: String, required: true },
+    buttonLink: { type: String },
 }, { _id: false });
 
 const OfferSchema: Schema<IOffer> = new Schema({
@@ -79,12 +81,12 @@ const ReviewSchema: Schema<IReview> = new Schema({
 }, { _id: false });
 
 const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    imageHint: { type: String, required: true },
-    buttonText: { type: String, required: true },
-    buttonLink: { type: String, required: true },
+    title: { type: String },
+    description: { type: String },
+    imageUrl: { type: String },
+    imageHint: { type: String },
+    buttonText: { type: String },
+    buttonLink: { type: String },
 }, { _id: false });
 
 const CategoryBannerSchema: Schema<ICategoryBanner> = new Schema({

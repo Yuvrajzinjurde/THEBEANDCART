@@ -191,28 +191,20 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
 
 const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandName: string }) => {
     if (!brand?.promoBanner) return null;
-    const { title, description, imageUrl, imageHint, buttonText, buttonLink } = brand.promoBanner;
+    const { title, description, imageUrl, imageHint, buttonLink } = brand.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[3/1]">
-                 <Image
-                    src={imageUrl}
-                    alt={title}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={imageHint}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-                <div className="relative z-10 p-8 md:p-12 max-w-2xl text-white flex flex-col items-start h-full justify-center">
-                    <h2 className="text-3xl md:text-4xl font-bold">{title}</h2>
-                    <p className="text-lg text-white/90 mt-2">{description}</p>
-                    <Button asChild size="lg" className="mt-6">
-                        <Link href={buttonLink}>
-                            {buttonText} <ArrowRight className="ml-2" />
-                        </Link>
-                    </Button>
+            <Link href={buttonLink || '#'}>
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[3/1]">
+                    <Image
+                        src={imageUrl}
+                        alt={title || 'Promotional banner'}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={imageHint}
+                    />
                 </div>
-            </div>
+            </Link>
         </section>
     )
 }
@@ -372,25 +364,18 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full text-foreground py-12 sm:py-16 md:py-20 flex items-center justify-center">
-                            <Image
-                                src={banner.imageUrl}
-                                alt={banner.title}
-                                fill
-                                className="object-cover"
-                                data-ai-hint={banner.imageHint}
-                                priority={index === 0}
-                            />
-                            <div className="absolute inset-0 bg-black/50" />
-                            <div className="container relative h-full flex flex-col justify-center items-center text-center text-white px-4 sm:px-6 lg:px-8">
-                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
-                                    {banner.title}
-                                </h1>
-                                <p className="mt-2 text-base md:text-lg max-w-2xl">
-                                    {banner.description}
-                                </p>
+                        <Link href={banner.buttonLink || '#'}>
+                            <div className="relative w-full text-foreground py-12 sm:py-16 md:py-20 flex items-center justify-center">
+                                <Image
+                                    src={banner.imageUrl}
+                                    alt={banner.title || 'Promotional banner'}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint={banner.imageHint}
+                                    priority={index === 0}
+                                />
                             </div>
-                        </div>
+                        </Link>
                     </CarouselItem>
                 ))}
                 </CarouselContent>
