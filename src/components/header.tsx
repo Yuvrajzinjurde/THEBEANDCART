@@ -65,7 +65,7 @@ export default function Header() {
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
-    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search', '/login', '/signup', '/forgot-password'];
+    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search', '/login', '/signup', '/forgot-password', '/dashboard'];
     const isGlobalRoute = pathname === '/' || globalRoutes.some(route => pathname.startsWith(route));
 
     if (isGlobalRoute) {
@@ -74,8 +74,44 @@ export default function Header() {
       const determinedBrand = pathBrand || queryBrand || 'reeva';
       setBrandName(determinedBrand);
     }
-
   }, [pathname, params, searchParams, fetchSettings]);
+
+  useEffect(() => {
+    async function fetchBrandData() {
+        setIsLoading(true);
+        const url = brandName 
+            ? `/api/products?storefront=${brandName}&limit=1000`
+            : `/api/products?limit=2000`;
+        
+        try {
+            const [productsRes, brandRes] = await Promise.all([
+                fetch(url),
+                brandName ? fetch(`/api/brands/${brandName}`) : Promise.resolve(null)
+            ]);
+
+            if (productsRes.ok) {
+                const { products: productData } = await productsRes.json();
+                setAllProducts(productData);
+            }
+
+            if (brandRes && brandRes.ok) {
+                const { brand: brandData } = await brandRes.json();
+                setBrand(brandData);
+            } else {
+                setBrand(null);
+            }
+        } catch (error) {
+            console.error("Failed to fetch data for header", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    if (isClient) {
+        fetchBrandData();
+    }
+}, [brandName, isClient]);
+
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
@@ -109,57 +145,6 @@ export default function Header() {
     });
     return Array.from(categorySet);
   }, [allProducts]);
-
-  useEffect(() => {
-    async function fetchBrandData() {
-      setIsLoading(true);
-      if (!brandName) {
-        // Fetch all products for global pages to power search suggestions
-        try {
-            const productsRes = await fetch(`/api/products?limit=1000`);
-            if (productsRes.ok) {
-                const { products: productData } = await productsRes.json();
-                setAllProducts(productData);
-            }
-        } catch (error) {
-            console.error("Failed to fetch all products for header", error);
-        }
-        setBrand(null);
-        setIsLoading(false);
-        return;
-      };
-      try {
-        const [brandRes, productsRes] = await Promise.all([
-          fetch(`/api/brands/${brandName}`),
-          fetch(`/api/products?storefront=${brandName}&limit=1000`)
-        ]);
-
-        if (brandRes.ok) {
-          const { brand: brandData } = await brandRes.json();
-          setBrand(brandData);
-        } else {
-          setBrand(null);
-        }
-
-        if (productsRes.ok) {
-          const { products: productData } = await productsRes.json();
-          setAllProducts(productData);
-        } else {
-          setAllProducts([]);
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch brand data for header", error);
-        setBrand(null);
-        setAllProducts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    if (isClient) {
-        fetchBrandData();
-    }
-  }, [brandName, isClient]);
   
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -208,7 +193,7 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  const currentDisplayName = !isLoading && (brand && brandName ? brand.displayName : settings.platformName);
+  const currentDisplayName = !isLoading && isClient && (brand && brandName ? brand.displayName : settings.platformName);
   const homeLink = brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
@@ -237,10 +222,6 @@ export default function Header() {
   const renderLogo = () => {
     const logoUrl = brandName && brand?.logoUrl ? brand.logoUrl : settings.platformLogoUrl;
     
-    if (isLoading || !isClient) {
-      return <Skeleton className="h-8 w-8 rounded-full" />;
-    }
-    
     if (logoUrl) {
       return <Image src={logoUrl} alt="Logo" width={32} height={32} className="h-8 w-8 rounded-full object-cover" />;
     }
@@ -252,7 +233,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-            {renderLogo()}
+            {(isLoading || !isClient) ? <Skeleton className="h-8 w-8 rounded-full" /> : renderLogo()}
             <span className="hidden font-bold text-lg sm:inline-block capitalize">
                 {(isLoading || !isClient) ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
             </span>
@@ -279,24 +260,24 @@ export default function Header() {
         {/* Search Bar */}
         <div className="flex-1 mx-4" ref={searchContainerRef}>
             <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
-                {(isLoading || !isClient) ? (
-                    <Skeleton className="h-11 w-full rounded-full" />
-                ) : (
-                    <>
-                        <Input
-                            name="search"
-                            type="search"
-                            placeholder="Search for anything"
-                            className="h-11 w-full rounded-full pl-5 pr-12 text-base"
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
-                            onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
-                        />
-                        <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full">
-                            <Search className="h-4 w-4" />
-                        </Button>
-                    </>
-                )}
+                 <>
+                    <Input
+                        name="search"
+                        type="search"
+                        placeholder="Search for anything"
+                        className={cn(
+                          "h-11 w-full rounded-full pl-5 pr-12 text-base",
+                          (isLoading || !isClient) && "animate-pulse bg-muted"
+                        )}
+                        value={searchQuery}
+                        onChange={handleSearchInputChange}
+                        onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
+                        disabled={(isLoading || !isClient)}
+                    />
+                    <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={(isLoading || !isClient)}>
+                        <Search className="h-4 w-4" />
+                    </Button>
+                </>
                  {isSuggestionsOpen && suggestions.length > 0 && (
                     <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
                         <ul className="py-1">
@@ -419,3 +400,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
