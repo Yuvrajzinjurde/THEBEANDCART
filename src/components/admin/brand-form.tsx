@@ -117,16 +117,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
 
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
     existingBrand ? {
-      displayName: existingBrand.displayName,
-      permanentName: existingBrand.permanentName,
-      logoUrl: existingBrand.logoUrl,
-      banners: existingBrand.banners,
-      themeName: existingBrand.themeName,
-      offers: existingBrand.offers,
-      reviews: existingBrand.reviews,
-      promoBanner: existingBrand.promoBanner,
-      categoryBanners: existingBrand.categoryBanners,
-      categories: existingBrand.categories || [],
+      ...existingBrand,
+       themeName: existingBrand.themeName,
     } : {
       displayName: "Aura",
       permanentName: "aura",
@@ -149,7 +141,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         { categoryName: "Combos", imageUrl: "https://picsum.photos/seed/cat-combos/400/400", imageHint: "gift set" },
       ],
       promoBanner: {
-        imageUrl: "https://picsum.photos/seed/promo-offer/1200/600",
+        imageUrl: "https://picsum.photos/seed/promo-offer/1600/400",
         imageHint: "beauty products",
         buttonLink: "#",
       },
