@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
@@ -44,13 +45,13 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 pt-6 text-center">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-8 pt-6 text-center">
         <p className="my-8 text-lg text-muted-foreground col-span-full">Searching for products...</p>
-        {[...Array(10)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
             <div key={i} className="space-y-2">
                 <Skeleton className="aspect-square w-full" />
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-4 w-2/3 mx-auto" />
+                <Skeleton className="h-6 w-1/2 mx-auto" />
             </div>
         ))}
     </div>
@@ -280,7 +281,7 @@ function SearchResults() {
                     <ProductGridSkeleton />
                 ) : products.length > 0 ? (
                     <>
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-6">
                         {products.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}

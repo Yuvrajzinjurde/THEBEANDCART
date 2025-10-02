@@ -54,7 +54,7 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6 text-center">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-6 text-center">
         <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         {[...Array(12)].map((_, i) => (
             <div key={i} className="space-y-2">
@@ -113,7 +113,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
             >
                 <CarouselContent className="-ml-2 sm:-ml-4">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <CarouselItem key={product._id as string} className="pl-2 sm:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/6">
                             <BrandProductCard product={product} />
                         </CarouselItem>
                     ))}
@@ -364,7 +364,7 @@ export default function ProductsPage() {
                 {isPending ? (
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-6">
                         {allProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}

@@ -104,7 +104,7 @@ const ProductCarouselSection = ({ title, products }: { title: string, products: 
             >
                 <CarouselContent>
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -158,14 +158,14 @@ const OffersSection = ({ settings }: { settings: IPlatformSettings | null }) => 
 
 const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }) => {
     if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
-    const { title, description, imageUrl, imageHint, buttonLink } = settings.promoBanner;
+    const { imageUrl, imageHint, buttonLink } = settings.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <Link href={buttonLink || '#'}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[3/1]">
                     <Image
                         src={imageUrl}
-                        alt={title || 'Promotional banner'}
+                        alt={'Promotional banner'}
                         fill
                         className="object-cover"
                         data-ai-hint={imageHint}
