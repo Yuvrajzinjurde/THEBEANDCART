@@ -365,7 +365,7 @@ export default function BrandHomePage() {
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
                         <Link href={banner.buttonLink || '#'}>
-                            <div className="relative w-full text-foreground py-12 sm:py-16 md:py-20 flex items-center justify-center">
+                            <div className="relative w-full text-foreground py-24 sm:py-32 md:py-40 flex items-center justify-center">
                                 <Image
                                     src={banner.imageUrl}
                                     alt={banner.title || 'Promotional banner'}

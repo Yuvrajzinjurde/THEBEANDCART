@@ -350,7 +350,7 @@ export default function LandingPage() {
                     {heroBanners.map((banner, index) => (
                         <CarouselItem key={index}>
                            <Link href={banner.buttonLink || '#'}>
-                                <div className="relative w-full text-foreground flex items-center justify-center py-8 sm:py-10 md:py-14">
+                                <div className="relative w-full text-foreground flex items-center justify-center py-16 sm:py-20 md:py-28">
                                     <Image
                                         src={banner.imageUrl}
                                         alt={banner.title || 'Promotional banner'}
