@@ -208,9 +208,31 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  if (!isClient) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
+            <Skeleton className="h-8 w-8 rounded-full mr-4" />
+            <Skeleton className="h-6 w-24 hidden sm:inline-block" />
+             <div className="flex-1 mx-4">
+                <div className="relative w-full max-w-lg mx-auto">
+                     <Skeleton className="h-11 w-full rounded-full" />
+                </div>
+            </div>
+            <div className="flex items-center gap-1">
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9 rounded-full" />
+                <Skeleton className="h-9 w-9" />
+            </div>
+        </div>
+      </header>
+    )
+  }
+
   
-  const currentDisplayName = isClient && !isLoading && (brand && brandName ? brand.displayName : settings.platformName);
-  const homeLink = isClient && brandName ? `/${brandName}/home` : '/';
+  const currentDisplayName = !isLoading && (brand && brandName ? brand.displayName : settings.platformName);
+  const homeLink = brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
