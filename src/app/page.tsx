@@ -162,7 +162,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
             <Link href={buttonLink || '#'}>
-                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[3/1]">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
                     <Image
                         src={imageUrl}
                         alt={'Promotional banner'}
