@@ -45,7 +45,7 @@ const staticDefaultValues: PlatformSettingsValues = {
   promoBanner: {
     title: "Mid-Season Mega Sale",
     description: "Unbeatable deals on your favorite brands. Get up to 60% off on selected items before they're gone!",
-    imageUrl: "https://picsum.photos/seed/mega-sale/1200/600",
+    imageUrl: "https://picsum.photos/seed/mega-sale/1600/400",
     imageHint: "shopping discount",
     buttonText: "Explore Deals",
     buttonLink: "/#",
@@ -403,7 +403,7 @@ export default function PlatformSettingsPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Hero Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the main landing page. Recommended dimensions: 1600x200px.</CardDescription>
+                <CardDescription>Manage the carousel banners on the main landing page. Required dimensions: 1600x400px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -411,17 +411,15 @@ export default function PlatformSettingsPage() {
                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeBanner(index)}>
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <FormField control={form.control} name={`heroBanners.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`heroBanners.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
                          <FormField control={form.control} name={`heroBanners.${index}.imageUrl`} render={({ field: imageField }) => (
                             <FormItem>
                                 <FormLabel>Banner Image</FormLabel>
-                                <FormDescription>Required dimensions: 1600x200px</FormDescription>
+                                <FormDescription>Required dimensions: 1600x400px</FormDescription>
                                 <FormControl>
                                    <div className="w-full">
-                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 200 })} />
+                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })} />
                                         {imageField.value ? (
-                                            <div className="relative w-full aspect-[8/1] border-2 border-dashed rounded-lg p-2">
+                                            <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                                 <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                 <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => imageField.onChange('')}><X className="h-4 w-4" /></Button>
                                             </div>
@@ -451,17 +449,15 @@ export default function PlatformSettingsPage() {
                 <CardDescription>A large banner to highlight a special campaign or collection.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name="promoBanner.description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
+                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
-                        <FormDescription>Required dimensions: 1200x600px</FormDescription>
+                        <FormDescription>Required dimensions: 1600x400px</FormDescription>
                          <FormControl>
                            <div className="w-full">
-                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1600, height: 400 })} />
                                 {field.value ? (
-                                    <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
+                                    <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                         <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
                                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
                                     </div>
@@ -479,10 +475,6 @@ export default function PlatformSettingsPage() {
                     </FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                 <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => ( <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                </div>
             </CardContent>
         </Card>
 

@@ -621,12 +621,12 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
-                        <FormDescription>Required dimensions: 1200x600px</FormDescription>
+                        <FormDescription>Required dimensions: 1600x400px</FormDescription>
                          <FormControl>
                            <div className="w-full">
-                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1600, height: 400 })} />
                                 {field.value ? (
-                                    <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
+                                    <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                         <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
                                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
                                     </div>
@@ -635,7 +635,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                             <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                            <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
+                                            <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                         </div>
                                     </label>
                                 )}
