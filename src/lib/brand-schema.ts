@@ -68,7 +68,11 @@ export const BrandFormSchema = z.object({
   themeName: z.string({ required_error: "Please select a theme." }),
   offers: z.array(offerSchema).optional(),
   reviews: z.array(reviewSchema).optional(),
-  promoBanner: promoBannerSchema.optional(),
+  promoBanner: promoBannerSchema.extend({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    buttonText: z.string().optional(),
+  }).optional(),
   categoryBanners: z.array(categoryBannerSchema).optional(),
   categories: z.array(z.string()).optional(),
   socials: SocialLinksSchema.optional(),
@@ -88,7 +92,11 @@ export const PlatformSettingsValidationSchema = z.object({
   promoBannerEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
-  promoBanner: promoBannerSchema.optional(),
+  promoBanner: promoBannerSchema.extend({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    buttonText: z.string().optional(),
+  }).optional(),
   offers: z.array(offerSchema).optional(),
 });
 

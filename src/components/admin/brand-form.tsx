@@ -134,8 +134,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       themeName: "Rose",
       categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
       banners: [
-        { title: "Discover Your Natural Glow", description: "Pure ingredients, powerful results. Shop our new arrivals.", imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
-        { title: "Summer Radiance Collection", description: "Lightweight formulas for a sun-kissed look. Limited edition.", imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
+        { imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
+        { imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
       ],
       categoryBanners: [
         { categoryName: "Skincare", imageUrl: "https://picsum.photos/seed/cat-skincare/400/600", imageHint: "face serum" },
@@ -149,11 +149,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         { categoryName: "Combos", imageUrl: "https://picsum.photos/seed/cat-combos/400/400", imageHint: "gift set" },
       ],
       promoBanner: {
-        title: "Exclusive Online Offer",
-        description: "Join our community and receive 20% off your first order. Plus, get a free gift at checkout!",
         imageUrl: "https://picsum.photos/seed/promo-offer/1200/600",
         imageHint: "beauty products",
-        buttonText: "Shop Now",
         buttonLink: "#",
       },
       offers: [
@@ -423,8 +420,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         
         <Card>
             <CardHeader>
-                <CardTitle>Homepage Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x400px.</CardDescription>
+                <CardTitle>Homepage Hero Banners</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -446,20 +442,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
-                        <FormField
-                            control={form.control}
-                            name={`banners.${index}.title`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Title (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`banners.${index}.description`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
+                       
                         <FormField
                             control={form.control}
                             name={`banners.${index}.buttonLink`}
@@ -473,6 +456,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             render={({ field: imageField }) => (
                                 <FormItem>
                                     <FormLabel>Banner Image</FormLabel>
+                                    <FormDescription>Required dimensions: 1600x400px</FormDescription>
                                     <FormControl>
                                        <div className="w-full">
                                             <Input
@@ -514,12 +498,12 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             control={form.control}
                             name={`banners.${index}.imageHint`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g., 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
+                <Button type="button" variant="outline" onClick={() => appendBanner({ imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
 
@@ -556,6 +540,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             render={({ field: imageField }) => (
                                 <FormItem>
                                     <FormLabel>Image</FormLabel>
+                                    <FormDescription>Recommended dimensions: 400x400px or 400x600px</FormDescription>
                                     <FormControl>
                                        <div className="w-full">
                                             <Input
@@ -628,24 +613,15 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Promotional Banner</CardTitle>
-                <CardDescription>A large banner to highlight a special campaign or collection.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
-                    <FormItem><FormLabel>Title (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
-                <FormField control={form.control} name="promoBanner.description" render={({ field }) => (
-                    <FormItem><FormLabel>Description (Optional)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
-                <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
-                     <FormItem><FormLabel>Button Text (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
                 <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
                     <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/sale" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
+                        <FormDescription>Required dimensions: 1200x600px</FormDescription>
                          <FormControl>
                            <div className="w-full">
                                 <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
@@ -669,7 +645,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     </FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
-                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
             </CardContent>
         </Card>
