@@ -392,7 +392,7 @@ export default function Header() {
        <div className={cn("w-full overflow-x-auto no-scrollbar", !showSecondaryNav && "hidden")}>
           <Separator />
           <div className="container px-4 sm:px-6">
-            <nav className="flex h-12 items-center gap-6">
+            <nav className="flex h-12 items-center justify-center gap-6">
                 {secondaryNavItems.map((item) => (
                     <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
                         <item.icon className="h-4 w-4" />
