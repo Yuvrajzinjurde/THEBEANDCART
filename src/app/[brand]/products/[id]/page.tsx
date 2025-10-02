@@ -85,9 +85,9 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
                 }}
                 className="w-full"
             >
-                <CarouselContent>
+                <CarouselContent className="-ml-2">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -125,7 +125,7 @@ const BoughtTogetherSection = ({ products }: { products: IProduct[] }) => {
 export default function ProductPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { id } = params;
+  const { id, brand: brandName } = params;
   
   const [product, setProduct] = useState<IProduct | null>(null);
   const [brand, setBrand] = useState<IBrand | null>(null);
@@ -244,7 +244,7 @@ export default function ProductPage() {
     return <div className="text-center text-muted-foreground py-10"><p>Product not found.</p></div>;
   }
   
-  const storefront = searchParams.get('storefront') || product.storefront;
+  const storefront = (brandName as string) || product.storefront;
   const filteredRecentlyViewed = recentlyViewed.filter(p => p._id !== product._id);
 
   return (

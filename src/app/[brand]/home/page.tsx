@@ -195,7 +195,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     const { imageUrl, imageHint, buttonLink } = brand.promoBanner;
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <Link href={buttonLink || '#'}>
+            <Link href={buttonLink || `/${brandName}/products`}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
                     <Image
                         src={imageUrl}
@@ -365,11 +365,11 @@ export default function BrandHomePage() {
                 <CarouselContent>
                 {brand.banners.map((banner, index) => (
                     <CarouselItem key={index}>
-                        <Link href={banner.buttonLink || '#'}>
+                        <Link href={banner.buttonLink || `/${brandName}/products`}>
                             <div className="relative w-full text-foreground py-24 sm:py-32 md:py-40 flex items-center justify-center">
                                 <Image
                                     src={banner.imageUrl}
-                                    alt={banner.title || 'Promotional banner'}
+                                    alt={'Promotional banner'}
                                     fill
                                     className="object-cover"
                                     data-ai-hint={banner.imageHint}
