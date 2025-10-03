@@ -222,9 +222,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid md:grid-cols-12 md:gap-8 lg:gap-12">
+    <div className="grid md:grid-cols-2 md:gap-8 lg:gap-12">
         {/* Left Column: Media Gallery */}
-        <div className="md:col-span-7 lg:col-span-8 md:sticky top-24 self-start">
+        <div className="md:sticky top-24 self-start">
              <div className="flex flex-col-reverse md:flex-row gap-4">
                 <div className="flex md:flex-col gap-2 w-full md:w-20">
                      <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps' }} orientation="vertical" className="w-full">
@@ -287,7 +287,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-5 lg:col-span-4 flex flex-col">
+        <div className="mt-8 md:mt-0 flex flex-col">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
@@ -469,7 +469,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             <Separator className="my-8" />
             
             <RatingsAndReviews 
-                productId={product._id} 
+                productId={product._id as string} 
                 reviewStats={reviewStats} 
                 reviews={reviews}
             />
