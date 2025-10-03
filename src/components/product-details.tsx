@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -222,82 +221,84 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid md:grid-cols-2 lg:gap-x-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-8">
         {/* Left Column: Media Gallery */}
-        <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
-            <div
-                className="relative group w-full"
-                onMouseEnter={() => setIsZooming(true)}
-                onMouseLeave={() => setIsZooming(false)}
-                onMouseMove={handleMouseMove}
-            >
-                <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
-                    <CarouselContent>
+        <div className="lg:sticky top-24 self-start">
+            <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+                <div
+                    className="relative group w-full"
+                    onMouseEnter={() => setIsZooming(true)}
+                    onMouseLeave={() => setIsZooming(false)}
+                    onMouseMove={handleMouseMove}
+                >
+                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
+                        <CarouselContent>
+                            {mediaItems.map((media, index) => (
+                                <CarouselItem key={index}>
+                                    <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
+                                        {media.type === 'image' ? (
+                                            <Image src={media.url} alt={product.name} fill className="object-cover" />
+                                        ) : (
+                                            <video src={media.url} controls className="w-full h-full object-cover" />
+                                        )}
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
+                        <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
+                    </Carousel>
+                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+                        <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
+                    </div>
+                    {/* Zoom Pane */}
+                    {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+                        <div className="absolute top-0 left-full ml-4 h-full w-[400px] bg-white border rounded-lg shadow-lg hidden xl:block overflow-hidden pointer-events-none z-20">
+                            <Image
+                                src={mediaItems[selectedIndex].url}
+                                alt={`${product.name} zoomed`}
+                                fill
+                                className="object-cover transition-transform duration-200 ease-out"
+                                style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
+                            />
+                        </div>
+                    )}
+                </div>
+                <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
+                    <CarouselContent className="-ml-2">
                         {mediaItems.map((media, index) => (
-                            <CarouselItem key={index}>
-                                <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
-                                    {media.type === 'image' ? (
-                                        <Image src={media.url} alt={product.name} fill className="object-cover" />
-                                    ) : (
-                                        <video src={media.url} controls className="w-full h-full object-cover" />
+                            <CarouselItem key={index} className="pl-2 basis-[16.66%]">
+                                <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
+                                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
+                                    {media.type === 'video' && (
+                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                            <PlayCircle className="w-6 h-6 text-white" />
+                                        </div>
                                     )}
-                                </div>
+                                </ThumbsButton>
                             </CarouselItem>
                         ))}
                     </CarouselContent>
-                     <CarouselPrevious className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
-                     <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
                 </Carousel>
-                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                    <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
-                </div>
-                {/* Zoom Pane */}
-                {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                    <div className="absolute top-0 left-full ml-4 h-[500px] w-[400px] bg-white border rounded-lg shadow-lg hidden lg:block overflow-hidden pointer-events-none z-20">
-                        <Image
-                            src={mediaItems[selectedIndex].url}
-                            alt={`${product.name} zoomed`}
-                            fill
-                            className="object-cover transition-transform duration-200 ease-out"
-                            style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
-                        />
+                <div className="mt-8 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                        <div className="flex items-center gap-1 rounded-lg border p-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Minus className="h-4 w-4" /></Button>
+                            <span className="w-8 text-center font-semibold">1</span>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Plus className="h-4 w-4" /></Button>
+                        </div>
                     </div>
-                )}
-            </div>
-             <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
-                <CarouselContent className="-ml-2">
-                    {mediaItems.map((media, index) => (
-                        <CarouselItem key={index} className="pl-2 basis-[16.66%]">
-                            <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
-                                <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
-                                {media.type === 'video' && (
-                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                        <PlayCircle className="w-6 h-6 text-white" />
-                                    </div>
-                                )}
-                            </ThumbsButton>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-            </Carousel>
-            <div className="mt-8 space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                    <div className="flex items-center gap-1 rounded-lg border p-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Minus className="h-4 w-4" /></Button>
-                        <span className="w-8 text-center font-semibold">1</span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Plus className="h-4 w-4" /></Button>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                        <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
                     </div>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
                 </div>
             </div>
         </div>
 
         {/* Right Column: Product Info */}
-        <div className="md:col-span-1 flex flex-col lg:ml-6">
+        <div className="mt-8 lg:mt-0">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
