@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -221,10 +222,10 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Left Column: Media Gallery */}
-        <div className="lg:col-span-3 lg:sticky top-24 self-start">
-            <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+        <div className="md:sticky top-24 self-start flex justify-center">
+            <div className="flex flex-col gap-4 w-full max-w-md">
                 <div
                     className="relative group w-full"
                     onMouseEnter={() => setIsZooming(true)}
@@ -298,7 +299,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         </div>
 
         {/* Right Column: Product Info */}
-        <div className="mt-8 md:mt-0 lg:col-span-2">
+        <div className="mt-8 md:mt-0">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
