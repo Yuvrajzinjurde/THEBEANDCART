@@ -224,7 +224,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   return (
     <div className="grid md:grid-cols-2 lg:gap-x-4">
         {/* Left Column: Media Gallery */}
-        <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm">
+        <div className="md:sticky top-24 self-start flex flex-col gap-4 w-full max-w-sm pl-48">
             <div
                 className="relative group w-full"
                 onMouseEnter={() => setIsZooming(true)}
