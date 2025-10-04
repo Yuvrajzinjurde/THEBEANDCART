@@ -52,9 +52,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const centralCard = brand.categoryGrid?.centralCard;
     const gridItems = [...filteredImages];
     
-    // Insert central card logic for 'All' category
     if (centralCard && activeCategory === 'All') {
-        const insertIndex = 4; // Position it as the 5th item (index 4)
+        const insertIndex = 4; 
         if (gridItems.length >= insertIndex) {
             gridItems.splice(insertIndex, 0, centralCard as any);
         } else {
@@ -104,17 +103,17 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
             <style jsx>{`
                 .grid-container {
                     display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    grid-auto-rows: minmax(150px, auto);
+                    grid-template-columns: repeat(4, 1fr);
+                    grid-auto-rows: minmax(120px, auto);
                     gap: 1rem;
                 }
-                .grid-item:nth-child(7n+1) { grid-row: span 2; aspect-ratio: 4 / 10.2; }
+                .grid-item:nth-child(7n+1) { grid-row: span 2; }
                 .grid-item:nth-child(7n+2) { grid-row: span 1; }
                 .grid-item:nth-child(7n+3) { grid-row: span 1; }
-                .grid-item-promo { grid-row: span 2; }
+                .grid-item-promo { grid-column: span 2; grid-row: span 2; }
                 .grid-item:nth-child(7n+4) { grid-row: span 1; }
                 .grid-item:nth-child(7n+5) { grid-row: span 1; }
-                .grid-item:nth-child(7n+6) { grid-row: span 2; aspect-ratio: 4 / 10.2; }
+                .grid-item:nth-child(7n+6) { grid-row: span 2; }
                 .grid-item:nth-child(7n+7) { grid-row: span 1; }
             `}</style>
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -133,8 +132,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             {loading ? (
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[...Array(7)].map((_, i) => <Skeleton key={i} className="w-full h-64" />)}
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[...Array(7)].map((_, i) => <Skeleton key={i} className="w-full h-48" />)}
                 </div>
             ) : (
                 <div className="grid-container">
