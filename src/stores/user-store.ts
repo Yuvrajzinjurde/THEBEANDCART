@@ -29,8 +29,8 @@ const useUserStore = create<UserDataState & UserDataActions>((set, get) => ({
   setCart: (cart) => set({ cart }),
   setWishlist: (wishlist) => set({ wishlist }),
   setNotifications: (notifications) => set({ 
-      notifications,
-      unreadNotificationsCount: notifications.filter(n => !n.isRead).length
+      notifications: Array.isArray(notifications) ? notifications : [],
+      unreadNotificationsCount: Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0
   }),
   markNotificationAsRead: (notificationId) => {
     const notifications = get().notifications.map(n => 
