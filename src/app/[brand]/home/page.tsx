@@ -59,17 +59,18 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const renderGridItem = (item: ICategoryGridImage | typeof centralCard, index: number) => {
       const isCentralCard = 'title' in item && item.title;
       const finalIndex = activeCategory === 'All' ? index : (index % 8);
-
+      
       const gridClasses = [
         "col-span-1 row-span-2", // Item 1
         "col-span-1 row-span-1", // Item 2
         "col-span-1 row-span-1", // Item 3
         "col-span-1 row-span-1", // Item 4
-        "col-span-1 row-span-2", // Item 5 (Promo)
+        "col-span-1 row-span-2", // Item 5 (Central Card)
         "col-span-1 row-span-2", // Item 6
         "col-span-1 row-span-1", // Item 7
         "col-span-1 row-span-1", // Item 8
       ];
+
 
       if (isCentralCard) {
            return (
@@ -128,7 +129,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                     {[...Array(6)].map((_, i) => <Skeleton key={i} className="w-full h-48" />)}
                 </div>
             ) : (
-                <div className="max-w-5xl mx-auto grid grid-cols-3 grid-flow-dense gap-4">
+                 <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-flow-dense gap-4">
                     {gridItems.map(renderGridItem)}
                 </div>
             )}
