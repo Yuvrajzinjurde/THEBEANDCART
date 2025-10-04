@@ -33,19 +33,15 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const categories = useMemo(() => {
         if (!brand.categoryGrid || brand.categoryGrid.length === 0) return [];
-        // Create a Set of unique category names, excluding 'All' if it exists.
         const uniqueCatsFromData = new Set(brand.categoryGrid.map(item => item.category));
         uniqueCatsFromData.delete('All');
-        // Return a new array with 'All' at the beginning, followed by the unique categories.
         return ['All', ...Array.from(uniqueCatsFromData)];
     }, [brand.categoryGrid]);
-
 
     const activeContent = useMemo(() => {
         return brand.categoryGrid.find(item => item.category === activeCategory) || brand.categoryGrid.find(item => item.category === 'All');
     }, [activeCategory, brand.categoryGrid]);
     
-    // We need a stable set of 8 images to create the frame.
     const surroundingImages = useMemo(() => {
         const categoryData = brand.categoryGrid.find(item => item.category === activeCategory) || brand.categoryGrid.find(item => item.category === 'All');
         return categoryData?.images.slice(0, 8) || [];
