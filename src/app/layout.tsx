@@ -35,21 +35,11 @@ export default async function RootLayout({
   const pathname = headersList.get('x-invoke-path') || '/';
   const searchParams = headersList.get('x-next-search') || '';
 
-  const { theme, settings } = await getThemeForRequest(pathname, searchParams);
+  const { theme, settings, isBrandRoute: isBrandRouteFromTheme } = await getThemeForRequest(pathname, searchParams);
   const platformSettings = settings as IPlatformSettings | null;
   
   const isAdminRoute = pathname.startsWith('/admin');
-  
-  const globalPrefixes = [
-      '/admin', '/legal', '/wishlist', '/create-hamper', '/cart', 
-      '/search', '/login', '/signup', '/forgot-password', '/dashboard'
-  ];
-  const isGlobalRoute = pathname === '/' || globalPrefixes.some(prefix => pathname.startsWith(prefix));
-  
-  const isBrandRoute = !isGlobalRoute;
-
-  const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.includes(route));
-
+  const isBrandRoute = isBrandRouteFromTheme;
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">

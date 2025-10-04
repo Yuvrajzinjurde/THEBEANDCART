@@ -25,6 +25,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
     let themeName: string | undefined;
     const settings = await getPlatformSettings();
     let brandName: string | null = null;
+    let isBrandRoute = false;
 
     const pathParts = pathname.split('/').filter(p => p);
 
@@ -37,6 +38,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
     
     if (pathParts.length > 0 && !globalPrefixes.includes(pathParts[0])) {
       brandName = pathParts[0];
+      isBrandRoute = true;
     }
     
     // If we've identified a brand for the current route, fetch its theme.
@@ -59,5 +61,5 @@ export async function getThemeForRequest(pathname: string, search: string) {
     // Find the theme object from our predefined list, falling back to a default 'Blue' theme if not found.
     const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue');
     
-    return { theme, settings };
+    return { theme, settings, isBrandRoute };
 }
