@@ -1,10 +1,13 @@
 
 "use client";
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell, Package, ShoppingCart, Tag, CheckCheck, Circle, RefreshCw, X, Info, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useUserStore from '@/stores/user-store';
@@ -44,14 +47,12 @@ const NOTIFICATION_COLORS: Record<NotificationType, string> = {
   return_request_admin: 'text-red-500 bg-red-100',
 };
 
-
-const NotificationItem = ({ notification }: { notification: INotification }) => {
+const NotificationItem = ({ notification, closePopover }: { notification: INotification, closePopover: () => void }) => {
     const router = useRouter();
     const { token } = useAuth();
     const { markNotificationAsRead } = useUserStore();
 
     const Icon = NOTIFICATION_ICONS[notification.type] || Circle;
-    const colors = NOTIFICATION_COLORS[notification.type] || 'text-gray-800 bg-gray-100';
 
     const handleNotificationClick = async () => {
         if (!notification.isRead) {
@@ -70,23 +71,24 @@ const NotificationItem = ({ notification }: { notification: INotification }) => 
         if (notification.link) {
             router.push(notification.link);
         }
+        closePopover();
     };
 
     return (
         <div 
             className={cn(
-                "flex items-start gap-4 p-4 rounded-lg transition-colors cursor-pointer border",
-                notification.isRead ? 'bg-background hover:bg-muted/50' : 'bg-primary/5 border-primary/20 hover:bg-primary/10'
+                "flex items-start gap-4 p-3 rounded-lg transition-colors cursor-pointer",
+                !notification.isRead && 'bg-primary/5'
             )}
             onClick={handleNotificationClick}
         >
-            <div className={cn("h-8 w-8 rounded-full flex items-center justify-center shrink-0", colors)}>
-                <Icon className="h-5 w-5" />
-            </div>
             <div className="flex-grow">
-                <p className="font-semibold text-sm">{notification.title}</p>
-                <p className="text-xs text-muted-foreground">{notification.message}</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className='flex items-center gap-2 mb-1'>
+                    {!notification.isRead && <div className='w-2 h-2 rounded-full bg-primary'></div>}
+                    <p className="font-semibold text-sm">{notification.title}</p>
+                </div>
+                <p className="text-xs text-muted-foreground ml-4">{notification.message}</p>
+                <p className="text-xs text-muted-foreground mt-1 ml-4">
                     {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                 </p>
             </div>
@@ -97,95 +99,109 @@ const NotificationItem = ({ notification }: { notification: INotification }) => 
     );
 };
 
+export function NotificationsPopover() {
+    const { notifications, markAllNotificationsAsRead, unreadNotificationsCount } = useUserStore(state => ({
+        notifications: state.notifications,
+        markAllNotificationsAsRead: state.markAllNotificationsAsRead,
+        unreadNotificationsCount: Array.isArray(state.notifications) ? state.notifications.filter(n => !n.isRead).length : 0,
+    }));
+    const { token } = useAuth();
+    const [activeTab, setActiveTab] = useState('all');
+    const [isOpen, setIsOpen] = useState(false);
 
-interface NotificationsDrawerProps {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-}
+    const sortedNotifications = useMemo(() => {
+        return [...(notifications || [])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }, [notifications]);
 
-export function NotificationsDrawer({ isOpen, onOpenChange }: NotificationsDrawerProps) {
-  const { notifications, markAllNotificationsAsRead } = useUserStore();
-  const { token } = useAuth();
-
-  const sortedNotifications = useMemo(() => {
-    return [...(notifications || [])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [notifications]);
-
-  const unreadNotifications = sortedNotifications.filter(n => !n.isRead);
+    const filteredNotifications = useMemo(() => {
+        if (activeTab === 'unread') return sortedNotifications.filter(n => !n.isRead);
+        if (activeTab === 'read') return sortedNotifications.filter(n => n.isRead);
+        return sortedNotifications;
+    }, [activeTab, sortedNotifications]);
   
-  const handleMarkAllAsRead = async () => {
-    try {
-        const response = await fetch('/api/notifications/mark-all-read', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-            markAllNotificationsAsRead();
+    const handleMarkAllAsRead = async () => {
+        try {
+            const response = await fetch('/api/notifications/mark-all-read', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                markAllNotificationsAsRead();
+            }
+        } catch (error) {
+            console.error("Failed to mark all as read", error);
         }
-    } catch (error) {
-        console.error("Failed to mark all as read", error);
-    }
-  };
-
-
-  return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[440px] sm:max-w-md flex flex-col p-0">
-        <SheetHeader className="p-4 pb-2 border-b">
-          <SheetTitle className="flex items-center justify-between">
-            <span className="text-lg font-semibold">Notifications</span>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-                <RefreshCw className="h-4 w-4" />
-            </Button>
-          </SheetTitle>
-        </SheetHeader>
-        <div className="flex-1 flex flex-col min-h-0">
-            <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-                <div className="px-4 pt-4">
-                    <TabsList className="grid w-full grid-cols-3 bg-muted/60">
-                        <TabsTrigger value="all">All <Badge variant="secondary" className="ml-2">{sortedNotifications.length}</Badge></TabsTrigger>
-                        <TabsTrigger value="unread">Unread <Badge variant="secondary" className="ml-2">{unreadNotifications.length}</Badge></TabsTrigger>
-                        <TabsTrigger value="read">Read</TabsTrigger>
-                    </TabsList>
+    };
+    
+    return (
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Notifications">
+                    <div className="relative">
+                        <Bell className="h-5 w-5" />
+                        {unreadNotificationsCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{unreadNotificationsCount}</span>}
+                    </div>
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0" align="end">
+                 <div className="p-4 border-b">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">Notifications</h3>
+                        <div className='flex items-center gap-1'>
+                             <Button variant='ghost' size='sm' className='text-xs h-7' onClick={handleMarkAllAsRead}>Mark all as read</Button>
+                             <div className='relative h-6 w-6 rounded-full flex items-center justify-center bg-muted-foreground/10 text-xs font-bold'>
+                                N
+                                <button className='absolute top-0 right-0 h-2 w-2 rounded-full border-2 border-background bg-primary'></button>
+                             </div>
+                        </div>
+                    </div>
+                    <div className='mt-4 flex items-center gap-2'>
+                        <Button
+                            size='sm'
+                            variant={activeTab === 'all' ? 'default' : 'outline'}
+                            className='rounded-full h-8 px-4 text-xs'
+                            onClick={() => setActiveTab('all')}
+                        >
+                            All {notifications?.length || 0}
+                        </Button>
+                        <Button
+                            size='sm'
+                            variant={activeTab === 'unread' ? 'default' : 'outline'}
+                            className='rounded-full h-8 px-4 text-xs'
+                            onClick={() => setActiveTab('unread')}
+                        >
+                            Unread {unreadNotificationsCount}
+                        </Button>
+                        <Button
+                            size='sm'
+                            variant={activeTab === 'read' ? 'default' : 'outline'}
+                            className='rounded-full h-8 px-4 text-xs'
+                            onClick={() => setActiveTab('read')}
+                        >
+                            Read
+                        </Button>
+                    </div>
                 </div>
-                <ScrollArea className="flex-1">
-                    <TabsContent value="all" className="p-4 pt-4 m-0">
-                        {sortedNotifications.length > 0 ? (
-                             <div className="space-y-3">
-                                {sortedNotifications.map(n => <NotificationItem key={n._id as string} notification={n} />)}
-                            </div>
+
+                <ScrollArea className='h-[400px]'>
+                    <div className="p-2 space-y-1">
+                        {filteredNotifications.length > 0 ? (
+                            filteredNotifications.map(n => <NotificationItem key={n._id as string} notification={n} closePopover={() => setIsOpen(false)} />)
                         ) : (
-                            <p className="text-center text-muted-foreground py-16">No notifications yet.</p>
-                        )}
-                    </TabsContent>
-                    <TabsContent value="unread" className="p-4 pt-4 m-0">
-                        {unreadNotifications.length > 0 ? (
-                            <div className="space-y-3">
-                                {unreadNotifications.map(n => <NotificationItem key={n._id as string} notification={n} />)}
+                            <div className="flex flex-col items-center justify-center text-center py-16 text-muted-foreground">
+                                <Bell className="w-12 h-12 mb-2" />
+                                <p className='font-medium'>All caught up!</p>
                             </div>
-                        ) : (
-                            <p className="text-center text-muted-foreground py-16">All caught up!</p>
                         )}
-                    </TabsContent>
-                    <TabsContent value="read" className="p-4 pt-4 m-0">
-                         {(sortedNotifications.length - unreadNotifications.length) > 0 ? (
-                            <div className="space-y-3">
-                                {sortedNotifications.filter(n => n.isRead).map(n => <NotificationItem key={n._id as string} notification={n} />)}
-                            </div>
-                        ) : (
-                            <p className="text-center text-muted-foreground py-16">No read notifications yet.</p>
-                        )}
-                    </TabsContent>
+                    </div>
                 </ScrollArea>
-            </Tabs>
-        </div>
-         <SheetFooter className="p-4 border-t bg-background flex-row justify-between items-center">
-            <Button variant="link" className="p-0 h-auto" onClick={handleMarkAllAsRead}>Mark all as read</Button>
-            <Button variant="ghost">
-                Go to notification center <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
+                <Separator />
+                 <div className="p-4 flex items-center justify-center">
+                    <Button variant="link" className="p-0 h-auto text-primary">
+                        Go to notification center <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                </div>
+            </PopoverContent>
+        </Popover>
+    )
 }

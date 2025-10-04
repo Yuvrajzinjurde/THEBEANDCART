@@ -10,6 +10,7 @@ type UserDataState = {
   cart: ICart | null;
   wishlist: IWishlist | null;
   notifications: INotification[];
+  unreadNotificationsCount: number;
 };
 
 type UserDataActions = {
@@ -20,21 +21,33 @@ type UserDataActions = {
   markAllNotificationsAsRead: () => void;
 };
 
-const useUserStore = create<UserDataState & UserDataActions>((set) => ({
+const useUserStore = create<UserDataState & UserDataActions>((set, get) => ({
   cart: null,
   wishlist: null,
   notifications: [],
+  unreadNotificationsCount: 0,
   setCart: (cart) => set({ cart }),
   setWishlist: (wishlist) => set({ wishlist }),
-  setNotifications: (notifications) => set({ notifications }),
-  markNotificationAsRead: (notificationId) => set(state => ({
-    notifications: state.notifications.map(n => 
+  setNotifications: (notifications) => set({ 
+      notifications,
+      unreadNotificationsCount: notifications.filter(n => !n.isRead).length
+  }),
+  markNotificationAsRead: (notificationId) => {
+    const notifications = get().notifications.map(n => 
       n._id === notificationId ? { ...n, isRead: true } : n
-    ),
-  })),
-  markAllNotificationsAsRead: () => set(state => ({
-    notifications: state.notifications.map(n => ({ ...n, isRead: true })),
-  })),
+    );
+    set({
+      notifications,
+      unreadNotificationsCount: notifications.filter(n => !n.isRead).length
+    });
+  },
+  markAllNotificationsAsRead: () => {
+    const notifications = get().notifications.map(n => ({ ...n, isRead: true }));
+    set({ 
+        notifications,
+        unreadNotificationsCount: 0 
+    });
+  },
 }));
 
 export default useUserStore;

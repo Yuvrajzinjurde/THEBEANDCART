@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 import useUserStore from "@/stores/user-store";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Skeleton } from "./ui/skeleton";
-import { NotificationsDrawer } from "./notifications-drawer";
+import { NotificationsPopover } from "./notifications-drawer";
 
 export default function Header() {
   const { user } = useAuth();
@@ -44,14 +44,13 @@ export default function Header() {
   const [brand, setBrand] = useState<IBrand | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
-  const { cart, wishlist, notifications } = useUserStore();
+  const { cart, wishlist } = useUserStore();
   const { settings, fetchSettings } = usePlatformSettingsStore();
 
   const [brandName, setBrandName] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   // State for search suggestions
   const [searchQuery, setSearchQuery] = useState("");
@@ -117,7 +116,6 @@ export default function Header() {
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
-  const unreadNotificationsCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
   
   const effectiveBrandName = brandName || 'reeva';
   const showSecondaryNav = pathname === `/${effectiveBrandName}/home`;
@@ -207,12 +205,7 @@ export default function Header() {
                  {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
             </Link>
         </Button>
-        <Button variant="ghost" size="icon" aria-label="Notifications" onClick={() => setIsNotificationsOpen(true)}>
-             <div className="relative">
-                <Bell className="h-5 w-5" />
-                {unreadNotificationsCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{unreadNotificationsCount}</span>}
-            </div>
-        </Button>
+        <NotificationsPopover />
         <UserNav />
         <Button variant="ghost" size="icon" aria-label="Cart" asChild>
             <Link href={`/cart`} className="relative">
@@ -403,7 +396,6 @@ export default function Header() {
           </div>
       </div>
     </header>
-    <NotificationsDrawer isOpen={isNotificationsOpen} onOpenChange={setIsNotificationsOpen} />
     </>
   );
 }
