@@ -33,8 +33,10 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const categories = useMemo(() => {
         if (!brand.categoryGrid || brand.categoryGrid.length === 0) return [];
+        // Create a Set of unique category names, excluding 'All' if it exists.
         const uniqueCatsFromData = new Set(brand.categoryGrid.map(item => item.category));
         uniqueCatsFromData.delete('All');
+        // Return a new array with 'All' at the beginning, followed by the unique categories.
         return ['All', ...Array.from(uniqueCatsFromData)];
     }, [brand.categoryGrid]);
 
@@ -62,7 +64,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                         variant={activeCategory === category ? 'default' : 'secondary'}
                         onClick={() => setActiveCategory(category)}
                         className={cn(
-                            "rounded-md px-6 py-2 text-sm font-medium",
+                            "rounded-lg px-6 py-2 text-sm font-medium transition-all",
                              activeCategory === category
                                 ? "bg-primary text-primary-foreground shadow-md"
                                 : "bg-primary/10 text-primary hover:bg-primary/20"
