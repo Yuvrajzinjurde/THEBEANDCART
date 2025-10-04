@@ -82,16 +82,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Invalid token on load:", error);
         logout();
       }
-    } else {
-      // Ensure state is clean if no token
-      setUser(null);
-      setToken(null);
-      setCart(null);
-      setWishlist(null);
     }
     setLoading(false);
-
-  }, [logout, fetchUserData, setCart, setWishlist]); 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>
