@@ -1,8 +1,7 @@
 
-
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import type { IBrand, IReview } from '@/models/brand.model';
