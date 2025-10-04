@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
 import { Loader } from '@/components/ui/loader';
 import { Button } from "@/components/ui/button";
-import { HeartCrack, ShoppingCart, ArrowLeft, Twitter, Facebook, Instagram, Linkedin, Trash, AlertCircle } from "lucide-react";
+import { HeartCrack, ShoppingCart, ArrowLeft, Trash, AlertCircle } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,17 +22,15 @@ import {
 } from "@/components/ui/breadcrumb";
 import { toast } from "react-toastify";
 import type { IProduct } from "@/models/product.model";
-import { Logo } from "@/components/logo";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { GlobalFooter } from "@/components/global-footer";
 
 const WishlistSkeleton = () => (
-    <main className="container py-8 px-10 text-center">
+    <main className="container py-8 px-4 sm:px-6 lg:px-8 text-center">
         <div className="flex items-center justify-between mb-6">
             <Skeleton className="h-8 w-64" />
         </div>
@@ -134,7 +132,7 @@ export default function WishlistPage() {
 
   return (
     <>
-    <main className="container py-8 px-10 flex-1">
+    <main className="container py-8 px-4 sm:px-6 lg:px-8 flex-1">
       <div className="flex items-center justify-between mb-6">
          <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
@@ -204,7 +202,7 @@ export default function WishlistPage() {
                                 )}
                             </div>
                             
-                             <div className="flex items-center gap-2 mt-auto pt-4 border-t sm:border-none sm:pt-2">
+                             <div className="flex items-center gap-2 mt-auto pt-4 flex-wrap">
                                 <Button 
                                     onClick={() => handleAddToCart(product)} 
                                 >

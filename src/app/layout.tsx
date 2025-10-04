@@ -39,7 +39,15 @@ export default async function RootLayout({
   const platformSettings = settings as IPlatformSettings | null;
   
   const isAdminRoute = pathname.startsWith('/admin');
-  const isBrandRoute = !isAdminRoute && !pathname.startsWith('/legal') && !pathname.startsWith('/wishlist') && !pathname.startsWith('/cart') && !pathname.startsWith('/search') && !pathname.startsWith('/login') && !pathname.startsWith('/signup') && !pathname.startsWith('/forgot-password') && pathname !== '/' && !pathname.startsWith('/create-hamper');
+  
+  const globalPrefixes = [
+      '/admin', '/legal', '/wishlist', '/create-hamper', '/cart', 
+      '/search', '/login', '/signup', '/forgot-password', '/dashboard'
+  ];
+  const isGlobalRoute = pathname === '/' || globalPrefixes.some(prefix => pathname.startsWith(prefix));
+  
+  const isBrandRoute = !isGlobalRoute;
+
   const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.includes(route));
 
 
@@ -56,7 +64,7 @@ export default async function RootLayout({
             <AuthProvider>
                 {!isAdminRoute && <Header />}
                 <div className="flex-1 flex flex-col">{children}</div>
-                {!isAdminRoute && !isBrandRoute && !isAuthRoute && <GlobalFooter />}
+                {!isAdminRoute && !isBrandRoute && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
                 position="top-right"

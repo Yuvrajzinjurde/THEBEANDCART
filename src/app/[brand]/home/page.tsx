@@ -142,48 +142,30 @@ const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
 
     const banners = brand.categoryBanners;
 
-    // This defines the structure of the grid. 
-    // You can adjust which banner goes into which column index here.
-    const columns = [
-        [banners[0], banners[1]], // Column 1
-        [banners[2], banners[3], banners[4]], // Column 2
-        [banners[5], banners[6]], // Column 3
-        [banners[7], banners[8]], // Column 4
-    ].map(col => col.filter(Boolean)); // Filter out undefined if banners array is shorter
-
     return (
         <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8 hidden md:block">
             <div className="container p-4 md:p-8 rounded-2xl">
-                 <div className="max-w-3xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
-                        {columns.map((columnItems, colIndex) => (
-                            <div key={colIndex} className="grid gap-4">
-                                {columnItems.map((banner, itemIndex) => (
-                                    <Link 
-                                        key={itemIndex} 
-                                        href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`}
-                                        className="relative group overflow-hidden rounded-xl shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl"
-                                    >
-                                        <Image 
-                                            src={banner.imageUrl}
-                                            alt={banner.categoryName}
-                                            width={400}
-                                            height={colIndex === 1 && itemIndex === 0 ? 600 : 400} // Example of different height
-                                            data-ai-hint={banner.imageHint}
-                                            className={cn(
-                                                "object-cover w-full transition-transform duration-300 group-hover:scale-105",
-                                                colIndex === 1 && itemIndex === 0 ? "aspect-[2/3]" : "aspect-square"
-                                            )}
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-                                        <div className="absolute bottom-0 left-0 p-4">
-                                            <h3 className="text-white text-lg font-bold">{banner.categoryName}</h3>
-                                        </div>
-                                    </Link>
-                                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {banners.slice(0, 4).map((banner, index) => (
+                        <Link 
+                            key={index} 
+                            href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`}
+                            className="relative group overflow-hidden rounded-xl shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl"
+                        >
+                            <Image 
+                                src={banner.imageUrl}
+                                alt={banner.categoryName}
+                                width={400}
+                                height={400}
+                                data-ai-hint={banner.imageHint}
+                                className="object-cover w-full aspect-square transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                            <div className="absolute bottom-0 left-0 p-4">
+                                <h3 className="text-white text-lg font-bold">{banner.categoryName}</h3>
                             </div>
-                        ))}
-                    </div>
+                        </Link>
+                    ))}
                 </div>
             </div>
         </section>

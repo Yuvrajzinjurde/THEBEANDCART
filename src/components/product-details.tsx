@@ -222,254 +222,253 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Column: Media Gallery */}
-        <div className="md:sticky top-24 self-start flex justify-center">
-            <div className="flex flex-col gap-4 w-full max-w-md">
-                <div
-                    className="relative group w-full"
-                    onMouseEnter={() => setIsZooming(true)}
-                    onMouseLeave={() => setIsZooming(false)}
-                    onMouseMove={handleMouseMove}
-                >
-                    <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
-                        <CarouselContent>
-                            {mediaItems.map((media, index) => (
-                                <CarouselItem key={index}>
-                                    <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
-                                        {media.type === 'image' ? (
-                                            <Image src={media.url} alt={product.name} fill className="object-cover" />
-                                        ) : (
-                                            <video src={media.url} controls className="w-full h-full object-cover" />
-                                        )}
-                                    </div>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
-                        <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
-                    </Carousel>
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                        <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+      {/* Left Column: Media Gallery */}
+      <div className="md:sticky top-24 self-start flex flex-col items-center">
+        <div className="w-full max-w-md space-y-4">
+          <div
+            className="relative group w-full"
+            onMouseEnter={() => setIsZooming(true)}
+            onMouseLeave={() => setIsZooming(false)}
+            onMouseMove={handleMouseMove}
+          >
+            <Carousel setApi={setMainApi} opts={{ loop: true }} className="w-full">
+              <CarouselContent>
+                {mediaItems.map((media, index) => (
+                  <CarouselItem key={index}>
+                    <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
+                      {media.type === 'image' ? (
+                        <Image src={media.url} alt={product.name} fill className="object-cover" />
+                      ) : (
+                        <video src={media.url} controls className="w-full h-full object-cover" />
+                      )}
                     </div>
-                    {/* Zoom Pane */}
-                    {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
-                        <div className="absolute top-0 left-full ml-4 h-full w-[400px] bg-white border rounded-lg shadow-lg hidden xl:block overflow-hidden pointer-events-none z-20">
-                            <Image
-                                src={mediaItems[selectedIndex].url}
-                                alt={`${product.name} zoomed`}
-                                fill
-                                className="object-cover transition-transform duration-200 ease-out"
-                                style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
-                            />
-                        </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowLeft /></CarouselPrevious>
+              <CarouselNext className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"><ArrowRight /></CarouselNext>
+            </Carousel>
+            <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+              <Button variant="outline" size="icon" className="rounded-full bg-background/60 hover:bg-background hover:text-red-500" onClick={handleAddToWishlist}><Heart /></Button>
+            </div>
+            {isZooming && mediaItems[selectedIndex]?.type === 'image' && (
+              <div className="absolute top-0 left-full ml-4 h-full w-[400px] bg-white border rounded-lg shadow-lg hidden xl:block overflow-hidden pointer-events-none z-20">
+                <Image
+                  src={mediaItems[selectedIndex].url}
+                  alt={`${product.name} zoomed`}
+                  fill
+                  className="object-cover transition-transform duration-200 ease-out"
+                  style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
+                />
+              </div>
+            )}
+          </div>
+          <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
+            <CarouselContent className="-ml-2">
+              {mediaItems.map((media, index) => (
+                <CarouselItem key={index} className="pl-2 basis-[16.66%]">
+                  <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
+                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
+                    {media.type === 'video' && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <PlayCircle className="w-6 h-6 text-white" />
+                      </div>
                     )}
+                  </ThumbsButton>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+           <div className="mt-8 space-y-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
+                    <div className="flex items-center gap-1 rounded-lg border p-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-8 text-center font-semibold">1</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Plus className="h-4 w-4" /></Button>
+                    </div>
                 </div>
-                <Carousel setApi={setThumbApi} opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: true }} className="w-full">
-                    <CarouselContent className="-ml-2">
-                        {mediaItems.map((media, index) => (
-                            <CarouselItem key={index} className="pl-2 basis-[16.66%]">
-                                <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
-                                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
-                                    {media.type === 'video' && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                            <PlayCircle className="w-6 h-6 text-white" />
-                                        </div>
-                                    )}
-                                </ThumbsButton>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-                <div className="mt-8 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
-                        <div className="flex items-center gap-1 rounded-lg border p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Minus className="h-4 w-4" /></Button>
-                            <span className="w-8 text-center font-semibold">1</span>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Plus className="h-4 w-4" /></Button>
-                        </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                        <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
-                    </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
+                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
                 </div>
             </div>
         </div>
+      </div>
 
-        {/* Right Column: Product Info */}
-        <div className="mt-8 md:mt-0">
-            <Breadcrumb>
-                <BreadcrumbList>
-                    <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/products?category=${categoryDisplay}`}>{categoryDisplay}</BreadcrumbLink></BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem><BreadcrumbPage>{product.name}</BreadcrumbPage></BreadcrumbItem>
-                </BreadcrumbList>
-            </Breadcrumb>
-            
-            <div className="mt-4">
-                <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-                <p className="text-muted-foreground mt-1">{product.brand}</p>
-            </div>
-            
-            <div className='space-y-2 mt-4'>
-                 <p className="text-sm font-semibold text-primary">Special price</p>
-                 <div className="flex items-baseline gap-3 flex-wrap">
-                    <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
-                    {hasDiscount && (
-                        <>
-                            <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
-                            <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
-                              <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button className="cursor-pointer" onClick={(e) => e.preventDefault()}>
-                                            <Info className="h-4 w-4 text-muted-foreground" />
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="p-3 w-64">
-                                        <div className="space-y-2">
-                                            <p className="font-bold text-base">Price details</p>
-                                            <div className="flex justify-between text-sm">
-                                                <p className="text-muted-foreground">Maximum Retail Price</p>
-                                                <p>₹{product.mrp!.toFixed(2)}</p>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <p className="text-muted-foreground">Selling Price</p>
-                                                <p>₹{product.sellingPrice.toFixed(2)}</p>
-                                            </div>
-                                            <Separator />
-                                            <div className="flex justify-between text-sm font-semibold text-green-600">
-                                               <p>Overall you save</p>
-                                               <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
-                                            </div>
-                                        </div>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </>
-                    )}
-                </div>
-                 <div className="flex items-center gap-2">
-                    <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
-                        <span>{reviewStats.averageRating.toFixed(1)}</span>
-                        <Star className="w-3.5 h-3.5 fill-white" />
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                        {reviewStats.totalRatings.toLocaleString()} ratings &amp; {reviewStats.totalReviews.toLocaleString()} reviews
-                    </span>
-                </div>
-            </div>
+      {/* Right Column: Product Info */}
+      <div className="mt-8 md:mt-0">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/home`}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/products?category=${categoryDisplay}`}>{categoryDisplay}</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbPage>{product.name}</BreadcrumbPage></BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         
-            <Separator className="my-6" />
-            
-            {/* Variant Selectors */}
-            {uniqueColors.length > 0 && (
-                <div className="space-y-4 mb-4">
-                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
-                    <div className="flex flex-wrap gap-3">
-                        {uniqueColors.map(({ color, imageUrl }) => (
-                            <TooltipProvider key={color}>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button
-                                            onClick={() => setSelectedColor(color)}
-                                            className={cn(
-                                                "relative h-10 w-10 rounded-full border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                                                selectedColor === color ? "border-primary" : "border-muted"
-                                            )}
-                                        >
-                                            <Image
-                                                src={imageUrl}
-                                                alt={color}
-                                                fill
-                                                className="object-cover rounded-full"
-                                            />
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>{color}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {sizesForSelectedColor.length > 0 && (
-                <div className="space-y-4 mb-4">
-                    <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {sizesForSelectedColor.map((size) => (
-                             <Button 
-                                key={size} 
-                                variant={selectedSize === size ? "default" : "outline"}
-                                onClick={() => setSelectedSize(size)} 
-                                className={cn(
-                                    "w-16 h-12 text-base",
-                                    selectedSize === size && "shadow-md"
-                                )}
-                            >
-                                {size}
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {(uniqueColors.length > 0 || sizesForSelectedColor.length > 0) && <Separator className="my-6" />}
-            
-            {/* Offers and Policy */}
-            <div className="space-y-4">
-                {coupons.length > 0 && (
-                    <div className="space-y-2">
-                        <h3 className="text-base font-semibold">Coupons for you</h3>
-                        {coupons.slice(0,2).map(coupon => (
-                            <div key={coupon._id as string} className="flex items-start gap-2">
-                                <Tag className="h-5 w-5 mt-0.5 text-primary" />
-                                <p className="text-sm text-muted-foreground">
-                                    <span className="font-semibold text-foreground">
-                                        {coupon.type === 'percentage' && `${coupon.value}% off`}
-                                        {coupon.type === 'fixed' && `₹${coupon.value} off`}
-                                        {coupon.type === 'free-shipping' && 'Free Shipping'}
-                                    </span> on orders {coupon.minPurchase > 0 ? `above ₹${coupon.minPurchase}` : ''}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+        <div className="mt-4">
+          <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
+          <p className="text-muted-foreground mt-1">{product.brand}</p>
+        </div>
+        
+        <div className='space-y-2 mt-4'>
+             <p className="text-sm font-semibold text-primary">Special price</p>
+             <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
+                {hasDiscount && (
+                    <>
+                        <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                        <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button className="cursor-pointer" onClick={(e) => e.preventDefault()}>
+                                        <Info className="h-4 w-4 text-muted-foreground" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent className="p-3 w-64">
+                                    <div className="space-y-2">
+                                        <p className="font-bold text-base">Price details</p>
+                                        <div className="flex justify-between text-sm">
+                                            <p className="text-muted-foreground">Maximum Retail Price</p>
+                                            <p>₹{product.mrp!.toFixed(2)}</p>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <p className="text-muted-foreground">Selling Price</p>
+                                            <p>₹{product.sellingPrice.toFixed(2)}</p>
+                                        </div>
+                                        <Separator />
+                                        <div className="flex justify-between text-sm font-semibold text-green-600">
+                                           <p>Overall you save</p>
+                                           <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
+                                        </div>
+                                    </div>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </>
                 )}
-                <div className="flex items-center gap-2 text-sm">
-                    <p>{product.returnPeriod} days return policy</p>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger>
-                            <TooltipContent className="p-4 max-w-sm">
-                                <div className="prose prose-sm"><div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} /></div>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+            </div>
+             <div className="flex items-center gap-2">
+                <Badge className="flex items-center gap-1 bg-green-600 hover:bg-green-700">
+                    <span>{reviewStats.averageRating.toFixed(1)}</span>
+                    <Star className="w-3.5 h-3.5 fill-white" />
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                    {reviewStats.totalRatings.toLocaleString()} ratings &amp; {reviewStats.totalReviews.toLocaleString()} reviews
+                </span>
+            </div>
+        </div>
+    
+        <Separator className="my-6" />
+        
+        {/* Variant Selectors */}
+        {uniqueColors.length > 0 && (
+            <div className="space-y-4 mb-4">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
+                <div className="flex flex-wrap gap-3">
+                    {uniqueColors.map(({ color, imageUrl }) => (
+                        <TooltipProvider key={color}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setSelectedColor(color)}
+                                        className={cn(
+                                            "relative h-10 w-10 rounded-full border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                                            selectedColor === color ? "border-primary" : "border-muted"
+                                        )}
+                                    >
+                                        <Image
+                                            src={imageUrl}
+                                            alt={color}
+                                            fill
+                                            className="object-cover rounded-full"
+                                        />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{color}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    ))}
                 </div>
             </div>
+        )}
 
-            <Separator className="my-6" />
+        {sizesForSelectedColor.length > 0 && (
+            <div className="space-y-4 mb-4">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground">Size</h3>
+                <div className="flex flex-wrap gap-2">
+                    {sizesForSelectedColor.map((size) => (
+                         <Button 
+                            key={size} 
+                            variant={selectedSize === size ? "default" : "outline"}
+                            onClick={() => setSelectedSize(size)} 
+                            className={cn(
+                                "w-16 h-12 text-base",
+                                selectedSize === size && "shadow-md"
+                            )}
+                        >
+                            {size}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+        )}
 
-            <div className='prose prose-sm sm:prose-base max-w-none text-muted-foreground' dangerouslySetInnerHTML={{ __html: product.description }} />
-
-            {children}
-
-            <Separator className="my-8" />
-            
-            <RatingsAndReviews 
-                productId={product._id as string} 
-                reviewStats={reviewStats} 
-                reviews={reviews}
-            />
-
+        {(uniqueColors.length > 0 || sizesForSelectedColor.length > 0) && <Separator className="my-6" />}
+        
+        {/* Offers and Policy */}
+        <div className="space-y-4">
+            {coupons.length > 0 && (
+                <div className="space-y-2">
+                    <h3 className="text-base font-semibold">Coupons for you</h3>
+                    {coupons.slice(0,2).map(coupon => (
+                        <div key={coupon._id as string} className="flex items-start gap-2">
+                            <Tag className="h-5 w-5 mt-0.5 text-primary" />
+                            <p className="text-sm text-muted-foreground">
+                                <span className="font-semibold text-foreground">
+                                    {coupon.type === 'percentage' && `${coupon.value}% off`}
+                                    {coupon.type === 'fixed' && `₹${coupon.value} off`}
+                                    {coupon.type === 'free-shipping' && 'Free Shipping'}
+                                </span> on orders {coupon.minPurchase > 0 ? `above ₹${coupon.minPurchase}` : ''}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            )}
+            <div className="flex items-center gap-2 text-sm">
+                <p>{product.returnPeriod} days return policy</p>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger>
+                        <TooltipContent className="p-4 max-w-sm">
+                            <div className="prose prose-sm"><div dangerouslySetInnerHTML={{ __html: returnPolicySummary }} /></div>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
         </div>
+
+        <Separator className="my-6" />
+
+        <div className='prose prose-sm sm:prose-base max-w-none text-muted-foreground' dangerouslySetInnerHTML={{ __html: product.description }} />
+
+        {children}
+
+        <Separator className="my-8" />
+        
+        <RatingsAndReviews 
+            productId={product._id as string} 
+            reviewStats={reviewStats} 
+            reviews={reviews}
+        />
+
+      </div>
     </div>
   );
 }
