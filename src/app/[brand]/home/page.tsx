@@ -45,92 +45,71 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     }, [brand?.categoryGrid?.images]);
 
     const filteredImages = useMemo(() => {
-        if (activeCategory === 'All') return images;
-        return images.filter(img => img.category === activeCategory);
+        if (activeCategory === 'All') return images.slice(0, 1); // Only show the first image for "All"
+        return images.filter(img => img.category === activeCategory).slice(0, 1);
     }, [images, activeCategory]);
 
     const centralCard = brand.categoryGrid?.centralCard;
-    const gridItems = [...filteredImages];
-    
-    if (centralCard && activeCategory === 'All' && gridItems.length > 3) {
-      gridItems.splice(4, 0, centralCard as any);
-    }
-    
-    const renderGridItem = (item: ICategoryGridImage | typeof centralCard, index: number) => {
-      const isCentralCard = 'title' in item && item.title;
-      const finalIndex = activeCategory === 'All' ? index : (index % 8);
-      
-      const gridClasses = [
-        "col-span-1 row-span-2", // Item 1
-        "col-span-1 row-span-1", // Item 2
-        "col-span-1 row-span-1", // Item 3
-        "col-span-1 row-span-1", // Item 4
-        "col-span-1 row-span-2", // Item 5 (Central Card)
-        "col-span-1 row-span-2", // Item 6
-        "col-span-1 row-span-1", // Item 7
-        "col-span-1 row-span-1", // Item 8
-      ];
-
-
-      if (isCentralCard) {
-           return (
-              <div key="central-card" className={cn("bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center", gridClasses[4])}>
-                  <h3 className="text-2xl font-bold">{item.title}</h3>
-                  <p className="mt-2 mb-4 text-sm opacity-90">{item.description}</p>
-                  <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
-                      <Link href={item.categoryLink ? `/${brand.permanentName}/products?category=${item.categoryLink}` : `/${brand.permanentName}/products`}>View More</Link>
-                  </Button>
-              </div>
-          );
-      }
-
-      const image = item as ICategoryGridImage;
-      const itemClass = gridClasses[finalIndex] || "col-span-1 row-span-1";
-
-      return (
-           <div key={image.imageUrl + index} className={cn("relative rounded-lg overflow-hidden", itemClass)}>
-               <Link href={image.category ? `/${brand.permanentName}/products?category=${image.category}` : '#'}>
-                  <Image
-                      src={image.imageUrl}
-                      alt={image.category || 'Category image'}
-                      fill
-                      className="object-cover w-full h-full"
-                      data-ai-hint={image.imageHint}
-                  />
-              </Link>
-          </div>
-      );
-    };
     
     if (!brand?.categoryGrid || (!brand.categoryGrid.images?.length && !brand.categoryGrid.centralCard)) {
         return null;
     }
 
-
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-                {categories.map(category => (
-                    <Button
-                        key={category}
-                        variant={activeCategory === category ? 'default' : 'secondary'}
-                        onClick={() => setActiveCategory(category)}
-                        className={cn(
-                            "rounded-md px-6 py-2 text-sm font-medium",
-                             activeCategory !== category && "bg-primary/10 text-primary-foreground hover:bg-primary/20 text-black"
-                        )}
-                    >
-                        {category}
-                    </Button>
-                ))}
-            </div>
-            {loading ? (
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="w-full h-48" />)}
-                </div>
+             {loading ? (
+                 <div className="flex justify-center"><Skeleton className="h-10 w-48" /></div>
             ) : (
-                 <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-flow-dense gap-4">
-                    {gridItems.map(renderGridItem)}
+                <div className="grid grid-cols-2 grid-rows-2 gap-x-8 gap-y-4" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
+
+                    {/* Filter Buttons */}
+                    <div className="col-start-1 flex justify-center items-start gap-3">
+                        {categories.map(category => (
+                            <Button
+                                key={category}
+                                variant={activeCategory === category ? 'default' : 'secondary'}
+                                onClick={() => setActiveCategory(category)}
+                                className={cn(
+                                    "rounded-md px-6 py-2 text-sm font-medium",
+                                    activeCategory !== category && "bg-primary/10 hover:bg-primary/20 text-black"
+                                )}
+                            >
+                                {category}
+                            </Button>
+                        ))}
+                    </div>
+
+                    {/* Image */}
+                    <div className="col-start-1 row-start-2 flex items-center">
+                         {filteredImages.length > 0 ? (
+                            <div className="relative rounded-lg overflow-hidden w-full h-24">
+                                <Link href={filteredImages[0].category ? `/${brand.permanentName}/products?category=${filteredImages[0].category}` : '#'}>
+                                    <Image
+                                        src={filteredImages[0].imageUrl}
+                                        alt={filteredImages[0].category || 'Category image'}
+                                        fill
+                                        className="object-cover w-full h-full"
+                                        data-ai-hint={filteredImages[0].imageHint}
+                                    />
+                                </Link>
+                            </div>
+                        ) : (
+                           <div className="w-full h-24 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
+                                No image for this category
+                           </div>
+                        )}
+                    </div>
+
+                    {/* Central Card */}
+                    {centralCard && (
+                        <div className="col-start-2 row-span-2 bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                            <h3 className="text-2xl font-bold">{centralCard.title}</h3>
+                            {centralCard.description && <p className="mt-2 mb-4 text-sm opacity-90">{centralCard.description}</p>}
+                            <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
+                                <Link href={centralCard.categoryLink ? `/${brand.permanentName}/products?category=${centralCard.categoryLink}` : `/${brand.permanentName}/products`}>View More</Link>
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
         </section>
