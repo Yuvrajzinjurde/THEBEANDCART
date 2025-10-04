@@ -122,7 +122,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   promoBanner: PromoBannerSchema,
   categories: { type: [String], default: [] },
   socials: SocialLinksSchema,
-  categoryGrid: [CategoryGridItemSchema],
+  categoryGrid: { type: [CategoryGridItemSchema], default: [] },
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);

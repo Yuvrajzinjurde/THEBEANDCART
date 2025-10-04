@@ -28,88 +28,108 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
+    const gridItems = Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [];
     const [activeCategory, setActiveCategory] = useState('All');
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (brand?.categoryGrid) {
-             if (!brand.categoryGrid.find(item => item.category === 'All')) {
-                 setActiveCategory(brand.categoryGrid[0]?.category || 'All');
-             }
-        }
-        setLoading(false);
-    }, [brand]);
 
     const categories = useMemo(() => {
-        if (!brand?.categoryGrid) return [];
-        const allCats = new Set(brand.categoryGrid.map(item => item.category));
+        if (!gridItems || gridItems.length === 0) return [];
+        const allCats = new Set(gridItems.map(item => item.category));
         return ['All', ...Array.from(allCats)];
-    }, [brand?.categoryGrid]);
+    }, [gridItems]);
 
     const activeContent = useMemo(() => {
         if (activeCategory === 'All') {
-            return brand.categoryGrid[0];
+            return gridItems[0];
         }
-        return brand.categoryGrid.find(item => item.category === activeCategory);
-    }, [activeCategory, brand.categoryGrid]);
+        return gridItems.find(item => item.category === activeCategory);
+    }, [activeCategory, gridItems]);
+    
+    useEffect(() => {
+        if (gridItems.length > 0) {
+            const allCat = gridItems.find(item => item.category === 'All');
+            if (allCat) {
+                setActiveCategory('All');
+            } else if (gridItems[0]) {
+                setActiveCategory(gridItems[0].category);
+            }
+        }
+    }, [gridItems]);
 
-    if (!brand?.categoryGrid || brand.categoryGrid.length === 0) {
+    const filteredImages = useMemo(() => {
+        if (activeCategory === 'All') {
+            return gridItems.slice(0, 5); // Show first 5 for 'All'
+        }
+        const categoryImages = gridItems.filter(item => item.category === activeCategory);
+        // In the design, it seems a single category has multiple images that form the grid.
+        // For simplicity now, we'll just show the one image associated with the category.
+        // To build the full masonry, we would need to associate multiple images per category.
+        return categoryImages.slice(0, 5);
+    }, [activeCategory, gridItems]);
+
+
+    if (!gridItems || gridItems.length === 0) {
         return null;
     }
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            {loading ? (
-                <div className="flex justify-center"><Skeleton className="h-10 w-full max-w-lg" /></div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                    {/* Image */}
-                    <div className="md:col-span-1">
-                        {activeContent?.imageUrl && (
-                             <div className="relative rounded-lg overflow-hidden w-full aspect-[4/5]">
-                                <Link href={activeContent.buttonLink || '#'}>
-                                    <Image
-                                        src={activeContent.imageUrl}
-                                        alt={activeContent.category || 'Category image'}
-                                        fill
-                                        className="object-cover w-full h-full"
-                                        data-ai-hint={activeContent.imageHint}
-                                    />
-                                </Link>
-                            </div>
+            <div className="flex justify-center flex-wrap gap-3 mb-8">
+                {categories.map(category => (
+                    <Button
+                        key={category}
+                        variant={activeCategory === category ? 'default' : 'secondary'}
+                        onClick={() => setActiveCategory(category)}
+                        className={cn(
+                            "rounded-md px-6 py-2 text-sm font-medium",
+                             activeCategory === category
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-secondary-foreground"
                         )}
-                    </div>
-                    {/* Central Content */}
-                    <div className="md:col-span-2 text-center md:text-left">
-                         {/* Filter Buttons */}
-                        <div className="flex justify-center md:justify-start flex-wrap gap-3 mb-6">
-                            {categories.map(category => (
-                                <Button
-                                    key={category}
-                                    variant={activeCategory === category ? 'default' : 'secondary'}
-                                    onClick={() => setActiveCategory(category)}
-                                    className={cn(
-                                        "rounded-md px-6 py-2 text-sm font-medium",
-                                        activeCategory !== category && "bg-primary/10 hover:bg-primary/20 text-black"
-                                    )}
-                                >
-                                    {category}
-                                </Button>
-                            ))}
+                    >
+                        {category}
+                    </Button>
+                ))}
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+                 <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[600px]">
+                    {/* Main large image */}
+                    {filteredImages.length > 0 && (
+                        <div className="md:col-span-2 md:row-span-2 relative rounded-2xl overflow-hidden shadow-lg group">
+                            <Image
+                                src={filteredImages[0].imageUrl}
+                                alt={filteredImages[0].title}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         </div>
-                        
-                        {activeContent && (
-                             <div className="p-6 flex flex-col items-center md:items-start text-center md:text-left">
-                                <h3 className="text-3xl font-bold">{activeContent.title}</h3>
-                                {activeContent.description && <p className="mt-2 mb-4 text-lg text-muted-foreground max-w-md">{activeContent.description}</p>}
-                                <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 shadow-md" asChild>
-                                    <Link href={activeContent.buttonLink || `/${brand.permanentName}/products?category=${activeContent.category}`}>View More</Link>
-                                </Button>
-                            </div>
-                        )}
-                    </div>
+                    )}
+                    
+                    {/* Central Promo Card */}
+                    {activeContent && (
+                        <div className="md:col-span-2 p-8 flex flex-col items-center justify-center text-center bg-muted rounded-2xl">
+                            <h3 className="text-3xl font-bold">{activeContent.title}</h3>
+                            <p className="mt-2 mb-4 text-lg text-muted-foreground max-w-md">{activeContent.description}</p>
+                            <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 shadow-md" asChild>
+                                <Link href={activeContent.buttonLink || '#'}>View More</Link>
+                            </Button>
+                        </div>
+                    )}
+
+                    {/* Small image */}
+                     {filteredImages.length > 1 && (
+                        <div className="md:col-span-2 relative rounded-2xl overflow-hidden shadow-lg group">
+                            <Image
+                                src={filteredImages[1].imageUrl}
+                                alt={filteredImages[1].title}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
         </section>
     );
 };
