@@ -39,6 +39,7 @@ const staticDefaultValues: PlatformSettingsValues = {
       description: "Discover curated collections from the world's most innovative brands.",
       imageUrl: "https://picsum.photos/seed/style-elevate/1600/400",
       imageHint: "fashion collection",
+      buttonLink: ''
     },
   ],
   featuredCategories: [],
@@ -437,9 +438,10 @@ export default function PlatformSettingsPage() {
                             </FormItem>
                         )}/>
                          <FormField control={form.control} name={`heroBanners.${index}.imageHint`} render={({ field }) => ( <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                         <FormField control={form.control} name={`heroBanners.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input placeholder="e.g. /reeva/products" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
+                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
         
@@ -475,6 +477,7 @@ export default function PlatformSettingsPage() {
                     </FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                 <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input placeholder="e.g. /search?keyword=sale" {...field} /></FormControl><FormMessage /></FormItem> )}/>
             </CardContent>
         </Card>
 
@@ -559,5 +562,3 @@ export default function PlatformSettingsPage() {
     </Form>
   );
 }
-
-    

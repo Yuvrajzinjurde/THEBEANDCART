@@ -118,40 +118,59 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const [gridImageCategory, setGridImageCategory] = useState('');
 
 
-  const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
-    existingBrand ? {
-      ...existingBrand,
-       themeName: existingBrand.themeName,
-    } : {
-      displayName: "Aura",
-      permanentName: "aura",
-      logoUrl: "https://picsum.photos/seed/aurora-logo/200/200",
-      themeName: "Rose",
-      categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
-      banners: [
-        { imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
-        { imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
-      ],
-      categoryGrid: {
-        centralCard: {
-          title: "Our Finest Collection",
-          description: "Handpicked for excellence. Discover products that define quality.",
-          categoryLink: "#"
+  const defaultValues: Partial<BrandFormValues> = React.useMemo(() => {
+    const staticDefaults = {
+        displayName: "Aura",
+        permanentName: "aura",
+        logoUrl: "https://picsum.photos/seed/aurora-logo/200/200",
+        themeName: "Rose",
+        categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
+        banners: [
+            { imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
+            { imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
+        ],
+        categoryGrid: {
+            centralCard: {
+                title: "Our Finest Collection",
+                description: "Handpicked for excellence. Discover products that define quality.",
+                categoryLink: "#"
+            },
+            images: []
         },
-        images: []
-      },
-      promoBanner: {
-        imageUrl: "https://picsum.photos/seed/promo-offer/1600/400",
-        imageHint: "beauty products",
-        buttonLink: "#",
-      },
-      reviews: [
-        { customerName: "Priya S.", rating: 5, reviewText: "The Vitamin C serum is a game changer! My skin has never felt brighter.", customerAvatarUrl: "https://picsum.photos/seed/priya/100/100" },
-        { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
-        { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
-      ],
+        promoBanner: {
+            imageUrl: "https://picsum.photos/seed/promo-offer/1600/400",
+            imageHint: "beauty products",
+            buttonLink: "#",
+        },
+        reviews: [
+            { customerName: "Priya S.", rating: 5, reviewText: "The Vitamin C serum is a game changer! My skin has never felt brighter.", customerAvatarUrl: "https://picsum.photos/seed/priya/100/100" },
+            { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
+            { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
+        ],
+    };
+
+    if (existingBrand) {
+        const brand = existingBrand as any; // Cast to any to handle potentially missing fields
+        return {
+            ...brand,
+            themeName: brand.themeName || 'Rose',
+            categoryGrid: {
+                centralCard: {
+                    title: brand.categoryGrid?.centralCard?.title || '',
+                    description: brand.categoryGrid?.centralCard?.description || '',
+                    categoryLink: brand.categoryGrid?.centralCard?.categoryLink || ''
+                },
+                images: brand.categoryGrid?.images || []
+            },
+            promoBanner: {
+                imageUrl: brand.promoBanner?.imageUrl || '',
+                imageHint: brand.promoBanner?.imageHint || '',
+                buttonLink: brand.promoBanner?.buttonLink || '',
+            }
+        };
     }
-  ), [existingBrand]);
+    return staticDefaults;
+  }, [existingBrand]);
 
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(BrandFormSchema),
