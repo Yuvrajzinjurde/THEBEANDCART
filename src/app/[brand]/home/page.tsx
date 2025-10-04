@@ -35,10 +35,14 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
+        // Create a set of unique category names from the data
         const uniqueCatsFromData = new Set(gridItems.map(item => item.category));
+        // Remove 'All' if it exists to prevent duplication
         uniqueCatsFromData.delete('All');
+        // Return a new array with 'All' at the beginning
         return ['All', ...Array.from(uniqueCatsFromData)];
     }, [gridItems]);
+
 
     const activeContent = useMemo(() => {
         return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
@@ -50,32 +54,9 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
         return allCategoryData?.images.slice(0, 8) || [];
     }, [gridItems]);
 
-    if (!activeContent) {
+    if (!activeContent || surroundingImages.length < 8) {
         return null;
     }
-    
-    const imageElements = surroundingImages.map((image, index) => (
-        <div key={`image-${index}`} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
-            <Image 
-                src={image.url} 
-                alt={image.hint || `Grid image ${index + 1}`}
-                fill 
-                className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                data-ai-hint={image.hint}
-            />
-        </div>
-    ));
-
-    // Insert the promo card in the middle (index 4)
-    imageElements.splice(4, 0, (
-        <div key="promo-card" className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center aspect-[4/3]">
-            <h3 className="text-2xl font-bold">{activeContent.title}</h3>
-            <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
-            <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
-                <Link href={activeContent.buttonLink || '#'}>View More</Link>
-            </Button>
-        </div>
-    ));
     
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -97,8 +78,45 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {imageElements}
+            <div className="grid grid-cols-3 grid-rows-4 gap-4 max-w-4xl mx-auto">
+                {/* Row 1 */}
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group row-span-2">
+                    <Image src={surroundingImages[0].url} alt={surroundingImages[0].hint || 'Grid image 1'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[0].hint} />
+                </div>
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                     <Image src={surroundingImages[1].url} alt={surroundingImages[1].hint || 'Grid image 2'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[1].hint} />
+                </div>
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                     <Image src={surroundingImages[2].url} alt={surroundingImages[2].hint || 'Grid image 3'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[2].hint} />
+                </div>
+
+                {/* Row 2 - Center piece is here */}
+                <div className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center row-span-2">
+                    <h3 className="text-2xl font-bold">{activeContent.title}</h3>
+                    <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
+                    <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
+                        <Link href={activeContent.buttonLink || '#'}>View More</Link>
+                    </Button>
+                </div>
+                 <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                     <Image src={surroundingImages[3].url} alt={surroundingImages[3].hint || 'Grid image 4'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[3].hint} />
+                </div>
+
+                {/* Row 3 */}
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                    <Image src={surroundingImages[4].url} alt={surroundingImages[4].hint || 'Grid image 5'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[4].hint} />
+                </div>
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group row-span-2">
+                     <Image src={surroundingImages[5].url} alt={surroundingImages[5].hint || 'Grid image 6'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[5].hint} />
+                </div>
+                
+                {/* Row 4 */}
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                     <Image src={surroundingImages[6].url} alt={surroundingImages[6].hint || 'Grid image 7'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[6].hint} />
+                </div>
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                     <Image src={surroundingImages[7].url} alt={surroundingImages[7].hint || 'Grid image 8'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[7].hint} />
+                </div>
             </div>
         </section>
     );
