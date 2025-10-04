@@ -103,6 +103,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const gridItems = Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [];
     const [activeCategory, setActiveCategory] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = 6; // Hardcoded as per design
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
@@ -128,14 +129,43 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
         }
     }, [gridItems]);
     
-    const totalPages = 6; // Hardcoded as per design
-
     if (!gridItems || gridItems.length === 0) {
         return null;
     }
     
-    const filteredImages = (activeContent?.images || []).slice(0, 8);
+    const imageElements = activeContent?.images.slice(0, 8).map((img, index) => (
+        <div key={index} className="relative rounded-xl overflow-hidden shadow-lg group">
+            <Image 
+                src={img.url} 
+                alt={img.hint || ''} 
+                fill 
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+        </div>
+    ));
 
+    const centralCard = activeContent && (
+        <div className="p-6 flex flex-col items-center justify-center text-center bg-primary text-primary-foreground rounded-xl shadow-lg">
+            <h3 className="text-2xl font-bold">{activeContent.title}</h3>
+            <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
+            <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
+                <Link href={activeContent.buttonLink || '#'}>View More</Link>
+            </Button>
+        </div>
+    );
+    
+    // Arrange items for a 3x3 grid with center card
+    const gridElements = [
+        imageElements?.[0],
+        imageElements?.[1],
+        imageElements?.[2],
+        imageElements?.[3],
+        centralCard,
+        imageElements?.[4],
+        imageElements?.[5],
+        imageElements?.[6],
+        imageElements?.[7],
+    ];
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -158,61 +188,12 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
             </div>
 
             <div className="max-w-4xl mx-auto">
-                 <div className="grid grid-cols-3 grid-rows-4 gap-4 h-[600px]">
-                    {/* First Column */}
-                    {filteredImages[0] && (
-                        <div className="row-span-2 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[0].url} alt={filteredImages[0].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                 <div className="grid grid-cols-3 grid-rows-3 gap-4 h-[600px]">
+                    {gridElements.map((el, i) => (
+                        <div key={i} className="w-full h-full">
+                            {el}
                         </div>
-                    )}
-                     {filteredImages[4] && (
-                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[4].url} alt={filteredImages[4].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
-                     {filteredImages[6] && (
-                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[6].url} alt={filteredImages[6].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
-                    
-                    {/* Second Column */}
-                    {filteredImages[1] && (
-                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
-                             <Image src={filteredImages[1].url} alt={filteredImages[1].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
-                    {activeContent && (
-                        <div className="row-span-2 p-6 flex flex-col items-center justify-center text-center bg-primary text-primary-foreground rounded-xl shadow-lg">
-                            <h3 className="text-2xl font-bold">{activeContent.title}</h3>
-                            <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
-                            <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
-                                <Link href={activeContent.buttonLink || '#'}>View More</Link>
-                            </Button>
-                        </div>
-                    )}
-                    {filteredImages[7] && (
-                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[7].url} alt={filteredImages[7].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
-
-                    {/* Third Column */}
-                    {filteredImages[2] && (
-                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[2].url} alt={filteredImages[2].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
-                    {filteredImages[3] && (
-                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[3].url} alt={filteredImages[3].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
-                    {filteredImages[5] && (
-                        <div className="row-span-2 relative rounded-xl overflow-hidden shadow-lg group">
-                            <Image src={filteredImages[5].url} alt={filteredImages[5].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                    )}
+                    ))}
                 </div>
                 <PaginationComponent totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
             </div>
