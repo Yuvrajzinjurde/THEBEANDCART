@@ -57,14 +57,9 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 {categories.map(category => (
                     <Button
                         key={category}
-                        variant={activeCategory === category ? 'default' : 'secondary'}
+                        variant={activeCategory === category ? 'default' : 'outline'}
                         onClick={() => setActiveCategory(category)}
-                        className={cn(
-                            "rounded-lg px-6 py-2 text-sm font-medium transition-all",
-                             activeCategory === category
-                                ? "bg-primary text-primary-foreground shadow-md"
-                                : "bg-primary/10 text-primary hover:bg-primary/20"
-                        )}
+                        className="rounded-full px-6"
                     >
                         {category}
                     </Button>
@@ -406,3 +401,4 @@ export default function BrandHomePage() {
     
 
     
+
