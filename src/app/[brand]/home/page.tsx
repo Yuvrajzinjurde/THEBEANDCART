@@ -78,10 +78,10 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group row-span-2">
                     <Image src={surroundingImages[0].url} alt={surroundingImages[0].hint || 'Grid image 1'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[0].hint} />
                 </div>
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                <div className="relative aspect-[4/2.5] rounded-xl overflow-hidden shadow-lg group">
                      <Image src={surroundingImages[1].url} alt={surroundingImages[1].hint || 'Grid image 2'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[1].hint} />
                 </div>
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                <div className="relative aspect-[4/2.5] rounded-xl overflow-hidden shadow-lg group">
                      <Image src={surroundingImages[2].url} alt={surroundingImages[2].hint || 'Grid image 3'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[2].hint} />
                 </div>
 
@@ -93,12 +93,12 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                         <Link href={activeContent.buttonLink || '#'}>View More</Link>
                     </Button>
                 </div>
-                 <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                 <div className="relative aspect-[4/2.5] rounded-xl overflow-hidden shadow-lg group">
                      <Image src={surroundingImages[3].url} alt={surroundingImages[3].hint || 'Grid image 4'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[3].hint} />
                 </div>
 
                 {/* Row 3 */}
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                <div className="relative aspect-[4/2.5] rounded-xl overflow-hidden shadow-lg group">
                     <Image src={surroundingImages[4].url} alt={surroundingImages[4].hint || 'Grid image 5'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[4].hint} />
                 </div>
                 <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group row-span-2">
@@ -106,10 +106,10 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 </div>
                 
                 {/* Row 4 */}
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                <div className="relative aspect-[4/2.5] rounded-xl overflow-hidden shadow-lg group">
                      <Image src={surroundingImages[6].url} alt={surroundingImages[6].hint || 'Grid image 7'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[6].hint} />
                 </div>
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-lg group">
+                <div className="relative aspect-[4/2.5] rounded-xl overflow-hidden shadow-lg group">
                      <Image src={surroundingImages[7].url} alt={surroundingImages[7].hint || 'Grid image 8'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[7].hint} />
                 </div>
             </div>
