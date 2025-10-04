@@ -19,7 +19,7 @@ import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -92,7 +92,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
             </div>
         );
     };
-
+    
     if (!brand?.categoryGrid || (!brand.categoryGrid.images?.length && !brand.categoryGrid.centralCard)) {
         return null;
     }
@@ -103,18 +103,18 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
             <style jsx>{`
                 .grid-container {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
-                    grid-auto-rows: minmax(120px, auto);
+                    grid-template-columns: repeat(3, 1fr);
+                    grid-auto-rows: minmax(100px, auto);
                     gap: 1rem;
                 }
-                .grid-item:nth-child(7n+1) { grid-row: span 2; }
-                .grid-item:nth-child(7n+2) { grid-row: span 1; }
-                .grid-item:nth-child(7n+3) { grid-row: span 1; }
-                .grid-item-promo { grid-column: span 2; grid-row: span 2; }
-                .grid-item:nth-child(7n+4) { grid-row: span 1; }
-                .grid-item:nth-child(7n+5) { grid-row: span 1; }
-                .grid-item:nth-child(7n+6) { grid-row: span 2; }
-                .grid-item:nth-child(7n+7) { grid-row: span 1; }
+                .grid-item:nth-child(6n+1) { grid-column: span 1; grid-row: span 2; }
+                .grid-item:nth-child(6n+2) { grid-column: span 1; grid-row: span 1; }
+                .grid-item:nth-child(6n+3) { grid-column: span 1; grid-row: span 1; }
+                .grid-item:nth-child(6n+4) { grid-column: span 1; grid-row: span 1; }
+                .grid-item-promo { grid-column: span 1; grid-row: span 2; }
+                .grid-item:nth-child(6n+5) { grid-column: span 1; grid-row: span 2; }
+                .grid-item:nth-child(6n+6) { grid-column: span 1; grid-row: span 1; }
+
             `}</style>
             <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {categories.map(category => (
@@ -132,12 +132,14 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             {loading ? (
-                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {[...Array(7)].map((_, i) => <Skeleton key={i} className="w-full h-48" />)}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="w-full h-48" />)}
                 </div>
             ) : (
-                <div className="grid-container">
-                    {gridItems.map(renderGridItem)}
+                <div className="max-w-5xl mx-auto">
+                    <div className="grid-container">
+                        {gridItems.map(renderGridItem)}
+                    </div>
                 </div>
             )}
         </section>
