@@ -52,18 +52,22 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const centralCard = brand.categoryGrid?.centralCard;
     const gridItems = [...filteredImages];
     
-    if (centralCard && gridItems.length > 2 && activeCategory === 'All') {
-        const middleIndex = Math.floor(gridItems.length / 2);
-        const insertPosition = middleIndex > 0 && middleIndex % 3 === 2 ? middleIndex + 1 : middleIndex;
-        gridItems.splice(insertPosition, 0, centralCard as any);
-    } else if (centralCard && activeCategory === 'All') {
-        gridItems.push(centralCard as any);
+    // Insert central card logic for 'All' category
+    if (centralCard && activeCategory === 'All') {
+        const insertIndex = 4; // Position it as the 5th item (index 4)
+        if (gridItems.length >= insertIndex) {
+            gridItems.splice(insertIndex, 0, centralCard as any);
+        } else {
+            gridItems.push(centralCard as any);
+        }
     }
     
     const renderGridItem = (item: ICategoryGridImage | typeof centralCard, index: number) => {
-        if ('title' in item && item.title) {
-            return (
-                <div key="central-card" className="row-span-2 col-span-1 bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
+        const isCentralCard = 'title' in item && item.title;
+
+        if (isCentralCard) {
+             return (
+                <div key="central-card" className="grid-item-promo bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
                     <h3 className="text-2xl font-bold">{item.title}</h3>
                     <p className="mt-2 mb-4 text-sm opacity-90">{item.description}</p>
                     <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
@@ -74,17 +78,15 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
         }
 
         const image = item as ICategoryGridImage;
-        const isTall = (index % 5 === 1 || index % 5 === 3) && filteredImages.length > 4;
 
         return (
-             <div key={image.imageUrl + index} className={cn("col-span-1", isTall ? "row-span-2" : "row-span-1")}>
+             <div key={image.imageUrl + index} className="grid-item relative aspect-[4/5] rounded-lg overflow-hidden">
                  <Link href={image.category ? `/${brand.permanentName}/products?category=${image.category}` : '#'}>
                     <Image
                         src={image.imageUrl}
                         alt={image.category || 'Category image'}
-                        width={400}
-                        height={isTall ? 800 : 400}
-                        className="rounded-lg object-cover w-full h-full"
+                        fill
+                        className="object-cover w-full h-full"
                         data-ai-hint={image.imageHint}
                     />
                 </Link>
@@ -99,6 +101,22 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
+            <style jsx>{`
+                .grid-container {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    grid-auto-rows: minmax(150px, auto);
+                    gap: 1rem;
+                }
+                .grid-item:nth-child(7n+1) { grid-row: span 2; aspect-ratio: 4 / 10.2; }
+                .grid-item:nth-child(7n+2) { grid-row: span 1; }
+                .grid-item:nth-child(7n+3) { grid-row: span 1; }
+                .grid-item-promo { grid-row: span 2; }
+                .grid-item:nth-child(7n+4) { grid-row: span 1; }
+                .grid-item:nth-child(7n+5) { grid-row: span 1; }
+                .grid-item:nth-child(7n+6) { grid-row: span 2; aspect-ratio: 4 / 10.2; }
+                .grid-item:nth-child(7n+7) { grid-row: span 1; }
+            `}</style>
             <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {categories.map(category => (
                     <Button
@@ -107,7 +125,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                         onClick={() => setActiveCategory(category)}
                         className={cn(
                             "rounded-md px-6 py-2 text-sm font-medium",
-                            activeCategory !== category && "bg-primary/10 text-primary-foreground hover:bg-primary/20"
+                             activeCategory !== category && "bg-primary/10 text-primary-foreground hover:bg-primary/20 text-black"
                         )}
                     >
                         {category}
@@ -115,11 +133,11 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             {loading ? (
-                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[200px]">
-                    {[...Array(7)].map((_, i) => <Skeleton key={i} className="w-full h-full" />)}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[...Array(7)].map((_, i) => <Skeleton key={i} className="w-full h-64" />)}
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4" style={{ gridAutoRows: 'minmax(200px, auto)' }}>
+                <div className="grid-container">
                     {gridItems.map(renderGridItem)}
                 </div>
             )}
@@ -301,7 +319,7 @@ export default function BrandHomePage() {
         setLoading(true);
         setError(null);
         try {
-            const [brandResponse, productsResponse, trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
+             const [brandResponse, productsResponse, trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
                 fetch(`/api/brands/${brandName}`),
                 fetch(`/api/products?storefront=${brandName}&limit=50`),
                 fetch(`/api/products?storefront=${brandName}&sortBy=popular&limit=12`),
