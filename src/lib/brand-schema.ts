@@ -32,12 +32,16 @@ const promoBannerSchema = z.object({
   buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
-const featuredProductGridSchema = z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    imageUrl: z.string().optional(),
+const categoryGridImageSchema = z.object({
+    category: z.string().min(1),
+    imageUrl: z.string().url(),
     imageHint: z.string().optional(),
-    buttonLink: z.string().url().optional().or(z.literal('')),
+});
+
+const centralCardSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  categoryLink: z.string().optional(),
 });
 
 export const themeColors = [
@@ -74,9 +78,12 @@ export const BrandFormSchema = z.object({
     description: z.string().optional(),
     buttonText: z.string().optional(),
   }).optional(),
-  featuredProductGrid: featuredProductGridSchema.optional(),
   categories: z.array(z.string()).optional(),
   socials: SocialLinksSchema.optional(),
+  categoryGrid: z.object({
+      centralCard: centralCardSchema.optional(),
+      images: z.array(categoryGridImageSchema).optional(),
+  }).optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;

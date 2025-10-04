@@ -1,4 +1,5 @@
 
+
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 interface IBanner {
@@ -31,12 +32,16 @@ interface IPromoBanner {
     buttonLink?: string;
 }
 
-interface IFeaturedProductGrid {
+interface ICategoryGridImage {
+    category: string;
+    imageUrl: string;
+    imageHint?: string;
+}
+
+interface ICentralCard {
     title?: string;
     description?: string;
-    imageUrl?: string;
-    imageHint?: string;
-    buttonLink?: string;
+    categoryLink?: string;
 }
 
 interface ISocialLinks {
@@ -56,9 +61,12 @@ export interface IBrand extends Document {
   offers: IOffer[];
   reviews: IReview[];
   promoBanner: IPromoBanner;
-  featuredProductGrid?: IFeaturedProductGrid;
   categories: string[];
   socials?: ISocialLinks;
+  categoryGrid: {
+      centralCard: ICentralCard;
+      images: ICategoryGridImage[];
+  };
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -91,13 +99,18 @@ const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
     buttonLink: { type: String },
 }, { _id: false });
 
-const FeaturedProductGridSchema: Schema<IFeaturedProductGrid> = new Schema({
+const CategoryGridImageSchema: Schema<ICategoryGridImage> = new Schema({
+    category: { type: String, required: true },
+    imageUrl: { type: String, required: true },
+    imageHint: { type: String },
+}, { _id: false });
+
+const CentralCardSchema: Schema<ICentralCard> = new Schema({
     title: { type: String },
     description: { type: String },
-    imageUrl: { type: String },
-    imageHint: { type: String },
-    buttonLink: { type: String },
+    categoryLink: { type: String },
 }, { _id: false });
+
 
 const SocialLinksSchema: Schema<ISocialLinks> = new Schema({
     twitter: { type: String },
@@ -116,9 +129,12 @@ const BrandSchema: Schema<IBrand> = new Schema({
   offers: [OfferSchema],
   reviews: [ReviewSchema],
   promoBanner: PromoBannerSchema,
-  featuredProductGrid: FeaturedProductGridSchema,
   categories: { type: [String], default: [] },
   socials: SocialLinksSchema,
+  categoryGrid: {
+      centralCard: { type: CentralCardSchema, default: {} },
+      images: [CategoryGridImageSchema],
+  },
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);
