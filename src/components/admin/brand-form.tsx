@@ -428,39 +428,86 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
           <CardContent className="space-y-6">
              {gridItemFields.map((field, index) => (
               <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
-                 <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeGridItem(index)}>
-                    <Trash className="h-4 w-4" />
-                </Button>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6">
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>This will permanently remove this category's content from the grid. This action cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => removeGridItem(index)}>Continue</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <FormField control={form.control} name={`categoryGrid.${index}.category`} render={({ field }) => ( <FormItem><FormLabel>Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent>{['All', ...availableCategories].map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name={`categoryGrid.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name={`categoryGrid.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name={`categoryGrid.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input placeholder="e.g. /category/new-arrivals" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name={`categoryGrid.${index}.imageUrl`} render={({ field: imageField }) => (
-                  <FormItem>
-                      <FormLabel>Image</FormLabel>
-                      <FormControl>
-                          <div className="w-full">
-                              <Input id={`grid-image-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, {width: 600, height: 400})} />
-                              {imageField.value ? (
-                                  <div className="relative w-48 h-32 border-2 border-dashed rounded-lg p-2">
-                                      <Image src={imageField.value} alt="Grid item preview" fill objectFit="contain" />
-                                      <Button type="button" variant="secondary" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => document.getElementById(`grid-image-upload-${index}`)?.click()}><UploadCloud className="h-4 w-4" /></Button>
-                                  </div>
-                              ) : (
-                                  <label htmlFor={`grid-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                      <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                      <p className="text-sm text-muted-foreground">Click to upload (600x400)</p>
-                                  </label>
-                              )}
-                          </div>
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                )}/>
-                <FormField control={form.control} name={`categoryGrid.${index}.imageHint`} render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'woman wearing necklace'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input placeholder="e.g. /category/new-arrivals" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )}/>
+                
+                <FormField
+                    control={form.control}
+                    name={`categoryGrid.${index}.images`}
+                    render={({ field: imageArrayField }) => {
+                        const handleImageFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const files = e.target.files;
+                            if (files) {
+                                const filePromises = Array.from(files).slice(0, 8 - (imageArrayField.value?.length || 0)).map(file => {
+                                    return new Promise<{ url: string; hint: string }>((resolve) => {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            resolve({ url: reader.result as string, hint: file.name });
+                                        };
+                                        reader.readAsDataURL(file);
+                                    });
+                                });
+                                Promise.all(filePromises).then(newImages => {
+                                    const currentImages = imageArrayField.value || [];
+                                    imageArrayField.onChange([...currentImages, ...newImages]);
+                                });
+                            }
+                        };
+                        
+                        const removeImage = (imgIndex: number) => {
+                             const currentImages = imageArrayField.value || [];
+                             imageArrayField.onChange(currentImages.filter((_, i) => i !== imgIndex));
+                        }
+
+                        return (
+                            <FormItem>
+                                <FormLabel>Images (up to 8)</FormLabel>
+                                <FormControl>
+                                    <div className="w-full">
+                                        <Input id={`grid-image-upload-${index}`} type="file" accept="image/*" multiple className="hidden" onChange={handleImageFilesChange} />
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {(imageArrayField.value || []).map((img, imgIndex) => (
+                                                <div key={imgIndex} className="relative w-full aspect-square border-2 border-dashed rounded-lg p-1">
+                                                    <Image src={img.url} alt="Grid item preview" fill objectFit="contain" />
+                                                    <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-5 w-5" onClick={() => removeImage(imgIndex)}><X className="h-3 w-3" /></Button>
+                                                </div>
+                                            ))}
+                                             {(imageArrayField.value?.length || 0) < 8 && (
+                                                <label htmlFor={`grid-image-upload-${index}`} className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                    <UploadCloud className="w-6 h-6 text-muted-foreground" />
+                                                    <p className="text-xs text-muted-foreground mt-1">Upload</p>
+                                                </label>
+                                            )}
+                                        </div>
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        );
+                    }}
+                />
               </div>
             ))}
-             <Button type="button" variant="outline" onClick={() => appendGridItem({ category: '', title: '', description: '', imageUrl: '', buttonLink: '', imageHint: '' })}>
+             <Button type="button" variant="outline" onClick={() => appendGridItem({ category: '', title: '', description: '', images: [], buttonLink: '' })}>
                 <PlusCircle className="mr-2 h-4 w-4"/>
                 Add Category Content
             </Button>
@@ -496,7 +543,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             control={form.control}
                             name={`banners.${index}.buttonLink`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Banner Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/collection" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Banner Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/collection" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                          <FormField
@@ -547,7 +594,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             control={form.control}
                             name={`banners.${index}.imageHint`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g., 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g., 'fashion model'" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                     </div>
@@ -562,7 +609,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
                 <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
-                    <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/sale" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/sale" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
@@ -591,7 +638,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     </FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
-                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'summer collection'" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )}/>
             </CardContent>
         </Card>

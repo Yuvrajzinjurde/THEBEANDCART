@@ -8,12 +8,18 @@ import type { ICategoryGridItem } from '@/models/brand.model';
 // Helper function to generate placeholder content for a category
 const generateCategoryGridItem = (category: string, brandName: string): ICategoryGridItem => {
     const sanitizedCategory = category.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    // Generate up to 8 unique images for each category
+    const images = Array.from({ length: 8 }, (_, i) => ({
+      url: `https://picsum.photos/seed/${sanitizedCategory}-${brandName}-${i + 1}/600/400`,
+      hint: `${category} product ${i + 1}`
+    }));
+
     return {
         category: category,
         title: `Explore Our ${category}`,
         description: `Discover the finest selection of ${category}. Curated just for you.`,
-        imageUrl: `https://picsum.photos/seed/${sanitizedCategory}-${brandName}/600/400`,
-        imageHint: `${category} products`,
+        images: images,
         buttonLink: `/${brandName}/products?category=${encodeURIComponent(category)}`,
     };
 };
@@ -44,8 +50,10 @@ export async function seedDatabase() {
                 category: 'All',
                 title: 'Curated For You',
                 description: `Browse our complete collection of hand-picked items, perfect for any occasion.`,
-                imageUrl: `https://picsum.photos/seed/${brand.permanentName}-all/600/400`,
-                imageHint: 'lifestyle collection',
+                images: Array.from({ length: 8 }, (_, i) => ({
+                    url: `https://picsum.photos/seed/${brand.permanentName}-all-${i + 1}/600/400`,
+                    hint: `lifestyle collection ${i + 1}`
+                })),
                 buttonLink: `/${brand.permanentName}/products`
             });
 

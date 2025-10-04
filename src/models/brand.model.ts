@@ -36,8 +36,7 @@ export interface ICategoryGridItem {
     category: string;
     title: string;
     description: string;
-    imageUrl: string;
-    imageHint?: string;
+    images: { url: string; hint?: string }[];
     buttonLink: string;
 }
 
@@ -97,8 +96,10 @@ const CategoryGridItemSchema: Schema<ICategoryGridItem> = new Schema({
     category: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    imageHint: { type: String },
+    images: [{
+        url: { type: String, required: true },
+        hint: { type: String }
+    }],
     buttonLink: { type: String, required: true },
 }, { _id: false });
 

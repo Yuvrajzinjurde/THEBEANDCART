@@ -36,8 +36,10 @@ const categoryGridItemSchema = z.object({
     category: z.string().min(1, "Category is required."),
     title: z.string().min(1, "Title is required."),
     description: z.string().min(1, "Description is required."),
-    imageUrl: z.string().url("Must be a valid URL.").min(1, "Image URL is required."),
-    imageHint: z.string().optional(),
+    images: z.array(z.object({
+        url: z.string().url("Must be a valid URL.").min(1, "Image URL is required."),
+        hint: z.string().optional(),
+    })).max(8, "You can upload a maximum of 8 images per category."),
     buttonLink: z.string().min(1, "Button link is required."),
 });
 

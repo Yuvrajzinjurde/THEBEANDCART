@@ -39,7 +39,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const activeContent = useMemo(() => {
         if (activeCategory === 'All') {
-            return gridItems[0];
+            return gridItems.find(item => item.category === 'All');
         }
         return gridItems.find(item => item.category === activeCategory);
     }, [activeCategory, gridItems]);
@@ -56,16 +56,9 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     }, [gridItems]);
 
     const filteredImages = useMemo(() => {
-        if (activeCategory === 'All') {
-            return gridItems.slice(0, 5); // Show first 5 for 'All'
-        }
-        const categoryImages = gridItems.filter(item => item.category === activeCategory);
-        // In the design, it seems a single category has multiple images that form the grid.
-        // For simplicity now, we'll just show the one image associated with the category.
-        // To build the full masonry, we would need to associate multiple images per category.
-        return categoryImages.slice(0, 5);
-    }, [activeCategory, gridItems]);
-
+        if (!activeContent) return [];
+        return activeContent.images || [];
+    }, [activeContent]);
 
     if (!gridItems || gridItems.length === 0) {
         return null;
@@ -97,8 +90,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                     {filteredImages.length > 0 && (
                         <div className="md:col-span-2 md:row-span-2 relative rounded-2xl overflow-hidden shadow-lg group">
                             <Image
-                                src={filteredImages[0].imageUrl}
-                                alt={filteredImages[0].title}
+                                src={filteredImages[0].url}
+                                alt={activeContent?.title || ''}
                                 fill
                                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                             />
@@ -121,8 +114,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                      {filteredImages.length > 1 && (
                         <div className="md:col-span-2 relative rounded-2xl overflow-hidden shadow-lg group">
                             <Image
-                                src={filteredImages[1].imageUrl}
-                                alt={filteredImages[1].title}
+                                src={filteredImages[1].url}
+                                alt={activeContent?.title || ''}
                                 fill
                                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                             />
@@ -209,7 +202,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
             <Link href={buttonLink || `/${brandName}/products`}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
                     <Image
-                        src={imageUrl}
+                        src={imageUrl || ''}
                         alt={'Promotional banner'}
                         fill
                         className="object-cover"
