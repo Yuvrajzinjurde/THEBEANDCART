@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export const bannerSchema = z.object({
@@ -31,17 +32,15 @@ const promoBannerSchema = z.object({
   buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
-const categoryGridImageSchema = z.object({
-    category: z.string().min(1, "Category is required for grid images."),
-    imageUrl: z.string().url(),
+const categoryGridItemSchema = z.object({
+    category: z.string().min(1, "Category is required."),
+    title: z.string().min(1, "Title is required."),
+    description: z.string().min(1, "Description is required."),
+    imageUrl: z.string().url("Must be a valid URL.").min(1, "Image URL is required."),
     imageHint: z.string().optional(),
+    buttonLink: z.string().min(1, "Button link is required."),
 });
 
-const centralCardSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  categoryLink: z.string().optional(),
-});
 
 export const themeColors = [
     { name: 'Jewelry', primary: '45 90% 55%', background: '0 0% 98%', accent: '45 90% 95%' },
@@ -79,10 +78,7 @@ export const BrandFormSchema = z.object({
   }).optional(),
   categories: z.array(z.string()).optional(),
   socials: SocialLinksSchema.optional(),
-  categoryGrid: z.object({
-      centralCard: centralCardSchema.optional(),
-      images: z.array(categoryGridImageSchema).optional(),
-  }).optional(),
+  categoryGrid: z.array(categoryGridItemSchema).optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;

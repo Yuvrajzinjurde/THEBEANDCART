@@ -1,10 +1,11 @@
 
+
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import type { IBrand, ICategoryGridImage, IReview } from '@/models/brand.model';
+import type { IBrand, IReview, ICategoryGridItem } from '@/models/brand.model';
 import type { IProduct } from '@/models/product.model';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,87 +30,84 @@ import { Skeleton } from '@/components/ui/skeleton';
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const [activeCategory, setActiveCategory] = useState('All');
     const [loading, setLoading] = useState(true);
-    const [images, setImages] = useState<ICategoryGridImage[]>([]);
 
     useEffect(() => {
-        if (brand?.categoryGrid?.images) {
-            setImages(brand.categoryGrid.images);
+        if (brand?.categoryGrid) {
+             if (!brand.categoryGrid.find(item => item.category === 'All')) {
+                 setActiveCategory(brand.categoryGrid[0]?.category || 'All');
+             }
         }
         setLoading(false);
     }, [brand]);
 
     const categories = useMemo(() => {
-        if (!brand?.categoryGrid?.images) return ['All'];
-        const allCats = new Set(brand.categoryGrid.images.map(img => img.category));
+        if (!brand?.categoryGrid) return [];
+        const allCats = new Set(brand.categoryGrid.map(item => item.category));
         return ['All', ...Array.from(allCats)];
-    }, [brand?.categoryGrid?.images]);
+    }, [brand?.categoryGrid]);
 
-    const filteredImages = useMemo(() => {
-        if (activeCategory === 'All') return images.slice(0, 1); // Only show the first image for "All"
-        return images.filter(img => img.category === activeCategory).slice(0, 1);
-    }, [images, activeCategory]);
+    const activeContent = useMemo(() => {
+        if (activeCategory === 'All') {
+            return brand.categoryGrid[0];
+        }
+        return brand.categoryGrid.find(item => item.category === activeCategory);
+    }, [activeCategory, brand.categoryGrid]);
 
-    const centralCard = brand.categoryGrid?.centralCard;
-    
-    if (!brand?.categoryGrid || (!brand.categoryGrid.images?.length && !brand.categoryGrid.centralCard)) {
+    if (!brand?.categoryGrid || brand.categoryGrid.length === 0) {
         return null;
     }
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-             {loading ? (
-                 <div className="flex justify-center"><Skeleton className="h-10 w-48" /></div>
+            {loading ? (
+                <div className="flex justify-center"><Skeleton className="h-10 w-full max-w-lg" /></div>
             ) : (
-                <div className="grid grid-cols-2 grid-rows-2 gap-x-8 gap-y-4" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
-
-                    {/* Filter Buttons */}
-                    <div className="col-start-1 flex justify-center items-start gap-3">
-                        {categories.map(category => (
-                            <Button
-                                key={category}
-                                variant={activeCategory === category ? 'default' : 'secondary'}
-                                onClick={() => setActiveCategory(category)}
-                                className={cn(
-                                    "rounded-md px-6 py-2 text-sm font-medium",
-                                    activeCategory !== category && "bg-primary/10 hover:bg-primary/20 text-black"
-                                )}
-                            >
-                                {category}
-                            </Button>
-                        ))}
-                    </div>
-
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                     {/* Image */}
-                    <div className="col-start-1 row-start-2 flex items-center">
-                         {filteredImages.length > 0 ? (
-                            <div className="relative rounded-lg overflow-hidden w-full h-24">
-                                <Link href={filteredImages[0].category ? `/${brand.permanentName}/products?category=${filteredImages[0].category}` : '#'}>
+                    <div className="md:col-span-1">
+                        {activeContent?.imageUrl && (
+                             <div className="relative rounded-lg overflow-hidden w-full aspect-[4/5]">
+                                <Link href={activeContent.buttonLink || '#'}>
                                     <Image
-                                        src={filteredImages[0].imageUrl}
-                                        alt={filteredImages[0].category || 'Category image'}
+                                        src={activeContent.imageUrl}
+                                        alt={activeContent.category || 'Category image'}
                                         fill
                                         className="object-cover w-full h-full"
-                                        data-ai-hint={filteredImages[0].imageHint}
+                                        data-ai-hint={activeContent.imageHint}
                                     />
                                 </Link>
                             </div>
-                        ) : (
-                           <div className="w-full h-24 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                                No image for this category
-                           </div>
                         )}
                     </div>
-
-                    {/* Central Card */}
-                    {centralCard && (
-                        <div className="col-start-2 row-span-2 bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
-                            <h3 className="text-2xl font-bold">{centralCard.title}</h3>
-                            {centralCard.description && <p className="mt-2 mb-4 text-sm opacity-90">{centralCard.description}</p>}
-                            <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
-                                <Link href={centralCard.categoryLink ? `/${brand.permanentName}/products?category=${centralCard.categoryLink}` : `/${brand.permanentName}/products`}>View More</Link>
-                            </Button>
+                    {/* Central Content */}
+                    <div className="md:col-span-2 text-center md:text-left">
+                         {/* Filter Buttons */}
+                        <div className="flex justify-center md:justify-start flex-wrap gap-3 mb-6">
+                            {categories.map(category => (
+                                <Button
+                                    key={category}
+                                    variant={activeCategory === category ? 'default' : 'secondary'}
+                                    onClick={() => setActiveCategory(category)}
+                                    className={cn(
+                                        "rounded-md px-6 py-2 text-sm font-medium",
+                                        activeCategory !== category && "bg-primary/10 hover:bg-primary/20 text-black"
+                                    )}
+                                >
+                                    {category}
+                                </Button>
+                            ))}
                         </div>
-                    )}
+                        
+                        {activeContent && (
+                             <div className="p-6 flex flex-col items-center md:items-start text-center md:text-left">
+                                <h3 className="text-3xl font-bold">{activeContent.title}</h3>
+                                {activeContent.description && <p className="mt-2 mb-4 text-lg text-muted-foreground max-w-md">{activeContent.description}</p>}
+                                <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 shadow-md" asChild>
+                                    <Link href={activeContent.buttonLink || `/${brand.permanentName}/products?category=${activeContent.category}`}>View More</Link>
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </section>

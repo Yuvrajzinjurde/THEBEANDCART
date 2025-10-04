@@ -1,4 +1,5 @@
 
+
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 interface IBanner {
@@ -31,16 +32,13 @@ interface IPromoBanner {
     buttonLink?: string;
 }
 
-export interface ICategoryGridImage {
+export interface ICategoryGridItem {
     category: string;
+    title: string;
+    description: string;
     imageUrl: string;
     imageHint?: string;
-}
-
-export interface ICentralCard {
-    title?: string;
-    description?: string;
-    categoryLink?: string;
+    buttonLink: string;
 }
 
 interface ISocialLinks {
@@ -62,10 +60,7 @@ export interface IBrand extends Document {
   promoBanner: IPromoBanner;
   categories: string[];
   socials?: ISocialLinks;
-  categoryGrid: {
-      centralCard?: ICentralCard;
-      images: ICategoryGridImage[];
-  };
+  categoryGrid: ICategoryGridItem[];
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
@@ -98,16 +93,13 @@ const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
     buttonLink: { type: String },
 }, { _id: false });
 
-const CategoryGridImageSchema: Schema<ICategoryGridImage> = new Schema({
+const CategoryGridItemSchema: Schema<ICategoryGridItem> = new Schema({
     category: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
     imageUrl: { type: String, required: true },
     imageHint: { type: String },
-}, { _id: false });
-
-const CentralCardSchema: Schema<ICentralCard> = new Schema({
-    title: { type: String },
-    description: { type: String },
-    categoryLink: { type: String },
+    buttonLink: { type: String, required: true },
 }, { _id: false });
 
 
@@ -130,10 +122,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   promoBanner: PromoBannerSchema,
   categories: { type: [String], default: [] },
   socials: SocialLinksSchema,
-  categoryGrid: {
-      centralCard: { type: CentralCardSchema },
-      images: [CategoryGridImageSchema],
-  },
+  categoryGrid: [CategoryGridItemSchema],
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);

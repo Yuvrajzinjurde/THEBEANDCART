@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Star, Crop } from 'lucide-react';
+import { Trash, UploadCloud, X, Star, Crop, PlusCircle } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -26,7 +26,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
 import { Separator } from '../ui/separator';
@@ -115,8 +114,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const [categoryInput, setCategoryInput] = React.useState('');
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [uncroppedLogo, setUncroppedLogo] = useState<string | null>(null);
-  const [gridImageCategory, setGridImageCategory] = useState('');
-
 
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => {
     const staticDefaults = {
@@ -129,14 +126,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             { imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
             { imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
         ],
-        categoryGrid: {
-            centralCard: {
-                title: "Our Finest Collection",
-                description: "Handpicked for excellence. Discover products that define quality.",
-                categoryLink: "#"
-            },
-            images: []
-        },
+        categoryGrid: [],
         promoBanner: {
             imageUrl: "https://picsum.photos/seed/promo-offer/1600/400",
             imageHint: "beauty products",
@@ -150,23 +140,16 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     };
 
     if (existingBrand) {
-        const brand = existingBrand as any; // Cast to any to handle potentially missing fields
+        const brand = existingBrand as any; 
         return {
             ...brand,
             themeName: brand.themeName || 'Rose',
-            categoryGrid: {
-                centralCard: {
-                    title: brand.categoryGrid?.centralCard?.title || '',
-                    description: brand.categoryGrid?.centralCard?.description || '',
-                    categoryLink: brand.categoryGrid?.centralCard?.categoryLink || ''
-                },
-                images: brand.categoryGrid?.images || []
-            },
             promoBanner: {
                 imageUrl: brand.promoBanner?.imageUrl || '',
                 imageHint: brand.promoBanner?.imageHint || '',
                 buttonLink: brand.promoBanner?.buttonLink || '',
-            }
+            },
+            categoryGrid: brand.categoryGrid || [],
         };
     }
     return staticDefaults;
@@ -193,9 +176,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     name: 'categories',
   });
 
-   const { fields: gridImageFields, append: appendGridImage, remove: removeGridImage } = useFieldArray({
+   const { fields: gridItemFields, append: appendGridItem, remove: removeGridItem } = useFieldArray({
     control: form.control,
-    name: 'categoryGrid.images',
+    name: 'categoryGrid',
   });
 
 
@@ -217,25 +200,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       reader.readAsDataURL(file);
     }
   };
-  
-  const handleGridFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && gridImageCategory) {
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (loadEvent) => {
-                const imageUrl = loadEvent.target?.result as string;
-                appendGridImage({ category: gridImageCategory, imageUrl, imageHint: '' });
-            };
-            reader.readAsDataURL(file);
-        });
-    } else if (!gridImageCategory) {
-        toast.warn("Please select a category before uploading images.");
-    }
-    // Clear the file input
-    if (e.target) e.target.value = '';
-  };
-  
+    
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -443,74 +408,47 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Category Image Grid</CardTitle>
-            <CardDescription>Manage the filterable image grid on the brand homepage.</CardDescription>
+            <CardDescription>Manage the filterable content grid on the brand homepage. Add content for each category you want to feature.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Central Card</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                 <FormField control={form.control} name="categoryGrid.centralCard.title" render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Our Finest Collection" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                 <FormField control={form.control} name="categoryGrid.centralCard.description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="A short, engaging description." {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                 <FormField control={form.control} name="categoryGrid.centralCard.categoryLink" render={({ field }) => ( <FormItem><FormLabel>Button Links to Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent>{availableCategories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )}/>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Grid Images</CardTitle>
-                 <FormDescription>Upload images and assign them to a category for filtering.</FormDescription>
-              </CardHeader>
-              <CardContent>
-                 <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
-                    <FormItem className="flex-grow">
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={setGridImageCategory} value={gridImageCategory}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select category to add images" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {availableCategories.map(cat => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </FormItem>
-                    <div>
-                        <Input id="grid-image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleGridFileChange} disabled={!gridImageCategory} />
-                        <label htmlFor="grid-image-upload" className={`inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 ${!gridImageCategory ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
-                           <UploadCloud className="mr-2 h-4 w-4" />
-                           Upload to {gridImageCategory || '...'}
-                        </label>
-                    </div>
-                </div>
-
-                <Separator className="my-6" />
-                
-                <div className="space-y-4">
-                  <h4 className="font-semibold">Uploaded Images</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {gridImageFields.map((field, index) => (
-                      <div key={field.id} className="relative group/image">
-                        <div className="aspect-square relative rounded-md overflow-hidden border">
-                          <Image src={field.imageUrl} alt={`Grid image ${index}`} fill className="object-cover" />
-                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                              <Button type="button" variant="destructive" size="icon" className="h-8 w-8 rounded-full" onClick={() => removeGridImage(index)}>
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                           </div>
-                        </div>
-                        <Badge variant="secondary" className="absolute bottom-1 left-1 capitalize text-xs">{field.category}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                   {gridImageFields.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No images uploaded for the grid yet.</p>}
-                </div>
-              </CardContent>
-            </Card>
+             {gridItemFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                 <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeGridItem(index)}>
+                    <Trash className="h-4 w-4" />
+                </Button>
+                <FormField control={form.control} name={`categoryGrid.${index}.category`} render={({ field }) => ( <FormItem><FormLabel>Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent>{availableCategories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input placeholder="e.g. /category/new-arrivals" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.imageUrl`} render={({ field: imageField }) => (
+                  <FormItem>
+                      <FormLabel>Image</FormLabel>
+                      <FormControl>
+                          <div className="w-full">
+                              <Input id={`grid-image-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange)} />
+                              {imageField.value ? (
+                                  <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                      <Image src={imageField.value} alt="Grid item preview" fill objectFit="contain" />
+                                      <Button type="button" variant="secondary" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => document.getElementById(`grid-image-upload-${index}`)?.click()}><UploadCloud className="h-4 w-4" /></Button>
+                                  </div>
+                              ) : (
+                                  <label htmlFor={`grid-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                      <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                      <p className="text-sm text-muted-foreground">Click to upload</p>
+                                  </label>
+                              )}
+                          </div>
+                      </FormControl>
+                      <FormMessage />
+                  </FormItem>
+                )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.imageHint`} render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'woman wearing necklace'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+              </div>
+            ))}
+             <Button type="button" variant="outline" onClick={() => appendGridItem({ category: '', title: '', description: '', imageUrl: '', buttonLink: '', imageHint: '' })}>
+                <PlusCircle className="mr-2 h-4 w-4"/>
+                Add Category Content
+            </Button>
           </CardContent>
         </Card>
         
@@ -599,7 +537,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                         />
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => appendBanner({ imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
+                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
         
