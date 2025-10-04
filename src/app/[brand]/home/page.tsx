@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import type { IBrand, IReview } from '@/models/brand.model';
+import type { IBrand, ICategoryGridImage, IReview } from '@/models/brand.model';
 import type { IProduct } from '@/models/product.model';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,11 +14,10 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star, Gift } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -27,69 +26,100 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from 'embla-carousel-autoplay';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const CategoryGrid = ({ brand }: { brand: IBrand }) => {
+    const [activeCategory, setActiveCategory] = useState('All');
+    const [loading, setLoading] = useState(true);
+    const [images, setImages] = useState<ICategoryGridImage[]>([]);
 
-type GroupedProducts = {
-  [category: string]: IProduct[];
-};
+    useEffect(() => {
+        if (brand?.categoryGrid?.images) {
+            setImages(brand.categoryGrid.images);
+        }
+        setLoading(false);
+    }, [brand]);
 
-const ProductGridWithFilters = ({ products, brand }: { products: IProduct[], brand: IBrand | null }) => {
-  const [activeCategory, setActiveCategory] = useState('All');
-  
-  const categories = useMemo(() => {
-    if (!brand?.categories || brand.categories.length === 0) {
-      const allProductCategories = new Set(products.map(p => p.category));
-      return ['All', ...Array.from(allProductCategories)];
+    const categories = useMemo(() => {
+        const allCats = new Set(images.map(img => img.category));
+        return ['All', ...Array.from(allCats)];
+    }, [images]);
+
+    const filteredImages = useMemo(() => {
+        if (activeCategory === 'All') return images;
+        return images.filter(img => img.category === activeCategory);
+    }, [images, activeCategory]);
+
+    const centralCard = brand.categoryGrid?.centralCard;
+    const gridItems = [...filteredImages];
+
+    if (centralCard && gridItems.length > 3) {
+        // Insert the central card into the middle of the grid for a visually balanced layout.
+        const middleIndex = Math.floor(gridItems.length / 2);
+        const insertPosition = middleIndex % 3 === 0 ? middleIndex + 1 : middleIndex;
+        gridItems.splice(insertPosition, 0, centralCard as any);
+    } else if (centralCard) {
+        gridItems.push(centralCard as any);
     }
-    return ['All', ...brand.categories];
-  }, [products, brand?.categories]);
+    
+    const renderGridItem = (item: ICategoryGridImage | typeof centralCard, index: number) => {
+        // Check if it's the central card by looking for its unique properties
+        if ('title' in item && item.title) {
+            return (
+                <div key="central-card" className="row-span-2 col-span-1 bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
+                    <h3 className="text-2xl font-bold">{item.title}</h3>
+                    <p className="mt-2 mb-4 text-sm opacity-90">{item.description}</p>
+                    <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
+                        <Link href={item.categoryLink || '#'}>View More</Link>
+                    </Button>
+                </div>
+            );
+        }
 
-  const filteredProducts = useMemo(() => {
-    if (activeCategory === 'All') return products;
-    return products.filter(p => p.category === activeCategory);
-  }, [products, activeCategory]);
+        // It's a regular image item
+        const image = item as ICategoryGridImage;
+        return (
+            <div key={image.imageUrl + index} className="col-span-1">
+                 <Link href={image.category ? `/${brand.permanentName}/products?category=${image.category}` : '#'}>
+                    <Image
+                        src={image.imageUrl}
+                        alt={image.category || 'Category image'}
+                        width={400}
+                        height={400}
+                        className="rounded-lg object-cover w-full h-full aspect-square"
+                        data-ai-hint={image.imageHint}
+                    />
+                </Link>
+            </div>
+        );
+    };
 
-  const featuredItem = brand?.featuredProductGrid;
-
-  // Insert the featured item at a specific position in the grid if it exists
-  const gridItems = [...filteredProducts];
-  if (featuredItem && activeCategory === 'All') {
-      const position = Math.min(4, gridItems.length);
-      gridItems.splice(position, 0, featuredItem as any);
-  }
-
-  return (
-      <section className="container py-12 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-              {categories.map(category => (
-                  <Button
-                      key={category}
-                      variant={activeCategory === category ? 'default' : 'outline'}
-                      onClick={() => setActiveCategory(category)}
-                      className="rounded-full px-6"
-                  >
-                      {category}
-                  </Button>
-              ))}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {gridItems.map((item, index) => {
-                  if (item.title && item.imageUrl) { // This is the featured item
-                      return (
-                          <Card key={`featured-${index}`} className="lg:col-span-2 bg-primary text-primary-foreground p-6 flex flex-col justify-center items-center text-center">
-                              <h3 className="text-2xl font-bold">{item.title}</h3>
-                              <p className="mt-2 mb-4">{item.description}</p>
-                              <Button variant="secondary" asChild>
-                                  <Link href={item.buttonLink || '#'}>View More</Link>
-                              </Button>
-                          </Card>
-                      )
-                  }
-                  const product = item as IProduct;
-                  return <BrandProductCard key={product._id as string} product={product} />
-              })}
-          </div>
-      </section>
-  );
+    return (
+        <section className="container py-12 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+                {categories.map(category => (
+                    <Button
+                        key={category}
+                        variant={activeCategory === category ? 'default' : 'secondary'}
+                        onClick={() => setActiveCategory(category)}
+                        className={cn(
+                            "rounded-md px-6 py-2 text-sm font-medium",
+                            activeCategory !== category && "bg-primary/10 text-primary-foreground hover:bg-primary/20"
+                        )}
+                    >
+                        {category}
+                    </Button>
+                ))}
+            </div>
+            {loading ? (
+                 <div className="grid grid-cols-3 gap-4 auto-rows-fr">
+                    {[...Array(8)].map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)}
+                </div>
+            ) : (
+                <div className="grid grid-cols-3 gap-4" style={{ gridTemplateRows: 'repeat(auto-fill, minmax(0, 1fr))' }}>
+                    {gridItems.map(renderGridItem)}
+                </div>
+            )}
+        </section>
+    );
 };
 
 
@@ -345,7 +375,7 @@ export default function BrandHomePage() {
                             <div className="relative w-full text-foreground py-24 sm:py-32 md:py-40 flex items-center justify-center">
                                 <Image
                                     src={banner.imageUrl}
-                                    alt={'Promotional banner'}
+                                    alt={banner.title || 'Promotional banner'}
                                     fill
                                     className="object-cover"
                                     data-ai-hint={banner.imageHint}
@@ -361,7 +391,7 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      <ProductGridWithFilters products={allProducts} brand={brand} />
+      <CategoryGrid brand={brand} />
       
       <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
@@ -373,3 +403,4 @@ export default function BrandHomePage() {
     </main>
   );
 }
+
