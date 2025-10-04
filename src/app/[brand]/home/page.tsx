@@ -68,7 +68,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     // Insert the promo card in the middle (index 4)
     imageElements.splice(4, 0, (
-        <div key="promo-card" className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center">
+        <div key="promo-card" className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center aspect-[4/3]">
             <h3 className="text-2xl font-bold">{activeContent.title}</h3>
             <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
             <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
