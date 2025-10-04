@@ -3,16 +3,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
 import Role from '@/models/role.model';
-import Notification, { notificationTypes } from '@/models/notification.model';
-import { z } from 'zod';
-
-const broadcastSchema = z.object({
-  title: z.string().min(1),
-  message: z.string().min(1),
-  link: z.string().optional(),
-  type: z.enum(notificationTypes).default('admin_announcement'),
-});
-
+import Notification from '@/models/notification.model';
+import { broadcastSchema } from '@/lib/notification-schema';
 
 export async function POST(req: Request) {
   try {
