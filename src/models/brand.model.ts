@@ -1,5 +1,4 @@
 
-
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 interface IBanner {
@@ -16,7 +15,7 @@ interface IOffer {
     code: string;
 }
 
-interface IReview {
+export interface IReview {
     customerName: string;
     rating: number;
     reviewText: string;
@@ -32,13 +31,13 @@ interface IPromoBanner {
     buttonLink?: string;
 }
 
-interface ICategoryGridImage {
-    category: string;
+export interface ICategoryGridImage {
+    category?: string;
     imageUrl: string;
     imageHint?: string;
 }
 
-interface ICentralCard {
+export interface ICentralCard {
     title?: string;
     description?: string;
     categoryLink?: string;
@@ -64,7 +63,7 @@ export interface IBrand extends Document {
   categories: string[];
   socials?: ISocialLinks;
   categoryGrid: {
-      centralCard: ICentralCard;
+      centralCard?: ICentralCard;
       images: ICategoryGridImage[];
   };
 }
@@ -100,7 +99,7 @@ const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
 }, { _id: false });
 
 const CategoryGridImageSchema: Schema<ICategoryGridImage> = new Schema({
-    category: { type: String, required: true },
+    category: { type: String },
     imageUrl: { type: String, required: true },
     imageHint: { type: String },
 }, { _id: false });
@@ -132,7 +131,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   categories: { type: [String], default: [] },
   socials: SocialLinksSchema,
   categoryGrid: {
-      centralCard: { type: CentralCardSchema, default: {} },
+      centralCard: { type: CentralCardSchema },
       images: [CategoryGridImageSchema],
   },
 }, { timestamps: true });

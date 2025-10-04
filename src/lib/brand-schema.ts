@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 
 export const bannerSchema = z.object({
@@ -33,7 +32,7 @@ const promoBannerSchema = z.object({
 });
 
 const categoryGridImageSchema = z.object({
-    category: z.string().min(1),
+    category: z.string().optional(),
     imageUrl: z.string().url(),
     imageHint: z.string().optional(),
 });
