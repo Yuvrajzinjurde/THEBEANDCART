@@ -30,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const [activeCategory, setActiveCategory] = useState('All');
-    
+
     const gridItems: ICategoryGridItem[] = useMemo(() => Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [], [brand.categoryGrid]);
 
     const categories = useMemo(() => {
@@ -44,15 +44,38 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
         return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
     }, [activeCategory, gridItems]);
     
-    // We need a stable set of 5 images to create the frame. We'll take them from the 'All' category data.
+    // We need a stable set of 8 images to create the frame.
     const surroundingImages = useMemo(() => {
         const allCategoryData = gridItems.find(item => item.category === 'All');
-        return allCategoryData?.images.slice(0, 5) || [];
+        return allCategoryData?.images.slice(0, 8) || [];
     }, [gridItems]);
 
     if (!activeContent) {
         return null;
     }
+    
+    const imageElements = surroundingImages.map((image, index) => (
+        <div key={`image-${index}`} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
+            <Image 
+                src={image.url} 
+                alt={image.hint || `Grid image ${index + 1}`}
+                fill 
+                className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                data-ai-hint={image.hint}
+            />
+        </div>
+    ));
+
+    // Insert the promo card in the middle (index 4)
+    imageElements.splice(4, 0, (
+        <div key="promo-card" className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center">
+            <h3 className="text-2xl font-bold">{activeContent.title}</h3>
+            <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
+            <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
+                <Link href={activeContent.buttonLink || '#'}>View More</Link>
+            </Button>
+        </div>
+    ));
     
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -74,52 +97,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             
-            <div className="grid grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {/* Top Row */}
-                {surroundingImages.slice(0, 3).map((image, index) => (
-                    <div key={`top-${index}`} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
-                        <Image 
-                            src={image.url} 
-                            alt={image.hint || `Grid image ${index}`}
-                            fill 
-                            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                            data-ai-hint={image.hint}
-                        />
-                    </div>
-                ))}
-                
-                {/* Bottom Row */}
-                {surroundingImages[3] && (
-                     <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
-                        <Image 
-                            src={surroundingImages[3].url} 
-                            alt={surroundingImages[3].hint || `Grid image 3`}
-                            fill 
-                            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                            data-ai-hint={surroundingImages[3].hint}
-                        />
-                    </div>
-                )}
-                
-                <div className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center">
-                    <h3 className="text-2xl font-bold">{activeContent.title}</h3>
-                    <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
-                    <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
-                        <Link href={activeContent.buttonLink || '#'}>View More</Link>
-                    </Button>
-                </div>
-
-                {surroundingImages[4] && (
-                     <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group">
-                        <Image 
-                            src={surroundingImages[4].url} 
-                            alt={surroundingImages[4].hint || `Grid image 4`}
-                            fill 
-                            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                            data-ai-hint={surroundingImages[4].hint}
-                        />
-                    </div>
-                )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+                {imageElements}
             </div>
         </section>
     );
