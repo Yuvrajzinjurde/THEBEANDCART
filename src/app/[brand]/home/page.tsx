@@ -5,7 +5,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import type { IBrand, IReview } from '@/models/brand.model';
+import type { IBrand, ICategoryGridItem } from '@/models/brand.model';
 import type { IProduct } from '@/models/product.model';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,20 +29,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
-    const gridItems = Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [];
+    const gridItems: ICategoryGridItem[] = Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [];
     const [activeCategory, setActiveCategory] = useState('All');
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
-        // Use a Set to ensure all categories from the data are unique
+        // Create a set of unique category names from the data.
         const uniqueCatsFromData = new Set(gridItems.map(item => item.category));
-        // Return an array with 'All' at the beginning, followed by the unique categories
+        // Remove 'All' if it exists to avoid duplication.
+        uniqueCatsFromData.delete('All');
+        // Return a new array with 'All' at the beginning, followed by the other unique categories.
         return ['All', ...Array.from(uniqueCatsFromData)];
     }, [gridItems]);
 
-
     const activeContent = useMemo(() => {
-        return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
+        return gridItems.find(item => item.category === activeCategory);
     }, [activeCategory, gridItems]);
     
     useEffect(() => {
