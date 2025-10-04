@@ -34,18 +34,19 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
-        const allCats = new Set(gridItems.map(item => item.category));
-        return ['All', ...Array.from(allCats)];
+        // Use a Set to ensure all categories from the data are unique
+        const uniqueCatsFromData = new Set(gridItems.map(item => item.category));
+        // Return an array with 'All' at the beginning, followed by the unique categories
+        return ['All', ...Array.from(uniqueCatsFromData)];
     }, [gridItems]);
 
+
     const activeContent = useMemo(() => {
-        if (activeCategory === 'All') {
-            return gridItems.find(item => item.category === 'All');
-        }
-        return gridItems.find(item => item.category === activeCategory);
+        return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
     }, [activeCategory, gridItems]);
     
     useEffect(() => {
+        // This effect can be simplified or removed if 'All' is always the default.
         if (gridItems.length > 0) {
             const allCat = gridItems.find(item => item.category === 'All');
             if (allCat) {
@@ -82,15 +83,18 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
             <div className="flex justify-center mt-8">
                 {activeContent && (
-                    <div className="relative rounded-xl overflow-hidden shadow-lg w-full max-w-sm">
-                        <Image 
-                            src={activeContent.imageUrl} 
-                            alt={activeContent.title} 
-                            fill 
-                            className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/30"></div>
-                        <div className="relative p-8 flex flex-col items-center justify-center text-center text-white min-h-[250px]">
+                    <div className="relative rounded-xl overflow-hidden shadow-lg w-full max-w-sm group">
+                         <div className="absolute inset-0 bg-black/30 z-10"></div>
+                         {activeContent.images?.[0]?.url && (
+                             <Image 
+                                src={activeContent.images[0].url} 
+                                alt={activeContent.title} 
+                                fill 
+                                className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                                data-ai-hint={activeContent.images[0].hint}
+                            />
+                         )}
+                        <div className="relative z-20 p-8 flex flex-col items-center justify-center text-center text-white min-h-[250px]">
                             <h3 className="text-2xl font-bold">{activeContent.title}</h3>
                             <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
                             <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
