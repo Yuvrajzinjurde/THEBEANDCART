@@ -36,55 +36,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setCart(null);
     setWishlist(null);
-    router.push('/login');
+    router.replace('/login');
   }, [router, setCart, setWishlist]);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = localStorage.getItem('token');
-      
-      if (storedToken) {
-        try {
-          const decoded = jwtDecode<User>(storedToken);
-          if (decoded.exp * 1000 < Date.now()) {
-            logout();
-          } else {
-            setUser(decoded);
-            setToken(storedToken);
-            
-            // Fetch cart/wishlist
-            const [cartRes, wishlistRes] = await Promise.all([
-              fetch('/api/cart', { headers: { 'Authorization': `Bearer ${storedToken}` } }),
-              fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${storedToken}` } })
-            ]);
-            
-            if (cartRes.ok) {
-              const { cart } = await cartRes.json();
-              setCart(cart);
-            } else {
-                setCart(null);
-            }
-            if (wishlistRes.ok) {
-              const { wishlist } = await wishlistRes.json();
-              setWishlist(wishlist);
-            } else {
-                setWishlist(null);
-            }
-          }
-        } catch (error) {
-          console.error("Invalid token:", error);
-          logout();
+  const fetchUserData = useCallback(async (currentToken: string) => {
+    try {
+        const [cartRes, wishlistRes] = await Promise.all([
+          fetch('/api/cart', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
+          fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${currentToken}` } })
+        ]);
+
+        if (cartRes.ok) {
+            const { cart } = await cartRes.json();
+            setCart(cart);
+        } else {
+            setCart(null);
         }
-      } else {
-          setUser(null);
-          setToken(null);
-          setCart(null);
-          setWishlist(null);
-      }
-      setLoading(false);
+        if (wishlistRes.ok) {
+            const { wishlist } = await wishlistRes.json();
+            setWishlist(wishlist);
+        } else {
+            setWishlist(null);
+        }
+    } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        setCart(null);
+        setWishlist(null);
     }
-    initializeAuth();
-  }, [logout, setCart, setWishlist]); 
+  }, [setCart, setWishlist]);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode<User>(storedToken);
+        if (decoded.exp * 1000 < Date.now()) {
+          logout();
+        } else {
+          setUser(decoded);
+          setToken(storedToken);
+          fetchUserData(storedToken);
+        }
+      } catch (error) {
+        console.error("Invalid token on load:", error);
+        logout();
+      }
+    } else {
+      // Ensure state is clean if no token
+      setUser(null);
+      setToken(null);
+      setCart(null);
+      setWishlist(null);
+    }
+    setLoading(false);
+
+  }, [logout, fetchUserData, setCart, setWishlist]); 
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>
