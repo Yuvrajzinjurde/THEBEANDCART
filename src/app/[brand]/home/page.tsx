@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -27,9 +27,82 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from 'embla-carousel-autoplay';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const PaginationComponent = ({ totalPages, currentPage, onPageChange }: { totalPages: number, currentPage: number, onPageChange: (page: number) => void }) => {
+    if (totalPages <= 1) return null;
+
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+
+    if (totalPages <= maxPagesToShow) {
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+    } else {
+        pageNumbers.push(1);
+        if (currentPage > 3) {
+            pageNumbers.push('...');
+        }
+        let start = Math.max(2, currentPage - 1);
+        let end = Math.min(totalPages - 1, currentPage + 1);
+
+        if (currentPage <= 2) {
+           end = 3;
+        }
+        if (currentPage >= totalPages - 1) {
+           start = totalPages - 2;
+        }
+
+        for (let i = start; i <= end; i++) {
+            pageNumbers.push(i);
+        }
+
+        if (currentPage < totalPages - 2) {
+            pageNumbers.push('...');
+        }
+        pageNumbers.push(totalPages);
+    }
+    
+    return (
+        <div className="flex items-center justify-center gap-2 mt-8">
+            <Button 
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onPageChange(currentPage - 1)} 
+                disabled={currentPage === 1}
+            >
+                <ChevronLeft className="h-4 w-4" />
+            </Button>
+             {pageNumbers.map((num, index) => (
+                <Button
+                    key={index}
+                    variant={num === currentPage ? 'default' : 'outline'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => typeof num === 'number' && onPageChange(num)}
+                    disabled={typeof num !== 'number'}
+                >
+                    {num}
+                </Button>
+            ))}
+            <Button 
+                variant="outline"
+                size="icon"
+                 className="h-8 w-8 bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => onPageChange(currentPage + 1)} 
+                disabled={currentPage === totalPages}
+            >
+                <ChevronRight className="h-4 w-4" />
+            </Button>
+        </div>
+    );
+};
+
+
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const gridItems = Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [];
     const [activeCategory, setActiveCategory] = useState('All');
+    const [currentPage, setCurrentPage] = useState(1);
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
@@ -54,15 +127,15 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
             }
         }
     }, [gridItems]);
-
-    const filteredImages = useMemo(() => {
-        if (!activeContent) return [];
-        return activeContent.images || [];
-    }, [activeContent]);
+    
+    const totalPages = 6; // Hardcoded as per design
 
     if (!gridItems || gridItems.length === 0) {
         return null;
     }
+    
+    const filteredImages = (activeContent?.images || []).slice(0, 8);
+
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -76,7 +149,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                             "rounded-md px-6 py-2 text-sm font-medium",
                              activeCategory === category
                                 ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-secondary-foreground"
+                                : "bg-primary/10 text-primary hover:bg-primary/20"
                         )}
                     >
                         {category}
@@ -84,44 +157,64 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
 
-            <div className="max-w-6xl mx-auto">
-                 <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-[600px]">
-                    {/* Main large image */}
-                    {filteredImages.length > 0 && (
-                        <div className="md:col-span-2 md:row-span-2 relative rounded-2xl overflow-hidden shadow-lg group">
-                            <Image
-                                src={filteredImages[0].url}
-                                alt={activeContent?.title || ''}
-                                fill
-                                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            />
-                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="max-w-4xl mx-auto">
+                 <div className="grid grid-cols-3 grid-rows-4 gap-4 h-[600px]">
+                    {/* First Column */}
+                    {filteredImages[0] && (
+                        <div className="row-span-2 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[0].url} alt={filteredImages[0].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                    )}
+                     {filteredImages[4] && (
+                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[4].url} alt={filteredImages[4].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                    )}
+                     {filteredImages[6] && (
+                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[6].url} alt={filteredImages[6].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                         </div>
                     )}
                     
-                    {/* Central Promo Card */}
+                    {/* Second Column */}
+                    {filteredImages[1] && (
+                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
+                             <Image src={filteredImages[1].url} alt={filteredImages[1].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                    )}
                     {activeContent && (
-                        <div className="md:col-span-2 p-8 flex flex-col items-center justify-center text-center bg-muted rounded-2xl">
-                            <h3 className="text-3xl font-bold">{activeContent.title}</h3>
-                            <p className="mt-2 mb-4 text-lg text-muted-foreground max-w-md">{activeContent.description}</p>
-                            <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 shadow-md" asChild>
+                        <div className="row-span-2 p-6 flex flex-col items-center justify-center text-center bg-primary text-primary-foreground rounded-xl shadow-lg">
+                            <h3 className="text-2xl font-bold">{activeContent.title}</h3>
+                            <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
+                            <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
                                 <Link href={activeContent.buttonLink || '#'}>View More</Link>
                             </Button>
                         </div>
                     )}
+                    {filteredImages[7] && (
+                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[7].url} alt={filteredImages[7].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                    )}
 
-                    {/* Small image */}
-                     {filteredImages.length > 1 && (
-                        <div className="md:col-span-2 relative rounded-2xl overflow-hidden shadow-lg group">
-                            <Image
-                                src={filteredImages[1].url}
-                                alt={activeContent?.title || ''}
-                                fill
-                                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            />
+                    {/* Third Column */}
+                    {filteredImages[2] && (
+                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[2].url} alt={filteredImages[2].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                    )}
+                    {filteredImages[3] && (
+                        <div className="row-span-1 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[3].url} alt={filteredImages[3].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                        </div>
+                    )}
+                    {filteredImages[5] && (
+                        <div className="row-span-2 relative rounded-xl overflow-hidden shadow-lg group">
+                            <Image src={filteredImages[5].url} alt={filteredImages[5].hint || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                         </div>
                     )}
                 </div>
+                <PaginationComponent totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
             </div>
         </section>
     );
