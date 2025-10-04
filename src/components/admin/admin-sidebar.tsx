@@ -21,6 +21,7 @@ import {
   Home,
   Box,
   ShoppingCart,
+  Bell,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -55,6 +56,7 @@ const navItems = [
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
+  { href: "/admin/notifications", icon: Bell, label: "Notifications" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/platform", icon: Home, label: "Platform" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
@@ -127,7 +129,7 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
             <CollapsibleTrigger asChild>
                 <Button variant="outline" className="w-full justify-start h-12">
                     <div className="flex items-center gap-3">
-                         <Avatar className="h-8 w-8">
+                         <Avatar className="h-8 w-8 relative">
                             {currentBrandDetails?.logoUrl ? (
                                 <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
                             ) : (
@@ -318,3 +320,7 @@ export function AdminSidebar() {
         </aside>
     );
 }
+
+    
+
+    
