@@ -52,45 +52,53 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const centralCard = brand.categoryGrid?.centralCard;
     const gridItems = [...filteredImages];
     
-    if (centralCard && activeCategory === 'All') {
-        const insertIndex = 4; 
-        if (gridItems.length >= insertIndex) {
-            gridItems.splice(insertIndex, 0, centralCard as any);
-        } else {
-            gridItems.push(centralCard as any);
-        }
+    if (centralCard && activeCategory === 'All' && gridItems.length > 3) {
+      gridItems.splice(4, 0, centralCard as any);
     }
     
     const renderGridItem = (item: ICategoryGridImage | typeof centralCard, index: number) => {
-        const isCentralCard = 'title' in item && item.title;
+      const isCentralCard = 'title' in item && item.title;
+      const finalIndex = activeCategory === 'All' ? index : (index % 8);
 
-        if (isCentralCard) {
-             return (
-                <div key="central-card" className="grid-item-promo bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
-                    <h3 className="text-2xl font-bold">{item.title}</h3>
-                    <p className="mt-2 mb-4 text-sm opacity-90">{item.description}</p>
-                    <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
-                        <Link href={item.categoryLink ? `/${brand.permanentName}/products?category=${item.categoryLink}` : `/${brand.permanentName}/products`}>View More</Link>
-                    </Button>
-                </div>
-            );
-        }
+      const gridClasses = [
+        "col-span-1 row-span-2", // Item 1
+        "col-span-1 row-span-1", // Item 2
+        "col-span-1 row-span-1", // Item 3
+        "col-span-1 row-span-1", // Item 4
+        "col-span-1 row-span-2", // Item 5 (Promo)
+        "col-span-1 row-span-2", // Item 6
+        "col-span-1 row-span-1", // Item 7
+        "col-span-1 row-span-1", // Item 8
+      ];
 
-        const image = item as ICategoryGridImage;
+      if (isCentralCard) {
+           return (
+              <div key="central-card" className={cn("bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center", gridClasses[4])}>
+                  <h3 className="text-2xl font-bold">{item.title}</h3>
+                  <p className="mt-2 mb-4 text-sm opacity-90">{item.description}</p>
+                  <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
+                      <Link href={item.categoryLink ? `/${brand.permanentName}/products?category=${item.categoryLink}` : `/${brand.permanentName}/products`}>View More</Link>
+                  </Button>
+              </div>
+          );
+      }
 
-        return (
-             <div key={image.imageUrl + index} className="grid-item relative aspect-[4/5] rounded-lg overflow-hidden">
-                 <Link href={image.category ? `/${brand.permanentName}/products?category=${image.category}` : '#'}>
-                    <Image
-                        src={image.imageUrl}
-                        alt={image.category || 'Category image'}
-                        fill
-                        className="object-cover w-full h-full"
-                        data-ai-hint={image.imageHint}
-                    />
-                </Link>
-            </div>
-        );
+      const image = item as ICategoryGridImage;
+      const itemClass = gridClasses[finalIndex] || "col-span-1 row-span-1";
+
+      return (
+           <div key={image.imageUrl + index} className={cn("relative rounded-lg overflow-hidden", itemClass)}>
+               <Link href={image.category ? `/${brand.permanentName}/products?category=${image.category}` : '#'}>
+                  <Image
+                      src={image.imageUrl}
+                      alt={image.category || 'Category image'}
+                      fill
+                      className="object-cover w-full h-full"
+                      data-ai-hint={image.imageHint}
+                  />
+              </Link>
+          </div>
+      );
     };
     
     if (!brand?.categoryGrid || (!brand.categoryGrid.images?.length && !brand.categoryGrid.centralCard)) {
@@ -100,22 +108,6 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
-            <style jsx>{`
-                .grid-container {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    grid-auto-rows: minmax(100px, auto);
-                    gap: 1rem;
-                }
-                .grid-item:nth-child(6n+1) { grid-column: span 1; grid-row: span 2; }
-                .grid-item:nth-child(6n+2) { grid-column: span 1; grid-row: span 1; }
-                .grid-item:nth-child(6n+3) { grid-column: span 1; grid-row: span 1; }
-                .grid-item:nth-child(6n+4) { grid-column: span 1; grid-row: span 1; }
-                .grid-item-promo { grid-column: span 1; grid-row: span 2; }
-                .grid-item:nth-child(6n+5) { grid-column: span 1; grid-row: span 2; }
-                .grid-item:nth-child(6n+6) { grid-column: span 1; grid-row: span 1; }
-
-            `}</style>
             <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {categories.map(category => (
                     <Button
@@ -136,10 +128,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                     {[...Array(6)].map((_, i) => <Skeleton key={i} className="w-full h-48" />)}
                 </div>
             ) : (
-                <div className="max-w-5xl mx-auto">
-                    <div className="grid-container">
-                        {gridItems.map(renderGridItem)}
-                    </div>
+                <div className="max-w-5xl mx-auto grid grid-cols-3 grid-flow-dense gap-4">
+                    {gridItems.map(renderGridItem)}
                 </div>
             )}
         </section>
