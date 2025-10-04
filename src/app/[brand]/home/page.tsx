@@ -31,25 +31,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const [activeCategory, setActiveCategory] = useState('All');
 
-    const gridItems: ICategoryGridItem[] = useMemo(() => Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [], [brand.categoryGrid]);
-
     const categories = useMemo(() => {
-        if (!gridItems || gridItems.length === 0) return [];
-        const uniqueCatsFromData = new Set(gridItems.map(item => item.category));
+        if (!brand.categoryGrid || brand.categoryGrid.length === 0) return [];
+        const uniqueCatsFromData = new Set(brand.categoryGrid.map(item => item.category));
         uniqueCatsFromData.delete('All');
         return ['All', ...Array.from(uniqueCatsFromData)];
-    }, [gridItems]);
+    }, [brand.categoryGrid]);
 
 
     const activeContent = useMemo(() => {
-        return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
-    }, [activeCategory, gridItems]);
+        return brand.categoryGrid.find(item => item.category === activeCategory) || brand.categoryGrid.find(item => item.category === 'All');
+    }, [activeCategory, brand.categoryGrid]);
     
     // We need a stable set of 8 images to create the frame.
     const surroundingImages = useMemo(() => {
-        const allCategoryData = gridItems.find(item => item.category === 'All');
-        return allCategoryData?.images.slice(0, 8) || [];
-    }, [gridItems]);
+        const categoryData = brand.categoryGrid.find(item => item.category === activeCategory) || brand.categoryGrid.find(item => item.category === 'All');
+        return categoryData?.images.slice(0, 8) || [];
+    }, [brand.categoryGrid, activeCategory]);
 
     if (!activeContent || surroundingImages.length < 8) {
         return null;
