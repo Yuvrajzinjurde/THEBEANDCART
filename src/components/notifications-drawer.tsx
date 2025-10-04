@@ -47,15 +47,16 @@ const NOTIFICATION_COLORS: Record<NotificationType, string> = {
   return_request_admin: 'text-red-500 bg-red-100',
 };
 
-const NotificationItem = ({ notification, closePopover }: { notification: INotification, closePopover: () => void }) => {
+const NotificationItem = ({ notification, userId, closePopover }: { notification: INotification, userId: string, closePopover: () => void }) => {
     const router = useRouter();
     const { token } = useAuth();
     const { markNotificationAsRead } = useUserStore();
+    const isRead = notification.readBy.includes(userId as any);
 
     const Icon = NOTIFICATION_ICONS[notification.type] || Circle;
 
     const handleNotificationClick = async () => {
-        if (!notification.isRead) {
+        if (!isRead) {
              try {
                 const response = await fetch(`/api/notifications/${notification._id}`, {
                     method: 'PATCH',
@@ -78,13 +79,13 @@ const NotificationItem = ({ notification, closePopover }: { notification: INotif
         <div 
             className={cn(
                 "flex items-start gap-4 p-3 rounded-lg transition-colors cursor-pointer",
-                !notification.isRead && 'bg-primary/5'
+                !isRead && 'bg-primary/5'
             )}
             onClick={handleNotificationClick}
         >
             <div className="flex-grow">
                 <div className='flex items-center gap-2 mb-1'>
-                    {!notification.isRead && <div className='w-2 h-2 rounded-full bg-primary'></div>}
+                    {!isRead && <div className='w-2 h-2 rounded-full bg-primary'></div>}
                     <p className="font-semibold text-sm">{notification.title}</p>
                 </div>
                 <p className="text-xs text-muted-foreground ml-4">{notification.message}</p>
@@ -100,12 +101,12 @@ const NotificationItem = ({ notification, closePopover }: { notification: INotif
 };
 
 export function NotificationsPopover() {
+    const { user, token } = useAuth();
     const { notifications, markAllNotificationsAsRead, unreadNotificationsCount } = useUserStore(state => ({
         notifications: state.notifications,
         markAllNotificationsAsRead: state.markAllNotificationsAsRead,
-        unreadNotificationsCount: Array.isArray(state.notifications) ? state.notifications.filter(n => !n.isRead).length : 0,
+        unreadNotificationsCount: Array.isArray(state.notifications) ? state.notifications.filter(n => !n.readBy.includes(user?.userId as any)).length : 0,
     }));
-    const { token } = useAuth();
     const [activeTab, setActiveTab] = useState('all');
     const [isOpen, setIsOpen] = useState(false);
 
@@ -114,10 +115,10 @@ export function NotificationsPopover() {
     }, [notifications]);
 
     const filteredNotifications = useMemo(() => {
-        if (activeTab === 'unread') return sortedNotifications.filter(n => !n.isRead);
-        if (activeTab === 'read') return sortedNotifications.filter(n => n.isRead);
+        if (!user) return [];
+        if (activeTab === 'unread') return sortedNotifications.filter(n => !n.readBy.includes(user.userId as any));
         return sortedNotifications;
-    }, [activeTab, sortedNotifications]);
+    }, [activeTab, sortedNotifications, user]);
   
     const handleMarkAllAsRead = async () => {
         try {
@@ -149,10 +150,6 @@ export function NotificationsPopover() {
                         <h3 className="text-lg font-semibold">Notifications</h3>
                         <div className='flex items-center gap-1'>
                              <Button variant='ghost' size='sm' className='text-xs h-7' onClick={handleMarkAllAsRead}>Mark all as read</Button>
-                             <div className='relative h-6 w-6 rounded-full flex items-center justify-center bg-muted-foreground/10 text-xs font-bold'>
-                                N
-                                <button className='absolute top-0 right-0 h-2 w-2 rounded-full border-2 border-background bg-primary'></button>
-                             </div>
                         </div>
                     </div>
                     <div className='mt-4 flex items-center gap-2'>
@@ -172,21 +169,13 @@ export function NotificationsPopover() {
                         >
                             Unread {unreadNotificationsCount}
                         </Button>
-                        <Button
-                            size='sm'
-                            variant={activeTab === 'read' ? 'default' : 'outline'}
-                            className='rounded-full h-8 px-4 text-xs'
-                            onClick={() => setActiveTab('read')}
-                        >
-                            Read
-                        </Button>
                     </div>
                 </div>
 
                 <ScrollArea className='h-[400px]'>
                     <div className="p-2 space-y-1">
                         {filteredNotifications.length > 0 ? (
-                            filteredNotifications.map(n => <NotificationItem key={n._id as string} notification={n} closePopover={() => setIsOpen(false)} />)
+                            filteredNotifications.map(n => <NotificationItem key={n._id as string} notification={n} userId={user!.userId} closePopover={() => setIsOpen(false)} />)
                         ) : (
                             <div className="flex flex-col items-center justify-center text-center py-16 text-muted-foreground">
                                 <Bell className="w-12 h-12 mb-2" />

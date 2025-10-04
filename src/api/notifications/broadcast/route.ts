@@ -18,7 +18,6 @@ export async function POST(req: Request) {
 
     const { title, message, link, type } = validation.data;
     
-    // Find admin role to exclude them from the broadcast
     const adminRole = await Role.findOne({ name: 'admin' });
     const adminRoleId = adminRole ? adminRole._id : null;
 
@@ -29,17 +28,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'No users found to send notifications to.' }, { status: 200 });
     }
     
-    const notifications = users.map(user => ({
-      userId: user._id,
+    const userIds = users.map(user => user._id);
+
+    const newNotification = new Notification({
+      recipientUsers: userIds,
       title,
       message,
       link: link || '',
       type,
-    }));
+      readBy: [],
+    });
 
-    await Notification.insertMany(notifications);
+    await newNotification.save();
 
-    return NextResponse.json({ message: 'Notifications sent successfully', notificationCount: users.length }, { status: 200 });
+    return NextResponse.json({ message: 'Notification sent successfully', notificationCount: users.length }, { status: 200 });
 
   } catch (error) {
     console.error('Failed to broadcast notification:', error);
