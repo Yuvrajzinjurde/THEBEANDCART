@@ -1,23 +1,8 @@
 
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
-
-export const notificationTypes = [
-  'order_success',
-  'order_status',
-  'order_delivery',
-  'shipment_update',
-  'cart_stock_alert',
-  'wishlist_stock_alert',
-  'new_product_suggestion',
-  'upcoming_sale',
-  'admin_announcement',
-  'new_order_admin',
-  'return_request_admin',
-] as const;
-
+import { notificationTypes } from '@/lib/notification-schema';
 
 export type NotificationType = typeof notificationTypes[number];
-
 
 export interface INotification extends Document {
   userId: Types.ObjectId;

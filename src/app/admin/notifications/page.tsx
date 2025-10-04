@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,16 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Bell, Send, Loader } from 'lucide-react';
-import { notificationTypes } from '@/models/notification.model';
-
-const notificationSchema = z.object({
-  title: z.string().min(1, "Title is required."),
-  message: z.string().min(1, "Message is required."),
-  link: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
-  type: z.enum(notificationTypes)
-});
-
-type NotificationFormValues = z.infer<typeof notificationSchema>;
+import { notificationSchema, type NotificationFormValues } from '@/lib/notification-schema';
 
 export default function AdminNotificationsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
