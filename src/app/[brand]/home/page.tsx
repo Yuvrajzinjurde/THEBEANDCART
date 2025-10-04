@@ -44,13 +44,13 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
         return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
     }, [activeCategory, gridItems]);
     
-    // Create a stable list of 8 images for the grid from the 'All' category
+    // We need a stable set of 5 images to create the frame. We'll take them from the 'All' category data.
     const surroundingImages = useMemo(() => {
         const allCategoryData = gridItems.find(item => item.category === 'All');
-        return allCategoryData?.images.slice(0, 8) || [];
+        return allCategoryData?.images.slice(0, 5) || [];
     }, [gridItems]);
 
-    if (!gridItems || gridItems.length === 0) {
+    if (!activeContent) {
         return null;
     }
     
@@ -73,10 +73,11 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                     </Button>
                 ))}
             </div>
-
-            <div className="grid grid-cols-3 grid-rows-3 gap-4 max-w-3xl mx-auto">
-                {surroundingImages.slice(0, 4).map((image, index) => (
-                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden shadow-lg group">
+            
+            <div className="grid grid-cols-3 gap-4 max-w-5xl mx-auto">
+                {/* Top Row */}
+                {surroundingImages.slice(0, 3).map((image, index) => (
+                    <div key={`top-${index}`} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
                         <Image 
                             src={image.url} 
                             alt={image.hint || `Grid image ${index}`}
@@ -86,28 +87,39 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                         />
                     </div>
                 ))}
-
-                {activeContent && (
-                    <div className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center">
-                        <h3 className="text-2xl font-bold">{activeContent.title}</h3>
-                        <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
-                        <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
-                            <Link href={activeContent.buttonLink || '#'}>View More</Link>
-                        </Button>
-                    </div>
-                )}
-
-                {surroundingImages.slice(4, 8).map((image, index) => (
-                    <div key={index + 4} className="relative aspect-square rounded-xl overflow-hidden shadow-lg group">
-                         <Image 
-                            src={image.url} 
-                            alt={image.hint || `Grid image ${index + 4}`}
+                
+                {/* Bottom Row */}
+                {surroundingImages[3] && (
+                     <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg group">
+                        <Image 
+                            src={surroundingImages[3].url} 
+                            alt={surroundingImages[3].hint || `Grid image 3`}
                             fill 
                             className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                            data-ai-hint={image.hint}
+                            data-ai-hint={surroundingImages[3].hint}
                         />
                     </div>
-                ))}
+                )}
+                
+                <div className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center">
+                    <h3 className="text-2xl font-bold">{activeContent.title}</h3>
+                    <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
+                    <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
+                        <Link href={activeContent.buttonLink || '#'}>View More</Link>
+                    </Button>
+                </div>
+
+                {surroundingImages[4] && (
+                     <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group">
+                        <Image 
+                            src={surroundingImages[4].url} 
+                            alt={surroundingImages[4].hint || `Grid image 4`}
+                            fill 
+                            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                            data-ai-hint={surroundingImages[4].hint}
+                        />
+                    </div>
+                )}
             </div>
         </section>
     );
@@ -401,4 +413,6 @@ export default function BrandHomePage() {
     </main>
   );
 }
+    
+
     
