@@ -32,7 +32,7 @@ const promoBannerSchema = z.object({
 });
 
 const categoryGridImageSchema = z.object({
-    category: z.string().optional(),
+    category: z.string().min(1, "Category is required for grid images."),
     imageUrl: z.string().url(),
     imageHint: z.string().optional(),
 });

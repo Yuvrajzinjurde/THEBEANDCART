@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
@@ -16,9 +17,9 @@ import {
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -38,9 +39,10 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     }, [brand]);
 
     const categories = useMemo(() => {
-        const allCats = new Set(images.map(img => img.category));
+        if (!brand?.categoryGrid?.images) return ['All'];
+        const allCats = new Set(brand.categoryGrid.images.map(img => img.category));
         return ['All', ...Array.from(allCats)];
-    }, [images]);
+    }, [brand?.categoryGrid?.images]);
 
     const filteredImages = useMemo(() => {
         if (activeCategory === 'All') return images;
@@ -50,31 +52,27 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     const centralCard = brand.categoryGrid?.centralCard;
     const gridItems = [...filteredImages];
     
-    // Insert the central card. Logic to place it near the middle.
-    if (centralCard && gridItems.length > 2) {
+    if (centralCard && gridItems.length > 2 && activeCategory === 'All') {
         const middleIndex = Math.floor(gridItems.length / 2);
-        // Ensure it doesn't end up as the last item in a row for better layout
         const insertPosition = middleIndex > 0 && middleIndex % 3 === 2 ? middleIndex + 1 : middleIndex;
         gridItems.splice(insertPosition, 0, centralCard as any);
-    } else if (centralCard) {
+    } else if (centralCard && activeCategory === 'All') {
         gridItems.push(centralCard as any);
     }
     
     const renderGridItem = (item: ICategoryGridImage | typeof centralCard, index: number) => {
-        // Check if it's the central card by looking for its unique properties
         if ('title' in item && item.title) {
             return (
                 <div key="central-card" className="row-span-2 col-span-1 bg-primary text-primary-foreground rounded-lg p-6 flex flex-col justify-center items-center text-center">
                     <h3 className="text-2xl font-bold">{item.title}</h3>
                     <p className="mt-2 mb-4 text-sm opacity-90">{item.description}</p>
                     <Button variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
-                        <Link href={item.categoryLink || '#'}>View More</Link>
+                        <Link href={item.categoryLink ? `/${brand.permanentName}/products?category=${item.categoryLink}` : `/${brand.permanentName}/products`}>View More</Link>
                     </Button>
                 </div>
             );
         }
 
-        // It's a regular image item
         const image = item as ICategoryGridImage;
         const isTall = (index % 5 === 1 || index % 5 === 3) && filteredImages.length > 4;
 
@@ -95,7 +93,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     };
 
     if (!brand?.categoryGrid || (!brand.categoryGrid.images?.length && !brand.categoryGrid.centralCard)) {
-        return null; // Don't render anything if there's no grid content
+        return null;
     }
 
 

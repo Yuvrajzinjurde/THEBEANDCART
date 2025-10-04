@@ -32,7 +32,7 @@ interface IPromoBanner {
 }
 
 export interface ICategoryGridImage {
-    category?: string;
+    category: string;
     imageUrl: string;
     imageHint?: string;
 }
@@ -99,7 +99,7 @@ const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
 }, { _id: false });
 
 const CategoryGridImageSchema: Schema<ICategoryGridImage> = new Schema({
-    category: { type: String },
+    category: { type: String, required: true },
     imageUrl: { type: String, required: true },
     imageHint: { type: String },
 }, { _id: false });
