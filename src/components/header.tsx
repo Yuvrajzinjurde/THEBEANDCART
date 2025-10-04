@@ -117,7 +117,7 @@ export default function Header() {
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
-  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+  const unreadNotificationsCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
   
   const effectiveBrandName = brandName || 'reeva';
   const showSecondaryNav = pathname === `/${effectiveBrandName}/home`;
