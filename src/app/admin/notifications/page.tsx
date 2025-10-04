@@ -10,14 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Bell, Send, Loader } from 'lucide-react';
-import { notificationSchema, type NotificationFormValues } from '@/lib/notification-schema';
+import { Radio, Send, Loader } from 'lucide-react';
+import { broadcastSchema, type NotificationFormValues } from '@/lib/notification-schema';
 
 export default function AdminNotificationsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<NotificationFormValues>({
-    resolver: zodResolver(notificationSchema),
+    resolver: zodResolver(broadcastSchema),
     defaultValues: {
       title: '',
       message: '',
@@ -57,7 +57,7 @@ export default function AdminNotificationsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Bell /> Broadcast Notifications</CardTitle>
+        <CardTitle className="flex items-center gap-2"><Radio /> Broadcast Notifications</CardTitle>
         <CardDescription>Send a notification to all registered users on the platform.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -113,3 +113,5 @@ export default function AdminNotificationsPage() {
     </Card>
   );
 }
+
+    
