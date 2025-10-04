@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export const bannerSchema = z.object({
@@ -31,13 +32,13 @@ const promoBannerSchema = z.object({
   buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
-
-const categoryBannerSchema = z.object({
-  categoryName: z.string().min(1, "Category name is required"),
-  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
-  imageHint: z.string().min(1, "Image hint is required"),
+const featuredProductGridSchema = z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    imageUrl: z.string().optional(),
+    imageHint: z.string().optional(),
+    buttonLink: z.string().url().optional().or(z.literal('')),
 });
-
 
 export const themeColors = [
     { name: 'Jewelry', primary: '45 90% 55%', background: '0 0% 98%', accent: '45 90% 95%' },
@@ -73,7 +74,7 @@ export const BrandFormSchema = z.object({
     description: z.string().optional(),
     buttonText: z.string().optional(),
   }).optional(),
-  categoryBanners: z.array(categoryBannerSchema).optional(),
+  featuredProductGrid: featuredProductGridSchema.optional(),
   categories: z.array(z.string()).optional(),
   socials: SocialLinksSchema.optional(),
 });

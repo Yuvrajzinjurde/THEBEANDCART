@@ -33,6 +33,67 @@ type GroupedProducts = {
   [category: string]: IProduct[];
 };
 
+const ProductGridWithFilters = ({ products, brand }: { products: IProduct[], brand: IBrand | null }) => {
+  const [activeCategory, setActiveCategory] = useState('All');
+  
+  const categories = useMemo(() => {
+    if (!brand?.categories || brand.categories.length === 0) {
+      const allProductCategories = new Set(products.map(p => p.category));
+      return ['All', ...Array.from(allProductCategories)];
+    }
+    return ['All', ...brand.categories];
+  }, [products, brand?.categories]);
+
+  const filteredProducts = useMemo(() => {
+    if (activeCategory === 'All') return products;
+    return products.filter(p => p.category === activeCategory);
+  }, [products, activeCategory]);
+
+  const featuredItem = brand?.featuredProductGrid;
+
+  // Insert the featured item at a specific position in the grid if it exists
+  const gridItems = [...filteredProducts];
+  if (featuredItem && activeCategory === 'All') {
+      const position = Math.min(4, gridItems.length);
+      gridItems.splice(position, 0, featuredItem as any);
+  }
+
+  return (
+      <section className="container py-12 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+              {categories.map(category => (
+                  <Button
+                      key={category}
+                      variant={activeCategory === category ? 'default' : 'outline'}
+                      onClick={() => setActiveCategory(category)}
+                      className="rounded-full px-6"
+                  >
+                      {category}
+                  </Button>
+              ))}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {gridItems.map((item, index) => {
+                  if (item.title && item.imageUrl) { // This is the featured item
+                      return (
+                          <Card key={`featured-${index}`} className="lg:col-span-2 bg-primary text-primary-foreground p-6 flex flex-col justify-center items-center text-center">
+                              <h3 className="text-2xl font-bold">{item.title}</h3>
+                              <p className="mt-2 mb-4">{item.description}</p>
+                              <Button variant="secondary" asChild>
+                                  <Link href={item.buttonLink || '#'}>View More</Link>
+                              </Button>
+                          </Card>
+                      )
+                  }
+                  const product = item as IProduct;
+                  return <BrandProductCard key={product._id as string} product={product} />
+              })}
+          </div>
+      </section>
+  );
+};
+
+
 const ProductCarouselSkeleton = () => (
     <section className="container pt-12 px-4 sm:px-6 lg:px-8 text-center">
         <Skeleton className="h-8 w-48 mb-4 mx-auto" />
@@ -98,79 +159,6 @@ const ProductCarouselSection = ({ title, products, brandName }: { title: string,
     );
 };
 
-
-const CategoryCarousel = ({ brand }: { brand: IBrand | null }) => {
-    if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
-        return null;
-    }
-
-    const banners = brand.categoryBanners;
-
-    return (
-        <section className="py-8 md:hidden">
-             <div className="container px-4 sm:px-6">
-                <h2 className="text-lg font-semibold tracking-tight mb-4">Shop by Category</h2>
-                <Carousel opts={{ align: "start", dragFree: true }} className="w-full no-scrollbar">
-                    <CarouselContent className="-ml-4">
-                        {banners.map((banner, index) => (
-                             <CarouselItem key={index} className="basis-1/3 pl-4">
-                                <Link href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-24 h-24 relative overflow-hidden border-2 border-transparent group-hover:border-primary transition-all rounded-full">
-                                        <Image
-                                            src={banner.imageUrl}
-                                            alt={banner.categoryName}
-                                            fill
-                                            className="object-cover"
-                                            data-ai-hint={banner.imageHint}
-                                        />
-                                    </div>
-                                    <p className="text-xs font-medium text-center truncate w-20">{banner.categoryName}</p>
-                                </Link>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-            </div>
-        </section>
-    );
-};
-
-const CategoryBannerGrid = ({ brand }: { brand: IBrand | null }) => {
-    if (!brand || !brand.categoryBanners || brand.categoryBanners.length === 0) {
-        return null;
-    }
-
-    const banners = brand.categoryBanners;
-
-    return (
-        <section id="categories" className="w-full py-12 sm:py-20 px-4 sm:px-8 hidden md:block">
-            <div className="container p-4 md:p-8 rounded-2xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {banners.slice(0, 4).map((banner, index) => (
-                        <Link 
-                            key={index} 
-                            href={`/${brand.permanentName}/products?category=${encodeURIComponent(banner.categoryName)}`}
-                            className="relative group overflow-hidden rounded-xl shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl"
-                        >
-                            <Image 
-                                src={banner.imageUrl}
-                                alt={banner.categoryName}
-                                width={400}
-                                height={400}
-                                data-ai-hint={banner.imageHint}
-                                className="object-cover w-full aspect-square transition-transform duration-300 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-                            <div className="absolute bottom-0 left-0 p-4">
-                                <h3 className="text-white text-lg font-bold">{banner.categoryName}</h3>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-};
 
 const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandName: string }) => {
     if (!brand?.promoBanner) return null;
@@ -261,6 +249,7 @@ export default function BrandHomePage() {
 
   const [brand, setBrand] = useState<IBrand | null>(null);
   
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
   const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
@@ -278,8 +267,9 @@ export default function BrandHomePage() {
         setLoading(true);
         setError(null);
         try {
-            const [brandResponse, trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
+            const [brandResponse, productsResponse, trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
                 fetch(`/api/brands/${brandName}`),
+                fetch(`/api/products?storefront=${brandName}&limit=50`),
                 fetch(`/api/products?storefront=${brandName}&sortBy=popular&limit=12`),
                 fetch(`/api/products?storefront=${brandName}&sortBy=rating&limit=12`),
                 fetch(`/api/products?storefront=${brandName}&sortBy=newest&limit=12`)
@@ -291,6 +281,11 @@ export default function BrandHomePage() {
             }
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
+
+            if (productsResponse.ok) {
+                const { products } = await productsResponse.json();
+                setAllProducts(products);
+            }
 
             if (trendingResponse.ok) {
                 const { products } = await trendingResponse.json();
@@ -367,13 +362,11 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      <CategoryCarousel brand={brand} />
+      <ProductGridWithFilters products={allProducts} brand={brand} />
       
       <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
       <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
       <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
-      
-      <CategoryBannerGrid brand={brand} />
 
       <PromoBannerSection brand={brand} brandName={brandName} />
       <ReviewsSection brand={brand} />

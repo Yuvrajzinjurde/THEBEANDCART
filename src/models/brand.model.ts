@@ -31,10 +31,12 @@ interface IPromoBanner {
     buttonLink?: string;
 }
 
-interface ICategoryBanner {
-    categoryName: string;
-    imageUrl: string;
-    imageHint: string;
+interface IFeaturedProductGrid {
+    title?: string;
+    description?: string;
+    imageUrl?: string;
+    imageHint?: string;
+    buttonLink?: string;
 }
 
 interface ISocialLinks {
@@ -54,7 +56,7 @@ export interface IBrand extends Document {
   offers: IOffer[];
   reviews: IReview[];
   promoBanner: IPromoBanner;
-  categoryBanners: ICategoryBanner[];
+  featuredProductGrid?: IFeaturedProductGrid;
   categories: string[];
   socials?: ISocialLinks;
 }
@@ -89,10 +91,12 @@ const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
     buttonLink: { type: String },
 }, { _id: false });
 
-const CategoryBannerSchema: Schema<ICategoryBanner> = new Schema({
-    categoryName: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    imageHint: { type: String, required: true },
+const FeaturedProductGridSchema: Schema<IFeaturedProductGrid> = new Schema({
+    title: { type: String },
+    description: { type: String },
+    imageUrl: { type: String },
+    imageHint: { type: String },
+    buttonLink: { type: String },
 }, { _id: false });
 
 const SocialLinksSchema: Schema<ISocialLinks> = new Schema({
@@ -112,7 +116,7 @@ const BrandSchema: Schema<IBrand> = new Schema({
   offers: [OfferSchema],
   reviews: [ReviewSchema],
   promoBanner: PromoBannerSchema,
-  categoryBanners: [CategoryBannerSchema],
+  featuredProductGrid: FeaturedProductGridSchema,
   categories: { type: [String], default: [] },
   socials: SocialLinksSchema,
 }, { timestamps: true });
