@@ -29,35 +29,27 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const CategoryGrid = ({ brand }: { brand: IBrand }) => {
-    const gridItems: ICategoryGridItem[] = Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [];
     const [activeCategory, setActiveCategory] = useState('All');
+    
+    const gridItems: ICategoryGridItem[] = useMemo(() => Array.isArray(brand.categoryGrid) ? brand.categoryGrid : [], [brand.categoryGrid]);
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
-        // Create a set of unique category names from the data.
         const uniqueCatsFromData = new Set(gridItems.map(item => item.category));
-        // Remove 'All' if it exists to avoid duplication.
         uniqueCatsFromData.delete('All');
-        // Return a new array with 'All' at the beginning, followed by the other unique categories.
         return ['All', ...Array.from(uniqueCatsFromData)];
     }, [gridItems]);
 
     const activeContent = useMemo(() => {
-        return gridItems.find(item => item.category === activeCategory);
+        return gridItems.find(item => item.category === activeCategory) || gridItems.find(item => item.category === 'All');
     }, [activeCategory, gridItems]);
     
-    useEffect(() => {
-        // This effect can be simplified or removed if 'All' is always the default.
-        if (gridItems.length > 0) {
-            const allCat = gridItems.find(item => item.category === 'All');
-            if (allCat) {
-                setActiveCategory('All');
-            } else if (gridItems[0]) {
-                setActiveCategory(gridItems[0].category);
-            }
-        }
+    // Create a stable list of 8 images for the grid from the 'All' category
+    const surroundingImages = useMemo(() => {
+        const allCategoryData = gridItems.find(item => item.category === 'All');
+        return allCategoryData?.images.slice(0, 8) || [];
     }, [gridItems]);
-    
+
     if (!gridItems || gridItems.length === 0) {
         return null;
     }
@@ -73,7 +65,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                         className={cn(
                             "rounded-md px-6 py-2 text-sm font-medium",
                              activeCategory === category
-                                ? "bg-primary text-primary-foreground"
+                                ? "bg-primary text-primary-foreground shadow-md"
                                 : "bg-primary/10 text-primary hover:bg-primary/20"
                         )}
                     >
@@ -82,28 +74,40 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
 
-            <div className="flex justify-center mt-8">
+            <div className="grid grid-cols-3 grid-rows-3 gap-4 max-w-3xl mx-auto">
+                {surroundingImages.slice(0, 4).map((image, index) => (
+                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden shadow-lg group">
+                        <Image 
+                            src={image.url} 
+                            alt={image.hint || `Grid image ${index}`}
+                            fill 
+                            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                            data-ai-hint={image.hint}
+                        />
+                    </div>
+                ))}
+
                 {activeContent && (
-                    <div className="relative rounded-xl overflow-hidden shadow-lg w-full max-w-sm group">
-                         <div className="absolute inset-0 bg-black/30 z-10"></div>
-                         {activeContent.images?.[0]?.url && (
-                             <Image 
-                                src={activeContent.images[0].url} 
-                                alt={activeContent.title} 
-                                fill 
-                                className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                                data-ai-hint={activeContent.images[0].hint}
-                            />
-                         )}
-                        <div className="relative z-20 p-8 flex flex-col items-center justify-center text-center text-white min-h-[250px]">
-                            <h3 className="text-2xl font-bold">{activeContent.title}</h3>
-                            <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
-                            <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
-                                <Link href={activeContent.buttonLink || '#'}>View More</Link>
-                            </Button>
-                        </div>
+                    <div className="relative rounded-xl overflow-hidden shadow-lg bg-primary text-primary-foreground p-6 flex flex-col items-center justify-center text-center">
+                        <h3 className="text-2xl font-bold">{activeContent.title}</h3>
+                        <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
+                        <Button variant="secondary" size="lg" className="bg-background text-primary hover:bg-background/90 shadow-md" asChild>
+                            <Link href={activeContent.buttonLink || '#'}>View More</Link>
+                        </Button>
                     </div>
                 )}
+
+                {surroundingImages.slice(4, 8).map((image, index) => (
+                    <div key={index + 4} className="relative aspect-square rounded-xl overflow-hidden shadow-lg group">
+                         <Image 
+                            src={image.url} 
+                            alt={image.hint || `Grid image ${index + 4}`}
+                            fill 
+                            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                            data-ai-hint={image.hint}
+                        />
+                    </div>
+                ))}
             </div>
         </section>
     );
@@ -194,6 +198,13 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
             </Link>
         </section>
     )
+}
+
+interface IReview {
+  customerName: string;
+  rating: number;
+  reviewText: string;
+  customerAvatarUrl: string;
 }
 
 const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
