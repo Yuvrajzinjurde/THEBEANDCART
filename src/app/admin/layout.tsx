@@ -1,7 +1,7 @@
 
 "use client";
 
-import { AdminSidebar, MobileAdminHeader } from "@/components/admin/admin-sidebar";
+import { AdminSidebar, MobileAdminHeader } from "./admin-sidebar";
 import { useEffect } from "react";
 
 export default function AdminLayout({
