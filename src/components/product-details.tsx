@@ -68,6 +68,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const { setCart, setWishlist } = useUserStore();
   
   const [product, setProduct] = useState(initialProduct);
+  const [quantity, setQuantity] = useState(1);
   
   const returnPolicySummary = `
     <ul>
@@ -93,6 +94,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     setProduct(initialProduct);
     setSelectedColor(initialProduct.color);
     setSelectedSize(initialProduct.size);
+    setQuantity(1); // Reset quantity when product changes
   }, [initialProduct]);
 
   // Memoize variant options
@@ -169,6 +171,19 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
   const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
 
+  const handleIncreaseQuantity = () => {
+    if (quantity < product.stock) {
+      setQuantity(q => q + 1);
+    } else {
+      toast.warn(`Only ${product.stock} items available.`);
+    }
+  };
+
+  const handleDecreaseQuantity = () => {
+    setQuantity(q => Math.max(1, q - 1));
+  };
+
+
   // Action Handlers
   const handleAddToCart = async () => {
     if (!user) {
@@ -188,13 +203,14 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ 
               productId: product._id, 
-              quantity: 1,
+              quantity: quantity,
               size: selectedSize,
               color: selectedColor
             }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        toast.success(`${quantity} x ${product.name} added to cart!`);
         setCart(result.cart);
     } catch (error: any) {
         toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
@@ -215,6 +231,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        toast.success(result.message);
         setWishlist(result.wishlist);
     } catch (error: any) {
         toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
@@ -284,9 +301,9 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold uppercase text-muted-foreground">Quantity</h3>
                     <div className="flex items-center gap-1 rounded-lg border p-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Minus className="h-4 w-4" /></Button>
-                        <span className="w-8 text-center font-semibold">1</span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {}}><Plus className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDecreaseQuantity}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-8 text-center font-semibold">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleIncreaseQuantity}><Plus className="h-4 w-4" /></Button>
                     </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
