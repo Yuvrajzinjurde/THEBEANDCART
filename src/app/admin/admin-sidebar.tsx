@@ -21,6 +21,7 @@ import {
   Home,
   Box,
   ShoppingCart,
+  Bell,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -55,6 +56,7 @@ const navItems = [
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
+  { href: "/admin/notifications", icon: Bell, label: "Notifications" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/platform", icon: Home, label: "Platform" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },

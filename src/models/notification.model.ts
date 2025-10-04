@@ -1,18 +1,22 @@
 
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
-export type NotificationType = 
-  | 'order_success'
-  | 'order_status'
-  | 'order_delivery'
-  | 'shipment_update'
-  | 'cart_stock_alert'
-  | 'wishlist_stock_alert'
-  | 'new_product_suggestion'
-  | 'upcoming_sale'
-  | 'admin_announcement'
-  | 'new_order_admin'
-  | 'return_request_admin';
+export const notificationTypes = [
+  'order_success',
+  'order_status',
+  'order_delivery',
+  'shipment_update',
+  'cart_stock_alert',
+  'wishlist_stock_alert',
+  'new_product_suggestion',
+  'upcoming_sale',
+  'admin_announcement',
+  'new_order_admin',
+  'return_request_admin',
+] as const;
+
+
+export type NotificationType = typeof notificationTypes[number];
 
 
 export interface INotification extends Document {
@@ -30,7 +34,7 @@ const NotificationSchema: Schema<INotification> = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   title: { type: String, required: true },
   message: { type: String, required: true },
-  type: { type: String, required: true },
+  type: { type: String, enum: notificationTypes, required: true },
   isRead: { type: Boolean, default: false, index: true },
   link: { type: String },
 }, { timestamps: true });
