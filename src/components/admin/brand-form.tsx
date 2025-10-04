@@ -117,7 +117,20 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const [uncroppedLogo, setUncroppedLogo] = useState<string | null>(null);
 
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => {
-    const staticDefaults = {
+     if (existingBrand) {
+        const brand = existingBrand as any; 
+        return {
+            ...brand,
+            themeName: brand.themeName || 'Rose',
+            promoBanner: {
+                imageUrl: brand.promoBanner?.imageUrl || '',
+                imageHint: brand.promoBanner?.imageHint || '',
+                buttonLink: brand.promoBanner?.buttonLink || '',
+            },
+            categoryGrid: brand.categoryGrid || [],
+        };
+    }
+    return {
         displayName: "Aura",
         permanentName: "aura",
         logoUrl: "https://picsum.photos/seed/aurora-logo/200/200",
@@ -139,21 +152,6 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
         ],
     };
-
-    if (existingBrand) {
-        const brand = existingBrand as any; 
-        return {
-            ...brand,
-            themeName: brand.themeName || 'Rose',
-            promoBanner: {
-                imageUrl: brand.promoBanner?.imageUrl || '',
-                imageHint: brand.promoBanner?.imageHint || '',
-                buttonLink: brand.promoBanner?.buttonLink || '',
-            },
-            categoryGrid: brand.categoryGrid || [],
-        };
-    }
-    return staticDefaults;
   }, [existingBrand]);
 
   const form = useForm<BrandFormValues>({
@@ -161,6 +159,22 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
     defaultValues,
     mode: 'onChange',
   });
+  
+  React.useEffect(() => {
+    if (existingBrand) {
+        const brandData = {
+            ...existingBrand,
+            themeName: existingBrand.themeName || 'Rose',
+            promoBanner: {
+                imageUrl: existingBrand.promoBanner?.imageUrl || '',
+                imageHint: existingBrand.promoBanner?.imageHint || '',
+                buttonLink: existingBrand.promoBanner?.buttonLink || '',
+            },
+            categoryGrid: existingBrand.categoryGrid || [],
+        };
+        form.reset(brandData);
+    }
+  }, [existingBrand, form]);
 
   const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
     control: form.control,
@@ -417,7 +431,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                  <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeGridItem(index)}>
                     <Trash className="h-4 w-4" />
                 </Button>
-                <FormField control={form.control} name={`categoryGrid.${index}.category`} render={({ field }) => ( <FormItem><FormLabel>Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent>{availableCategories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.category`} render={({ field }) => ( <FormItem><FormLabel>Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent>{['All', ...availableCategories].map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )}/>
                 <FormField control={form.control} name={`categoryGrid.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 <FormField control={form.control} name={`categoryGrid.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
                 <FormField control={form.control} name={`categoryGrid.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input placeholder="e.g. /category/new-arrivals" {...field} /></FormControl><FormMessage /></FormItem> )}/>
@@ -426,16 +440,16 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                       <FormLabel>Image</FormLabel>
                       <FormControl>
                           <div className="w-full">
-                              <Input id={`grid-image-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange)} />
+                              <Input id={`grid-image-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, {width: 600, height: 400})} />
                               {imageField.value ? (
-                                  <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                  <div className="relative w-48 h-32 border-2 border-dashed rounded-lg p-2">
                                       <Image src={imageField.value} alt="Grid item preview" fill objectFit="contain" />
                                       <Button type="button" variant="secondary" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => document.getElementById(`grid-image-upload-${index}`)?.click()}><UploadCloud className="h-4 w-4" /></Button>
                                   </div>
                               ) : (
                                   <label htmlFor={`grid-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                       <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                      <p className="text-sm text-muted-foreground">Click to upload</p>
+                                      <p className="text-sm text-muted-foreground">Click to upload (600x400)</p>
                                   </label>
                               )}
                           </div>
