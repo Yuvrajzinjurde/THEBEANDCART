@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
@@ -84,8 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     setLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, [logout, fetchUserData]); 
   
   return (
     <AuthContext.Provider value={{ user, loading, logout, token }}>
