@@ -26,6 +26,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { BrandFormSchema, type BrandFormValues, themeColors } from '@/lib/brand-schema';
 import { Separator } from '../ui/separator';
@@ -408,7 +409,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Category Image Grid</CardTitle>
-            <CardDescription>Manage the filterable content grid on the brand homepage. Add content for each category you want to feature.</CardDescription>
+            <CardDescription>Manage the filterable content grid on the brand homepage.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
              {gridItemFields.map((field, index) => (
