@@ -35,11 +35,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const categories = useMemo(() => {
         if (!gridItems || gridItems.length === 0) return [];
-        // Create a set of unique category names from the data
         const uniqueCatsFromData = new Set(gridItems.map(item => item.category));
-        // Remove 'All' if it exists to prevent duplication
         uniqueCatsFromData.delete('All');
-        // Return a new array with 'All' at the beginning
         return ['All', ...Array.from(uniqueCatsFromData)];
     }, [gridItems]);
 
@@ -78,7 +75,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             
-            <div className="grid grid-cols-3 grid-rows-4 gap-4 max-w-4xl mx-auto">
+            <div className="grid grid-cols-3 grid-rows-4 gap-4 max-w-3xl mx-auto">
                 {/* Row 1 */}
                 <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group row-span-2">
                     <Image src={surroundingImages[0].url} alt={surroundingImages[0].hint || 'Grid image 1'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[0].hint} />
