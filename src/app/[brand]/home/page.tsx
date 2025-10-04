@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
@@ -50,11 +49,12 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
     const centralCard = brand.categoryGrid?.centralCard;
     const gridItems = [...filteredImages];
-
-    if (centralCard && gridItems.length > 3) {
-        // Insert the central card into the middle of the grid for a visually balanced layout.
+    
+    // Insert the central card. Logic to place it near the middle.
+    if (centralCard && gridItems.length > 2) {
         const middleIndex = Math.floor(gridItems.length / 2);
-        const insertPosition = middleIndex % 3 === 0 ? middleIndex + 1 : middleIndex;
+        // Ensure it doesn't end up as the last item in a row for better layout
+        const insertPosition = middleIndex > 0 && middleIndex % 3 === 2 ? middleIndex + 1 : middleIndex;
         gridItems.splice(insertPosition, 0, centralCard as any);
     } else if (centralCard) {
         gridItems.push(centralCard as any);
@@ -76,21 +76,28 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
         // It's a regular image item
         const image = item as ICategoryGridImage;
+        const isTall = (index % 5 === 1 || index % 5 === 3) && filteredImages.length > 4;
+
         return (
-            <div key={image.imageUrl + index} className="col-span-1">
+             <div key={image.imageUrl + index} className={cn("col-span-1", isTall ? "row-span-2" : "row-span-1")}>
                  <Link href={image.category ? `/${brand.permanentName}/products?category=${image.category}` : '#'}>
                     <Image
                         src={image.imageUrl}
                         alt={image.category || 'Category image'}
                         width={400}
-                        height={400}
-                        className="rounded-lg object-cover w-full h-full aspect-square"
+                        height={isTall ? 800 : 400}
+                        className="rounded-lg object-cover w-full h-full"
                         data-ai-hint={image.imageHint}
                     />
                 </Link>
             </div>
         );
     };
+
+    if (!brand?.categoryGrid || (!brand.categoryGrid.images?.length && !brand.categoryGrid.centralCard)) {
+        return null; // Don't render anything if there's no grid content
+    }
+
 
     return (
         <section className="container py-12 px-4 sm:px-6 lg:px-8">
@@ -110,11 +117,11 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             {loading ? (
-                 <div className="grid grid-cols-3 gap-4 auto-rows-fr">
-                    {[...Array(8)].map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)}
+                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[200px]">
+                    {[...Array(7)].map((_, i) => <Skeleton key={i} className="w-full h-full" />)}
                 </div>
             ) : (
-                <div className="grid grid-cols-3 gap-4" style={{ gridTemplateRows: 'repeat(auto-fill, minmax(0, 1fr))' }}>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4" style={{ gridAutoRows: 'minmax(200px, auto)' }}>
                     {gridItems.map(renderGridItem)}
                 </div>
             )}
@@ -403,4 +410,4 @@ export default function BrandHomePage() {
     </main>
   );
 }
-
+    
