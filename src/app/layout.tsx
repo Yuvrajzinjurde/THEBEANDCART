@@ -35,11 +35,10 @@ export default async function RootLayout({
   const pathname = headersList.get('x-invoke-path') || '/';
   const searchParams = headersList.get('x-next-search') || '';
 
-  const { theme, settings, isBrandRoute: isBrandRouteFromTheme } = await getThemeForRequest(pathname, searchParams);
+  const { theme, settings, isBrandRoute } = await getThemeForRequest(pathname, searchParams);
   const platformSettings = settings as IPlatformSettings | null;
   
   const isAdminRoute = pathname.startsWith('/admin');
-  const isBrandRoute = isBrandRouteFromTheme;
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
