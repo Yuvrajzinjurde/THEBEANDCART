@@ -91,7 +91,7 @@ export function NotificationsDrawer({ isOpen, onOpenChange }: NotificationsDrawe
   const { token } = useAuth();
 
   const sortedNotifications = useMemo(() => {
-    return [...notifications].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return [...(notifications || [])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [notifications]);
 
   const unreadNotifications = sortedNotifications.filter(n => !n.isRead);
