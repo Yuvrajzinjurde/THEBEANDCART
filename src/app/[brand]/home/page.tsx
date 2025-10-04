@@ -278,19 +278,19 @@ export default function BrandHomePage() {
         setLoading(true);
         setError(null);
         try {
-            const brandResponse = await fetch(`/api/brands/${brandName}`);
+            const [brandResponse, trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
+                fetch(`/api/brands/${brandName}`),
+                fetch(`/api/products?storefront=${brandName}&sortBy=popular&limit=12`),
+                fetch(`/api/products?storefront=${brandName}&sortBy=rating&limit=12`),
+                fetch(`/api/products?storefront=${brandName}&sortBy=newest&limit=12`)
+            ]);
+
             if (!brandResponse.ok) {
               const errorData = await brandResponse.json();
               throw new Error(errorData.message || 'Brand not found');
             }
             const brandData = await brandResponse.json();
             setBrand(brandData.brand);
-
-            const [trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
-                fetch(`/api/products?storefront=${brandName}&sortBy=popular&limit=12`),
-                fetch(`/api/products?storefront=${brandName}&sortBy=rating&limit=12`),
-                fetch(`/api/products?storefront=${brandName}&sortBy=newest&limit=12`)
-            ]);
 
             if (trendingResponse.ok) {
                 const { products } = await trendingResponse.json();
