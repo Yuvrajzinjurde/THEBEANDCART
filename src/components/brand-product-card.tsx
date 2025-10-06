@@ -167,7 +167,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full overflow-hidden"
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
@@ -193,19 +193,17 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </CarouselContent>
             </Carousel>
             
-            {product.images.length > 1 && (
-                <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {product.images.slice(0, 4).map((_, i) => (
-                        <div
-                            key={i}
-                            className={cn(
-                                "h-1.5 w-1.5 rounded-full transition-all duration-300",
-                                currentSlide === i ? 'bg-white w-3' : 'bg-white/50'
-                            )}
-                        />
-                    ))}
-                </div>
-            )}
+             <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {product.images.slice(0, 4).map((_, i) => (
+                    <div
+                        key={i}
+                        className={cn(
+                            "h-1.5 w-1.5 rounded-full transition-all duration-300",
+                            currentSlide === i ? 'bg-white w-3' : 'bg-white/50'
+                        )}
+                    />
+                ))}
+            </div>
         </div>
 
         <Button
@@ -295,17 +293,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         )}
                     </div>
                 </div>
-                 <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 rounded-full border bg-background p-1">
-                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={(e) => {e.preventDefault(); e.stopPropagation(); setQuantity(q => Math.max(1, q-1))}}><Minus className="h-4 w-4" /></Button>
-                        <span className="w-6 text-center font-semibold text-sm">{quantity}</span>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={(e) => {e.preventDefault(); e.stopPropagation(); setQuantity(q => q+1)}}><Plus className="h-4 w-4" /></Button>
-                    </div>
-                    <Button className="flex-grow h-9" onClick={handleCartClick}>
-                        <ShoppingCart className="mr-2 h-4 w-4"/>
-                        Add
-                    </Button>
-                </div>
+                <Button 
+                    variant="outline" 
+                    className="w-full h-9 rounded-full" 
+                    onClick={handleCartClick}
+                >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Add to Cart
+                </Button>
             </div>
         </div>
       </motion.div>
