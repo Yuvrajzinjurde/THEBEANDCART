@@ -312,7 +312,11 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
                     </div>
-                    <Button variant="secondary" className="rounded-full h-9 px-4 flex-grow" onClick={handleCartClick}>
+                    <Button
+                        variant="outline"
+                        className="rounded-full h-9 px-4 flex-grow hover:bg-primary hover:text-primary-foreground"
+                        onClick={handleCartClick}
+                    >
                         <ShoppingCart className="mr-2 h-4 w-4" />
                         Add
                     </Button>
