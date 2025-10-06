@@ -147,10 +147,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full overflow-hidden"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
         ref={carouselRef}
       >
-        <div className="w-full relative rounded-t-lg">
+        <div className="w-full relative rounded-t-lg overflow-hidden">
             <Carousel
                 setApi={setApi}
                 plugins={[autoplayPlugin.current]}
@@ -196,9 +196,18 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             
              <div className="mt-auto pt-2 grid grid-cols-2 gap-4 items-end">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-                        <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
+                    <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={cn(
+                              "h-4 w-4",
+                              i < Math.round(rating)
+                                ? "text-green-500 fill-green-500"
+                                : "text-gray-300"
+                            )}
+                          />
+                        ))}
                     </div>
 
                     <div className="flex items-baseline gap-x-2 flex-wrap">
