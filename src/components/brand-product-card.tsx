@@ -36,6 +36,23 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const [api, setApi] = useState<CarouselApi>();
   
   const carouselRef = useRef<HTMLDivElement>(null);
+  
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    
+    const onSelect = () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    };
+    
+    api.on("select", onSelect);
+    onSelect(); // Set initial value
+
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
 
   // Each card needs its own instance of the autoplay plugin.
   const autoplayPlugin = useRef(
@@ -172,6 +189,20 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 ))}
                 </CarouselContent>
             </Carousel>
+            
+            {product.images.length > 1 && (
+                <div className="absolute top-2 left-2 flex items-center gap-1.5">
+                    {product.images.slice(0, 4).map((_, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                "h-1.5 w-1.5 rounded-full transition-all duration-300",
+                                currentSlide === i ? 'bg-white w-3' : 'bg-white/50'
+                            )}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
 
         <Button
@@ -194,7 +225,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
             
-            <div className="mt-auto pt-2 flex items-center justify-between">
+            <div className="mt-auto pt-2 grid grid-cols-[1fr_auto] items-center gap-x-2">
                 <div className="space-y-1">
                     <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
@@ -258,7 +289,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         )}
                     </div>
                 </div>
-                 <div className="flex justify-end">
+                 <div className="flex items-center justify-end">
                     <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleCartClick}>
                         <ShoppingCart className="h-4 w-4"/>
                         <span className="sr-only">Add to Cart</span>
