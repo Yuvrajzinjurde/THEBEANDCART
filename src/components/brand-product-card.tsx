@@ -147,7 +147,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full overflow-hidden"
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg">
@@ -194,7 +194,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
             
-             <div className="mt-auto pt-2 flex items-end justify-between">
+             <div className="mt-auto pt-2 grid grid-cols-2 gap-4 items-end">
                 <div className="space-y-1">
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
@@ -249,15 +249,15 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         )}
                     </div>
                 </div>
-
-                 <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleCartClick}>
-                    <ShoppingCart className="h-4 w-4"/>
-                    <span className="sr-only">Add to Cart</span>
-                </Button>
+                 <div className="flex justify-end">
+                    <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleCartClick}>
+                        <ShoppingCart className="h-4 w-4"/>
+                        <span className="sr-only">Add to Cart</span>
+                    </Button>
+                </div>
             </div>
         </div>
       </motion.div>
     </Link>
   );
 }
-
