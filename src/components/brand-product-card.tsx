@@ -200,7 +200,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </CarouselContent>
             </Carousel>
             
-            <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+             <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 {product.images.slice(0, 4).map((_, i) => (
                     <div
                         key={i}
@@ -250,7 +250,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                                 />
                                 ))}
                             </div>
-                            <span className="text-xs font-medium text-muted-foreground">({rating.toFixed(1)})</span>
+                             <span className="text-xs font-medium text-muted-foreground">({rating.toFixed(1)})</span>
                         </div>
 
                         <div className="flex items-baseline gap-x-2 flex-wrap">
@@ -304,7 +304,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </div>
 
                 <div className="flex items-center space-x-2">
-                    <div className="flex items-center rounded-full border p-0.5 h-9 shrink-0">
+                    <div className="flex items-center justify-center rounded-full border p-0.5 h-9 shrink-0">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                         <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
