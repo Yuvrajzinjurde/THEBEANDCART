@@ -170,6 +170,19 @@ const HamperSection = () => {
 
 const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     const autoplay = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
+    const [canScroll, setCanScroll] = useState(false);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const checkScroll = () => {
+            if (scrollContainerRef.current) {
+                setCanScroll(scrollContainerRef.current.scrollWidth > scrollContainerRef.current.clientWidth);
+            }
+        };
+        checkScroll();
+        window.addEventListener('resize', checkScroll);
+        return () => window.removeEventListener('resize', checkScroll);
+    }, [brands]);
 
     if (!brands || brands.length === 0) return null;
 
@@ -177,7 +190,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
         const theme = themeColors.find(t => t.name === brand.themeName);
         const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
         return (
-            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center">
+            <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center flex-shrink-0">
                 <div 
                     className="w-32 h-32 md:w-36 md:h-36 relative rounded-full overflow-hidden border-2 transition-all duration-300 group-hover:scale-105"
                     style={{ 
@@ -200,21 +213,29 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12">
             <div className="container">
-                <Carousel
-                    plugins={[autoplay.current]}
-                    opts={{ align: "start", loop: true }}
-                    className="w-full"
-                >
-                    <CarouselContent>
+                {canScroll ? (
+                    <Carousel
+                        plugins={[autoplay.current]}
+                        opts={{ align: "start", loop: true }}
+                        className="w-full"
+                    >
+                        <CarouselContent>
+                            {brands.map((brand) => (
+                                <CarouselItem key={brand.permanentName} className="basis-auto">
+                                    <BrandLogo brand={brand} />
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                        <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                    </Carousel>
+                ) : (
+                    <div ref={scrollContainerRef} className="flex justify-center items-center gap-4">
                         {brands.map((brand) => (
-                            <CarouselItem key={brand.permanentName} className="basis-full sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                                <BrandLogo brand={brand} />
-                            </CarouselItem>
+                            <BrandLogo key={brand.permanentName} brand={brand} />
                         ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                    <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                </Carousel>
+                    </div>
+                )}
             </div>
         </section>
     );
