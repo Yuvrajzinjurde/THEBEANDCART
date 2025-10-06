@@ -194,8 +194,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
             
-            <div className="mt-auto pt-2 grid grid-cols-10 gap-2 items-end">
-                <div className="col-span-9 space-y-1">
+            <div className="mt-auto pt-2 flex items-center justify-between">
+                <div className="space-y-1">
                     <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Star
@@ -258,7 +258,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         )}
                     </div>
                 </div>
-                 <div className="col-span-1 flex justify-end">
+                 <div className="flex justify-end">
                     <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleCartClick}>
                         <ShoppingCart className="h-4 w-4"/>
                         <span className="sr-only">Add to Cart</span>
