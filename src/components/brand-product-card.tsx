@@ -158,6 +158,13 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
   const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
+  const handleQuantityChange = (e: React.MouseEvent, amount: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setQuantity(prev => Math.max(1, prev + amount));
+  };
+
+
   return (
     <Link 
       href={`/${product.storefront}/products/${product._id}`} 
@@ -167,7 +174,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full overflow-hidden"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
@@ -293,17 +300,21 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         )}
                     </div>
                 </div>
-                <Button 
-                    variant="outline" 
-                    className="w-full h-9 rounded-full" 
-                    onClick={handleCartClick}
-                >
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Add to Cart
-                </Button>
+                 <div className="flex items-center justify-between gap-2 h-9 rounded-full border p-1">
+                    <div className="flex items-center">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-8 text-center font-semibold text-sm">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
+                    </div>
+                    <Button variant="secondary" className="rounded-full h-7 px-4" onClick={handleCartClick}>
+                        Add
+                    </Button>
+                </div>
             </div>
         </div>
       </motion.div>
     </Link>
   );
 }
+
+    
