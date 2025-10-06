@@ -34,7 +34,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const { user, token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
-  const [quantity, setQuantity] = useState(1);
   
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -109,22 +108,16 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ productId: product._id, quantity: quantity }),
+            body: JSON.stringify({ productId: product._id, quantity: 1 }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
-        toast.success(`${quantity} x ${product.name} added to cart!`);
+        toast.success(`Added ${product.name} to cart!`);
         setCart(result.cart);
     } catch (error: any) {
         toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
-  
-  const handleQuantityChange = (e: React.MouseEvent, amount: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setQuantity(prev => Math.max(1, prev + amount));
-  }
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -157,7 +150,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
         ref={carouselRef}
       >
-        <div className="w-full relative overflow-hidden rounded-t-lg">
+        <div className="w-full relative rounded-t-lg">
             <Carousel
                 setApi={setApi}
                 plugins={[autoplayPlugin.current]}
@@ -254,14 +247,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </div>
             </div>
             
-            <div className="mt-auto pt-2 border-t flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 rounded-full border bg-background shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
-                    <span className="w-5 text-center font-semibold text-sm">{quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
-                </div>
-                <Button size="sm" className="h-8 flex-grow" onClick={handleCartClick}>
-                    <ShoppingCart className="h-4 w-4 mr-2"/> Add
+             <div className="mt-auto pt-2 border-t flex items-center justify-end">
+                <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleCartClick}>
+                    <ShoppingCart className="h-4 w-4"/>
+                    <span className="sr-only">Add to Cart</span>
                 </Button>
             </div>
         </div>
