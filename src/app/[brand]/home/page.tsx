@@ -147,8 +147,8 @@ const ProductCarouselSection = ({ title, products, brandName, icon: Icon }: { ti
         <section className="container pt-12 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-                    {Icon && <Icon className="h-6 w-6" />}
                     {title}
+                    {Icon && <Icon className="h-6 w-6" />}
                 </h2>
                  <Button variant="link" asChild>
                     <Link href={`/${brandName}/products`}>
@@ -404,5 +404,6 @@ export default function BrandHomePage() {
     
 
     
+
 
 
