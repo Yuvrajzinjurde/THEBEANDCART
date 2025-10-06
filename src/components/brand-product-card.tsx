@@ -306,8 +306,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         </div>
                     </div>
                 </div>
-                 <div className="flex items-center justify-between space-x-2">
-                    <div className="flex items-center justify-center rounded-full border p-0.5 h-9 shrink-0">
+                 <div className="flex items-center justify-center space-x-2">
+                    <div className="flex items-center justify-center rounded-full border p-0 h-9 shrink-0">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                         <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
