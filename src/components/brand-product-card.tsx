@@ -200,7 +200,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </CarouselContent>
             </Carousel>
             
-             <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 {product.images.slice(0, 4).map((_, i) => (
                     <div
                         key={i}
