@@ -12,7 +12,7 @@ import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift } from 'lucide-react';
+import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift, Star, TrendingUp, Sparkles } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -54,12 +54,15 @@ const LandingPageSkeleton = () => (
 );
 
 
-const ProductCarouselSection = ({ title, products }: { title: string, products: IProduct[] }) => {
+const ProductCarouselSection = ({ title, products, icon: Icon }: { title: string, products: IProduct[], icon?: React.ElementType }) => {
     if (!products || products.length === 0) return null;
     return (
         <section className="container pt-12 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
+                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    {Icon && <Icon className="h-6 w-6" />}
+                    {title}
+                </h2>
             </div>
             <Separator className="mb-6" />
             <Carousel
@@ -344,12 +347,12 @@ export default function LandingPage() {
             </div>
         ) : (
             <>
-                <ProductCarouselSection title="Trending Now" products={trendingProducts} />
+                <ProductCarouselSection title="Trending Now" products={trendingProducts} icon={TrendingUp} />
                 
                 <PromoBannerSection settings={platformSettings} />
                 
-                <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} />
-                <ProductCarouselSection title="Newest Arrivals" products={newestProducts} />
+                <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} icon={Star} />
+                <ProductCarouselSection title="Newest Arrivals" products={newestProducts} icon={Sparkles} />
                 
                 {uniqueCategories.length > 0 && (
                     <section className="container pt-16 px-4 sm:px-6 lg:px-8">

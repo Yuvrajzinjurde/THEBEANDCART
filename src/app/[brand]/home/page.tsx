@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/carousel";
 import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -140,13 +140,16 @@ const ProductCarouselSkeleton = () => (
 );
 
 
-const ProductCarouselSection = ({ title, products, brandName }: { title: string, products: IProduct[], brandName: string }) => {
+const ProductCarouselSection = ({ title, products, brandName, icon: Icon }: { title: string, products: IProduct[], brandName: string, icon?: React.ElementType }) => {
     if (!products || products.length === 0) return null;
     
     return (
         <section className="container pt-12 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h2>
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    {Icon && <Icon className="h-6 w-6" />}
+                    {title}
+                </h2>
                  <Button variant="link" asChild>
                     <Link href={`/${brandName}/products`}>
                         Discover All
@@ -388,9 +391,9 @@ export default function BrandHomePage() {
       
       <CategoryGrid brand={brand} />
       
-      <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} />
-      <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} />
-      <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} />
+      <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} icon={TrendingUp} />
+      <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} icon={Star} />
+      <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} icon={Sparkles} />
 
       <PromoBannerSection brand={brand} brandName={brandName} />
       <ReviewsSection brand={brand} />
@@ -401,4 +404,5 @@ export default function BrandHomePage() {
     
 
     
+
 
