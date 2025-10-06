@@ -54,14 +54,14 @@ const LandingPageSkeleton = () => (
 );
 
 
-const ProductCarouselSection = ({ title, products, icon: Icon }: { title: string, products: IProduct[], icon?: React.ElementType }) => {
+const ProductCarouselSection = ({ title, products, emoji }: { title: string, products: IProduct[], emoji?: string }) => {
     if (!products || products.length === 0) return null;
     return (
         <section className="container pt-12 px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-4">
                  <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
                     {title}
-                    {Icon && <Icon className="h-6 w-6" />}
+                    {emoji && <span className="text-2xl">{emoji}</span>}
                 </h2>
             </div>
             <Separator className="mb-6" />
@@ -347,12 +347,12 @@ export default function LandingPage() {
             </div>
         ) : (
             <>
-                <ProductCarouselSection title="Trending Now" products={trendingProducts} icon={TrendingUp} />
+                <ProductCarouselSection title="Trending Now" products={trendingProducts} emoji="📈" />
                 
                 <PromoBannerSection settings={platformSettings} />
                 
-                <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} icon={Star} />
-                <ProductCarouselSection title="Newest Arrivals" products={newestProducts} icon={Sparkles} />
+                <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} emoji="⭐" />
+                <ProductCarouselSection title="Newest Arrivals" products={newestProducts} emoji="✨" />
                 
                 {uniqueCategories.length > 0 && (
                     <section className="container pt-16 px-4 sm:px-6 lg:px-8">
