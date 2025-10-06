@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star, Info } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info, Plus, Minus } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const { user, token } = useAuth();
   const { wishlist, setWishlist, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
+  const [quantity, setQuantity] = useState(1);
   
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -107,15 +108,22 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ productId: product._id, quantity: 1 }),
+            body: JSON.stringify({ productId: product._id, quantity: quantity }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        toast.success(`${quantity} x ${product.name} added to cart!`);
         setCart(result.cart);
     } catch (error: any) {
         toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
     }
   };
+  
+  const handleQuantityChange = (e: React.MouseEvent, amount: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setQuantity(prev => Math.max(1, prev + amount));
+  }
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -172,44 +180,31 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             </Carousel>
         </div>
 
-        <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <Button
+        <Button
             size="icon"
             variant="secondary"
             className={cn(
-                "rounded-full w-8 h-8 shadow-md hover:bg-background",
+                "absolute top-2 right-2 rounded-full w-8 h-8 shadow-md hover:bg-background z-10",
+                "opacity-0 transition-opacity duration-300 group-hover:opacity-100",
                 isWishlisted ? "text-primary hover:text-primary/90" : "hover:text-red-500"
             )}
             onClick={handleWishlistClick}
             aria-label="Add to wishlist"
           >
             <Heart className={cn("h-4 w-4", isWishlisted && "fill-current")} />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full w-8 h-8 shadow-md hover:bg-background"
-            onClick={handleCartClick}
-            aria-label="Add to cart"
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
-        </div>
+        </Button>
 
         <div className="p-3 flex flex-col flex-grow">
-          <div className="flex-grow">
+          <div className="flex-grow space-y-1">
             <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-            <div className="min-h-[2.5rem] my-0.5">
-                <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{product.name}</h3>
-            </div>
-          </div>
-          
-          <div className="mt-auto pt-1">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <h3 className="text-sm font-semibold text-foreground leading-tight truncate">{product.name}</h3>
+            
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
                 <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
             </div>
-              <div className="flex items-baseline gap-x-2 flex-wrap">
+
+             <div className="flex items-baseline gap-x-2 flex-wrap">
                   <p className="text-base font-bold text-foreground">
                       ₹{sellingPrice.toLocaleString('en-IN')}
                   </p>
@@ -256,6 +251,17 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                       </div>
                   )}
               </div>
+          </div>
+          
+          <div className="mt-3 pt-3 border-t flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1 rounded-full border bg-background">
+                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
+                <span className="w-5 text-center font-semibold text-sm">{quantity}</span>
+                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
+            </div>
+            <Button size="sm" className="h-8 flex-grow" onClick={handleCartClick}>
+              <ShoppingCart className="h-4 w-4 mr-2"/> Add
+            </Button>
           </div>
         </div>
       </motion.div>
