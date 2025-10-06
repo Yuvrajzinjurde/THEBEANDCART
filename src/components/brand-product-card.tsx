@@ -149,7 +149,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     fetch(`/api/products/${product._id}/track`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metric: 'clicks' }),
+        body: JSON.stringify({ metric: 'views' }),
     }).catch(err => console.error("Failed to track click:", err));
     
     router.push(`/${product.storefront}/products/${product._id}`);
@@ -326,8 +326,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
                     </div>
                     <Button
-                        variant="secondary"
-                        className="rounded-full h-9 px-4 flex-grow"
+                        variant="outline"
+                        className="rounded-full h-9 px-4 flex-grow hover:bg-primary hover:text-primary-foreground"
                         onClick={handleCartClick}
                     >
                         <ShoppingCart className="mr-2 h-4 w-4" />
@@ -340,3 +340,5 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
+
+    
