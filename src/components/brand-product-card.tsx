@@ -234,79 +234,83 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             </div>
             
             <div className="mt-auto pt-2 grid grid-cols-1 gap-y-3">
-                 <div className="flex flex-col items-start justify-center">
-                     <div className="flex items-center gap-1">
-                        <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                            <Star
-                                key={i}
-                                className={cn(
-                                "h-4 w-4",
-                                i < Math.round(rating)
-                                    ? "text-green-500 fill-green-500"
-                                    : "text-gray-300"
-                                )}
-                            />
-                            ))}
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">({rating.toFixed(1)})</span>
-                    </div>
-
-                    <div className="flex items-baseline gap-x-2 flex-wrap">
-                        <p className="text-base font-bold text-foreground">
-                            ₹{sellingPrice.toLocaleString('en-IN')}
-                        </p>
-                        {hasDiscount && (
-                            <p className="text-xs font-medium text-muted-foreground line-through">
-                                ₹{mrp.toLocaleString('en-IN')}
-                            </p>
-                        )}
-                    </div>
-                  
-                    <div className="min-h-[16px]">
-                        {hasDiscount && (
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-semibold text-green-600">
-                                    {discountPercentage}% off
-                                </span>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
-                                                <Info className="h-3 w-3 text-muted-foreground" />
-                                            </button>
-                                        </TooltipTrigger>
-                                        <TooltipContent className="p-3 w-64" side="top" align="center">
-                                            <div className="space-y-2">
-                                                <p className="font-bold text-base">Price details</p>
-                                                <div className="flex justify-between text-sm">
-                                                    <p className="text-muted-foreground">Maximum Retail Price</p>
-                                                    <p>₹{mrp.toFixed(2)}</p>
-                                                </div>
-                                                <div className="flex justify-between text-sm">
-                                                    <p className="text-muted-foreground">Selling Price</p>
-                                                    <p>₹{sellingPrice.toFixed(2)}</p>
-                                                </div>
-                                                <Separator />
-                                                <div className="flex justify-between text-sm font-semibold text-green-600">
-                                                <p>Overall you save</p>
-                                                <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
-                                                </div>
-                                            </div>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                 <div className="flex items-center justify-between">
+                     <div className="flex flex-col items-start justify-center">
+                        <div className="flex items-center gap-1">
+                            <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                <Star
+                                    key={i}
+                                    className={cn(
+                                    "h-4 w-4",
+                                    i < Math.round(rating)
+                                        ? "text-green-500 fill-green-500"
+                                        : "text-gray-300"
+                                    )}
+                                />
+                                ))}
                             </div>
-                        )}
+                            <span className="text-xs font-medium text-muted-foreground">({rating.toFixed(1)})</span>
+                        </div>
+
+                        <div className="flex items-baseline gap-x-2 flex-wrap">
+                            <p className="text-base font-bold text-foreground">
+                                ₹{sellingPrice.toLocaleString('en-IN')}
+                            </p>
+                            {hasDiscount && (
+                                <p className="text-xs font-medium text-muted-foreground line-through">
+                                    ₹{mrp.toLocaleString('en-IN')}
+                                </p>
+                            )}
+                        </div>
+                    
+                        <div className="min-h-[16px]">
+                            {hasDiscount && (
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-semibold text-green-600">
+                                        {discountPercentage}% off
+                                    </span>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
+                                                    <Info className="h-3 w-3 text-muted-foreground" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="p-3 w-64" side="top" align="center">
+                                                <div className="space-y-2">
+                                                    <p className="font-bold text-base">Price details</p>
+                                                    <div className="flex justify-between text-sm">
+                                                        <p className="text-muted-foreground">Maximum Retail Price</p>
+                                                        <p>₹{mrp.toFixed(2)}</p>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm">
+                                                        <p className="text-muted-foreground">Selling Price</p>
+                                                        <p>₹{sellingPrice.toFixed(2)}</p>
+                                                    </div>
+                                                    <Separator />
+                                                    <div className="flex justify-between text-sm font-semibold text-green-600">
+                                                    <p>Overall you save</p>
+                                                    <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
+                                                    </div>
+                                                </div>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-                 <div className="flex items-center justify-between gap-2 h-9 rounded-full border p-1">
-                    <div className="flex items-center">
+
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center rounded-full border p-1 h-9">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                         <span className="w-8 text-center font-semibold text-sm">{quantity}</span>
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
                     </div>
-                    <Button variant="secondary" className="rounded-full h-7 px-4" onClick={handleCartClick}>
+                    <Button variant="secondary" className="rounded-full h-9 px-4 flex-1" onClick={handleCartClick}>
+                        <ShoppingCart className="mr-2 h-4 w-4" />
                         Add
                     </Button>
                 </div>
@@ -316,5 +320,3 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
-
-    
