@@ -242,17 +242,33 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                      <div className="flex flex-col items-start justify-center">
                         <div className="flex items-center gap-1">
                             <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                <Star
-                                    key={i}
-                                    className={cn(
-                                    "h-4 w-4",
-                                    i < Math.round(rating)
-                                        ? "text-green-500 fill-green-500"
-                                        : "text-gray-300"
-                                    )}
-                                />
-                                ))}
+                                {[...Array(5)].map((_, i) => {
+                                    const ratingValue = i + 1;
+                                    const fullStar = rating >= ratingValue;
+                                    const halfStar = rating > i && rating < ratingValue;
+
+                                    return (
+                                        <div key={i} className="relative">
+                                            <Star
+                                                className={cn(
+                                                    "h-4 w-4",
+                                                    (fullStar || halfStar) ? "text-green-500" : "text-gray-300"
+                                                )}
+                                                style={{
+                                                    fill: fullStar ? 'currentColor' : 'transparent'
+                                                }}
+                                            />
+                                            {halfStar && (
+                                                <div
+                                                    className="absolute top-0 left-0 h-full overflow-hidden"
+                                                    style={{ width: `${(rating - i) * 100}%` }}
+                                                >
+                                                    <Star className="h-4 w-4 text-green-500 fill-current" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                              <span className="text-xs font-medium text-muted-foreground">({rating.toFixed(1)})</span>
                         </div>
@@ -306,7 +322,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         </div>
                     </div>
                 </div>
-                 <div className="flex items-center justify-center space-x-2">
+                 <div className="flex items-center justify-between space-x-2">
                     <div className="flex items-center justify-center rounded-full border p-0 h-9 shrink-0">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                         <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
