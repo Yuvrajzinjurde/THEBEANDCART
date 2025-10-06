@@ -183,6 +183,17 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
+            <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                {product.images.slice(0, 4).map((_, i) => (
+                    <div
+                        key={i}
+                        className={cn(
+                            "h-1 w-1 rounded-full transition-all duration-300",
+                            currentSlide === i ? 'bg-white w-2.5' : 'bg-white/50'
+                        )}
+                    />
+                ))}
+            </div>
             <Carousel
                 setApi={setApi}
                 plugins={[autoplayPlugin.current]}
@@ -204,25 +215,13 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 ))}
                 </CarouselContent>
             </Carousel>
-            
-             <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {product.images.slice(0, 4).map((_, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            "h-1.5 w-1.5 rounded-full transition-all duration-300",
-                            currentSlide === i ? 'bg-white w-3' : 'bg-white/50'
-                        )}
-                    />
-                ))}
-            </div>
         </div>
 
         <Button
             size="icon"
             variant="secondary"
             className={cn(
-                "absolute top-2 right-2 rounded-full w-8 h-8 shadow-md hover:bg-background z-10",
+                "absolute top-2 left-2 rounded-full w-8 h-8 shadow-md hover:bg-background z-10",
                 "opacity-0 transition-opacity duration-300 group-hover:opacity-100",
                 isWishlisted ? "text-primary hover:text-primary/90" : "hover:text-red-500"
             )}
@@ -307,7 +306,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                 <div className="flex items-center space-x-2">
                     <div className="flex items-center justify-center rounded-full border p-0.5 h-9 shrink-0">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                         <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
