@@ -226,14 +226,34 @@ export default function Header() {
     return <Logo className="h-8 w-8" />;
   };
 
+  if (!isClient) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-6 w-24 ml-4" />
+            <div className="flex-1 mx-4">
+                <Skeleton className="h-11 w-full max-w-lg mx-auto rounded-full" />
+            </div>
+            <div className="flex items-center gap-1">
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9 rounded-full" />
+                <Skeleton className="h-9 w-9" />
+            </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <>
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-            {(isLoading || !isClient) ? <Skeleton className="h-8 w-8 rounded-full" /> : renderLogo()}
+            {isLoading ? <Skeleton className="h-8 w-8 rounded-full" /> : renderLogo()}
             <span className="hidden font-bold text-lg sm:inline-block capitalize">
-                {(isLoading || !isClient) ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
+                {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
             </span>
         </Link>
 
@@ -263,16 +283,13 @@ export default function Header() {
                         name="search"
                         type="search"
                         placeholder="Search for anything"
-                        className={cn(
-                          "h-11 w-full rounded-full pl-5 pr-12 text-base",
-                          (isLoading || !isClient) && "animate-pulse bg-muted"
-                        )}
+                        className="h-11 w-full rounded-full pl-5 pr-12 text-base"
                         value={searchQuery}
                         onChange={handleSearchInputChange}
                         onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
-                        disabled={(isLoading || !isClient)}
+                        disabled={isLoading}
                     />
-                    <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={(isLoading || !isClient)}>
+                    <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={isLoading}>
                         <Search className="h-4 w-4" />
                     </Button>
                 </>
@@ -297,7 +314,7 @@ export default function Header() {
 
         {/* Actions */}
         <div className="hidden md:flex">
-            {(isLoading || !isClient) ? (
+            {isLoading ? (
                 <div className="flex items-center gap-1">
                     <Skeleton className="h-9 w-9" />
                     <Skeleton className="h-9 w-9" />
@@ -337,7 +354,7 @@ export default function Header() {
                                 <Link href="#" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
                                     <Package className="h-5 w-5" />
                                     My Orders
-                                </Link>
+                            </Link>
                             )}
                             <Separator />
                             {categories.length > 0 && (
@@ -399,3 +416,5 @@ export default function Header() {
     </>
   );
 }
+
+    
