@@ -125,7 +125,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ productId: product._id, quantity: 1 }),
+            body: JSON.stringify({ productId: product._id, quantity: 1, size: product.size, color: product.color }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
@@ -191,7 +191,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             </Carousel>
             
             {product.images.length > 1 && (
-                <div className="absolute top-2 left-2 flex items-center gap-1.5">
+                <div className="absolute top-2 left-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     {product.images.slice(0, 4).map((_, i) => (
                         <div
                             key={i}
@@ -225,20 +225,23 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
             
-            <div className="mt-auto pt-2 grid grid-cols-[1fr_auto] items-center gap-x-2">
-                <div className="space-y-1">
-                    <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={cn(
-                              "h-4 w-4",
-                              i < Math.round(rating)
-                                ? "text-green-500 fill-green-500"
-                                : "text-gray-300"
-                            )}
-                          />
-                        ))}
+            <div className="mt-auto pt-2 grid grid-cols-[9fr_1fr] items-center gap-x-2">
+                 <div className="flex flex-col items-start justify-center">
+                     <div className="flex items-center gap-1">
+                        <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                            <Star
+                                key={i}
+                                className={cn(
+                                "h-4 w-4",
+                                i < Math.round(rating)
+                                    ? "text-green-500 fill-green-500"
+                                    : "text-gray-300"
+                                )}
+                            />
+                            ))}
+                        </div>
+                        <span className="text-xs font-medium text-muted-foreground">({rating.toFixed(1)})</span>
                     </div>
 
                     <div className="flex items-baseline gap-x-2 flex-wrap">
