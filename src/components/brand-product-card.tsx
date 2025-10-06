@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star, Info } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info, Plus, Minus } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,9 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const [quantity, setQuantity] = useState(1);
+
 
   useEffect(() => {
     if (!api) return;
@@ -125,7 +128,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ productId: product._id, quantity: 1, size: product.size, color: product.color }),
+            body: JSON.stringify({ productId: product._id, quantity, size: product.size, color: product.color }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
@@ -225,7 +228,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
             
-            <div className="mt-auto pt-2 grid grid-cols-[9fr_1fr] items-center gap-x-2">
+            <div className="mt-auto pt-2 grid grid-cols-1 gap-y-3">
                  <div className="flex flex-col items-start justify-center">
                      <div className="flex items-center gap-1">
                         <div className="flex items-center">
@@ -292,10 +295,15 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         )}
                     </div>
                 </div>
-                 <div className="flex items-center justify-end">
-                    <Button size="icon" className="h-8 w-8 rounded-full" onClick={handleCartClick}>
-                        <ShoppingCart className="h-4 w-4"/>
-                        <span className="sr-only">Add to Cart</span>
+                 <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 rounded-full border bg-background p-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={(e) => {e.preventDefault(); e.stopPropagation(); setQuantity(q => Math.max(1, q-1))}}><Minus className="h-4 w-4" /></Button>
+                        <span className="w-6 text-center font-semibold text-sm">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={(e) => {e.preventDefault(); e.stopPropagation(); setQuantity(q => q+1)}}><Plus className="h-4 w-4" /></Button>
+                    </div>
+                    <Button className="flex-grow h-9" onClick={handleCartClick}>
+                        <ShoppingCart className="mr-2 h-4 w-4"/>
+                        Add
                     </Button>
                 </div>
             </div>
