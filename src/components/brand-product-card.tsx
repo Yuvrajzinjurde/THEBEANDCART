@@ -59,7 +59,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
   // Each card needs its own instance of the autoplay plugin.
   const autoplayPlugin = useRef(
-    Autoplay({ delay: 1000, stopOnInteraction: false, playOnInit: false })
+    Autoplay({ delay: 3000, stopOnInteraction: true, playOnInit: false })
   );
 
   useEffect(() => {
@@ -67,7 +67,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     if (!carouselEl) return;
 
     const startAutoplay = () => autoplayPlugin.current.play();
-    const stopAutoplay = () => autoplayPlugin.current.stop();
+    const stopAutoplay = () => {
+      autoplayPlugin.current.stop();
+      if(api) {
+        api.scrollTo(0); // Reset to first slide on mouse leave
+      }
+    };
 
     carouselEl.addEventListener('mouseenter', startAutoplay);
     carouselEl.addEventListener('mouseleave', stopAutoplay);
@@ -78,7 +83,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         carouselEl.removeEventListener('mouseleave', stopAutoplay);
       }
     }
-  }, []);
+  }, [api]);
   
 
   const isWishlisted = useMemo(() => {
@@ -302,8 +307,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                         </div>
                     </div>
                 </div>
-
-                <div className="flex items-center space-x-2">
+                 <div className="flex items-center space-x-2">
                     <div className="flex items-center justify-center rounded-full border p-0.5 h-9 shrink-0">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                         <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
