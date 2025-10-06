@@ -87,6 +87,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        toast.success(result.message);
         setWishlist(result.wishlist);
     } catch (error: any) {
         toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
@@ -153,10 +154,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
         ref={carouselRef}
       >
-        <div className="w-full">
+        <div className="w-full relative overflow-hidden rounded-t-lg">
             <Carousel
                 setApi={setApi}
                 plugins={[autoplayPlugin.current]}
@@ -195,7 +196,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         </Button>
 
         <div className="p-3 flex flex-col flex-grow">
-            <div className="flex-grow space-y-1">
+            <div className="flex-grow space-y-1 mb-2">
                 <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
                 
@@ -253,14 +254,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </div>
             </div>
             
-            <div className="mt-2 pt-2 border-t flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 rounded-full border bg-background">
+            <div className="mt-auto pt-2 border-t flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1 rounded-full border bg-background shrink-0">
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
                     <span className="w-5 text-center font-semibold text-sm">{quantity}</span>
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
                 </div>
                 <Button size="sm" className="h-8 flex-grow" onClick={handleCartClick}>
-                <ShoppingCart className="h-4 w-4 mr-2"/> Add
+                    <ShoppingCart className="h-4 w-4 mr-2"/> Add
                 </Button>
             </div>
         </div>
