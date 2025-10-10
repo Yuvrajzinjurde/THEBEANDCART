@@ -43,15 +43,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchUserData = useCallback(async (currentToken: string) => {
     try {
         const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
-          fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
           fetch('/api/cart', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
-          fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${currentToken}` } })
+          fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
+          fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
         ]);
-
-        if (notificationsRes.ok) {
-            const { notifications } = await notificationsRes.json();
-            setNotifications(notifications);
-        }
 
         if (cartRes.ok) {
             const { cart } = await cartRes.json();
@@ -64,6 +59,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setWishlist(wishlist);
         } else {
             setWishlist(null);
+        }
+        if (notificationsRes.ok) {
+            const { notifications } = await notificationsRes.json();
+            setNotifications(notifications);
+        } else {
+            setNotifications([]);
         }
     } catch (error) {
         console.error("Failed to fetch user data:", error);
