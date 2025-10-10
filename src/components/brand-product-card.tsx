@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -159,7 +160,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const rating = typeof product.rating === 'number' ? product.rating : 0;
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
-  const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
   const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
   const handleQuantityChange = (e: React.MouseEvent, amount: number) => {
@@ -182,7 +182,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
-            <div className="absolute top-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+             <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
                 {product.images.slice(0, 4).map((_, i) => (
                     <div
                         key={i}
@@ -220,8 +220,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             size="icon"
             variant="secondary"
             className={cn(
-                "absolute top-2 left-2 rounded-full w-8 h-8 shadow-md hover:bg-background z-10",
-                "opacity-0 transition-opacity duration-300 group-hover:opacity-100",
+                "absolute top-2 right-2 rounded-full w-8 h-8 shadow-md hover:bg-background z-10",
                 isWishlisted ? "text-primary hover:text-primary/90" : "hover:text-red-500"
             )}
             onClick={handleWishlistClick}
@@ -235,104 +234,53 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
+
+             <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => {
+                    const ratingValue = i + 1;
+                    return (
+                        <Star
+                            key={i}
+                            className={cn(
+                                "h-4 w-4",
+                                rating >= ratingValue ? "text-green-500 fill-green-500" : "text-gray-300"
+                            )}
+                        />
+                    );
+                })}
+                 <span className="text-xs text-muted-foreground ml-1">({rating.toFixed(1)})</span>
+            </div>
             
-            <div className="mt-auto pt-2 grid grid-cols-1 gap-y-3">
-                 <div className="flex items-center justify-between">
-                     <div className="flex flex-col items-start justify-center">
-                        <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => {
-                                const ratingValue = i + 1;
-                                const fullStar = rating >= ratingValue;
-                                const halfStar = rating > i && rating < ratingValue;
-
-                                return (
-                                    <div key={i} className="relative">
-                                        <Star
-                                            className={cn(
-                                                "h-4 w-4",
-                                                (fullStar || halfStar) ? "text-green-500" : "text-gray-300"
-                                            )}
-                                            style={{
-                                                fill: fullStar ? 'currentColor' : 'transparent'
-                                            }}
-                                        />
-                                        {halfStar && (
-                                            <div
-                                                className="absolute top-0 left-0 h-full overflow-hidden"
-                                                style={{ width: `${(rating - i) * 100}%` }}
-                                            >
-                                                <Star className="h-4 w-4 text-green-500 fill-current" />
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className="flex items-baseline gap-x-2 flex-wrap">
-                            <p className="text-base font-bold text-foreground">
-                                ₹{sellingPrice.toLocaleString('en-IN')}
-                            </p>
-                            {hasDiscount && (
-                                <p className="text-xs font-medium text-muted-foreground line-through">
-                                    ₹{mrp.toLocaleString('en-IN')}
-                                </p>
-                            )}
-                        </div>
-                    
-                        <div className="min-h-[16px]">
-                            {hasDiscount && (
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-xs font-semibold text-green-600">
-                                        {discountPercentage}% off
-                                    </span>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
-                                                    <Info className="h-3 w-3 text-muted-foreground" />
-                                                </button>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="p-3 w-64" side="top" align="center">
-                                                <div className="space-y-2">
-                                                    <p className="font-bold text-base">Price details</p>
-                                                    <div className="flex justify-between text-sm">
-                                                        <p className="text-muted-foreground">Maximum Retail Price</p>
-                                                        <p>₹{mrp.toFixed(2)}</p>
-                                                    </div>
-                                                    <div className="flex justify-between text-sm">
-                                                        <p className="text-muted-foreground">Selling Price</p>
-                                                        <p>₹{sellingPrice.toFixed(2)}</p>
-                                                    </div>
-                                                    <Separator />
-                                                    <div className="flex justify-between text-sm font-semibold text-green-600">
-                                                    <p>Overall you save</p>
-                                                    <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
-                                                    </div>
-                                                </div>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+            <div className="mt-2 space-y-1">
+                 <div className="flex items-baseline gap-x-2 flex-wrap">
+                    <p className="text-base font-bold text-foreground">
+                        ₹{sellingPrice.toLocaleString('en-IN')}
+                    </p>
+                    {hasDiscount && (
+                        <p className="text-xs font-medium text-muted-foreground line-through">
+                            ₹{mrp.toLocaleString('en-IN')}
+                        </p>
+                    )}
                 </div>
-                 <div className="flex items-center justify-center space-x-2">
-                    <div className="flex items-center justify-center rounded-full border p-0 h-9 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, -1)}><Minus className="h-4 w-4" /></Button>
-                        <span className="w-4 text-center font-semibold text-sm">{quantity}</span>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => handleQuantityChange(e, 1)}><Plus className="h-4 w-4" /></Button>
-                    </div>
-                    <Button
-                        variant="outline"
-                        className="rounded-full h-9 px-4 flex-grow hover:bg-primary hover:text-primary-foreground"
-                        onClick={handleCartClick}
-                    >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Add
-                    </Button>
+            
+                <div className="min-h-[16px]">
+                    {hasDiscount && (
+                        <span className="text-xs font-semibold text-green-600">
+                            {discountPercentage}% off
+                        </span>
+                    )}
                 </div>
+            </div>
+
+            <div className="mt-4">
+                 <Button
+                    variant="outline"
+                    className="w-full rounded-md h-9 px-4 hover:bg-primary hover:text-primary-foreground"
+                    onClick={handleCartClick}
+                >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    ADD TO CART
+                </Button>
             </div>
         </div>
       </motion.div>
