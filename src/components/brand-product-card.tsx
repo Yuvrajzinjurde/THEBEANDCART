@@ -230,7 +230,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         </Button>
 
         <div className="p-3 flex flex-col flex-grow">
-            <div className="flex-grow space-y-1 mb-2">
+            <div className="flex-grow space-y-1 mb-1">
                 <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
@@ -251,7 +251,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                  <span className="text-xs text-muted-foreground ml-1">({rating.toFixed(1)})</span>
             </div>
             
-            <div className="mt-2 space-y-1">
+            <div className="mt-1">
                  <div className="flex items-baseline gap-x-2 flex-wrap">
                     <p className="text-base font-bold text-foreground">
                         ₹{sellingPrice.toLocaleString('en-IN')}
@@ -272,7 +272,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </div>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-2">
                  <Button
                     variant="outline"
                     className="w-full rounded-md h-9 px-4 hover:bg-primary hover:text-primary-foreground"
