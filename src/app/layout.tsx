@@ -48,7 +48,7 @@ export default async function RootLayout({
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
-                {!isAdminRoute && <Header />}
+                {!isAdminRoute && !isBrandRoute && <Header />}
                 <main className="flex-1 flex flex-col">{children}</main>
                 {!isAdminRoute && !isBrandRoute && <GlobalFooter />}
             </AuthProvider>
