@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, createContext, useCallback, useContext } from 'react';
+import React, { useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/stores/user-store';
 import { create } from 'zustand';
@@ -27,7 +27,19 @@ const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   loading: true,
-  login: (user, token) => set({ user, token, loading: false }),
+  login: (user, token) => {
+    set({ user, token, loading: false });
+    // After login, fetch user-specific data
+    Promise.all([
+      fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }),
+    ]).then(async ([cartRes, wishlistRes, notificationsRes]) => {
+      if (cartRes.ok) useUserStore.getState().setCart(await cartRes.json().then(d => d.cart));
+      if (wishlistRes.ok) useUserStore.getState().setWishlist(await wishlistRes.json().then(d => d.wishlist));
+      if (notificationsRes.ok) useUserStore.getState().setNotifications(await notificationsRes.json().then(d => d.notifications));
+    });
+  },
   logout: async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
@@ -35,6 +47,7 @@ const useAuthStore = create<AuthState>((set) => ({
       console.error('Logout failed', error);
     } finally {
       set({ user: null, token: null, loading: false });
+      // Clear user-specific data on logout
       useUserStore.getState().setCart(null);
       useUserStore.getState().setWishlist(null);
       useUserStore.getState().setNotifications([]);
@@ -45,7 +58,7 @@ const useAuthStore = create<AuthState>((set) => ({
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const { user: userData } = await res.json();
-        const token = 'authenticated'; // Since we are using httpOnly cookies, we just need a truthy value
+        const token = 'authenticated'; // Placeholder token since it's in an httpOnly cookie
         
         // Fetch user-specific data after confirming authentication
         const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
@@ -57,8 +70,9 @@ const useAuthStore = create<AuthState>((set) => ({
         if (cartRes.ok) useUserStore.getState().setCart(await cartRes.json().then(d => d.cart));
         if (wishlistRes.ok) useUserStore.getState().setWishlist(await wishlistRes.json().then(d => d.wishlist));
         if (notificationsRes.ok) useUserStore.getState().setNotifications(await notificationsRes.json().then(d => d.notifications));
-
+        
         set({ user: userData, token, loading: false });
+
       } else {
         set({ user: null, token: null, loading: false });
       }
@@ -68,6 +82,11 @@ const useAuthStore = create<AuthState>((set) => ({
     }
   },
 }));
+
+// Initialize the check user status on load
+if (typeof window !== 'undefined') {
+    useAuthStore.getState().checkUser();
+}
 
 export const AuthContext = createContext<Omit<AuthState, 'checkUser'>>(useAuthStore.getState());
 
@@ -82,12 +101,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const checkUser = useAuthStore((state) => state.checkUser);
   const loading = useAuthStore((state) => state.loading);
-
-  useEffect(() => {
-    checkUser();
-  }, [checkUser]);
 
   if (loading) {
     return (
