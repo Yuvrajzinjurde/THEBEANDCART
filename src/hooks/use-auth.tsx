@@ -19,6 +19,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
+  logout: () => void;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   setLoading: (loading: boolean) => void;
@@ -28,99 +29,94 @@ const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   loading: true,
+  logout: () => {}, // Placeholder, will be overwritten
   setUser: (user) => set({ user }),
   setToken: (token) => set({ token }),
   setLoading: (loading) => set({ loading }),
 }));
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const router = useRouter();
-  const { setUser, setToken, setLoading, user } = useAuthStore();
-  const { setCart, setWishlist, setNotifications } = useUserStore();
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setToken(null);
-    setCart(null);
-    setWishlist(null);
-    setNotifications([]);
-    router.replace('/login');
-  }, [router, setUser, setToken, setCart, setWishlist, setNotifications]);
+// This component will handle all the logic that depends on the router
+const AuthHandler = ({ children }: { children: React.ReactNode }) => {
+    const router = useRouter();
+    const { setUser, setToken, setLoading } = useAuthStore();
+    const { setCart, setWishlist, setNotifications } = useUserStore();
 
-  const fetchUserData = useCallback(async (currentToken: string) => {
-    try {
-        const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
-          fetch('/api/cart', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
-          fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
-          fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
-        ]);
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken(null);
+        setCart(null);
+        setWishlist(null);
+        setNotifications([]);
+        router.replace('/login');
+    }, [router, setUser, setToken, setCart, setWishlist, setNotifications]);
 
-        if (cartRes.ok) {
-            const { cart } = await cartRes.json();
-            setCart(cart);
-        }
-        if (wishlistRes.ok) {
-            const { wishlist } = await wishlistRes.json();
-            setWishlist(wishlist);
-        }
-        if (notificationsRes.ok) {
-            const { notifications } = await notificationsRes.json();
-            setNotifications(notifications);
-        }
-    } catch (error) {
-        console.error("Failed to fetch user data in background:", error);
-    }
-  }, [setCart, setWishlist, setNotifications]);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    // Set the logout function in the store
+    useEffect(() => {
+        useAuthStore.setState({ logout });
+    }, [logout]);
     
-    if (storedToken) {
-      try {
-        const decoded = jwtDecode<User>(storedToken);
-        if (decoded.exp * 1000 < Date.now()) {
-          logout();
-        } else {
-          setUser(decoded);
-          setToken(storedToken);
-          fetchUserData(storedToken); 
+    const fetchUserData = useCallback(async (currentToken: string) => {
+        try {
+            const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
+            fetch('/api/cart', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
+            fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
+            fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
+            ]);
+
+            if (cartRes.ok) {
+                const { cart } = await cartRes.json();
+                setCart(cart);
+            }
+            if (wishlistRes.ok) {
+                const { wishlist } = await wishlistRes.json();
+                setWishlist(wishlist);
+            }
+            if (notificationsRes.ok) {
+                const { notifications } = await notificationsRes.json();
+                setNotifications(notifications);
+            }
+        } catch (error) {
+            console.error("Failed to fetch user data in background:", error);
         }
-      } catch (error) {
-        console.error("Invalid token on load:", error);
-        logout();
-      }
-    }
-    setLoading(false);
-  }, [logout, setUser, setToken, fetchUserData]); 
+    }, [setCart, setWishlist, setNotifications]);
 
-  // Create a value object that includes the logout function
-  const authContextValue = {
-    ...useAuthStore(),
-    logout,
-  };
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        
+        if (storedToken) {
+        try {
+            const decoded = jwtDecode<User>(storedToken);
+            if (decoded.exp * 1000 < Date.now()) {
+            logout();
+            } else {
+            setUser(decoded);
+            setToken(storedToken);
+            fetchUserData(storedToken); 
+            }
+        } catch (error) {
+            console.error("Invalid token on load:", error);
+            logout();
+        }
+        }
+        setLoading(false);
+    }, [logout, setUser, setToken, fetchUserData]);
 
+    return <>{children}</>;
+}
+
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <AuthContext.Provider value={authContextValue as any}>
-      {children}
-    </AuthContext.Provider>
+      <AuthHandler>
+          {children}
+      </AuthHandler>
   );
 };
 
-// Custom hook to use the auth store and context
+// Custom hook to use the auth store
 export const useAuth = () => {
     const store = useAuthStore();
-    const context = useContext(AuthContext);
-
-    if (context === undefined) {
-        // This might happen on the very first render before the provider is mounted.
-        // We can return the store's state and a placeholder logout.
-        return { ...store, logout: () => {} };
-    }
-    
-    // The context holds the logout function
-    return { ...store, logout: context.logout };
+    return store;
 };
-
-// Create the context
-const AuthContext = createContext<{ logout: () => void; } | undefined>(undefined);
