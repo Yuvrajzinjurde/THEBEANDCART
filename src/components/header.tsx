@@ -35,7 +35,7 @@ import { Skeleton } from "./ui/skeleton";
 import { NotificationsPopover } from "./notifications-drawer";
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const params = useParams();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -203,20 +203,32 @@ export default function Header() {
 
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
-            <Link href="/wishlist" className="relative">
-                <Heart className="h-5 w-5" />
-                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
-            </Link>
-        </Button>
-        <NotificationsPopover />
-        <UserNav />
-        <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href={`/cart`} className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
-            </Link>
-        </Button>
+        {authLoading ? (
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9 rounded-full" />
+            </div>
+        ) : user ? (
+            <>
+                <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
+                    <Link href="/wishlist" className="relative">
+                        <Heart className="h-5 w-5" />
+                        {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
+                    </Link>
+                </Button>
+                <NotificationsPopover />
+                <UserNav />
+                <Button variant="ghost" size="icon" aria-label="Cart" asChild>
+                    <Link href={`/cart`} className="relative">
+                        <ShoppingCart className="h-5 w-5" />
+                        {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                    </Link>
+                </Button>
+            </>
+        ) : (
+            <Button asChild><Link href="/login">Login</Link></Button>
+        )}
     </div>
   );
   
@@ -320,16 +332,7 @@ export default function Header() {
 
         {/* Actions */}
         <div className="hidden md:flex">
-            {isLoading ? (
-                <div className="flex items-center gap-1">
-                    <Skeleton className="h-9 w-9" />
-                    <Skeleton className="h-9 w-9" />
-                    <Skeleton className="h-9 w-9 rounded-full" />
-                    <Skeleton className="h-9 w-9" />
-                </div>
-            ) : (
-                <DesktopNavActions />
-            )}
+            <DesktopNavActions />
         </div>
 
         {/* Mobile Navigation */}
