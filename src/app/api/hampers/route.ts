@@ -2,20 +2,26 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
+import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { Types } from 'mongoose';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
 }
 
-const getToken = () => {
-    const cookieStore = cookies();
-    return cookieStore.get('accessToken')?.value;
-}
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
 
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
+}
 
 const HamperUpdateSchema = z.object({
     occasion: z.string().optional(),
@@ -33,12 +39,9 @@ const HamperUpdateSchema = z.object({
 export async function GET(req: Request) {
     await dbConnect();
     try {
-        const token = getToken();
-        if (!token) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        const userId = getUserIdFromToken(req);
+        if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         
-        const decoded = jwt.decode(token) as DecodedToken;
-        const userId = decoded.userId;
-
         const hamper = await Hamper.findOne({ userId, isComplete: false });
 
         return NextResponse.json({ hamper }, { status: 200 });
@@ -54,11 +57,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     await dbConnect();
     try {
-        const token = getToken();
-        if (!token) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-
-        const decoded = jwt.decode(token) as DecodedToken;
-        const userId = decoded.userId;
+        const userId = getUserIdFromToken(req);
+        if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
 
         const body = await req.json();
         const validation = HamperUpdateSchema.safeParse(body);
@@ -67,7 +67,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
         
-        // Use findOneAndUpdate with upsert to create or update the user's active hamper
         const updatedHamper = await Hamper.findOneAndUpdate(
             { userId, isComplete: false },
             { $set: { ...validation.data, userId } },
@@ -86,12 +85,9 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
     await dbConnect();
     try {
-        const token = getToken();
-        if (!token) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        const userId = getUserIdFromToken(req);
+        if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         
-        const decoded = jwt.decode(token) as DecodedToken;
-        const userId = decoded.userId;
-
         await Hamper.deleteOne({ userId, isComplete: false });
 
         return NextResponse.json({ message: 'Hamper progress discarded' }, { status: 200 });

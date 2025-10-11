@@ -29,7 +29,7 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { wishlist, setWishlist, cart, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
   
@@ -60,7 +60,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     };
   }, [api]);
 
-  // Each card needs its own instance of the autoplay plugin.
   const autoplayPlugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true, playOnInit: false })
   );
@@ -73,7 +72,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     const stopAutoplay = () => {
       autoplayPlugin.current.stop();
       if(api) {
-        api.scrollTo(0); // Reset to first slide on mouse leave
+        api.scrollTo(0);
       }
     };
 
@@ -98,7 +97,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) {
+    if (!user || !token) {
         toast.info("Please log in to add items to your wishlist.");
         router.push(`/${product.storefront}/login`);
         return;
@@ -108,6 +107,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ productId: product._id }),
         });
@@ -116,12 +116,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         toast.success(result.message);
         setWishlist(result.wishlist);
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        toast.error(error.message);
     }
   };
 
   const handleUpdateCart = async (quantity: number) => {
-     if (!user) {
+     if (!user || !token) {
         toast.info("Please log in to manage your cart.");
         router.push(`/${product.storefront}/login`);
         return;
@@ -132,6 +132,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ productId: product._id, quantity, size: product.size, color: product.color }),
             });
@@ -145,10 +146,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             throw error;
         }
     } else {
-        // Remove from cart
          try {
             const response = await fetch(`/api/cart?productId=${product._id}`, {
                 method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);

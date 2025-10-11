@@ -69,8 +69,9 @@ export async function POST(req: Request) {
       { expiresIn: '7d' } // Long-lived refresh token
     );
 
+    // Make accessToken accessible to client-side script
     const accessTokenCookie = serialize('accessToken', accessToken, {
-        httpOnly: true,
+        httpOnly: false, // Important: make it readable by JS
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
         maxAge: 60 * 15, // 15 minutes
@@ -91,7 +92,8 @@ export async function POST(req: Request) {
             name: user.firstName,
             roles: userRoles,
             brand: user.brand
-        }
+        },
+        token: accessToken // Send token in body as well
     }, { status: 200 });
 
     response.headers.append('Set-Cookie', accessTokenCookie);

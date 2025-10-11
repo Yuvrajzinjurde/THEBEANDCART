@@ -77,6 +77,7 @@ export default function WishlistPage() {
   }, [user, authLoading, router]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
+    if (!token) return;
     try {
       const response = await fetch('/api/wishlist', {
         method: 'POST',
@@ -90,11 +91,12 @@ export default function WishlistPage() {
       if (!response.ok) throw new Error(result.message);
       setWishlist(result.wishlist);
     } catch (error: any) {
-      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+      toast.error(error.message);
     }
   };
 
   const handleAddToCart = async (product: IProduct) => {
+    if (!token) return;
     const availableStock = product.stock ?? 0;
     if (availableStock === 0) {
       toast.error("This item is out of stock.");
@@ -102,7 +104,6 @@ export default function WishlistPage() {
     }
 
     try {
-      // Add to cart
       const cartResponse = await fetch('/api/cart', {
           method: 'POST',
           headers: { 
@@ -115,11 +116,10 @@ export default function WishlistPage() {
       if (!cartResponse.ok) throw new Error(cartResult.message);
       setCart(cartResult.cart);
       
-      // Remove from wishlist
       await handleRemoveFromWishlist(product._id as string);
 
     } catch (error: any) {
-      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+      toast.error(error.message);
     }
   };
 

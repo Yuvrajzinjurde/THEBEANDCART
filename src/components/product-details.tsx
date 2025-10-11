@@ -64,7 +64,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
 
 export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, reviews, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   
   const [product, setProduct] = useState(initialProduct);
@@ -89,17 +89,15 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const [isZooming, setIsZooming] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Update product when initialProduct from props changes
   useEffect(() => {
     setProduct(initialProduct);
     setSelectedColor(initialProduct.color);
     setSelectedSize(initialProduct.size);
-    setQuantity(1); // Reset quantity when product changes
+    setQuantity(1);
   }, [initialProduct]);
 
-  // Memoize variant options
   const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
-    const colorMap = new Map<string, string>(); // color -> imageUrl
+    const colorMap = new Map<string, string>();
     const sizeSet = new Set<string>();
     
     variants.forEach(v => {
@@ -117,13 +115,11 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     };
   }, [variants, selectedColor]);
   
-  // Navigate to the correct variant URL when color/size selection changes
   useEffect(() => {
     const variant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
     if (variant && variant._id !== product._id) {
         router.replace(`/${storefront}/products/${variant._id}`);
     } else if (!variant && selectedColor) {
-      // If a color is selected but not a size yet, find the first available variant of that color
       const firstVariantOfColor = variants.find(v => v.color === selectedColor);
       if (firstVariantOfColor && firstVariantOfColor._id !== product._id) {
         router.replace(`/${storefront}/products/${firstVariantOfColor._id}`);
@@ -132,7 +128,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   }, [selectedColor, selectedSize, variants, product._id, router, storefront]);
 
 
-  // Carousel synchronization logic
   const onThumbClick = useCallback((index: number) => {
     mainApi?.scrollTo(index);
   }, [mainApi]);
@@ -153,7 +148,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     mainApi.on('reInit', onSelect);
   }, [mainApi, onSelect]);
 
-  // Zoom logic
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
@@ -163,7 +157,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   const mediaItems = useMemo(() => [
     ...product.images.map(url => ({ type: 'image', url })),
-    // ...(product.videos?.map(url => ({ type: 'video', url })) || [])
   ], [product.images]);
 
   const categoryDisplay = product.category;
@@ -183,10 +176,8 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     setQuantity(q => Math.max(1, q - 1));
   };
 
-
-  // Action Handlers
   const handleAddToCart = async () => {
-    if (!user) {
+    if (!user || !token) {
         toast.info("Please log in to add items to your cart.");
         router.push(`/${storefront}/login`);
         return;
@@ -200,7 +191,10 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     try {
         const response = await fetch('/api/cart', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ 
               productId: product._id, 
               quantity: quantity,
@@ -218,7 +212,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   };
 
   const handleAddToWishlist = async () => {
-     if (!user) {
+     if (!user || !token) {
         toast.info("Please log in to add items to your wishlist.");
         router.push(`/${storefront}/login`);
         return;
@@ -226,7 +220,10 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     try {
         const response = await fetch('/api/wishlist', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ productId: product._id }),
         });
         const result = await response.json();
@@ -234,13 +231,12 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         toast.success(result.message);
         setWishlist(result.wishlist);
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        toast.error(error.message);
     }
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-      {/* Left Column: Media Gallery */}
       <div className="md:sticky top-24 self-start flex flex-col items-center">
         <div className="w-full max-w-md space-y-4">
           <div
@@ -314,7 +310,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         </div>
       </div>
 
-      {/* Right Column: Product Info */}
       <div className="mt-8 md:mt-0">
         <Breadcrumb>
           <BreadcrumbList>
@@ -382,7 +377,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     
         <Separator className="my-6" />
         
-        {/* Variant Selectors */}
         {uniqueColors.length > 0 && (
             <div className="space-y-4 mb-4">
                 <h3 className="text-sm font-semibold uppercase text-muted-foreground">Color</h3>
@@ -439,7 +433,6 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
         {(uniqueColors.length > 0 || sizesForSelectedColor.length > 0) && <Separator className="my-6" />}
         
-        {/* Offers and Policy */}
         <div className="space-y-4">
             {coupons.length > 0 && (
                 <div className="space-y-2">

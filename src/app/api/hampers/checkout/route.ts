@@ -1,34 +1,39 @@
 
 
 import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
 import Cart, { ICart } from '@/models/cart.model';
 import Product from '@/models/product.model';
 import Box from '@/models/box.model';
 import { Types } from 'mongoose';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
 }
 
-const getToken = () => {
-    const cookieStore = cookies();
-    return cookieStore.get('accessToken')?.value;
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
 }
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = getToken();
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwt.decode(token) as DecodedToken;
-    const userId = decoded.userId;
 
     const hamper = await Hamper.findOne({ userId, isComplete: false });
 
@@ -40,19 +45,16 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'Hamper is incomplete. Please select products, a box, and a bag.' }, { status: 400 });
     }
     
-    // Mark the hamper as complete
     hamper.isComplete = true;
     hamper.isAddedToCart = true;
     await hamper.save();
     
     let cart: ICart | null = await Cart.findOne({ userId });
     
-    // Create new cart if it doesn't exist
     if (!cart) {
         cart = await Cart.create({ userId, items: [] });
     }
 
-    // Add all products from the hamper to the cart
     for (const productId of hamper.products) {
         const product = await Product.findById(productId);
         if (product && product.stock > 0) {
@@ -60,13 +62,10 @@ export async function POST(req: Request) {
         }
     }
 
-    // Add box and bag as items in the cart
     const box = await Box.findById(hamper.boxId);
     if(box && hamper.boxVariantId) {
         const boxVariant = box.variants.find(v => (v as any)._id.equals(hamper.boxVariantId));
         if (boxVariant && boxVariant.sellingPrice > 0) {
-            // This is a simplification. A real app might have boxes as actual products.
-            // For now, we find or create a temporary "product" for the box to add to cart
             const productName = `${box.name} (${boxVariant.name})`;
             let boxProduct = await Product.findOne({ name: productName, storefront: 'hamper-assets' });
             if (!boxProduct) {

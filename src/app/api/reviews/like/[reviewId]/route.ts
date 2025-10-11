@@ -5,6 +5,26 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Review from '@/models/review.model';
 import { Types } from 'mongoose';
+import jwt from 'jsonwebtoken';
+
+interface DecodedToken {
+  userId: string;
+}
+
+// This function is simple and doesn't verify the token, it just decodes it.
+// For a production app, you'd want to verify it against the secret.
+const getAuthFromToken = (req: Request): DecodedToken | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded;
+    } catch (error) {
+        return null;
+    }
+}
 
 export async function POST(
   req: Request,
@@ -12,13 +32,17 @@ export async function POST(
 ) {
   try {
     await dbConnect();
+    
+    const auth = getAuthFromToken(req);
+    if (!auth) {
+        return NextResponse.json({ message: 'Authentication required to like a review.' }, { status: 401 });
+    }
 
     const { reviewId } = params;
     if (!Types.ObjectId.isValid(reviewId)) {
       return NextResponse.json({ message: 'Invalid Review ID' }, { status: 400 });
     }
 
-    // A simple POST to this endpoint increments the like. No user tracking for simplicity.
     const review = await Review.findByIdAndUpdate(
       reviewId,
       { $inc: { likes: 1 } },

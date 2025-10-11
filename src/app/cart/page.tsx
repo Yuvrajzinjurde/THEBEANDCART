@@ -90,14 +90,13 @@ const EXTRA_DISCOUNT_THRESHOLD = 799;
 const FREE_GIFT_THRESHOLD = 999;
 const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
 
-// Create a mock product for the free gift
 const freeGiftProduct: IProduct = {
     _id: 'free-gift-id',
     name: 'Surprise Gift',
     brand: 'From us, to you!',
-    images: [''], // No image needed, we use the icon
+    images: [''],
     sellingPrice: 0,
-    mrp: 999, // Show a perceived value
+    mrp: 999,
     storefront: 'reeva',
     category: 'Gift',
     description: '',
@@ -284,7 +283,6 @@ export default function CartPage() {
         }));
     
     if (subtotal >= FREE_GIFT_THRESHOLD) {
-        // Add the free gift as an item to the cart list
         items.push({
             productId: 'free-gift-id' as any,
             quantity: 1,
@@ -298,6 +296,7 @@ export default function CartPage() {
 
   const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
+    if (!token) return;
 
     try {
       const response = await fetch('/api/cart', {
@@ -312,11 +311,12 @@ export default function CartPage() {
       if (!response.ok) throw new Error(result.message);
       setCart(result.cart);
     } catch (error: any) {
-      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+      toast.error(error.message);
     }
   };
 
   const handleRemoveItem = async (productId: string) => {
+    if (!token) return;
     try {
       const response = await fetch(`/api/cart?productId=${productId}`, {
         method: 'DELETE',
@@ -326,27 +326,28 @@ export default function CartPage() {
       if (!response.ok) throw new Error(result.message);
       setCart(result.cart);
     } catch (error: any) {
-      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+      toast.error(error.message);
     }
   };
 
   const handleMoveToWishlist = async (productId: string) => {
+    if (!token) return;
     try {
-      // First, add to wishlist
       const wishlistRes = await fetch('/api/wishlist', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({ productId }),
       });
       const wishlistResult = await wishlistRes.json();
       if (!wishlistRes.ok) throw new Error(wishlistResult.message);
       setWishlist(wishlistResult.wishlist);
-
-      // Then, remove from cart
       await handleRemoveItem(productId);
 
     } catch (error: any) {
-      toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+      toast.error(error.message);
     }
   };
 
@@ -379,7 +380,6 @@ export default function CartPage() {
     }
 
     try {
-      // 1. Create a Razorpay Order
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -394,7 +394,6 @@ export default function CartPage() {
         throw new Error("Could not create payment order.");
       }
 
-      // 2. Open Razorpay Checkout
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -403,13 +402,12 @@ export default function CartPage() {
         description: "Order Payment",
         order_id: order.id,
         handler: async function (response: any) {
-          // TODO: Verify payment on backend and create order in DB
           toast.success("Payment Successful!");
-          router.push('/order-confirmation'); // Redirect to a confirmation page
+          router.push('/order-confirmation');
         },
         prefill: {
           name: user.name,
-          email: (user as any).email, // Assuming email is part of user object
+          email: (user as any).email,
         },
         theme: {
           color: "#3399cc"
@@ -419,9 +417,9 @@ export default function CartPage() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Checkout failed", error);
-      toast.error("Could not initiate payment. Please try again.");
+      toast.error(error.message);
     }
   };
 
@@ -474,7 +472,7 @@ export default function CartPage() {
                     </BreadcrumbList>
                     </Breadcrumb>
                 </div>
-                <div className="lg:hidden w-48" /> {/* Spacer for mobile */}
+                <div className="lg:hidden w-48" />
             </div>
             <div className="flex-grow flex justify-center w-full">
                 <CartProgressBar currentValue={subtotal} />

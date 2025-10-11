@@ -49,6 +49,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.3.11",
     "genkit": "^1.14.1",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.475.0",
@@ -74,6 +75,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.13",
     "@types/bcryptjs": "^2.4.6",
+    "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
     "@types/react": "^18",

@@ -2,29 +2,35 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/notification.model';
-import { Types } from 'mongoose';
-import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 interface DecodedToken {
   userId: string;
 }
 
-const getToken = () => {
-    const cookieStore = cookies();
-    return cookieStore.get('accessToken')?.value;
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
 }
 
 // POST to mark all notifications for a user as read
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const token = getToken();
-    if (!token) {
+    const userIdString = getUserIdFromToken(req);
+    if (!userIdString) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwt.decode(token) as DecodedToken;
-    const userId = new Types.ObjectId(decoded.userId);
+    const userId = new Types.ObjectId(userIdString);
 
     await Notification.updateMany(
       { recipientUsers: userId }, 

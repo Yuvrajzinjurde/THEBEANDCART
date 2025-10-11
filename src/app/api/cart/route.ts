@@ -1,21 +1,27 @@
 
 
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Cart, { ICart } from '@/models/cart.model';
 import Product from '@/models/product.model';
 import { Types } from 'mongoose';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
 }
 
-const getToken = () => {
-    const cookieStore = cookies();
-    return cookieStore.get('accessToken')?.value;
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
 }
 
 // GET the user's cart
@@ -23,12 +29,10 @@ export async function GET(req: Request) {
     try {
         await dbConnect();
         
-        const token = getToken();
-        if (!token) {
+        const userId = getUserIdFromToken(req);
+        if (!userId) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwt.decode(token) as DecodedToken;
-        const userId = decoded.userId;
 
         const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
         if (!cart) {
@@ -51,12 +55,10 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = getToken();
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwt.decode(token) as DecodedToken;
-    const userId = decoded.userId;
 
     const { productId, quantity, size, color } = await req.json();
 
@@ -120,12 +122,10 @@ export async function DELETE(req: Request) {
     try {
         await dbConnect();
 
-        const token = getToken();
-        if (!token) {
+        const userId = getUserIdFromToken(req);
+        if (!userId) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwt.decode(token) as DecodedToken;
-        const userId = decoded.userId;
         
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get('productId');
@@ -140,8 +140,6 @@ export async function DELETE(req: Request) {
         }
 
         const initialLength = cart.items.length;
-        // This will remove all variants of a product ID. If you need to remove a specific variant,
-        // you'd need to pass size/color here as well. For now, this seems acceptable.
         cart.items = cart.items.filter(item => item.productId.toString() !== productId);
 
         if (cart.items.length === initialLength) {

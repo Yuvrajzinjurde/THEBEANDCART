@@ -29,16 +29,14 @@ export async function GET(req: NextRequest) {
         try {
             decodedAccessToken = jwt.verify(accessToken, JWT_SECRET) as jwt.JwtPayload;
         } catch (error) {
-            // Access token expired or invalid
             decodedAccessToken = null;
         }
     }
 
     if (decodedAccessToken) {
-        return NextResponse.json({ user: decodedAccessToken });
+        return NextResponse.json({ user: decodedAccessToken, token: accessToken });
     }
     
-    // If access token is expired, try to refresh it
     if (!refreshToken) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
@@ -60,27 +58,28 @@ export async function GET(req: NextRequest) {
         );
 
         const accessTokenCookie = serialize('accessToken', newAccessToken, {
-            httpOnly: true,
+            httpOnly: false, // Match login route
             secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
             maxAge: 60 * 15,
             path: '/',
         });
-
-        const response = NextResponse.json({ user: {
+        
+        const userData = {
             userId: user._id,
             roles: userRoles,
             name: user.firstName,
             brand: user.brand,
-        }});
+        };
+
+        const response = NextResponse.json({ user: userData, token: newAccessToken });
         
         response.headers.set('Set-Cookie', accessTokenCookie);
         
         return response;
 
     } catch (error) {
-        // Clear cookies if refresh token is invalid
-        const expiredAccessTokenCookie = serialize('accessToken', '', { httpOnly: true, maxAge: -1, path: '/' });
+        const expiredAccessTokenCookie = serialize('accessToken', '', { httpOnly: false, maxAge: -1, path: '/' });
         const expiredRefreshTokenCookie = serialize('refreshToken', '', { httpOnly: true, maxAge: -1, path: '/' });
         
         const response = NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

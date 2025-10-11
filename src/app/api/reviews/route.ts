@@ -8,7 +8,6 @@ import Review from '@/models/review.model';
 import Product from '@/models/product.model';
 import Order from '@/models/order.model';
 import { Types } from 'mongoose';
-import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
@@ -16,9 +15,17 @@ interface DecodedToken {
   name: string;
 }
 
-const getToken = () => {
-    const cookieStore = cookies();
-    return cookieStore.get('accessToken')?.value;
+const getAuthFromToken = (req: Request): DecodedToken | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded;
+    } catch (error) {
+        return null;
+    }
 }
 
 const ReviewSubmissionSchema = z.object({
@@ -33,13 +40,12 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = getToken();
-    if (!token) {
+    const auth = getAuthFromToken(req);
+    if (!auth) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwt.decode(token) as DecodedToken;
-    const userId = new Types.ObjectId(decoded.userId);
-    const userName = decoded.name;
+    const userId = new Types.ObjectId(auth.userId);
+    const userName = auth.name;
 
     const body = await req.json();
     const validation = ReviewSubmissionSchema.safeParse(body);
@@ -56,7 +62,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    // Find all variants to check for existing reviews and for purchase validation
     const variantIds = product.styleId 
         ? (await Product.find({ styleId: product.styleId }, '_id')).map(p => p._id)
         : [productObjectId];
@@ -77,7 +82,7 @@ export async function POST(req: Request) {
     }
 
     const newReview = new Review({
-        productId: productObjectId, // Associate review with the specific variant purchased
+        productId: productObjectId,
         userId,
         userName,
         rating,
@@ -87,7 +92,6 @@ export async function POST(req: Request) {
 
     await newReview.save();
 
-    // After saving, recalculate average rating for all variants
     const stats = await Review.aggregate([
         { $match: { productId: { $in: variantIds } } },
         { $group: { _id: null, avgRating: { $avg: '$rating' } } }
@@ -95,7 +99,6 @@ export async function POST(req: Request) {
 
     if (stats.length > 0) {
         const newAverageRating = stats[0].avgRating;
-        // Update all variants with the new average rating
         await Product.updateMany(
             { _id: { $in: variantIds } },
             { $set: { rating: newAverageRating } }

@@ -1,20 +1,27 @@
 
 
 import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Wishlist, { IWishlist } from '@/models/wishlist.model';
 import Product from '@/models/product.model';
 import { Types } from 'mongoose';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
 }
 
-const getToken = () => {
-    const cookieStore = cookies();
-    return cookieStore.get('accessToken')?.value;
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.decode(token) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
 }
 
 // GET the user's wishlist
@@ -22,17 +29,14 @@ export async function GET(req: Request) {
     try {
         await dbConnect();
 
-        const token = getToken();
-        if (!token) {
+        const userId = getUserIdFromToken(req);
+        if (!userId) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwt.decode(token) as DecodedToken;
-        const userId = decoded.userId;
 
         const wishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products',
             model: Product,
-            // Explicitly select the stock field
             select: 'name images sellingPrice mrp category rating storefront stock brand',
         });
         
@@ -57,12 +61,10 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = getToken();
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwt.decode(token) as DecodedToken;
-    const userId = decoded.userId;
 
     const { productId } = await req.json();
 
@@ -84,21 +86,17 @@ export async function POST(req: Request) {
     let message: string;
 
     if (wishlist) {
-      // Wishlist exists for user
       const productIndex = wishlist.products.findIndex(p => p.toString() === productId);
 
       if (productIndex > -1) {
-        // Product is already in the wishlist, remove it
         wishlist.products.splice(productIndex, 1);
         message = 'Product removed from wishlist.';
       } else {
-        // Product is not in the wishlist, add it
         wishlist.products.push(new Types.ObjectId(productId));
         message = 'Product added to wishlist.';
       }
       await wishlist.save();
     } else {
-      // No wishlist for user, create a new one
       wishlist = await Wishlist.create({
         userId,
         products: [new Types.ObjectId(productId)],

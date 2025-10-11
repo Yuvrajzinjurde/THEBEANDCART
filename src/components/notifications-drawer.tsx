@@ -56,7 +56,7 @@ const NotificationItem = ({ notification, userId, closePopover }: { notification
     const Icon = NOTIFICATION_ICONS[notification.type] || Circle;
 
     const handleNotificationClick = async () => {
-        if (!isRead) {
+        if (!isRead && token) {
              try {
                 const response = await fetch(`/api/notifications/${notification._id}`, {
                     method: 'PATCH',
@@ -121,6 +121,7 @@ export function NotificationsPopover() {
     }, [activeTab, sortedNotifications, user]);
   
     const handleMarkAllAsRead = async () => {
+        if (!token) return;
         try {
             const response = await fetch('/api/notifications/mark-all-read', {
                 method: 'POST',
