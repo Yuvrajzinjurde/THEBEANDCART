@@ -49,7 +49,10 @@ export default async function RootLayout({
             <title>{platformSettings?.platformName || 'The Brand Cart'}</title>
             <ThemeInjector theme={theme} />
         </head>
-        <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
+        <body className={cn(
+            "min-h-screen font-body antialiased no-scrollbar",
+            showHeaderAndFooter && "flex flex-col"
+        )}>
             <AuthProvider>
                 {showHeaderAndFooter && <Header />}
                 {children}
