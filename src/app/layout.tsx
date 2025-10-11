@@ -52,7 +52,7 @@ export default async function RootLayout({
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
                 {showHeaderAndFooter && <Header />}
-                <main className="flex-1 flex flex-col">{children}</main>
+                {children}
                 {showHeaderAndFooter && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
