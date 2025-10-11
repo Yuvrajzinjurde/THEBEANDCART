@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, createContext, useCallback, useContext } from 'react';
@@ -81,7 +82,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { checkUser, loading } = useAuthStore();
+  const checkUser = useAuthStore((state) => state.checkUser);
+  const loading = useAuthStore((state) => state.loading);
 
   useEffect(() => {
     checkUser();
