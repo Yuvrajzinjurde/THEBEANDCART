@@ -31,11 +31,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = headers();
-  // Using 'x-invoke-path' as a more reliable way to get the path on the server.
   const pathname = headersList.get('x-invoke-path') || '/';
-  const searchParams = headersList.get('x-next-search') || '';
-
-  const { theme, settings, isBrandRoute } = await getThemeForRequest(pathname, searchParams);
+  
+  const { theme, settings } = await getThemeForRequest(pathname);
   const platformSettings = settings as IPlatformSettings | null;
   const isAdminRoute = pathname.startsWith('/admin');
 
@@ -52,7 +50,7 @@ export default async function RootLayout({
             <AuthProvider>
                 {!isAdminRoute && <Header />}
                 <main className="flex-1 flex flex-col">{children}</main>
-                {!isBrandRoute && !isAdminRoute && <GlobalFooter />}
+                {!isAdminRoute && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
                 position="top-right"

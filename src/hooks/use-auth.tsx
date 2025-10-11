@@ -3,120 +3,95 @@
 
 import React, { useEffect, createContext, useContext, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
 import useUserStore from '@/stores/user-store';
 import { create } from 'zustand';
 
-interface User {
+export interface User {
   userId: string;
   roles: string[];
   name: string;
-  exp: number;
   brand?: string;
 }
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   loading: boolean;
-  logout: () => void;
-  setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
-  setLoading: (loading: boolean) => void;
+  checkUser: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
   loading: true,
-  logout: () => {}, // Placeholder, will be overwritten
-  setUser: (user) => set({ user }),
-  setToken: (token) => set({ token }),
-  setLoading: (loading) => set({ loading }),
+  checkUser: async () => {}, // Placeholder
+  logout: async () => {}, // Placeholder
 }));
 
-
-// This component will handle all the logic that depends on the router
-const AuthHandler = ({ children }: { children: React.ReactNode }) => {
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
-    const { setUser, setToken, setLoading } = useAuthStore();
     const { setCart, setWishlist, setNotifications } = useUserStore();
 
-    const logout = useCallback(() => {
-        localStorage.removeItem('token');
-        setUser(null);
-        setToken(null);
-        setCart(null);
-        setWishlist(null);
-        setNotifications([]);
-        router.replace('/login');
-    }, [router, setUser, setToken, setCart, setWishlist, setNotifications]);
-
-    // Set the logout function in the store
-    useEffect(() => {
-        useAuthStore.setState({ logout });
-    }, [logout]);
-    
-    const fetchUserData = useCallback(async (currentToken: string) => {
+    const fetchUserData = useCallback(async () => {
         try {
             const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
-            fetch('/api/cart', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
-            fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
-            fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${currentToken}` } }),
+                fetch('/api/cart'),
+                fetch('/api/wishlist'),
+                fetch('/api/notifications'),
             ]);
 
-            if (cartRes.ok) {
-                const { cart } = await cartRes.json();
-                setCart(cart);
-            }
-            if (wishlistRes.ok) {
-                const { wishlist } = await wishlistRes.json();
-                setWishlist(wishlist);
-            }
-            if (notificationsRes.ok) {
-                const { notifications } = await notificationsRes.json();
-                setNotifications(notifications);
-            }
+            if (cartRes.ok) setCart(await cartRes.json().then(d => d.cart));
+            if (wishlistRes.ok) setWishlist(await wishlistRes.json().then(d => d.wishlist));
+            if (notificationsRes.ok) setNotifications(await notificationsRes.json().then(d => d.notifications));
         } catch (error) {
             console.error("Failed to fetch user data in background:", error);
         }
     }, [setCart, setWishlist, setNotifications]);
 
-    useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        
-        if (storedToken) {
+    const checkUser = useCallback(async () => {
+        useAuthStore.setState({ loading: true });
         try {
-            const decoded = jwtDecode<User>(storedToken);
-            if (decoded.exp * 1000 < Date.now()) {
-            logout();
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                const { user } = await res.json();
+                useAuthStore.setState({ user });
+                await fetchUserData();
             } else {
-            setUser(decoded);
-            setToken(storedToken);
-            fetchUserData(storedToken); 
+                useAuthStore.setState({ user: null });
             }
         } catch (error) {
-            console.error("Invalid token on load:", error);
-            logout();
+            console.error('Failed to check user status', error);
+            useAuthStore.setState({ user: null });
+        } finally {
+            useAuthStore.setState({ loading: false });
         }
+    }, [fetchUserData]);
+
+    const logout = useCallback(async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (error) {
+            console.error('Logout failed', error);
+        } finally {
+            useAuthStore.setState({ user: null });
+            setCart(null);
+            setWishlist(null);
+            setNotifications([]);
+            router.push('/login');
         }
-        setLoading(false);
-    }, [logout, setUser, setToken, fetchUserData]);
+    }, [router, setCart, setWishlist, setNotifications]);
+
+    useEffect(() => {
+        useAuthStore.setState({ checkUser, logout });
+        checkUser();
+    }, [checkUser, logout]);
 
     return <>{children}</>;
-}
-
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-      <AuthHandler>
-          {children}
-      </AuthHandler>
-  );
 };
 
-// Custom hook to use the auth store
+export const AuthContext = createContext<AuthState>(useAuthStore.getState());
+
 export const useAuth = () => {
-    const store = useAuthStore();
-    return store;
+    return useAuthStore(state => state);
 };
+
+export { AuthProvider };

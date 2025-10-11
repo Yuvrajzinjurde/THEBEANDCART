@@ -16,7 +16,7 @@ import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
 import { LogOut, User as UserIcon, Settings, CreditCard, Package } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 interface UserNavProps {
     isCollapsed?: boolean;
@@ -24,8 +24,7 @@ interface UserNavProps {
 
 export function UserNav({ isCollapsed = false }: UserNavProps) {
   const { user, loading, logout } = useAuth();
-  const params = useParams();
-  const brandName = (params.brand as string) || 'reeva';
+  const router = useRouter();
 
   if (loading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
@@ -40,7 +39,6 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
   }
 
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "U";
-  const userBrand = user.brand || 'reeva';
 
   const userMenuItems = (
     <>
@@ -80,6 +78,11 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
       </DropdownMenuItem>
   );
 
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
   if (isCollapsed) {
     return (
        <DropdownMenu>
@@ -101,7 +104,7 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                     {user.roles.includes('admin') ? adminMenuItem : userMenuItems}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
+                <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                 </DropdownMenuItem>
@@ -133,7 +136,7 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
                     {user.roles.includes('admin') ? adminMenuItem : userMenuItems}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
+                <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
                 </DropdownMenuItem>

@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
@@ -35,15 +34,12 @@ import type { IBrand } from "@/models/brand.model";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Logo } from "../logo";
 import { Skeleton } from "../ui/skeleton";
-
-interface DecodedToken {
-  roles: string[];
-  brand?: string;
-}
+import { useAuth } from "@/hooks/use-auth";
 
 export function LoginForm() {
   const router = useRouter();
   const { settings } = usePlatformSettingsStore();
+  const { checkUser } = useAuth();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -51,9 +47,6 @@ export function LoginForm() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Since this is a global login, we can't rely on URL params.
-    // We'll set a default or use logic to determine the brand if needed.
-    // For now, let's default to a primary brand.
     const urlBrand = new URLSearchParams(window.location.search).get('brand');
     if (urlBrand) {
         setBrandName(urlBrand);
@@ -91,16 +84,15 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      localStorage.setItem('token', result.token);
+      toast.success(`Welcome back, ${result.user.name}!`);
 
-      toast.success(`Welcome back, ${result.name}!`);
+      // Manually trigger a re-check of user status
+      await checkUser();
 
-      // Decode token to get roles and redirect
-      const decoded = jwtDecode<DecodedToken>(result.token);
-      if (decoded.roles.includes('admin')) {
+      if (result.user.roles.includes('admin')) {
         router.push("/admin/dashboard");
       } else {
-        const userBrand = decoded.brand || 'reeva';
+        const userBrand = result.user.brand || 'reeva';
         router.push(`/${userBrand}/home`);
       }
 
@@ -221,5 +213,3 @@ export function LoginForm() {
     </Card>
   );
 }
-
-    
