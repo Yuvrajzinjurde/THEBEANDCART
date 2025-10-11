@@ -37,6 +37,7 @@ export default async function RootLayout({
 
   const { theme, settings, isBrandRoute } = await getThemeForRequest(pathname, searchParams);
   const platformSettings = settings as IPlatformSettings | null;
+  const isAdminRoute = pathname.startsWith('/admin');
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
@@ -49,9 +50,9 @@ export default async function RootLayout({
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
-                <Header />
+                {!isAdminRoute && <Header />}
                 <div className="flex-1 flex flex-col">{children}</div>
-                {!isBrandRoute && <GlobalFooter />}
+                {!isBrandRoute && !isAdminRoute && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
                 position="top-right"
