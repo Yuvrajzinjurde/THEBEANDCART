@@ -62,7 +62,11 @@ export default function Header() {
   useEffect(() => {
     setIsClient(true);
     fetchSettings();
-    
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const pathBrand = params.brand as string;
     const queryBrand = searchParams.get('storefront');
     
@@ -75,9 +79,11 @@ export default function Header() {
       const determinedBrand = pathBrand || queryBrand || 'reeva';
       setBrandName(determinedBrand);
     }
-  }, [pathname, params, searchParams, fetchSettings]);
+  }, [pathname, params, searchParams, isClient]);
 
   useEffect(() => {
+    if (!isClient) return;
+
     async function fetchBrandData() {
         setIsLoading(true);
         const url = brandName 
@@ -108,10 +114,8 @@ export default function Header() {
         }
     }
 
-    if (isClient) {
-        fetchBrandData();
-    }
-}, [brandName, isClient]);
+    fetchBrandData();
+  }, [brandName, isClient]);
 
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
@@ -217,13 +221,15 @@ export default function Header() {
   );
   
   const renderLogo = () => {
+    if (isLoading) return <Skeleton className="h-8 w-8 rounded-full" />;
+    
     const logoUrl = brandName && brand?.logoUrl ? brand.logoUrl : settings.platformLogoUrl;
     
     if (logoUrl) {
       return <Image src={logoUrl} alt="Logo" width={32} height={32} className="h-8 w-8 rounded-full object-cover" />;
     }
     
-    return <Logo className="h-8 w-8" />;
+    return null;
   };
 
   if (!isClient) {
@@ -251,7 +257,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-            {isLoading ? <Skeleton className="h-8 w-8 rounded-full" /> : renderLogo()}
+            {renderLogo()}
             <span className="hidden font-bold text-lg sm:inline-block capitalize">
                 {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
             </span>
@@ -416,5 +422,3 @@ export default function Header() {
     </>
   );
 }
-
-    
