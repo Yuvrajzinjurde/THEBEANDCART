@@ -1,7 +1,7 @@
+
 "use client";
 
 import { SignUpForm } from "@/components/auth/signup-form";
-import { GlobalFooter } from "@/components/global-footer";
 import { Suspense } from "react";
 import { Loader } from "@/components/ui/loader";
 
@@ -22,7 +22,6 @@ export default function SignUpPage() {
         </div>
     }>
       <SignUpPageContent />
-      <GlobalFooter />
     </Suspense>
   );
 }

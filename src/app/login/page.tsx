@@ -1,6 +1,6 @@
+
 "use client";
 
-import { GlobalFooter } from "@/components/global-footer";
 import { LoginForm } from "@/components/auth/login-form";
 import { Suspense } from "react";
 import { Loader } from "@/components/ui/loader";
@@ -22,7 +22,6 @@ export default function LoginPage() {
         </div>
     }>
       <LoginPageContent />
-      <GlobalFooter />
     </Suspense>
   );
 }

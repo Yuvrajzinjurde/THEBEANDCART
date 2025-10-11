@@ -27,7 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GlobalFooter } from "@/components/global-footer";
 
 const WishlistSkeleton = () => (
     <main className="container py-8 px-4 sm:px-6 lg:px-8 text-center">
@@ -131,7 +130,6 @@ export default function WishlistPage() {
   const wishlistProducts = (wishlist?.products as IProduct[]) || [];
 
   return (
-    <>
     <main className="container py-8 px-4 sm:px-6 lg:px-8 flex-1">
       <div className="flex items-center justify-between mb-6">
          <div className="flex items-center gap-4">
@@ -236,7 +234,5 @@ export default function WishlistPage() {
         </div>
       )}
     </main>
-    <GlobalFooter />
-    </>
   );
 }
