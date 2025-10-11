@@ -33,9 +33,12 @@ export default async function RootLayout({
   const headersList = headers();
   const pathname = headersList.get('x-invoke-path') || '/';
   
-  const { theme, settings, isBrandRoute } = await getThemeForRequest(pathname, '');
+  const { theme, settings } = await getThemeForRequest(pathname, '');
   const platformSettings = settings as IPlatformSettings | null;
+
   const isAdminRoute = pathname.startsWith('/admin');
+  const isAuthRoute = /\/(login|signup|forgot-password)/.test(pathname);
+  const showHeaderAndFooter = !isAdminRoute && !isAuthRoute;
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
@@ -48,9 +51,9 @@ export default async function RootLayout({
         </head>
         <body className={cn("flex min-h-screen flex-col font-body antialiased no-scrollbar")}>
             <AuthProvider>
-                {!isAdminRoute && !isBrandRoute && <Header />}
+                {showHeaderAndFooter && <Header />}
                 <main className="flex-1 flex flex-col">{children}</main>
-                {!isAdminRoute && !isBrandRoute && <GlobalFooter />}
+                {showHeaderAndFooter && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
                 position="top-right"
