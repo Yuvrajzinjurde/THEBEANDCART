@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star, Info, Plus, Minus } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info, Plus, Minus, Trash2 } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,6 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { Separator } from "./ui/separator";
 import { toast } from "react-toastify";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
@@ -32,14 +30,19 @@ interface BrandProductCardProps {
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
   const { user, token } = useAuth();
-  const { wishlist, setWishlist, setCart } = useUserStore();
+  const { wishlist, setWishlist, cart, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
   
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const [quantity, setQuantity] = useState(1);
+  const cartItem = useMemo(() => {
+    return cart?.items?.find(item => {
+        const productId = (item.productId as IProduct)?._id || item.productId;
+        return productId?.toString() === product._id.toString();
+    });
+  }, [cart, product._id]);
 
 
   useEffect(() => {
@@ -118,38 +121,54 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     }
   };
 
-  const handleCartClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleUpdateCart = async (quantity: number) => {
      if (!user) {
-        toast.info("Please log in to add items to your cart.");
+        toast.info("Please log in to manage your cart.");
         router.push(`/${product.storefront}/login`);
         return;
     }
-    try {
-        const response = await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ productId: product._id, quantity, size: product.size, color: product.color }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        toast.success(`Added ${product.name} to cart!`);
-        setCart(result.cart);
-    } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+    if (quantity > 0) {
+        try {
+            const response = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId: product._id, quantity, size: product.size, color: product.color }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            if (quantity > (cartItem?.quantity || 0)) {
+              toast.success(`Added ${product.name} to cart!`);
+            }
+            setCart(result.cart);
+        } catch (error: any) {
+            toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        }
+    } else {
+        // Remove from cart
+         try {
+            const response = await fetch(`/api/cart?productId=${product._id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            setCart(result.cart);
+        } catch (error: any) {
+            toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        }
     }
   };
+
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     fetch(`/api/products/${product._id}/track`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metric: 'views' }),
+        body: JSON.stringify({ metric: 'clicks' }),
     }).catch(err => console.error("Failed to track click:", err));
     
     router.push(`/${product.storefront}/products/${product._id}`);
@@ -162,10 +181,10 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
   const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
 
-  const handleQuantityChange = (e: React.MouseEvent, amount: number) => {
+  const handleQuantityButtonClick = (e: React.MouseEvent, amount: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setQuantity(prev => Math.max(1, prev + amount));
+    handleUpdateCart((cartItem?.quantity || 0) + amount);
   };
 
 
@@ -230,7 +249,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         </Button>
 
         <div className="p-3 flex flex-col flex-grow">
-            <div className="flex-grow space-y-1 mb-1">
+            <div className="flex-grow space-y-1 mb-2">
                 <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
                 <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
@@ -251,7 +270,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                  <span className="text-xs text-muted-foreground ml-1">({rating.toFixed(1)})</span>
             </div>
             
-            <div className="mt-1">
+            <div className="mt-2">
                  <div className="flex items-baseline gap-x-2 flex-wrap">
                     <p className="text-base font-bold text-foreground">
                         ₹{sellingPrice.toLocaleString('en-IN')}
@@ -272,15 +291,31 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 </div>
             </div>
 
-            <div className="mt-2">
-                 <Button
-                    variant="outline"
-                    className="w-full rounded-md h-9 px-4 hover:bg-primary hover:text-primary-foreground"
-                    onClick={handleCartClick}
-                >
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    ADD TO CART
-                </Button>
+            <div className="mt-2 h-9">
+                 {cartItem ? (
+                    <div className="flex items-center justify-between rounded-md border w-full">
+                       <Button variant="ghost" size="icon" className="h-full" onClick={(e) => handleQuantityButtonClick(e, -1)}>
+                           {cartItem.quantity === 1 ? <Trash2 className="h-4 w-4 text-destructive" /> : <Minus className="h-4 w-4" />}
+                       </Button>
+                       <span className="font-bold text-sm">{cartItem.quantity}</span>
+                       <Button variant="ghost" size="icon" className="h-full" onClick={(e) => handleQuantityButtonClick(e, 1)}>
+                           <Plus className="h-4 w-4" />
+                       </Button>
+                    </div>
+                ) : (
+                    <Button
+                        variant="outline"
+                        className="w-full h-full px-4 hover:bg-primary hover:text-primary-foreground"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleUpdateCart(1);
+                        }}
+                    >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        ADD TO CART
+                    </Button>
+                )}
             </div>
         </div>
       </motion.div>
