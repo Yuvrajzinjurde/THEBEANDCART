@@ -48,10 +48,13 @@ const AuthHandler = () => {
 
     const fetchUserData = useCallback(async () => {
         try {
+            const token = useAuthStore.getState().token;
+            if (!token) return;
+
             const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
-                fetch('/api/cart'),
-                fetch('/api/wishlist'),
-                fetch('/api/notifications'),
+                fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }),
             ]);
 
             if (cartRes.ok) setCart(await cartRes.json().then(d => d.cart));
@@ -67,19 +70,22 @@ const AuthHandler = () => {
         try {
             const res = await fetch('/api/auth/me');
             if (res.ok) {
-                const { user: userData, token } = await res.json();
+                const { user: userData } = await res.json();
                 setUser(userData);
-                await fetchUserData();
+                 // The token is managed by httpOnly cookie, but we can set a dummy one for client-side checks
+                useAuthStore.setState({ token: 'authenticated' });
             } else {
                 setUser(null);
+                useAuthStore.setState({ token: null });
             }
         } catch (error) {
             console.error('Failed to check user status', error);
             setUser(null);
+            useAuthStore.setState({ token: null });
         } finally {
             setLoading(false);
         }
-    }, [setUser, setLoading, fetchUserData]);
+    }, [setUser, setLoading]);
 
     const handleLogout = useCallback(async () => {
         try {
@@ -88,6 +94,7 @@ const AuthHandler = () => {
             console.error('Logout failed', error);
         } finally {
             setUser(null);
+            useAuthStore.setState({ token: null });
             setCart(null);
             setWishlist(null);
             setNotifications([]);
