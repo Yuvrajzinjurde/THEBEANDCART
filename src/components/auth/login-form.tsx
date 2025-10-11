@@ -39,7 +39,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function LoginForm() {
   const router = useRouter();
   const { settings } = usePlatformSettingsStore();
-  const { checkUser } = useAuth();
+  const { login } = useAuth();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -84,10 +84,12 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      toast.success(`Welcome back, ${result.user.name}!`);
+      const accessToken = response.headers.get('Authorization')?.split(' ')[1];
+      
+      // Update global state
+      login(result.user, accessToken || '');
 
-      // Manually trigger a re-check of user status
-      await checkUser();
+      toast.success(`Welcome back, ${result.user.name}!`);
 
       if (result.user.roles.includes('admin')) {
         router.push("/admin/dashboard");

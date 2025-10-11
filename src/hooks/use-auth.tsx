@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, createContext, useContext, useCallback } from 'react';
+import React, { useEffect, createContext, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/stores/user-store';
 import { create } from 'zustand';
@@ -15,20 +15,35 @@ export interface User {
 
 interface AuthState {
   user: User | null;
+  token: string | null;
   loading: boolean;
-  checkUser: () => Promise<void>;
-  logout: () => Promise<void>;
+  setUser: (user: User | null) => void;
+  setToken: (token: string | null) => void;
+  setLoading: (loading: boolean) => void;
+  login: (user: User, token: string) => void;
+  logout: () => void;
 }
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  token: null,
   loading: true,
-  checkUser: async () => {}, // Placeholder
-  logout: async () => {}, // Placeholder
+  setUser: (user) => set({ user }),
+  setToken: (token) => set({ token }),
+  setLoading: (loading) => set({ loading }),
+  login: (user, token) => set({ user, token }),
+  logout: () => set({ user: null, token: null }),
 }));
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthContext = createContext<AuthState>(useAuthStore.getState());
+
+export const useAuth = () => {
+    return useAuthStore(state => state);
+};
+
+const AuthHandler = () => {
     const router = useRouter();
+    const { user, setUser, setLoading } = useAuthStore();
     const { setCart, setWishlist, setNotifications } = useUserStore();
 
     const fetchUserData = useCallback(async () => {
@@ -48,50 +63,58 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, [setCart, setWishlist, setNotifications]);
 
     const checkUser = useCallback(async () => {
-        useAuthStore.setState({ loading: true });
+        setLoading(true);
         try {
             const res = await fetch('/api/auth/me');
             if (res.ok) {
-                const { user } = await res.json();
-                useAuthStore.setState({ user });
+                const { user: userData, token } = await res.json();
+                setUser(userData);
                 await fetchUserData();
             } else {
-                useAuthStore.setState({ user: null });
+                setUser(null);
             }
         } catch (error) {
             console.error('Failed to check user status', error);
-            useAuthStore.setState({ user: null });
+            setUser(null);
         } finally {
-            useAuthStore.setState({ loading: false });
+            setLoading(false);
         }
-    }, [fetchUserData]);
+    }, [setUser, setLoading, fetchUserData]);
 
-    const logout = useCallback(async () => {
+    const handleLogout = useCallback(async () => {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
         } catch (error) {
             console.error('Logout failed', error);
         } finally {
-            useAuthStore.setState({ user: null });
+            setUser(null);
             setCart(null);
             setWishlist(null);
             setNotifications([]);
             router.push('/login');
         }
-    }, [router, setCart, setWishlist, setNotifications]);
-
+    }, [router, setUser, setCart, setWishlist, setNotifications]);
+    
     useEffect(() => {
-        useAuthStore.setState({ checkUser, logout });
+        useAuthStore.setState({ logout: handleLogout });
         checkUser();
-    }, [checkUser, logout]);
+    }, [checkUser, handleLogout]);
+    
+    useEffect(() => {
+        if(user) {
+            fetchUserData();
+        }
+    }, [user, fetchUserData])
 
-    return <>{children}</>;
+    return null; // This component does not render anything
 };
 
-export const AuthContext = createContext<AuthState>(useAuthStore.getState());
 
-export const useAuth = () => {
-    return useAuthStore(state => state);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <>
+      <AuthHandler />
+      {children}
+    </>
+  );
 };
-
-export { AuthProvider };
