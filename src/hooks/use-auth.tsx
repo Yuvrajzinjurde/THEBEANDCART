@@ -39,7 +39,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setNotifications([]);
     router.replace('/login');
   }, [router, setCart, setWishlist, setNotifications]);
-
+  
+  // This function can be called to fetch user-specific data after login
+  // without blocking the main auth flow.
   const fetchUserData = useCallback(async (currentToken: string) => {
     try {
         const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
@@ -51,28 +53,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (cartRes.ok) {
             const { cart } = await cartRes.json();
             setCart(cart);
-        } else {
-            setCart(null);
         }
         if (wishlistRes.ok) {
             const { wishlist } = await wishlistRes.json();
             setWishlist(wishlist);
-        } else {
-            setWishlist(null);
         }
         if (notificationsRes.ok) {
             const { notifications } = await notificationsRes.json();
             setNotifications(notifications);
-        } else {
-            setNotifications([]);
         }
     } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        setCart(null);
-        setWishlist(null);
-        setNotifications([]);
+        console.error("Failed to fetch user data in background:", error);
     }
   }, [setCart, setWishlist, setNotifications]);
+
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -85,14 +79,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setUser(decoded);
           setToken(storedToken);
-          fetchUserData(storedToken);
+          // Fetch data in the background without blocking the UI
+          fetchUserData(storedToken); 
         }
       } catch (error) {
         console.error("Invalid token on load:", error);
         logout();
       }
     }
-    setLoading(false);
+    setLoading(false); // Set loading to false immediately after checking token
   }, [logout, fetchUserData]); 
   
   return (
