@@ -2,24 +2,34 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/notification.model';
-import { jwtDecode } from 'jwt-decode';
+import { Types } from 'mongoose';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
+}
+
+const getToken = () => {
+    const cookieStore = cookies();
+    return cookieStore.get('accessToken')?.value;
 }
 
 // POST to mark all notifications for a user as read
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const token = getToken();
     if (!token) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
+    const decoded = jwt.decode(token) as DecodedToken;
+    const userId = new Types.ObjectId(decoded.userId);
 
-    await Notification.updateMany({ userId: userId, isRead: false }, { $set: { isRead: true } });
+    await Notification.updateMany(
+      { recipientUsers: userId }, 
+      { $addToSet: { readBy: userId } }
+    );
 
     return NextResponse.json({ message: 'All notifications marked as read' }, { status: 200 });
   } catch (error) {

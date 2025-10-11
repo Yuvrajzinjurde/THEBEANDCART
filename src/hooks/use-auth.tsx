@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, createContext, useContext } from 'react';
+import React, { useEffect, createContext, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/stores/user-store';
 import { create } from 'zustand';
@@ -16,24 +16,22 @@ export interface User {
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   loading: boolean;
-  login: (user: User, token: string) => void;
+  login: (user: User) => void;
   logout: () => Promise<void>;
   checkUser: () => Promise<void>;
 }
 
 const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
   loading: true,
-  login: (user, token) => {
-    set({ user, token, loading: false });
+  login: (user) => {
+    set({ user, loading: false });
     // After login, fetch user-specific data
     Promise.all([
-      fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
-      fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
-      fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch('/api/cart'),
+      fetch('/api/wishlist'),
+      fetch('/api/notifications'),
     ]).then(async ([cartRes, wishlistRes, notificationsRes]) => {
       if (cartRes.ok) useUserStore.getState().setCart(await cartRes.json().then(d => d.cart));
       if (wishlistRes.ok) useUserStore.getState().setWishlist(await wishlistRes.json().then(d => d.wishlist));
@@ -46,7 +44,7 @@ const useAuthStore = create<AuthState>((set) => ({
     } catch (error) {
       console.error('Logout failed', error);
     } finally {
-      set({ user: null, token: null, loading: false });
+      set({ user: null, loading: false });
       // Clear user-specific data on logout
       useUserStore.getState().setCart(null);
       useUserStore.getState().setWishlist(null);
@@ -58,42 +56,33 @@ const useAuthStore = create<AuthState>((set) => ({
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const { user: userData } = await res.json();
-        const token = 'authenticated'; // Placeholder token since it's in an httpOnly cookie
         
         // Fetch user-specific data after confirming authentication
         const [cartRes, wishlistRes, notificationsRes] = await Promise.all([
-            fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch('/api/cart'),
+            fetch('/api/wishlist'),
+            fetch('/api/notifications'),
         ]);
 
         if (cartRes.ok) useUserStore.getState().setCart(await cartRes.json().then(d => d.cart));
         if (wishlistRes.ok) useUserStore.getState().setWishlist(await wishlistRes.json().then(d => d.wishlist));
         if (notificationsRes.ok) useUserStore.getState().setNotifications(await notificationsRes.json().then(d => d.notifications));
         
-        set({ user: userData, token, loading: false });
+        set({ user: userData, loading: false });
 
       } else {
-        set({ user: null, token: null, loading: false });
+        set({ user: null, loading: false });
       }
     } catch (error) {
       console.error('Failed to check user status', error);
-      set({ user: null, token: null, loading: false });
+      set({ user: null, loading: false });
     }
   },
 }));
 
-// Initialize the check user status on load
-if (typeof window !== 'undefined') {
-    useAuthStore.getState().checkUser();
-}
-
-export const AuthContext = createContext<Omit<AuthState, 'checkUser'>>(useAuthStore.getState());
-
 export const useAuth = () => {
   return useAuthStore(state => ({
     user: state.user,
-    token: state.token,
     loading: state.loading,
     login: state.login,
     logout: state.logout,
@@ -101,7 +90,13 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const checkUser = useAuthStore((state) => state.checkUser);
   const loading = useAuthStore((state) => state.loading);
+
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
+
 
   if (loading) {
     return (
@@ -111,9 +106,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   }
 
-  return (
-    <AuthContext.Provider value={useAuthStore.getState()}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <>{children}</>;
 };

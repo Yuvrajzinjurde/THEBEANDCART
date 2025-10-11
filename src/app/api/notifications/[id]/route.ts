@@ -2,11 +2,17 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/notification.model';
-import { jwtDecode } from 'jwt-decode';
 import { Types } from 'mongoose';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
+}
+
+const getToken = () => {
+    const cookieStore = cookies();
+    return cookieStore.get('accessToken')?.value;
 }
 
 // PATCH to mark a single notification as read
@@ -16,12 +22,12 @@ export async function PATCH(
 ) {
   try {
     await dbConnect();
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const token = getToken();
     if (!token) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
+    const decoded = jwt.decode(token) as DecodedToken;
+    const userId = new Types.ObjectId(decoded.userId);
     const { id } = params;
 
     if (!Types.ObjectId.isValid(id)) {
@@ -29,13 +35,13 @@ export async function PATCH(
     }
 
     const notification = await Notification.findOneAndUpdate(
-      { _id: id, userId: userId },
-      { isRead: true },
+      { _id: id, recipientUsers: userId },
+      { $addToSet: { readBy: userId } }, // Add user to readBy array if not already present
       { new: true }
     );
 
     if (!notification) {
-      return NextResponse.json({ message: 'Notification not found or not owned by user' }, { status: 404 });
+      return NextResponse.json({ message: 'Notification not found or not intended for user' }, { status: 404 });
     }
 
     return NextResponse.json({ message: 'Notification marked as read', notification }, { status: 200 });

@@ -6,22 +6,28 @@ import dbConnect from '@/lib/mongodb';
 import Cart, { ICart } from '@/models/cart.model';
 import Product from '@/models/product.model';
 import { Types } from 'mongoose';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
 }
 
+const getToken = () => {
+    const cookieStore = cookies();
+    return cookieStore.get('accessToken')?.value;
+}
 
 // GET the user's cart
 export async function GET(req: Request) {
     try {
         await dbConnect();
         
-        const token = req.headers.get('authorization')?.split(' ')[1];
+        const token = getToken();
         if (!token) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
+        const decoded = jwt.decode(token) as DecodedToken;
         const userId = decoded.userId;
 
         const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
@@ -33,7 +39,7 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error('Get Cart Error:', error);
-        if (error instanceof Error && error.name === 'ExpiredSignatureError') {
+        if (error instanceof Error && (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError')) {
             return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
         }
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
@@ -45,11 +51,11 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const token = getToken();
     if (!token) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
+    const decoded = jwt.decode(token) as DecodedToken;
     const userId = decoded.userId;
 
     const { productId, quantity, size, color } = await req.json();
@@ -102,7 +108,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'Cart updated successfully', cart: populatedCart }, { status: 200 });
   } catch (error) {
     console.error('Update Cart Error:', error);
-    if (error instanceof Error && error.name === 'ExpiredSignatureError') {
+    if (error instanceof Error && (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError')) {
         return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
     }
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
@@ -114,11 +120,11 @@ export async function DELETE(req: Request) {
     try {
         await dbConnect();
 
-        const token = req.headers.get('authorization')?.split(' ')[1];
+        const token = getToken();
         if (!token) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
+        const decoded = jwt.decode(token) as DecodedToken;
         const userId = decoded.userId;
         
         const { searchParams } = new URL(req.url);

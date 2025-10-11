@@ -2,25 +2,33 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/notification.model';
-import { jwtDecode } from 'jwt-decode';
 import { Types } from 'mongoose';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
+}
+
+const getToken = () => {
+    const cookieStore = cookies();
+    return cookieStore.get('accessToken')?.value;
 }
 
 // GET all notifications for the authenticated user
 export async function GET(req: Request) {
   try {
     await dbConnect();
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const token = getToken();
     if (!token) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
+    const decoded = jwt.decode(token) as DecodedToken;
     const userId = decoded.userId;
 
-    const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({ 
+      recipientUsers: new Types.ObjectId(userId) 
+    }).sort({ createdAt: -1 });
 
     return NextResponse.json({ notifications }, { status: 200 });
   } catch (error) {

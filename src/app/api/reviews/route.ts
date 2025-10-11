@@ -2,17 +2,23 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
 import { z } from 'zod';
 import dbConnect from '@/lib/mongodb';
 import Review from '@/models/review.model';
 import Product from '@/models/product.model';
 import Order from '@/models/order.model';
 import { Types } from 'mongoose';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
   userId: string;
   name: string;
+}
+
+const getToken = () => {
+    const cookieStore = cookies();
+    return cookieStore.get('accessToken')?.value;
 }
 
 const ReviewSubmissionSchema = z.object({
@@ -27,11 +33,11 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const token = getToken();
     if (!token) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
+    const decoded = jwt.decode(token) as DecodedToken;
     const userId = new Types.ObjectId(decoded.userId);
     const userName = decoded.name;
 

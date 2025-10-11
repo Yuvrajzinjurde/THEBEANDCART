@@ -18,6 +18,7 @@ export async function POST(
       return NextResponse.json({ message: 'Invalid Review ID' }, { status: 400 });
     }
 
+    // A simple POST to this endpoint increments the like. No user tracking for simplicity.
     const review = await Review.findByIdAndUpdate(
       reviewId,
       { $inc: { likes: 1 } },

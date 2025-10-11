@@ -64,7 +64,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
 
 export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, reviews, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   
   const [product, setProduct] = useState(initialProduct);
@@ -200,7 +200,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     try {
         const response = await fetch('/api/cart', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               productId: product._id, 
               quantity: quantity,
@@ -226,7 +226,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     try {
         const response = await fetch('/api/wishlist', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId: product._id }),
         });
         const result = await response.json();

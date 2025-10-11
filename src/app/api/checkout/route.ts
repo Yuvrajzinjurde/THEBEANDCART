@@ -2,7 +2,8 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { z } from 'zod';
-import { jwtDecode } from 'jwt-decode';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
 const checkoutSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
@@ -12,13 +13,18 @@ interface DecodedToken {
   userId: string;
 }
 
+const getToken = () => {
+    const cookieStore = cookies();
+    return cookieStore.get('accessToken')?.value;
+}
+
 export async function POST(req: Request) {
   try {
-    const token = req.headers.get('authorization')?.split(' ')[1];
+    const token = getToken();
     if (!token) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
+    const decoded = jwt.decode(token) as DecodedToken;
     const userId = decoded.userId;
 
     const body = await req.json();

@@ -84,10 +84,8 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      const accessToken = response.headers.get('Authorization')?.split(' ')[1];
-      
       // Update global state
-      login(result.user, accessToken || '');
+      login(result.user);
 
       toast.success(`Welcome back, ${result.user.name}!`);
 

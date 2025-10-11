@@ -29,7 +29,7 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const { wishlist, setWishlist, cart, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
   
@@ -108,7 +108,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ productId: product._id }),
         });
@@ -133,7 +132,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ productId: product._id, quantity, size: product.size, color: product.color }),
             });
@@ -151,7 +149,6 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
          try {
             const response = await fetch(`/api/cart?productId=${product._id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` },
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
