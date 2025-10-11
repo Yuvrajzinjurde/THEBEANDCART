@@ -142,7 +142,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             }
             setCart(result.cart);
         } catch (error: any) {
-            toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+            throw error;
         }
     } else {
         // Remove from cart
@@ -154,7 +154,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
             if (!response.ok) throw new Error(result.message);
             setCart(result.cart);
         } catch (error: any) {
-            toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+            throw error;
         }
     }
   };

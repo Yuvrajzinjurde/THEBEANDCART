@@ -213,7 +213,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         toast.success(`${quantity} x ${product.name} added to cart!`);
         setCart(result.cart);
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        throw error;
     }
   };
 
