@@ -268,143 +268,165 @@ export default function Header() {
     <>
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <Link href={homeLink} className="mr-4 flex items-center space-x-2">
-            {renderLogo()}
-            <span className="hidden font-bold text-lg sm:inline-block capitalize">
-                {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
-            </span>
-        </Link>
+        <div className="flex-1 flex justify-between items-center">
+          <div className="flex items-center gap-x-4">
+            <Link href={homeLink} className="flex items-center space-x-2">
+                {renderLogo()}
+                <span className="hidden font-bold text-lg sm:inline-block capitalize">
+                    {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
+                </span>
+            </Link>
 
-        {brandName && categories.length > 0 && (
-          <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="hidden md:flex items-center gap-2">
-                      <Menu className="h-5 w-5" />
-                      <span className="font-semibold">Categories</span>
-                  </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                  {categories.map(cat => (
-                      <DropdownMenuItem key={cat} asChild>
-                          <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
-                      </DropdownMenuItem>
-                  ))}
-              </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+            {brandName && categories.length > 0 && (
+              <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="hidden md:flex items-center gap-2">
+                          <Menu className="h-5 w-5" />
+                          <span className="font-semibold">Categories</span>
+                      </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                      {categories.map(cat => (
+                          <DropdownMenuItem key={cat} asChild>
+                              <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                          </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 mx-4" ref={searchContainerRef}>
-            <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
-                 <>
-                    <Input
-                        name="search"
-                        type="search"
-                        placeholder="Search for anything"
-                        className="h-11 w-full rounded-full pl-5 pr-12 text-base"
-                        value={searchQuery}
-                        onChange={handleSearchInputChange}
-                        onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
-                        disabled={isLoading}
-                    />
-                    <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={isLoading}>
-                        <Search className="h-4 w-4" />
-                    </Button>
-                </>
-                 {isSuggestionsOpen && suggestions.length > 0 && (
-                    <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
-                        <ul className="py-1">
-                            {suggestions.map((suggestion, index) => (
-                                <li 
-                                    key={index}
-                                    className="px-4 py-2 hover:bg-accent cursor-pointer flex items-center gap-2"
-                                    onClick={() => executeSearch(suggestion)}
-                                >
-                                    <Search className="h-4 w-4 text-muted-foreground"/>
-                                    <span>{searchQuery} in <span className="font-bold">{suggestion}</span></span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                 )}
-            </form>
-        </div>
+          {/* Search Bar */}
+          <div className="hidden md:block flex-1 mx-4" ref={searchContainerRef}>
+              <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
+                  <>
+                      <Input
+                          name="search"
+                          type="search"
+                          placeholder="Search for anything"
+                          className="h-11 w-full rounded-full pl-5 pr-12 text-base"
+                          value={searchQuery}
+                          onChange={handleSearchInputChange}
+                          onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
+                          disabled={isLoading}
+                      />
+                      <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={isLoading}>
+                          <Search className="h-4 w-4" />
+                      </Button>
+                  </>
+                  {isSuggestionsOpen && suggestions.length > 0 && (
+                      <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
+                          <ul className="py-1">
+                              {suggestions.map((suggestion, index) => (
+                                  <li 
+                                      key={index}
+                                      className="px-4 py-2 hover:bg-accent cursor-pointer flex items-center gap-2"
+                                      onClick={() => executeSearch(suggestion)}
+                                  >
+                                      <Search className="h-4 w-4 text-muted-foreground"/>
+                                      <span>{searchQuery} in <span className="font-bold">{suggestion}</span></span>
+                                  </li>
+                              ))}
+                          </ul>
+                      </div>
+                  )}
+              </form>
+          </div>
 
-        {/* Actions */}
-        <div className="hidden md:flex">
-            <DesktopNavActions />
-        </div>
+          {/* Actions */}
+          <div className="hidden md:flex">
+              <DesktopNavActions />
+          </div>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden">
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                        <Menu className="h-6 w-6" />
-                        <span className="sr-only">Open menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[340px] flex flex-col p-0">
-                    <SheetHeader className="p-4 border-b">
-                        <SheetTitle>
-                            <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                                {renderLogo()}
-                                <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
-                            </Link>
-                        </SheetTitle>
-                    </SheetHeader>
-                    <div className="flex-1 overflow-y-auto p-4">
-                        <nav className="flex flex-col gap-4">
-                             <Link href={`/${effectiveBrandName}/products`} className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                                <Box className="h-5 w-5" />
-                                All Products
-                            </Link>
-                            {user && (
-                                <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                                    <Package className="h-5 w-5" />
-                                    My Orders
-                            </Link>
-                            )}
-                            <Separator />
-                            {categories.length > 0 && (
-                                <>
-                                <h3 className="font-semibold text-muted-foreground">Categories</h3>
-                                {categories.map(cat => (
-                                    <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                                        {cat}
-                                    </Link>
-                                ))}
-                                <Separator />
-                                </>
-                            )}
-                            <h3 className="font-semibold text-muted-foreground">Explore</h3>
-                            {secondaryNavItems.map((item) => (
-                                <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                                    <item.icon className="h-4 w-4" />
-                                    {item.label}
-                                </Link>
-                            ))}
-                        </nav>
-                    </div>
-                     <div className="border-t p-4">
-                        <div className="flex items-center justify-around">
-                            <Button variant="ghost" size="icon" asChild>
-                                <Link href="/wishlist" className="relative" onClick={() => setIsSheetOpen(false)}>
-                                    <Heart className="h-6 w-6"/>
-                                    {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
-                                </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" asChild>
-                                 <Link href={`/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
-                                    <ShoppingCart className="h-6 w-6" />
-                                    {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
-                                </Link>
-                            </Button>
-                             <UserNav />
-                        </div>
-                    </div>
-                </SheetContent>
-            </Sheet>
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                  <SheetTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                          <Menu className="h-6 w-6" />
+                          <span className="sr-only">Open menu</span>
+                      </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[300px] sm:w-[340px] flex flex-col p-0">
+                      <SheetHeader className="p-4 border-b">
+                          <SheetTitle>
+                              <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                                  {renderLogo()}
+                                  <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
+                              </Link>
+                          </SheetTitle>
+                      </SheetHeader>
+                      <div className="flex-1 overflow-y-auto p-4">
+                           {/* Mobile Search */}
+                            <div className="mb-4" ref={searchContainerRef}>
+                                <form className="relative w-full" onSubmit={handleSearchSubmit}>
+                                    <Input
+                                        name="search"
+                                        type="search"
+                                        placeholder="Search..."
+                                        className="h-11 w-full rounded-full pl-5 pr-12 text-base"
+                                        value={searchQuery}
+                                        onChange={handleSearchInputChange}
+                                        onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
+                                        disabled={isLoading}
+                                    />
+                                    <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={isLoading}>
+                                        <Search className="h-4 w-4" />
+                                    </Button>
+                                </form>
+                            </div>
+                          <nav className="flex flex-col gap-4">
+                              <Link href={`/${effectiveBrandName}/products`} className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                  <Box className="h-5 w-5" />
+                                  All Products
+                              </Link>
+                              {user && (
+                                  <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                      <Package className="h-5 w-5" />
+                                      My Orders
+                              </Link>
+                              )}
+                              <Separator />
+                              {categories.length > 0 && (
+                                  <>
+                                  <h3 className="font-semibold text-muted-foreground">Categories</h3>
+                                  {categories.map(cat => (
+                                      <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                          {cat}
+                                      </Link>
+                                  ))}
+                                  <Separator />
+                                  </>
+                              )}
+                              <h3 className="font-semibold text-muted-foreground">Explore</h3>
+                              {secondaryNavItems.map((item) => (
+                                  <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                      <item.icon className="h-4 w-4" />
+                                      {item.label}
+                                  </Link>
+                              ))}
+                          </nav>
+                      </div>
+                      <div className="border-t p-4">
+                          <div className="flex items-center justify-around">
+                              <Button variant="ghost" size="icon" asChild>
+                                  <Link href="/wishlist" className="relative" onClick={() => setIsSheetOpen(false)}>
+                                      <Heart className="h-6 w-6"/>
+                                      {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
+                                  </Link>
+                              </Button>
+                              <Button variant="ghost" size="icon" asChild>
+                                  <Link href={`/cart`} className="relative" onClick={() => setIsSheetOpen(false)}>
+                                      <ShoppingCart className="h-6 w-6" />
+                                      {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                                  </Link>
+                              </Button>
+                              <UserNav />
+                          </div>
+                      </div>
+                  </SheetContent>
+              </Sheet>
+          </div>
         </div>
       </div>
       
