@@ -239,15 +239,6 @@ export function AdminSidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    useEffect(() => {
-        const checkIsMobile = () => {
-            if (window.innerWidth < 768) setIsCollapsed(true);
-        };
-        checkIsMobile();
-        window.addEventListener('resize', checkIsMobile);
-        return () => window.removeEventListener('resize', checkIsMobile);
-    }, []);
-
     const toggleSidebar = () => {
         setIsCollapsed(!isCollapsed);
     }
@@ -321,8 +312,3 @@ export function AdminSidebar() {
         </aside>
     );
 }
-
-    
-
-
-    
