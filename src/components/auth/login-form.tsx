@@ -38,6 +38,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { settings } = usePlatformSettingsStore();
   const { login } = useAuth();
   
@@ -47,14 +48,14 @@ export function LoginForm() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const urlBrand = new URLSearchParams(window.location.search).get('brand');
+    const urlBrand = searchParams.get('brand');
     if (urlBrand) {
         setBrandName(urlBrand);
     }
     if (settings.platformName) {
         setLoading(false);
     }
-  }, [settings]);
+  }, [settings, searchParams]);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -84,12 +85,15 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      // Update global state
       login(result.user, result.token);
 
       toast.success(`Welcome back, ${result.user.name}!`);
 
-      if (result.user.roles.includes('admin')) {
+      const redirectUrl = searchParams.get('redirect');
+
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else if (result.user.roles.includes('admin')) {
         router.push("/admin/dashboard");
       } else {
         const userBrand = result.user.brand || 'reeva';

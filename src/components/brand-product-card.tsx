@@ -7,7 +7,7 @@ import { Heart, ShoppingCart, Star, Info, Plus, Minus, Trash2 } from "lucide-rea
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Carousel,
   CarouselContent,
@@ -29,6 +29,7 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, token } = useAuth();
   const { wishlist, setWishlist, cart, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
@@ -99,7 +100,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     e.stopPropagation();
     if (!user || !token) {
         toast.info("Please log in to add items to your wishlist.");
-        router.push(`/${product.storefront}/login`);
+        router.push(`/login?redirect=${pathname}`);
         return;
     }
     try {
@@ -123,7 +124,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const handleUpdateCart = async (quantity: number) => {
      if (!user || !token) {
         toast.info("Please log in to manage your cart.");
-        router.push(`/${product.storefront}/login`);
+        router.push(`/login?redirect=${pathname}`);
         return;
     }
     if (quantity > 0) {

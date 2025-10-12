@@ -1,11 +1,10 @@
 
-
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import useHamperStore from "@/stores/hamper-store";
 import type { IBox, IBoxVariant } from "@/models/box.model";
@@ -527,6 +526,7 @@ const Step5_Notes = () => {
 
 export default function CreateHamperPage() {
     const router = useRouter();
+    const pathname = usePathname();
     const { user, loading: authLoading, token } = useAuth();
     
     const { step, setStep, reset: resetHamper, ...hamperState } = useHamperStore();
@@ -539,9 +539,9 @@ export default function CreateHamperPage() {
     useEffect(() => {
         if (!authLoading && !user) {
             toast.info("Please log in to create a hamper.");
-            router.replace(`/reeva/login`);
+            router.replace(`/login?redirect=${pathname}`);
         }
-    }, [user, authLoading, router]);
+    }, [user, authLoading, router, pathname]);
     
     // Persist progress to backend on state change
     useEffect(() => {
@@ -626,9 +626,7 @@ export default function CreateHamperPage() {
 
             toast.success("Hamper finalized and added to cart!");
             resetHamper();
-            const firstItem = cart.items?.[0];
-            const storefront = (firstItem?.productId as any)?.storefront;
-            router.push(`/${storefront || 'reeva'}/cart`);
+            router.push(`/cart`);
         } catch (error: any) {
             console.error("Checkout failed:", error);
             toast.error(error.message);

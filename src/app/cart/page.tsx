@@ -1,11 +1,10 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
 import { Loader } from "@/components/ui/loader";
@@ -42,6 +41,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react"
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 import { cn } from "@/lib/utils";
+import useCartSettingsStore from "@/stores/cart-settings-store";
 
 const HiddenScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
@@ -85,10 +85,6 @@ ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 
 
 const SHIPPING_COST = 50;
-const FREE_SHIPPING_THRESHOLD = 399;
-const EXTRA_DISCOUNT_THRESHOLD = 799;
-const FREE_GIFT_THRESHOLD = 999;
-const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
 
 const freeGiftProduct: IProduct = {
     _id: 'free-gift-id',
@@ -242,9 +238,15 @@ const ExploreBrands = () => {
 
 export default function CartPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading: authLoading, token } = useAuth();
   const { cart, setCart, setWishlist } = useUserStore();
+  const { settings: cartSettings, fetchSettings: fetchCartSettings } = useCartSettingsStore();
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCartSettings();
+  }, [fetchCartSettings]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -256,12 +258,12 @@ export default function CartPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.replace(`/login`);
+        router.replace(`/login?redirect=${pathname}`);
         return;
       }
       setLoading(false);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, pathname]);
   
   const subtotal = useMemo(() =>
     cart?.items?.reduce((acc, item) => {
@@ -271,6 +273,8 @@ export default function CartPage() {
     }, 0) || 0,
     [cart]
   );
+  
+  const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
 
   const cartItems = useMemo(() => {
     if (!cart || !cart.items) return [];
@@ -282,7 +286,7 @@ export default function CartPage() {
           product: item.productId,
         }));
     
-    if (subtotal >= FREE_GIFT_THRESHOLD) {
+    if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold) {
         items.push({
             productId: 'free-gift-id' as any,
             quantity: 1,
@@ -292,7 +296,7 @@ export default function CartPage() {
         });
     }
     return items;
-  }, [cart, subtotal]);
+  }, [cart, subtotal, cartSettings]);
 
   const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
@@ -362,13 +366,13 @@ export default function CartPage() {
   );
   
   const milestoneDiscount = useMemo(() => {
-    if (subtotal >= EXTRA_DISCOUNT_THRESHOLD) {
+    if (cartSettings.extraDiscountThreshold && subtotal >= cartSettings.extraDiscountThreshold) {
       return subtotal * EXTRA_DISCOUNT_PERCENTAGE;
     }
     return 0;
-  }, [subtotal]);
+  }, [subtotal, cartSettings]);
   
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_COST;
+  const shipping = (cartSettings.freeShippingThreshold && subtotal >= cartSettings.freeShippingThreshold) || subtotal === 0 ? 0 : SHIPPING_COST;
   const grandTotal = subtotal - milestoneDiscount + shipping;
   
   const deliveryDate = format(addDays(new Date(), 5), 'EEE, MMM d');

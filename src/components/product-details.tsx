@@ -1,10 +1,9 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import type { ICoupon } from '@/models/coupon.model';
@@ -64,6 +63,7 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
 
 export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, reviews, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   
@@ -179,7 +179,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const handleAddToCart = async () => {
     if (!user || !token) {
         toast.info("Please log in to add items to your cart.");
-        router.push(`/${storefront}/login`);
+        router.push(`/login?redirect=${pathname}`);
         return;
     }
     
@@ -214,7 +214,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
   const handleAddToWishlist = async () => {
      if (!user || !token) {
         toast.info("Please log in to add items to your wishlist.");
-        router.push(`/${storefront}/login`);
+        router.push(`/login?redirect=${pathname}`);
         return;
     }
     try {
