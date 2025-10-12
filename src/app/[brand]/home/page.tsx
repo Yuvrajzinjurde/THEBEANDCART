@@ -110,31 +110,29 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
 
 const ProductCarouselSkeleton = () => (
-    <section className="pt-12 w-full">
-        <div className="container px-4">
-            <Skeleton className="h-8 w-48 mb-4" />
-            <Separator className="mb-6" />
-            <div className="mx-auto text-center">
-              <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                    <div key={i}>
-                         <div className="flex flex-col sm:flex-row gap-4 w-full">
-                            <Skeleton className="w-full sm:w-36 h-36 rounded-lg flex-shrink-0" />
-                            <div className="flex-grow space-y-2">
-                                <Skeleton className="h-4 w-1/4" />
-                                <Skeleton className="h-6 w-3/4" />
-                                <Skeleton className="h-8 w-1/2 mt-2" />
-                                <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
-                                    <Skeleton className="h-10 w-36" />
-                                    <Skeleton className="h-10 w-28" />
-                                </div>
+    <section className="pt-12 w-full container px-4">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Separator className="mb-6" />
+        <div className="mx-auto text-center">
+          <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+                <div key={i}>
+                     <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <Skeleton className="w-full sm:w-36 h-36 rounded-lg flex-shrink-0" />
+                        <div className="flex-grow space-y-2">
+                            <Skeleton className="h-4 w-1/4" />
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-8 w-1/2 mt-2" />
+                            <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
+                                <Skeleton className="h-10 w-36" />
+                                <Skeleton className="h-10 w-28" />
                             </div>
                         </div>
                     </div>
-                ))}
-            </div>
+                </div>
+            ))}
         </div>
     </section>
 );
@@ -144,22 +142,20 @@ const ProductCarouselSection = ({ title, products, brandName, emoji }: { title: 
     if (!products || products.length === 0) return null;
     
     return (
-        <section className="pt-12 w-full">
-            <div className="container px-4">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-                        {title}
-                        {emoji && <span className="text-2xl">{emoji}</span>}
-                    </h2>
-                     <Button variant="link" asChild>
-                        <Link href={`/${brandName}/products`}>
-                            Discover All
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                    </Button>
-                </div>
-                <Separator className="mb-6" />
+        <section className="pt-12 w-full container px-4">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    {title}
+                    {emoji && <span className="text-2xl">{emoji}</span>}
+                </h2>
+                 <Button variant="link" asChild>
+                    <Link href={`/${brandName}/products`}>
+                        Discover All
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
             </div>
+            <Separator className="mb-6" />
              <Carousel
                 opts={{
                     align: "start",
@@ -167,17 +163,15 @@ const ProductCarouselSection = ({ title, products, brandName, emoji }: { title: 
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-1">
-                    <div className="container px-4 flex">
-                        {products.map((product) => (
-                            <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6 pl-3">
-                                <BrandProductCard product={product} />
-                            </CarouselItem>
-                        ))}
-                    </div>
+                <CarouselContent>
+                    {products.map((product) => (
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                            <BrandProductCard product={product} />
+                        </CarouselItem>
+                    ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                <CarouselPrevious className="absolute left-[-16px] top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                <CarouselNext className="absolute right-[-16px] top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
             </Carousel>
         </section>
     );

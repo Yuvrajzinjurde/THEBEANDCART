@@ -54,33 +54,29 @@ const LandingPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, emoji }: { title: string, products: IProduct[], emoji?: string }) => {
     if (!products || products.length === 0) return null;
     return (
-        <section className="w-full pt-12">
-            <div className="container px-4">
-                <div className="flex justify-between items-center mb-4">
-                     <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-                        {title}
-                        {emoji && <span className="text-2xl">{emoji}</span>}
-                    </h2>
-                </div>
-                <Separator className="mb-6" />
+        <section className="w-full pt-12 container px-4">
+            <div className="flex justify-between items-center mb-4">
+                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    {title}
+                    {emoji && <span className="text-2xl">{emoji}</span>}
+                </h2>
             </div>
+            <Separator className="mb-6" />
             <Carousel
                 opts={{ align: "start", loop: true }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-1">
-                    <div className="container px-4 flex">
-                        {products.map((product) => (
-                            <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6 pl-3">
-                                <div className="p-1">
-                                    <BrandProductCard product={product} />
-                                </div>
-                            </CarouselItem>
-                        ))}
-                    </div>
+                <CarouselContent>
+                    {products.map((product) => (
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                            <div className="p-1">
+                                <BrandProductCard product={product} />
+                            </div>
+                        </CarouselItem>
+                    ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                <CarouselPrevious className="absolute left-[-16px] top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                <CarouselNext className="absolute right-[-16px] top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
             </Carousel>
         </section>
     );
@@ -90,20 +86,18 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
     const { imageUrl, imageHint, buttonLink } = settings.promoBanner;
     return (
-        <section className="w-full py-12">
-            <div className="container px-4">
-                <Link href={buttonLink || '#'}>
-                    <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
-                        <Image
-                            src={imageUrl}
-                            alt={'Promotional banner'}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={imageHint}
-                        />
-                    </div>
-                </Link>
-            </div>
+        <section className="w-full py-12 container px-4">
+            <Link href={buttonLink || '#'}>
+                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
+                    <Image
+                        src={imageUrl}
+                        alt={'Promotional banner'}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={imageHint}
+                    />
+                </div>
+            </Link>
         </section>
     )
 };
@@ -114,23 +108,21 @@ const HamperSection = () => {
     if (!settings.hamperFeatureEnabled) return null;
 
     return (
-        <section className="w-full py-12">
-            <div className="container px-4">
-                <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
-                    <div className="relative z-10 p-8 md:p-12 text-center">
-                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
-                            <Gift className="h-8 w-8 text-primary" />
-                        </div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
-                        <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                            Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
-                        </p>
-                        <Button asChild size="lg" className="mt-6">
-                            <Link href="/create-hamper">
-                                Start Creating <ArrowRight className="ml-2" />
-                            </Link>
-                        </Button>
+        <section className="w-full py-12 container px-4">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
+                <div className="relative z-10 p-8 md:p-12 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
+                        <Gift className="h-8 w-8 text-primary" />
                     </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                        Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
+                    </p>
+                    <Button asChild size="lg" className="mt-6">
+                        <Link href="/create-hamper">
+                            Start Creating <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </section>
@@ -181,32 +173,30 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     };
 
     return (
-        <section className="w-full py-12">
-            <div className="container px-4">
-                {canScroll ? (
-                    <Carousel
-                        plugins={[autoplay.current]}
-                        opts={{ align: "start", loop: true }}
-                        className="w-full"
-                    >
-                        <CarouselContent>
-                            {brands.map((brand) => (
-                                <CarouselItem key={brand.permanentName} className="basis-auto">
-                                    <BrandLogo brand={brand} />
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                        <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                    </Carousel>
-                ) : (
-                    <div ref={scrollContainerRef} className="flex justify-center items-center gap-4">
+        <section className="w-full py-12 container px-4">
+            {canScroll ? (
+                <Carousel
+                    plugins={[autoplay.current]}
+                    opts={{ align: "start", loop: true }}
+                    className="w-full"
+                >
+                    <CarouselContent>
                         {brands.map((brand) => (
-                            <BrandLogo key={brand.permanentName} brand={brand} />
+                            <CarouselItem key={brand.permanentName} className="basis-auto">
+                                <BrandLogo brand={brand} />
+                            </CarouselItem>
                         ))}
-                    </div>
-                )}
-            </div>
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                    <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                </Carousel>
+            ) : (
+                <div ref={scrollContainerRef} className="flex justify-center items-center gap-4">
+                    {brands.map((brand) => (
+                        <BrandLogo key={brand.permanentName} brand={brand} />
+                    ))}
+                </div>
+            )}
         </section>
     );
 };
