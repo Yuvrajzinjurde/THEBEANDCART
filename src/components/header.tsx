@@ -325,7 +325,7 @@ export default function Header() {
           </Sheet>
         </div>
 
-        <div className="w-full flex items-center justify-between gap-6">
+        <div className="flex w-full items-center justify-between gap-6">
           {/* Desktop Logo & Categories (left) */}
           <div className="hidden md:flex items-center gap-x-4">
             <Link href={homeLink} className="flex items-center space-x-2">
