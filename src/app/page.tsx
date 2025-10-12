@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -279,7 +278,7 @@ export default function LandingPage() {
   const platformSettings = settings as IPlatformSettings;
   
   if (loading || !platformSettings || !Array.isArray(platformSettings.heroBanners) || platformSettings.heroBanners.length === 0) {
-      return <LandingPageSkeleton />;
+      return <main className="flex-1"><LandingPageSkeleton /></main>;
   }
   
   const heroBanners = platformSettings.heroBanners;

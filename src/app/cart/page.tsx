@@ -118,7 +118,7 @@ const GiftBoxIcon = () => (
 )
 
 const CartSkeleton = () => (
-    <>
+    <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
      <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
         <div className="container flex items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2">
@@ -131,60 +131,58 @@ const CartSkeleton = () => (
             <div className="w-48 hidden lg:block" />
         </div>
       </div>
-    <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-            <div className="lg:col-span-2 space-y-4">
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-32" />
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {[...Array(2)].map((_, i) => (
-                            <div key={i} className="flex gap-4">
-                                <Skeleton className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] rounded-lg" />
-                                <div className="flex-grow space-y-2">
-                                    <Skeleton className="h-4 w-1/4" />
-                                    <Skeleton className="h-6 w-3/4" />
-                                    <Skeleton className="h-5 w-1/2" />
-                                    <Skeleton className="h-4 w-1/3 mt-2" />
-                                    <div className="flex justify-between mt-4">
-                                        <Skeleton className="h-8 w-24 rounded-full" />
-                                        <div className="flex gap-4">
-                                            <Skeleton className="h-5 w-20" />
-                                            <Skeleton className="h-5 w-28" />
-                                        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
+        <div className="lg:col-span-2 space-y-4">
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-32" />
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {[...Array(2)].map((_, i) => (
+                        <div key={i} className="flex gap-4">
+                            <Skeleton className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] rounded-lg" />
+                            <div className="flex-grow space-y-2">
+                                <Skeleton className="h-4 w-1/4" />
+                                <Skeleton className="h-6 w-3/4" />
+                                <Skeleton className="h-5 w-1/2" />
+                                <Skeleton className="h-4 w-1/3 mt-2" />
+                                <div className="flex justify-between mt-4">
+                                    <Skeleton className="h-8 w-24 rounded-full" />
+                                    <div className="flex gap-4">
+                                        <Skeleton className="h-5 w-20" />
+                                        <Skeleton className="h-5 w-28" />
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        </div>
+        <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6">
+                <Card>
+                    <CardHeader><Skeleton className="h-6 w-24" /></CardHeader>
+                    <CardContent className="flex gap-2">
+                        <Skeleton className="h-10 flex-grow" />
+                        <Skeleton className="h-10 w-20" />
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-5 w-full" />
+                        <Skeleton className="h-5 w-full" />
+                        <Skeleton className="h-5 w-full" />
+                        <Separator />
+                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-12 w-full mt-4" />
                     </CardContent>
                 </Card>
             </div>
-            <div className="lg:col-span-1">
-                <div className="sticky top-24 space-y-6">
-                    <Card>
-                        <CardHeader><Skeleton className="h-6 w-24" /></CardHeader>
-                        <CardContent className="flex gap-2">
-                            <Skeleton className="h-10 flex-grow" />
-                            <Skeleton className="h-10 w-20" />
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader><Skeleton className="h-6 w-32" /></CardHeader>
-                        <CardContent className="space-y-4">
-                            <Skeleton className="h-5 w-full" />
-                            <Skeleton className="h-5 w-full" />
-                            <Skeleton className="h-5 w-full" />
-                            <Separator />
-                            <Skeleton className="h-6 w-full" />
-                            <Skeleton className="h-12 w-full mt-4" />
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
         </div>
+    </div>
     </main>
-    </>
 );
 
 const ExploreBrands = () => {
