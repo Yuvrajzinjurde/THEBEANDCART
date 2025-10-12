@@ -38,11 +38,8 @@ export default async function RootLayout({
 
   const isAdminRoute = pathname.startsWith('/admin');
   
-  // Correctly identify auth routes, even with brand segments
-  const pathSegments = pathname.split('/').filter(Boolean);
-  const lastSegment = pathSegments[pathSegments.length - 1];
-  const authRoutes = ['login', 'signup', 'forgot-password'];
-  const isAuthRoute = authRoutes.includes(lastSegment);
+  const authRoutes = ['/login', '/signup', '/forgot-password'];
+  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   
   const showHeaderAndFooter = !isAdminRoute && !isAuthRoute;
 
