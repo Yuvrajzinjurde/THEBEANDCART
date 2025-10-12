@@ -167,12 +167,14 @@ const ProductCarouselSection = ({ title, products, brandName, emoji }: { title: 
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2 container px-4">
-                    {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                            <BrandProductCard product={product} />
-                        </CarouselItem>
-                    ))}
+                <CarouselContent className="-ml-1">
+                    <div className="container px-4 flex">
+                        {products.map((product) => (
+                            <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6 pl-3">
+                                <BrandProductCard product={product} />
+                            </CarouselItem>
+                        ))}
+                    </div>
                 </CarouselContent>
                 <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
                 <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />

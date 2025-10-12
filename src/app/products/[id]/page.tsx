@@ -54,25 +54,23 @@ const ProductPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
         return (
-            <section className="pt-12 w-full">
-                <div className="container px-4">
-                    <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
-                    <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
-                                <div className="space-y-2">
-                                    <Skeleton className="aspect-square w-full" />
-                                    <Skeleton className="h-4 w-2/3" />
-                                    <Skeleton className="h-6 w-1/2" />
-                                </div>
+            <div className="container pt-12 px-4">
+                <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
+                <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 flex-shrink-0 p-1">
+                            <div className="space-y-2">
+                                <Skeleton className="aspect-square w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                                <Skeleton className="h-6 w-1/2" />
                             </div>
-                        ))}
-                    </div>
-                     <div className="mx-auto text-center">
-                       <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
-                     </div>
+                        </div>
+                    ))}
                 </div>
-            </section>
+                 <div className="mx-auto text-center">
+                   <p className="my-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+                 </div>
+            </div>
         )
     }
 
@@ -88,16 +86,18 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
                     align: "start",
                     loop: products.length > 6,
                 }}
-                className="w-full container px-4"
+                className="w-full"
             >
-                <CarouselContent className="-ml-2">
-                    {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                            <div className="p-1">
-                                <BrandProductCard product={product} />
-                            </div>
-                        </CarouselItem>
-                    ))}
+                <CarouselContent className="-ml-1">
+                    <div className="container px-4 flex">
+                        {products.map((product) => (
+                            <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6 pl-3">
+                                <div className="p-1">
+                                    <BrandProductCard product={product} />
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </div>
                 </CarouselContent>
                 <CarouselPrevious className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
                 <CarouselNext className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
