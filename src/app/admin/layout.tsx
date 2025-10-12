@@ -65,7 +65,7 @@ export default function AdminLayout({
       <div className="flex flex-col">
         <MobileAdminHeader />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/30">
-            <div className="container mx-auto px-0">
+            <div className="container mx-auto">
               {children}
             </div>
         </main>

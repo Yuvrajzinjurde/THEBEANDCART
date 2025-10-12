@@ -9,16 +9,14 @@ import type { IPlatformSettings } from '@/models/platform.model';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { Twitter, Facebook, Instagram, Linkedin, ArrowRight, Gift, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowRight, Gift, Star, TrendingUp, Sparkles } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Separator } from '@/components/ui/separator';
@@ -285,7 +283,7 @@ export default function LandingPage() {
 
   return (
     <>
-      {heroBanners && heroBanners.length > 0 ? (
+      {heroBanners && heroBanners.length > 0 && (
            <section className="w-full hidden sm:block">
               <Carousel 
                   className="w-full" 
@@ -315,17 +313,9 @@ export default function LandingPage() {
                   <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
               </Carousel>
           </section>
-      ) : (
-          <section className="container text-center py-20 sm:py-32 px-4 sm:px-6 lg:px-8">
-               <Logo className="h-16 w-16 mx-auto mb-4" />
-              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground">
-                  The Brand Cart
-              </h1>
-               <p className="mt-4 text-lg text-muted-foreground">Your Cart, Your Way.</p>
-          </section>
       )}
       
-      <main className="container px-4 sm:px-6 lg:px-8">
+      <main className="container">
         <section className="text-center py-16">
             <h2 className="text-xl font-semibold text-muted-foreground sm:text-2xl">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>

@@ -6,9 +6,6 @@ import { useEffect, useState, useMemo, useTransition, useCallback } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
 import type { IBrand } from '@/models/brand.model';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { ProductFilters } from '@/components/product-filters';
 import {
@@ -26,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Smile, SlidersHorizontal, ArrowRight, ChevronLeft, ChevronRight, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { ChevronDown, Smile, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -323,7 +320,7 @@ export default function ProductsPage() {
                             <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
                                 {currentCategory ? `${currentCategory}` : `All Products`}
                             </h1>
-                            <p className="text-sm text-muted-foreground mt-1">{isPending ? <Loader className="inline-block h-4 w-4" /> : `${pagination.totalProducts} products`}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{pagination.totalProducts} products</p>
                         </div>
                         <div className="flex items-center gap-2 self-end">
                              <Sheet>
@@ -365,11 +362,14 @@ export default function ProductsPage() {
                 {isPending ? (
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
+                    <>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pt-6">
                         {allProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}
                     </div>
+                    <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
+                    </>
                 ) : (
                     <div className="text-center py-16 border rounded-lg mt-6 flex flex-col items-center">
                         <Smile className="w-16 h-16 text-muted-foreground/50 mb-4" />
@@ -378,7 +378,6 @@ export default function ProductsPage() {
                          <Button variant="link" className="mt-2" onClick={clearAllFilters}>Clear all filters</Button>
                     </div>
                 )}
-                 <PaginationComponent pagination={pagination} onPageChange={handlePageChange} />
                  <div className="mt-16">
                     <ProductCarouselSection title="Explore Our Popular Products" products={popularProducts} />
                 </div>

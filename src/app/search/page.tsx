@@ -5,7 +5,6 @@
 import { useEffect, useState, useMemo, useTransition, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { IProduct } from '@/models/product.model';
-import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
 import {
   Breadcrumb,
@@ -24,7 +23,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Smile, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { GlobalFooter } from '@/components/global-footer';
 import { ProductFilters } from '@/components/product-filters';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import type { ActiveFilters } from '@/app/[brand]/products/page';
@@ -206,7 +204,6 @@ function SearchResults() {
   }
 
   return (
-    <>
     <main className="container py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
@@ -299,8 +296,6 @@ function SearchResults() {
             </div>
         </div>
     </main>
-    <GlobalFooter />
-    </>
   );
 }
 

@@ -8,7 +8,6 @@ import Image from "next/image";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
 import { UserNav } from "@/components/user-nav";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { IBrand } from "@/models/brand.model";
@@ -326,8 +325,7 @@ export default function Header() {
             </Sheet>
           </div>
 
-          {/* This div centers all content on desktop */}
-          <div className="w-full flex items-center gap-6">
+          <div className="flex items-center justify-between w-full">
             {/* Desktop Logo & Categories (left) */}
             <div className="hidden md:flex items-center gap-x-4">
               <Link href={homeLink} className="flex items-center space-x-2">
@@ -356,8 +354,8 @@ export default function Header() {
             </div>
 
             {/* Search Bar (center) */}
-            <div className="flex-1" ref={searchContainerRef}>
-              <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
+            <div className="flex-1 max-w-lg mx-auto" ref={searchContainerRef}>
+              <form className="relative w-full" onSubmit={handleSearchSubmit}>
                 <Input
                   name="search"
                   type="search"

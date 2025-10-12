@@ -15,9 +15,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Loader } from '@/components/ui/loader';
 import { BrandProductCard } from '@/components/brand-product-card';
-import { ArrowRight, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -386,7 +385,7 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      <div className="container px-4 sm:px-6 lg:px-8">
+      <div className="container">
         <CategoryGrid brand={brand} />
         
         <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} emoji="📈" />
