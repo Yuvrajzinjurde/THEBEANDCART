@@ -85,7 +85,7 @@ export function LoginForm() {
       }
       
       // Update global state
-      login(result.user);
+      login(result.user, result.token);
 
       toast.success(`Welcome back, ${result.user.name}!`);
 
