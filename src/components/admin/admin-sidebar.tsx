@@ -41,13 +41,13 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import useBrandStore from "@/stores/brand-store";
-import { Button } from "../ui/button";
-import { UserNav } from "../user-nav";
-import { Separator } from "../ui/separator";
+import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/user-nav";
+import { Separator } from "@/components/ui/separator";
 import type { IBrand } from "@/models/brand.model";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const mainNavItem = { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" };
 
@@ -156,18 +156,18 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
     )
 }
 
-const SidebarContent = () => {
+const SidebarContent = ({ className }: { className?: string}) => {
     const pathname = usePathname();
     const { href, icon: Icon, label } = mainNavItem;
 
     return (
-        <>
+        <div className={cn("flex h-full flex-col", className)}>
         {/* Main Content */}
         <div className="flex-1 overflow-auto py-2 no-scrollbar">
             <div className="p-2">
                 <BrandSelector isCollapsed={false} />
             </div>
-             <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
+             <nav className="grid items-start gap-1 px-2 text-sm font-medium">
                 <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary")}>
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
@@ -182,22 +182,18 @@ const SidebarContent = () => {
             </nav>
         </div>
         {/* Sidebar Footer */}
-        <div className="mt-auto border-t">
-            <div className="p-2">
-                <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Help &amp; Settings</span>
-                    <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button>
-                    </div>
+        <div className="mt-auto border-t p-2">
+            <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Help &amp; Settings</span>
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button>
                 </div>
             </div>
-            <Separator className="my-0" />
-            <div className="p-2">
-                <UserNav />
-            </div>
+            <Separator className="my-2" />
+            <UserNav />
         </div>
-      </>
+      </div>
     )
 }
 
@@ -206,22 +202,18 @@ export function MobileAdminHeader() {
      const { selectedBrand } = useBrandStore();
 
     return (
-        <header className="md:hidden flex h-16 items-center justify-between border-b bg-background px-4 shrink-0">
-             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-                <Store className="h-6 w-6 text-primary" />
-                <span className="capitalize">{selectedBrand}</span>
-            </Link>
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" className="sm:hidden">
                         <PanelLeft className="h-5 w-5" />
                         <span className="sr-only">Toggle Menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-64 flex flex-col p-0">
+                <SheetContent side="left" className="sm:max-w-xs p-0">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
-                            <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
+                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
                                 <Store className="h-6 w-6 text-primary" />
                                 <span>Admin Panel</span>
                             </Link>
@@ -230,6 +222,10 @@ export function MobileAdminHeader() {
                     <SidebarContent />
                 </SheetContent>
             </Sheet>
+            <div className="relative ml-auto flex-1 md:grow-0">
+                {/* Search can go here */}
+            </div>
+            <UserNav />
         </header>
     )
 }
@@ -237,78 +233,19 @@ export function MobileAdminHeader() {
 
 export function AdminSidebar() {
     const pathname = usePathname();
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsCollapsed(!isCollapsed);
-    }
-    
     const { href: mainHref, icon: MainIcon, label: mainLabel } = mainNavItem;
 
     return (
-        <aside className={cn(
-            "hidden md:flex md:flex-col transition-all duration-300 ease-in-out bg-background border-r h-screen sticky top-0",
-            isCollapsed ? "w-16" : "w-64",
-        )}>
-             <TooltipProvider delayDuration={0}>
-                <div className="flex h-full max-h-screen flex-col">
-                    <div className={cn("flex items-center h-16 border-b px-4 shrink-0", isCollapsed ? "justify-center" : "justify-between")}>
-                        <Link href="/admin/dashboard" className={cn("flex items-center gap-2 font-bold", isCollapsed && "hidden")}>
-                            <Store className="h-6 w-6 text-primary" />
-                            <span>Admin Panel</span>
-                        </Link>
-                        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
-                            <PanelLeft className="h-5 w-5" />
-                            <span className="sr-only">Toggle Sidebar</span>
-                        </Button>
-                    </div>
-                    <div className={cn("p-2", isCollapsed && "px-1.5 py-2 flex justify-center")}>
-                        <BrandSelector isCollapsed={isCollapsed} />
-                    </div>
-                    <div className="flex-1 overflow-auto py-2 no-scrollbar">
-                        <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Link
-                                        href={mainHref}
-                                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(mainHref) && "bg-muted text-primary", isCollapsed && "justify-center")}
-                                    >
-                                        <MainIcon className="h-4 w-4" />
-                                        <span className={cn(isCollapsed && "hidden")}>{mainLabel}</span>
-                                    </Link>
-                                </TooltipTrigger>
-                                {isCollapsed && <TooltipContent side="right">{mainLabel}</TooltipContent>}
-                            </Tooltip>
-                            <Separator className="my-2" />
-                            {navItems.sort((a, b) => a.label.localeCompare(b.label)).map(({ href, icon: Icon, label }) => (
-                                <Tooltip key={label}>
-                                    <TooltipTrigger asChild>
-                                        <Link
-                                            href={href}
-                                            className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary", isCollapsed && "justify-center")}
-                                        >
-                                            <Icon className="h-4 w-4" />
-                                            <span className={cn(isCollapsed && "hidden")}>{label}</span>
-                                        </Link>
-                                    </TooltipTrigger>
-                                    {isCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
-                                </Tooltip>
-                            ))}
-                        </nav>
-                    </div>
-                    <div className="mt-auto border-t">
-                        <div className={cn("p-2", isCollapsed ? "py-2" : "p-2")}>
-                                <div className={cn("flex items-center justify-between", isCollapsed && "flex-col gap-2")}>
-                                    {!isCollapsed && <span className="text-xs text-muted-foreground">Settings</span>}
-                                </div>
-                        </div>
-                        <Separator className="my-0" />
-                        <div className={cn("py-2", isCollapsed && "p-2 flex justify-center")}>
-                            <UserNav isCollapsed={isCollapsed} />
-                        </div>
-                    </div>
+        <aside className="hidden border-r bg-background md:flex h-full">
+             <div className="flex h-full max-h-screen flex-col gap-2">
+                <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                    <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
+                        <Store className="h-6 w-6 text-primary" />
+                        <span>Admin Panel</span>
+                    </Link>
                 </div>
-            </TooltipProvider>
+                <SidebarContent className="flex-1"/>
+            </div>
         </aside>
     );
 }
