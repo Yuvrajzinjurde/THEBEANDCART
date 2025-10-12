@@ -208,16 +208,22 @@ export default function Header() {
                 <Skeleton className="h-9 w-9" />
                 <Skeleton className="h-9 w-9 rounded-full" />
             </div>
-        ) : user ? (
+        ) : (
             <>
-                <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
-                    <Link href="/wishlist" className="relative">
-                        <Heart className="h-5 w-5" />
-                        {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
-                    </Link>
-                </Button>
-                <NotificationsPopover />
-                <UserNav />
+                {user ? (
+                    <>
+                        <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
+                            <Link href="/wishlist" className="relative">
+                                <Heart className="h-5 w-5" />
+                                {wishlistCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{wishlistCount}</span>}
+                            </Link>
+                        </Button>
+                        <NotificationsPopover />
+                        <UserNav />
+                    </>
+                ) : (
+                    <Button variant="ghost" asChild><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
+                )}
                 <Button variant="ghost" size="icon" aria-label="Cart" asChild>
                     <Link href={`/cart`} className="relative">
                         <ShoppingCart className="h-5 w-5" />
@@ -225,8 +231,6 @@ export default function Header() {
                     </Link>
                 </Button>
             </>
-        ) : (
-            <Button asChild><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
         )}
     </div>
   );
@@ -319,7 +323,7 @@ export default function Header() {
                       {user ? (
                         <UserNav />
                       ) : (
-                        <Button asChild className="w-full"><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
+                        <Button variant="outline" asChild className="w-full"><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
                       )}
                     </div>
                   </SheetContent>

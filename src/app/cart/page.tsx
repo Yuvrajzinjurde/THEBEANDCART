@@ -254,14 +254,12 @@ export default function CartPage() {
   }, []);
 
   useEffect(() => {
+    // This page is now accessible to guests, so we don't redirect.
+    // We just wait for auth state to be resolved to avoid flashes of content.
     if (!authLoading) {
-      if (!user) {
-        router.replace(`/login?redirect=${pathname}`);
-        return;
-      }
       setLoading(false);
     }
-  }, [user, authLoading, router, pathname]);
+  }, [authLoading]);
   
   const subtotal = useMemo(() =>
     cart?.items?.reduce((acc, item) => {
@@ -298,7 +296,11 @@ export default function CartPage() {
 
   const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
-    if (!token) return;
+    if (!token) {
+        toast.info("Please log in to update your cart.");
+        router.push(`/login?redirect=${pathname}`);
+        return;
+    };
 
     try {
       const response = await fetch('/api/cart', {
@@ -318,7 +320,11 @@ export default function CartPage() {
   };
 
   const handleRemoveItem = async (productId: string) => {
-    if (!token) return;
+    if (!token) {
+        toast.info("Please log in to update your cart.");
+        router.push(`/login?redirect=${pathname}`);
+        return;
+    };
     try {
       const response = await fetch(`/api/cart?productId=${productId}`, {
         method: 'DELETE',
@@ -333,7 +339,11 @@ export default function CartPage() {
   };
 
   const handleMoveToWishlist = async (productId: string) => {
-    if (!token) return;
+    if (!token) {
+        toast.info("Please log in to update your cart.");
+        router.push(`/login?redirect=${pathname}`);
+        return;
+    };
     try {
       const wishlistRes = await fetch('/api/wishlist', {
         method: 'POST',
@@ -377,7 +387,8 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     if (!user || !token) {
-      toast.error("Please log in to proceed.");
+      toast.info("Please log in to proceed to checkout.");
+      router.push(`/login?redirect=${pathname}`);
       return;
     }
 
