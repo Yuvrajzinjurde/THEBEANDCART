@@ -227,7 +227,7 @@ export default function Header() {
                 </Button>
             </>
         ) : (
-            <Button asChild><Link href="/login">Login</Link></Button>
+            <Button asChild><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
         )}
     </div>
   );
@@ -360,7 +360,7 @@ export default function Header() {
                                 All Products
                             </Link>
                             {user && (
-                                <Link href="#" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
                                     <Package className="h-5 w-5" />
                                     My Orders
                             </Link>
