@@ -59,10 +59,10 @@ export const themeColors = [
 ] as const;
 
 const SocialLinksSchema = z.object({
-    twitter: z.string().url().optional().or(z.literal('')),
-    facebook: z.string().url().optional().or(z.literal('')),
-    instagram: z.string().url().optional().or(z.literal('')),
-    linkedin: z.string().url().optional().or(z.literal('')),
+    twitter: z.string().url("Invalid Twitter URL").or(z.literal('')).optional(),
+    facebook: z.string().url("Invalid Facebook URL").or(z.literal('')).optional(),
+    instagram: z.string().url("Invalid Instagram URL").or(z.literal('')).optional(),
+    linkedin: z.string().url("Invalid LinkedIn URL").or(z.literal('')).optional(),
 });
 
 export const BrandFormSchema = z.object({

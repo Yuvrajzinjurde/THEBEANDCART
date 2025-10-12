@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Star, Crop, PlusCircle } from 'lucide-react';
+import { Trash, UploadCloud, X, Star, Crop, PlusCircle, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -122,6 +122,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         return {
             ...brand,
             themeName: brand.themeName || 'Rose',
+            socials: brand.socials || { twitter: '', facebook: '', instagram: '', linkedin: '' },
             promoBanner: {
                 imageUrl: brand.promoBanner?.imageUrl || '',
                 imageHint: brand.promoBanner?.imageHint || '',
@@ -151,6 +152,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
             { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
             { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
         ],
+        socials: { twitter: '#', facebook: '#', instagram: '#', linkedin: '#' },
     };
   }, [existingBrand]);
 
@@ -165,6 +167,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         const brandData = {
             ...existingBrand,
             themeName: existingBrand.themeName || 'Rose',
+            socials: existingBrand.socials || { twitter: '', facebook: '', instagram: '', linkedin: '' },
             promoBanner: {
                 imageUrl: existingBrand.promoBanner?.imageUrl || '',
                 imageHint: existingBrand.promoBanner?.imageHint || '',
@@ -417,6 +420,19 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                         </FormItem>
                     )}
                 />
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Social Media Links</CardTitle>
+                <CardDescription>Enter the URLs for your brand's social media profiles.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="socials.twitter" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Twitter/> Twitter</FormLabel><FormControl><Input placeholder="https://twitter.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.facebook" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Facebook/> Facebook</FormLabel><FormControl><Input placeholder="https://facebook.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.instagram" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Instagram/> Instagram</FormLabel><FormControl><Input placeholder="https://instagram.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Linkedin/> LinkedIn</FormLabel><FormControl><Input placeholder="https://linkedin.com/company/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
             </CardContent>
         </Card>
 
