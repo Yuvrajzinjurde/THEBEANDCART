@@ -30,8 +30,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LandingPageSkeleton = () => (
-    <main className="container flex flex-col items-center justify-center flex-1 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-4xl px-4">
+    <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4">
             <div className="space-y-8 animate-pulse">
                 <div className="flex justify-center">
                     <Skeleton className="h-16 w-16 rounded-full" />
@@ -284,8 +284,7 @@ export default function LandingPage() {
   const heroBanners = platformSettings.heroBanners;
 
   return (
-    <main className="flex-1">
-
+    <main>
         {heroBanners && heroBanners.length > 0 ? (
              <section className="w-full hidden sm:block">
                 <Carousel 

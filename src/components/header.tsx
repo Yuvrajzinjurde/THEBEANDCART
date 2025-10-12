@@ -266,159 +266,162 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        {/* Mobile Menu (left) */}
-        <div className="md:hidden">
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[340px] flex flex-col p-0">
-              <SheetHeader className="p-4 border-b">
-                <SheetTitle>
-                  <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                    {renderLogo()}
-                    <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
-                  </Link>
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex-1 overflow-y-auto p-4">
-                <nav className="flex flex-col gap-4">
-                  {user && (
-                    <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                      <Package className="h-5 w-5" />
-                      My Orders
+      <div className="container">
+        <div className="flex h-16 items-center">
+          {/* Mobile Menu (left) */}
+          <div className="md:hidden">
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[340px] flex flex-col p-0">
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle>
+                    <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                      {renderLogo()}
+                      <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
                     </Link>
-                  )}
-                  <Separator />
-                  {categories.length > 0 && (
-                    <>
-                      <h3 className="font-semibold text-muted-foreground">Categories</h3>
-                      {categories.map(cat => (
-                        <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                          {cat}
-                        </Link>
-                      ))}
-                      <Separator />
-                    </>
-                  )}
-                  <h3 className="font-semibold text-muted-foreground">Explore</h3>
-                  {secondaryNavItems.map((item) => (
-                    <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                      <item.icon className="h-4 w-4" />
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-              <div className="border-t p-4">
-                {user ? (
-                  <UserNav />
-                ) : (
-                  <Button asChild className="w-full"><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        <div className="flex w-full items-center justify-between gap-6">
-          {/* Desktop Logo & Categories (left) */}
-          <div className="hidden md:flex items-center gap-x-4">
-            <Link href={homeLink} className="flex items-center space-x-2">
-              {renderLogo()}
-              <span className="font-bold text-lg capitalize">
-                {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
-              </span>
-            </Link>
-            {brandName && categories.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="items-center gap-2">
-                    <Menu className="h-5 w-5" />
-                    <span className="font-semibold">Categories</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {categories.map(cat => (
-                    <DropdownMenuItem key={cat} asChild>
-                      <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-
-          {/* Search Bar (center) */}
-          <div className="flex-1 md:w-full md:max-w-lg" ref={searchContainerRef}>
-            <form className="relative w-full" onSubmit={handleSearchSubmit}>
-              <Input
-                name="search"
-                type="search"
-                placeholder="Search for anything"
-                className="h-11 w-full rounded-full pl-5 pr-12 text-base"
-                value={searchQuery}
-                onChange={handleSearchInputChange}
-                onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
-                disabled={isLoading}
-              />
-              <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={isLoading}>
-                <Search className="h-4 w-4" />
-              </Button>
-              {isSuggestionsOpen && suggestions.length > 0 && (
-                <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
-                  <ul className="py-1">
-                    {suggestions.map((suggestion, index) => (
-                      <li
-                        key={index}
-                        className="px-4 py-2 hover:bg-accent cursor-pointer flex items-center gap-2"
-                        onClick={() => executeSearch(suggestion)}
-                      >
-                        <Search className="h-4 w-4 text-muted-foreground" />
-                        <span>{searchQuery} in <span className="font-bold">{suggestion}</span></span>
-                      </li>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto p-4">
+                  <nav className="flex flex-col gap-4">
+                    {user && (
+                      <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                        <Package className="h-5 w-5" />
+                        My Orders
+                      </Link>
+                    )}
+                    <Separator />
+                    {categories.length > 0 && (
+                      <>
+                        <h3 className="font-semibold text-muted-foreground">Categories</h3>
+                        {categories.map(cat => (
+                          <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                            {cat}
+                          </Link>
+                        ))}
+                        <Separator />
+                      </>
+                    )}
+                    <h3 className="font-semibold text-muted-foreground">Explore</h3>
+                    {secondaryNavItems.map((item) => (
+                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </Link>
                     ))}
-                  </ul>
+                  </nav>
                 </div>
-              )}
-            </form>
+                <div className="border-t p-4">
+                  {user ? (
+                    <UserNav />
+                  ) : (
+                    <Button asChild className="w-full"><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
 
-          {/* Actions (right) */}
-          <div className="hidden md:flex">
-            <DesktopNavActions />
-          </div>
-        </div>
-
-        {/* Mobile Actions (right) */}
-        <div className="md:hidden flex items-center gap-1">
-          <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-            <Link href={`/cart`} className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
-            </Link>
-          </Button>
-          {user && <NotificationsPopover />}
-        </div>
-      </div>
-
-      <div className={cn("w-full overflow-x-auto no-scrollbar", !showSecondaryNav && "hidden")}>
-        <Separator />
-        <div className="container">
-          <nav className="flex h-12 items-center justify-center gap-6">
-            {secondaryNavItems.map((item) => (
-              <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
-                <item.icon className="h-4 w-4" />
-                {item.label}
+          <div className="w-full flex items-center gap-6">
+            {/* Desktop Logo & Categories (left) */}
+            <div className="hidden md:flex items-center gap-x-4">
+              <Link href={homeLink} className="flex items-center space-x-2">
+                {renderLogo()}
+                <span className="font-bold text-lg capitalize">
+                  {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
+                </span>
               </Link>
-            ))}
-          </nav>
+              {brandName && categories.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="items-center gap-2">
+                      <Menu className="h-5 w-5" />
+                      <span className="font-semibold">Categories</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {categories.map(cat => (
+                      <DropdownMenuItem key={cat} asChild>
+                        <Link href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+
+            {/* Search Bar (center) */}
+            <div className="flex-1" ref={searchContainerRef}>
+              <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
+                <Input
+                  name="search"
+                  type="search"
+                  placeholder="Search for anything"
+                  className="h-11 w-full rounded-full pl-5 pr-12 text-base"
+                  value={searchQuery}
+                  onChange={handleSearchInputChange}
+                  onFocus={() => searchQuery.length > 1 && setIsSuggestionsOpen(true)}
+                  disabled={isLoading}
+                />
+                <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full" disabled={isLoading}>
+                  <Search className="h-4 w-4" />
+                </Button>
+                {isSuggestionsOpen && suggestions.length > 0 && (
+                  <div className="absolute top-full mt-2 w-full rounded-md bg-background border shadow-lg z-10">
+                    <ul className="py-1">
+                      {suggestions.map((suggestion, index) => (
+                        <li
+                          key={index}
+                          className="px-4 py-2 hover:bg-accent cursor-pointer flex items-center gap-2"
+                          onClick={() => executeSearch(suggestion)}
+                        >
+                          <Search className="h-4 w-4 text-muted-foreground" />
+                          <span>{searchQuery} in <span className="font-bold">{suggestion}</span></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </form>
+            </div>
+
+            {/* Actions (right) */}
+            <div className="hidden md:flex">
+              <DesktopNavActions />
+            </div>
+          </div>
+
+          {/* Mobile Actions (right) */}
+          <div className="md:hidden flex items-center gap-1">
+            <Button variant="ghost" size="icon" aria-label="Cart" asChild>
+              <Link href={`/cart`} className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+              </Link>
+            </Button>
+            {user && <NotificationsPopover />}
+          </div>
         </div>
       </div>
+      
+      {showSecondaryNav && (
+        <div className="w-full overflow-x-auto no-scrollbar border-t">
+          <div className="container">
+            <nav className="flex h-12 items-center justify-center gap-6">
+              {secondaryNavItems.map((item) => (
+                <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
