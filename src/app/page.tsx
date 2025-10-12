@@ -56,7 +56,7 @@ const LandingPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, emoji }: { title: string, products: IProduct[], emoji?: string }) => {
     if (!products || products.length === 0) return null;
     return (
-        <section className="container pt-12 px-4 sm:px-6 lg:px-8">
+        <section className="w-full pt-12">
             <div className="flex justify-between items-center mb-4">
                  <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
                     {title}
@@ -88,7 +88,7 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     if (!settings?.promoBannerEnabled || !settings?.promoBanner?.imageUrl) return null;
     const { imageUrl, imageHint, buttonLink } = settings.promoBanner;
     return (
-        <section className="container py-12 px-4 sm:px-6 lg:px-8">
+        <section className="w-full py-12">
             <Link href={buttonLink || '#'}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
                     <Image
@@ -110,7 +110,7 @@ const HamperSection = () => {
     if (!settings.hamperFeatureEnabled) return null;
 
     return (
-        <section className="container py-12 px-4 sm:px-6 lg:px-8">
+        <section className="w-full py-12">
             <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
                 <div className="relative z-10 p-8 md:p-12 text-center">
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
@@ -176,7 +176,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
     return (
         <section className="w-full py-12">
-            <div className="container">
+            <div className="w-full">
                 {canScroll ? (
                     <Carousel
                         plugins={[autoplay.current]}
@@ -284,48 +284,49 @@ export default function LandingPage() {
   const heroBanners = platformSettings.heroBanners;
 
   return (
-    <main>
-        {heroBanners && heroBanners.length > 0 ? (
-             <section className="w-full hidden sm:block">
-                <Carousel 
-                    className="w-full" 
-                    plugins={[mainCarouselPlugin.current]}
-                    onMouseEnter={() => mainCarouselPlugin.current.stop()}
-                    onMouseLeave={() => mainCarouselPlugin.current.reset()}
-                >
-                    <CarouselContent>
-                    {heroBanners.map((banner, index) => (
-                        <CarouselItem key={index}>
-                           <Link href={banner.buttonLink || '#'}>
-                                <div className="relative w-full text-foreground flex items-center justify-center py-16 sm:py-20 md:py-28">
-                                    <Image
-                                        src={banner.imageUrl}
-                                        alt={banner.title || 'Promotional banner'}
-                                        fill
-                                        className="object-cover"
-                                        data-ai-hint={banner.imageHint}
-                                        priority={index === 0}
-                                    />
-                                </div>
-                            </Link>
-                        </CarouselItem>
-                    ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                    <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
-                </Carousel>
-            </section>
-        ) : (
-            <section className="container text-center py-20 sm:py-32 px-4 sm:px-6 lg:px-8">
-                 <Logo className="h-16 w-16 mx-auto mb-4" />
-                <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground">
-                    The Brand Cart
-                </h1>
-                 <p className="mt-4 text-lg text-muted-foreground">Your Cart, Your Way.</p>
-            </section>
-        )}
-        
-        <section className="container text-center py-16 px-4 sm:px-6 lg:px-8">
+    <>
+      {heroBanners && heroBanners.length > 0 ? (
+           <section className="w-full hidden sm:block">
+              <Carousel 
+                  className="w-full" 
+                  plugins={[mainCarouselPlugin.current]}
+                  onMouseEnter={() => mainCarouselPlugin.current.stop()}
+                  onMouseLeave={() => mainCarouselPlugin.current.reset()}
+              >
+                  <CarouselContent>
+                  {heroBanners.map((banner, index) => (
+                      <CarouselItem key={index}>
+                         <Link href={banner.buttonLink || '#'}>
+                              <div className="relative w-full text-foreground flex items-center justify-center py-16 sm:py-20 md:py-28">
+                                  <Image
+                                      src={banner.imageUrl}
+                                      alt={banner.title || 'Promotional banner'}
+                                      fill
+                                      className="object-cover"
+                                      data-ai-hint={banner.imageHint}
+                                      priority={index === 0}
+                                  />
+                              </div>
+                          </Link>
+                      </CarouselItem>
+                  ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+                  <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
+              </Carousel>
+          </section>
+      ) : (
+          <section className="container text-center py-20 sm:py-32 px-4 sm:px-6 lg:px-8">
+               <Logo className="h-16 w-16 mx-auto mb-4" />
+              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground">
+                  The Brand Cart
+              </h1>
+               <p className="mt-4 text-lg text-muted-foreground">Your Cart, Your Way.</p>
+          </section>
+      )}
+      
+      <main className="container px-4 sm:px-6 lg:px-8">
+        <section className="text-center py-16">
             <h2 className="text-xl font-semibold text-muted-foreground sm:text-2xl">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
         </section>
@@ -334,12 +335,12 @@ export default function LandingPage() {
         <ShopByBrandSection brands={brands} />
 
         {loading ? (
-            <div className="container flex flex-col items-center justify-center text-center py-16 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-center text-center py-16">
                 <Loader className="h-12 w-12" />
                 <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         ) : error ? (
-            <div className="container text-center text-destructive py-16 px-4 sm:px-6 lg:px-8">
+            <div className="text-center text-destructive py-16">
                 <p>Could not load products. Please try again later.</p>
             </div>
         ) : (
@@ -352,7 +353,7 @@ export default function LandingPage() {
                 <ProductCarouselSection title="Newest Arrivals" products={newestProducts} emoji="✨" />
                 
                 {uniqueCategories.length > 0 && (
-                    <section className="container pt-16 px-4 sm:px-6 lg:px-8">
+                    <section className="pt-16">
                         <div className="text-center mb-10">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
                         </div>
@@ -370,13 +371,13 @@ export default function LandingPage() {
                         </div>
                     </section>
                 )}
-                 <section className="container py-16 px-4 sm:px-6 lg:px-8 text-center">
+                 <section className="py-16 text-center">
                     <h2 className="text-2xl font-bold text-foreground">A Personalized Experience, Coming Soon</h2>
                     <p className="mt-2 max-w-xl mx-auto text-muted-foreground">We’ll soon let you design your own cart experience. Stay tuned for AI-driven suggestions and more!</p>
                 </section>
             </>
         )}
-
-    </main>
+      </main>
+    </>
   );
 }

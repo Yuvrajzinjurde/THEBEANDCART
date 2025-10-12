@@ -326,6 +326,7 @@ export default function Header() {
             </Sheet>
           </div>
 
+          {/* This div centers all content on desktop */}
           <div className="w-full flex items-center gap-6">
             {/* Desktop Logo & Categories (left) */}
             <div className="hidden md:flex items-center gap-x-4">
