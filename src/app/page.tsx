@@ -30,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LandingPageSkeleton = () => (
-    <div className="container flex flex-col items-center justify-center min-h-screen p-4 px-4 sm:px-6 lg:px-8">
+    <main className="container flex flex-col items-center justify-center flex-1 py-8 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-4xl px-4">
             <div className="space-y-8 animate-pulse">
                 <div className="flex justify-center">
@@ -49,7 +49,7 @@ const LandingPageSkeleton = () => (
                  <p className="my-8 text-center text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
             </div>
         </div>
-    </div>
+    </main>
 );
 
 
@@ -278,7 +278,7 @@ export default function LandingPage() {
   const platformSettings = settings as IPlatformSettings;
   
   if (loading || !platformSettings || !Array.isArray(platformSettings.heroBanners) || platformSettings.heroBanners.length === 0) {
-      return <main className="flex-1"><LandingPageSkeleton /></main>;
+      return <LandingPageSkeleton />;
   }
   
   const heroBanners = platformSettings.heroBanners;
@@ -326,7 +326,7 @@ export default function LandingPage() {
             </section>
         )}
         
-        <section className="container py-16 px-4 sm:px-6 lg:px-8 text-center">
+        <section className="container text-center py-16 px-4 sm:px-6 lg:px-8">
             <h2 className="text-xl font-semibold text-muted-foreground sm:text-2xl">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
         </section>

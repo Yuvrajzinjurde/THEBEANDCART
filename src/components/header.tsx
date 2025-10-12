@@ -325,8 +325,7 @@ export default function Header() {
           </Sheet>
         </div>
 
-        {/* Centered content for desktop */}
-        <div className="flex w-full items-center justify-between gap-6 md:mx-auto">
+        <div className="w-full flex items-center justify-between gap-6">
           {/* Desktop Logo & Categories (left) */}
           <div className="hidden md:flex items-center gap-x-4">
             <Link href={homeLink} className="flex items-center space-x-2">
@@ -355,7 +354,7 @@ export default function Header() {
           </div>
 
           {/* Search Bar (center) */}
-          <div className="flex-1 md:flex-none md:w-full md:max-w-lg" ref={searchContainerRef}>
+          <div className="flex-1 md:w-full md:max-w-lg" ref={searchContainerRef}>
             <form className="relative w-full" onSubmit={handleSearchSubmit}>
               <Input
                 name="search"
@@ -409,7 +408,7 @@ export default function Header() {
 
       <div className={cn("w-full overflow-x-auto no-scrollbar", !showSecondaryNav && "hidden")}>
         <Separator />
-        <div className="container px-4 sm:px-6">
+        <div className="container">
           <nav className="flex h-12 items-center justify-center gap-6">
             {secondaryNavItems.map((item) => (
               <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
@@ -52,7 +51,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     }
     
     return (
-        <section className="container py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-12">
             <div className="flex justify-center flex-wrap gap-3 mb-8">
                 {categories.map(category => (
                     <Button
@@ -112,8 +111,8 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
 
 const ProductCarouselSkeleton = () => (
-    <section className="container pt-12 px-4 sm:px-6 lg:px-8 text-center">
-        <Skeleton className="h-8 w-48 mb-4 mx-auto" />
+    <section className="pt-12">
+        <Skeleton className="h-8 w-48 mb-4" />
         <Separator className="mb-6" />
         <div className="mx-auto text-center">
           <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
@@ -144,7 +143,7 @@ const ProductCarouselSection = ({ title, products, brandName, emoji }: { title: 
     if (!products || products.length === 0) return null;
     
     return (
-        <section className="container pt-12 px-4 sm:px-6 lg:px-8">
+        <section className="pt-12">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
                     {title}
@@ -184,7 +183,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     if (!brand?.promoBanner) return null;
     const { imageUrl, imageHint, buttonLink } = brand.promoBanner;
     return (
-        <section className="container py-12 px-4 sm:px-6 lg:px-8">
+        <section className="py-12">
             <Link href={buttonLink || `/${brandName}/products`}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
                     <Image
@@ -223,8 +222,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
 
   return (
-    <section className="w-full py-12 md:py-16 px-4 sm:px-6 lg:px-8">
-      <div className="container">
+    <section className="w-full py-12 md:py-16">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Your Cheers, Our Motivation</h2>
         </div>
@@ -263,7 +261,6 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
           <CarouselPrevious className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
           <CarouselNext className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 hidden sm:flex" />
         </Carousel>
-      </div>
     </section>
   );
 };
@@ -339,7 +336,7 @@ export default function BrandHomePage() {
 
   if (authLoading || loading) {
     return (
-        <main>
+        <main className="container py-8 px-4 sm:px-6 lg:px-8">
             <Skeleton className="w-full h-[90px] md:h-[90px]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
@@ -350,7 +347,7 @@ export default function BrandHomePage() {
   
   if (error || !brand) {
       return (
-          <main className="container flex min-h-screen flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+          <main className="container flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">{error || 'The requested brand does not exist.'}</p>
           </main>
@@ -358,7 +355,7 @@ export default function BrandHomePage() {
   }
   
   return (
-    <main>
+    <main className="flex-1">
         <section className="w-full">
             <Carousel 
                 className="w-full"
@@ -389,23 +386,17 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      <CategoryGrid brand={brand} />
-      
-      <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} emoji="📈" />
-      <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} emoji="⭐" />
-      <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} emoji="✨" />
+      <div className="container px-4 sm:px-6 lg:px-8">
+        <CategoryGrid brand={brand} />
+        
+        <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} emoji="📈" />
+        <ProductCarouselSection title="Top Rated" products={topRatedProducts} brandName={brandName} emoji="⭐" />
+        <ProductCarouselSection title="Newest Arrivals" products={newestProducts} brandName={brandName} emoji="✨" />
 
-      <PromoBannerSection brand={brand} brandName={brandName} />
-      <ReviewsSection brand={brand} />
+        <PromoBannerSection brand={brand} brandName={brandName} />
+        <ReviewsSection brand={brand} />
+      </div>
 
     </main>
   );
 }
-    
-
-    
-
-
-
-
-

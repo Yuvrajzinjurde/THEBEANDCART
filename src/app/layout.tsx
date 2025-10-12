@@ -55,7 +55,7 @@ export default async function RootLayout({
         )}>
             <AuthProvider>
                 {showHeaderAndFooter && <Header />}
-                <div className="flex-1 w-full">
+                <div className="flex-1 w-full flex flex-col">
                     {children}
                 </div>
                 {showHeaderAndFooter && <GlobalFooter />}
