@@ -34,19 +34,22 @@ export async function GET(req: NextRequest) {
     }
 
     if (decodedAccessToken) {
+        // Token is valid, return user data from token
+        // This is faster and avoids a database hit on every navigation
         return NextResponse.json({ user: decodedAccessToken, token: accessToken });
     }
     
+    // Access token is invalid or expired, try to refresh it
     if (!refreshToken) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized, session expired' }, { status: 401 });
     }
 
     try {
         const decodedRefreshToken = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as jwt.JwtPayload;
-        const user = await User.findById(decodedRefreshToken.userId).populate({ path: 'roles', model: Role });
+        const user = await User.findById(decodedRefreshToken.userId).populate({ path: 'roles', model: Role }).lean();
 
-        if (!user) {
-            return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+        if (!user || user.status === 'blocked') {
+            throw new Error('Invalid user or account blocked.');
         }
         
         const userRoles = user.roles.map((role: any) => role.name);
@@ -58,7 +61,7 @@ export async function GET(req: NextRequest) {
         );
 
         const accessTokenCookie = serialize('accessToken', newAccessToken, {
-            httpOnly: false, // Match login route
+            httpOnly: false,
             secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
             maxAge: 60 * 15,

@@ -85,7 +85,8 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
-      login(result.user, result.token);
+      // Await the login function which now returns a promise
+      await login(result.user, result.token);
 
       toast.success(`Welcome back, ${result.user.name}!`);
 
@@ -109,6 +110,7 @@ export function LoginForm() {
   }
 
   return (
+    <main className="container flex flex-1 items-center justify-center p-4">
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
         {loading ? (
@@ -215,5 +217,6 @@ export function LoginForm() {
         </p>
       </CardFooter>
     </Card>
+    </main>
   );
 }
