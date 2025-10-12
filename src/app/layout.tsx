@@ -37,7 +37,8 @@ export default async function RootLayout({
   const platformSettings = settings as IPlatformSettings | null;
 
   const isAdminRoute = pathname.startsWith('/admin');
-  const isAuthRoute = /\/(login|signup|forgot-password)/.test(pathname);
+  // Corrected logic to identify authentication routes
+  const isAuthRoute = ['/login', '/signup', '/forgot-password'].some(route => pathname.startsWith(route));
   const showHeaderAndFooter = !isAdminRoute && !isAuthRoute;
 
   return (
