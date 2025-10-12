@@ -17,7 +17,7 @@ const BrandFooter = ({ brand }: { brand: IBrand | null }) => {
     
     return (
         <footer className="w-full border-t bg-background mt-auto">
-            <div className="container py-8 px-4 sm:px-6 lg:px-8">
+            <div className="container py-8 px-4">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         {brand.logoUrl && (

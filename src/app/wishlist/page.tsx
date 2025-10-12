@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const WishlistSkeleton = () => (
-    <main className="container py-8 px-4 sm:px-6 lg:px-8">
+    <main className="container py-8 px-4">
         <div className="flex items-center justify-between mb-6">
             <Skeleton className="h-8 w-64" />
         </div>
@@ -130,7 +130,7 @@ export default function WishlistPage() {
   const wishlistProducts = (wishlist?.products as IProduct[]) || [];
 
   return (
-    <main className="container py-8 px-4 sm:px-6 lg:px-8 flex-1">
+    <main className="container py-8 px-4 flex-1">
       <div className="flex items-center justify-between mb-6">
          <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>

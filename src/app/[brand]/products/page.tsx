@@ -263,7 +263,7 @@ export default function ProductsPage() {
 
   if (isInitialLoading) {
       return (
-           <main className="container py-8 px-4 sm:px-6 lg:px-8">
+           <main className="container py-8 px-4">
                 <Skeleton className="h-8 w-64 mb-4" />
                 <div className="grid lg:grid-cols-[280px_1fr] lg:gap-8">
                     <Skeleton className="hidden lg:block h-[600px] w-full" />
@@ -283,7 +283,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <main className="container py-8 px-4 sm:px-6 lg:px-8">
+    <main className="container py-8 px-4">
         <div className="flex items-center justify-between mb-4 border-b pb-4">
              <Breadcrumb>
                 <BreadcrumbList>

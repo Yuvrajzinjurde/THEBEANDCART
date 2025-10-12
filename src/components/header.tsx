@@ -246,7 +246,7 @@ export default function Header() {
   if (!isClient) {
     return (
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center">
+        <div className="container flex h-16 items-center px-4">
             <Skeleton className="h-8 w-8 rounded-full" />
             <Skeleton className="h-6 w-24 ml-4" />
             <div className="flex-1 mx-4">
@@ -265,67 +265,67 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container">
+      <div className="container px-4">
         <div className="flex h-16 items-center">
-          {/* Mobile Menu (left) */}
-          <div className="md:hidden">
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[340px] flex flex-col p-0">
-                <SheetHeader className="p-4 border-b">
-                  <SheetTitle>
-                    <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
-                      {renderLogo()}
-                      <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
-                    </Link>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <nav className="flex flex-col gap-4">
-                    {user && (
-                      <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                        <Package className="h-5 w-5" />
-                        My Orders
-                      </Link>
-                    )}
-                    <Separator />
-                    {categories.length > 0 && (
-                      <>
-                        <h3 className="font-semibold text-muted-foreground">Categories</h3>
-                        {categories.map(cat => (
-                          <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                            {cat}
+            <div className="flex items-center gap-x-6 w-full">
+              {/* Mobile Menu (left) */}
+              <div className="md:hidden">
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="h-6 w-6" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[300px] sm:w-[340px] flex flex-col p-0">
+                    <SheetHeader className="p-4 border-b">
+                      <SheetTitle>
+                        <Link href={homeLink} className="flex items-center space-x-2" onClick={() => setIsSheetOpen(false)}>
+                          {renderLogo()}
+                          <span className="font-bold text-lg capitalize">{currentDisplayName}</span>
+                        </Link>
+                      </SheetTitle>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto p-4">
+                      <nav className="flex flex-col gap-4">
+                        {user && (
+                          <Link href="/dashboard/orders" className="flex items-center gap-2 font-semibold text-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                            <Package className="h-5 w-5" />
+                            My Orders
+                          </Link>
+                        )}
+                        <Separator />
+                        {categories.length > 0 && (
+                          <>
+                            <h3 className="font-semibold text-muted-foreground">Categories</h3>
+                            {categories.map(cat => (
+                              <Link key={cat} href={`/${effectiveBrandName}/products?category=${encodeURIComponent(cat)}`} className="text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                                {cat}
+                              </Link>
+                            ))}
+                            <Separator />
+                          </>
+                        )}
+                        <h3 className="font-semibold text-muted-foreground">Explore</h3>
+                        {secondaryNavItems.map((item) => (
+                          <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
                           </Link>
                         ))}
-                        <Separator />
-                      </>
-                    )}
-                    <h3 className="font-semibold text-muted-foreground">Explore</h3>
-                    {secondaryNavItems.map((item) => (
-                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => setIsSheetOpen(false)}>
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-                </div>
-                <div className="border-t p-4">
-                  {user ? (
-                    <UserNav />
-                  ) : (
-                    <Button asChild className="w-full"><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+                      </nav>
+                    </div>
+                    <div className="border-t p-4">
+                      {user ? (
+                        <UserNav />
+                      ) : (
+                        <Button asChild className="w-full"><Link href={`/login?redirect=${pathname}`}>Login</Link></Button>
+                      )}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
 
-          <div className="flex items-center justify-between w-full">
             {/* Desktop Logo & Categories (left) */}
             <div className="hidden md:flex items-center gap-x-4">
               <Link href={homeLink} className="flex items-center space-x-2">
@@ -353,7 +353,7 @@ export default function Header() {
               )}
             </div>
 
-            {/* Search Bar (center) */}
+             {/* Search Bar (center) */}
             <div className="flex-1 max-w-lg mx-auto" ref={searchContainerRef}>
               <form className="relative w-full" onSubmit={handleSearchSubmit}>
                 <Input
@@ -388,28 +388,29 @@ export default function Header() {
               </form>
             </div>
 
+
             {/* Actions (right) */}
             <div className="hidden md:flex">
               <DesktopNavActions />
             </div>
-          </div>
 
-          {/* Mobile Actions (right) */}
-          <div className="md:hidden flex items-center gap-1">
-            <Button variant="ghost" size="icon" aria-label="Cart" asChild>
-              <Link href={`/cart`} className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
-              </Link>
-            </Button>
-            {user && <NotificationsPopover />}
-          </div>
+            {/* Mobile Actions (right) */}
+            <div className="md:hidden flex items-center gap-1">
+              <Button variant="ghost" size="icon" aria-label="Cart" asChild>
+                <Link href={`/cart`} className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartCount > 0 && <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                </Link>
+              </Button>
+              {user && <NotificationsPopover />}
+            </div>
+            </div>
         </div>
       </div>
       
       {showSecondaryNav && (
         <div className="w-full overflow-x-auto no-scrollbar border-t">
-          <div className="container">
+          <div className="container px-4">
             <nav className="flex h-12 items-center justify-center gap-6">
               {secondaryNavItems.map((item) => (
                 <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">

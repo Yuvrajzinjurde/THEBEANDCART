@@ -118,7 +118,7 @@ const GiftBoxIcon = () => (
 )
 
 const CartSkeleton = () => (
-    <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="container flex-1 py-8 px-4">
      <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
         <div className="container flex items-center justify-between gap-4 px-5">
             <div className="flex items-center gap-2">
@@ -432,7 +432,7 @@ export default function CartPage() {
   
   if (cartItems.length === 0) {
       return (
-        <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
+        <main className="container flex-1 py-8 px-4">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">Your Cart is Empty</h2>
@@ -450,7 +450,7 @@ export default function CartPage() {
   return (
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
-        <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-4">
             <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="flex items-center gap-2">
                     <Button
@@ -483,7 +483,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
+      <main className="container flex-1 py-8 px-4">
         <div className="mx-auto max-w-7xl">
             <div className="grid lg:grid-cols-12 lg:gap-8 lg:items-start">
                 <div className="lg:col-span-7 xl:col-span-8">

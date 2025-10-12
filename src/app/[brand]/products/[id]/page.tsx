@@ -23,7 +23,7 @@ import type { IReview } from '@/models/review.model';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductPageSkeleton = () => (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 text-center">
+    <div className="container mx-auto py-8 px-4 text-center">
         <div className="grid md:grid-cols-2 gap-8">
             <div className="flex flex-col gap-4">
                 <Skeleton className="aspect-square w-full rounded-lg" />
@@ -54,7 +54,7 @@ const ProductPageSkeleton = () => (
 const ProductCarouselSection = ({ title, products, isLoading }: { title: string, products: IProduct[], isLoading?: boolean }) => {
     if (isLoading) {
         return (
-            <div className="container pt-12 px-4 sm:px-6 lg:px-8 text-center">
+            <div className="container pt-12 px-4">
                 <h2 className="text-2xl font-bold tracking-tight mb-4">{title}</h2>
                 <div className="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
                     {[...Array(6)].map((_, i) => (
@@ -76,7 +76,7 @@ const ProductCarouselSection = ({ title, products, isLoading }: { title: string,
 
     if (!products || products.length === 0) return null;
     return (
-        <section className="container pt-12 px-4 sm:px-6 lg:px-8">
+        <section className="container pt-12 px-4">
             <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
             <Separator className="my-4" />
             <Carousel
@@ -249,7 +249,7 @@ export default function ProductPage() {
   const filteredRecentlyViewed = recentlyViewed.filter(p => p._id !== product._id);
 
   return (
-      <main className="container py-8 px-4 sm:px-6 lg:px-8">
+      <main className="container py-8 px-4">
         <ProductDetails 
           product={product} 
           variants={variants.length > 0 ? variants : [product]} 

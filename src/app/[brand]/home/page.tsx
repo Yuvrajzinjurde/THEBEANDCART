@@ -335,7 +335,7 @@ export default function BrandHomePage() {
 
   if (authLoading || loading) {
     return (
-        <main className="container py-8 px-4 sm:px-6 lg:px-8">
+        <main className="container py-8 px-4">
             <Skeleton className="w-full h-[90px] md:h-[90px]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
@@ -346,7 +346,7 @@ export default function BrandHomePage() {
   
   if (error || !brand) {
       return (
-          <main className="container flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+          <main className="container flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4">
               <h1 className="text-2xl font-bold">Brand not found</h1>
               <p className="text-muted-foreground">{error || 'The requested brand does not exist.'}</p>
           </main>
@@ -385,7 +385,7 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      <div className="container">
+      <div className="container px-4">
         <CategoryGrid brand={brand} />
         
         <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} emoji="📈" />

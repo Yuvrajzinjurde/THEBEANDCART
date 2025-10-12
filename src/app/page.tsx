@@ -28,7 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const LandingPageSkeleton = () => (
-    <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="container flex-1 py-8 px-4">
         <div className="w-full px-4">
             <div className="space-y-8 animate-pulse">
                 <div className="flex justify-center">
@@ -315,7 +315,7 @@ export default function LandingPage() {
           </section>
       )}
       
-      <main className="container">
+      <main className="container px-4">
         <section className="text-center py-16">
             <h2 className="text-xl font-semibold text-muted-foreground sm:text-2xl">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
