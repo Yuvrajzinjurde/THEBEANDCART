@@ -249,8 +249,8 @@ export default function UserDetailsPage() {
                     <CardTitle>All Orders</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between gap-4 mb-4">
-                        <div className="relative w-full max-w-sm">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                        <div className="relative w-full md:max-w-sm">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input 
                                 placeholder="Search by Order ID" 
@@ -259,9 +259,9 @@ export default function UserDetailsPage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full md:w-auto">
                              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-full md:w-[180px]">
                                     <SelectValue placeholder="Status" />
                                 </SelectTrigger>
                                 <SelectContent>

@@ -283,7 +283,7 @@ function BusinessDashboardPage() {
             )}
             </div>
 
-            <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 items-center justify-start border-t pt-4">
                 <StatCard title="Total Views" value={(totalViews || 0).toLocaleString()} change={percentageChanges.views} />
                 <StatCard title="Total Clicks" value={(totalClicks || 0).toLocaleString()} change={percentageChanges.clicks} />
                 <StatCard title="Total Orders" value={(totalOrders || 0).toLocaleString()} change={percentageChanges.orders}/>

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo, useTransition, useCallback } from 'react';
@@ -54,7 +55,7 @@ const SORT_OPTIONS: { [key: string]: string } = {
 };
 
 const ProductGridSkeleton = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-6 text-center">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-4 pt-6 text-center">
         <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
         {[...Array(12)].map((_, i) => (
             <div key={i} className="space-y-2">
@@ -364,7 +365,7 @@ export default function ProductsPage() {
                 {isPending ? (
                      <ProductGridSkeleton />
                 ) : allProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pt-6">
                         {allProducts.map((product) => (
                             <BrandProductCard key={product._id as string} product={product} />
                         ))}

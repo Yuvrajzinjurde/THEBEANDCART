@@ -66,7 +66,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 ))}
             </div>
             
-            <div className="grid grid-cols-3 grid-rows-4 gap-4 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 sm:grid-rows-4 gap-4 max-w-3xl mx-auto">
                 {/* Row 1 */}
                 <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg group row-span-2">
                     <Image src={surroundingImages[0].url} alt={surroundingImages[0].hint || 'Grid image 1'} fill className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-ai-hint={surroundingImages[0].hint} />
@@ -404,6 +404,7 @@ export default function BrandHomePage() {
     
 
     
+
 
 
 
