@@ -285,8 +285,7 @@ export default function LandingPage() {
   const heroBanners = platformSettings.heroBanners;
 
   return (
-    <>
-    <main>
+    <main className="flex-1">
 
         {heroBanners && heroBanners.length > 0 ? (
              <section className="w-full hidden sm:block">
@@ -381,6 +380,5 @@ export default function LandingPage() {
         )}
 
     </main>
-    </>
   );
 }

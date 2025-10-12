@@ -1,4 +1,5 @@
 
+
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -51,11 +52,13 @@ export default async function RootLayout({
         </head>
         <body className={cn(
             "min-h-screen font-body antialiased no-scrollbar",
-            showHeaderAndFooter && "flex flex-col"
+            "flex flex-col"
         )}>
             <AuthProvider>
                 {showHeaderAndFooter && <Header />}
-                {children}
+                <main className="flex-1">
+                    {children}
+                </main>
                 {showHeaderAndFooter && <GlobalFooter />}
             </AuthProvider>
             <ToastContainer
