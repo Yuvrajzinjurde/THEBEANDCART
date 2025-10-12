@@ -655,7 +655,7 @@ export default function CreateHamperPage() {
     return (
         <>
         <div className="flex flex-col min-h-screen">
-            <main className="container flex-grow py-8 px-10">
+            <main className="container flex-grow py-8 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto pb-24">
                      <div className="relative mb-8 flex items-center justify-between">
                         <Button variant="outline" size="icon" onClick={() => router.push('/')} className="hidden sm:inline-flex">
@@ -691,7 +691,7 @@ export default function CreateHamperPage() {
                 </AlertDialog>
             </main>
             <footer className="sticky bottom-0 z-10 w-full bg-background/95 border-t backdrop-blur-sm">
-                <div className="container flex h-20 items-center justify-between gap-4">
+                <div className="container flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
                         <Button variant="outline" onClick={() => setStep(step - 1)} disabled={step === 1 || isDiscarding}>
                             <ArrowLeft className="mr-2 h-4 w-4"/> Previous
                         </Button>

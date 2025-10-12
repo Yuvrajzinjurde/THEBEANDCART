@@ -135,7 +135,7 @@ const CartSkeleton = () => (
             <div className="w-48 hidden lg:block" />
         </div>
       </div>
-    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
             <div className="lg:col-span-2 space-y-4">
                 <Card>
@@ -430,7 +430,7 @@ export default function CartPage() {
   
   if (cartItems.length === 0) {
       return (
-        <main className="container py-8 px-10 flex-1">
+        <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center justify-center text-center py-24 border-2 border-dashed rounded-lg">
                 <ShoppingCart className="w-20 h-20 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">Your Cart is Empty</h2>
@@ -448,7 +448,7 @@ export default function CartPage() {
   return (
     <>
       <div className="sticky top-16 z-20 w-full bg-background/95 py-2 backdrop-blur-sm">
-        <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-5">
+        <div className="container flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between w-full lg:w-auto">
                 <div className="flex items-center gap-2">
                     <Button
@@ -481,16 +481,16 @@ export default function CartPage() {
         </div>
       </div>
 
-      <main className="py-8 flex-1">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <main className="container flex-1 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
             <div className="grid lg:grid-cols-12 lg:gap-8 lg:items-start">
                 <div className="lg:col-span-7 xl:col-span-8">
                     <HiddenScrollArea className="h-auto lg:h-[600px] lg:pr-6">
                         <Card className="border-none shadow-none">
-                            <CardHeader>
+                            <CardHeader className="p-0">
                                 <CardTitle>My Cart ({cartItems.length})</CardTitle>
                             </CardHeader>
-                            <CardContent className="divide-y p-0">
+                            <CardContent className="divide-y p-0 mt-4">
                                 {cartItems.map(item => {
                                     const isGift = item.product._id === 'free-gift-id';
                                     const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -25,7 +26,7 @@ function DashboardLayout({
   const { logout } = useAuth();
 
   return (
-    <div className="flex w-full bg-muted/40 min-h-[calc(100vh-4rem)]">
+    <div className="container flex w-full bg-muted/40 min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8">
       <aside className="hidden md:flex flex-col w-64 border-r bg-background h-screen sticky top-16">
           <div className="flex-1 overflow-y-auto">
             <nav className="flex flex-col gap-2 p-4">
