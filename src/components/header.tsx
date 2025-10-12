@@ -267,8 +267,8 @@ export default function Header() {
   return (
     <>
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <div className="flex-1 flex justify-between items-center">
+      <div className="container flex h-16 items-center justify-center">
+        <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-x-4">
             <Link href={homeLink} className="flex items-center space-x-2">
                 {renderLogo()}
@@ -297,7 +297,7 @@ export default function Header() {
           </div>
 
           {/* Search Bar */}
-          <div className="hidden md:block flex-1 mx-4" ref={searchContainerRef}>
+          <div className="hidden md:block mx-4" ref={searchContainerRef}>
               <form className="relative w-full max-w-lg mx-auto" onSubmit={handleSearchSubmit}>
                   <>
                       <Input
