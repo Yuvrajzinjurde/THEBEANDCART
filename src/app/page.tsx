@@ -55,20 +55,22 @@ const ProductCarouselSection = ({ title, products, emoji }: { title: string, pro
     if (!products || products.length === 0) return null;
     return (
         <section className="w-full pt-12">
-            <div className="flex justify-between items-center mb-4">
-                 <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-                    {title}
-                    {emoji && <span className="text-2xl">{emoji}</span>}
-                </h2>
+            <div className="container px-4">
+                <div className="flex justify-between items-center mb-4">
+                     <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+                        {title}
+                        {emoji && <span className="text-2xl">{emoji}</span>}
+                    </h2>
+                </div>
+                <Separator className="mb-6" />
             </div>
-            <Separator className="mb-6" />
             <Carousel
                 opts={{ align: "start", loop: true }}
-                className="w-full"
+                className="w-full container px-4"
             >
-                <CarouselContent>
+                <CarouselContent className="-ml-2">
                     {products.map((product) => (
-                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <CarouselItem key={product._id as string} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6 pl-2">
                             <div className="p-1">
                                 <BrandProductCard product={product} />
                             </div>
@@ -87,17 +89,19 @@ const PromoBannerSection = ({ settings }: { settings: IPlatformSettings | null }
     const { imageUrl, imageHint, buttonLink } = settings.promoBanner;
     return (
         <section className="w-full py-12">
-            <Link href={buttonLink || '#'}>
-                <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
-                    <Image
-                        src={imageUrl}
-                        alt={'Promotional banner'}
-                        fill
-                        className="object-cover"
-                        data-ai-hint={imageHint}
-                    />
-                </div>
-            </Link>
+            <div className="container px-4">
+                <Link href={buttonLink || '#'}>
+                    <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
+                        <Image
+                            src={imageUrl}
+                            alt={'Promotional banner'}
+                            fill
+                            className="object-cover"
+                            data-ai-hint={imageHint}
+                        />
+                    </div>
+                </Link>
+            </div>
         </section>
     )
 };
@@ -109,20 +113,22 @@ const HamperSection = () => {
 
     return (
         <section className="w-full py-12">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
-                <div className="relative z-10 p-8 md:p-12 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
-                        <Gift className="h-8 w-8 text-primary" />
+            <div className="container px-4">
+                <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
+                    <div className="relative z-10 p-8 md:p-12 text-center">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
+                            <Gift className="h-8 w-8 text-primary" />
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
+                        <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                            Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
+                        </p>
+                        <Button asChild size="lg" className="mt-6">
+                            <Link href="/create-hamper">
+                                Start Creating <ArrowRight className="ml-2" />
+                            </Link>
+                        </Button>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">Create Your Own Hamper</h2>
-                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                        Design a personalized gift hamper for any occasion. Choose the box, fill it with products, and add a personal touch.
-                    </p>
-                    <Button asChild size="lg" className="mt-6">
-                        <Link href="/create-hamper">
-                            Start Creating <ArrowRight className="ml-2" />
-                        </Link>
-                    </Button>
                 </div>
             </div>
         </section>
@@ -174,7 +180,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
     return (
         <section className="w-full py-12">
-            <div className="w-full">
+            <div className="container px-4">
                 {canScroll ? (
                     <Carousel
                         plugins={[autoplay.current]}
@@ -282,7 +288,7 @@ export default function LandingPage() {
   const heroBanners = platformSettings.heroBanners;
 
   return (
-    <>
+    <main className="w-full flex-1">
       {heroBanners && heroBanners.length > 0 && (
            <section className="w-full hidden sm:block">
               <Carousel 
@@ -315,22 +321,23 @@ export default function LandingPage() {
           </section>
       )}
       
-      <main className="container px-4">
+      <div className="container px-4">
         <section className="text-center py-16">
             <h2 className="text-xl font-semibold text-muted-foreground sm:text-2xl">A home for curated experiences.</h2>
             <p className="mt-2 max-w-2xl mx-auto text-foreground/80">From hampers to unique brands like Reeva, Nevermore, and beyond – everything starts here.</p>
         </section>
+      </div>
 
         <HamperSection />
         <ShopByBrandSection brands={brands} />
 
         {loading ? (
-            <div className="flex flex-col items-center justify-center text-center py-16">
+            <div className="container px-4 flex flex-col items-center justify-center text-center py-16">
                 <Loader className="h-12 w-12" />
                 <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
             </div>
         ) : error ? (
-            <div className="text-center text-destructive py-16">
+            <div className="container px-4 text-center text-destructive py-16">
                 <p>Could not load products. Please try again later.</p>
             </div>
         ) : (
@@ -343,7 +350,7 @@ export default function LandingPage() {
                 <ProductCarouselSection title="Newest Arrivals" products={newestProducts} emoji="✨" />
                 
                 {uniqueCategories.length > 0 && (
-                    <section className="pt-16">
+                    <section className="pt-16 container px-4">
                         <div className="text-center mb-10">
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
                         </div>
@@ -361,13 +368,12 @@ export default function LandingPage() {
                         </div>
                     </section>
                 )}
-                 <section className="py-16 text-center">
+                 <section className="py-16 text-center container px-4">
                     <h2 className="text-2xl font-bold text-foreground">A Personalized Experience, Coming Soon</h2>
                     <p className="mt-2 max-w-xl mx-auto text-muted-foreground">We’ll soon let you design your own cart experience. Stay tuned for AI-driven suggestions and more!</p>
                 </section>
             </>
         )}
-      </main>
-    </>
+    </main>
   );
 }

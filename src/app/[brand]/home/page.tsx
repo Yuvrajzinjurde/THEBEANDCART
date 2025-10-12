@@ -50,7 +50,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
     }
     
     return (
-        <section className="py-12">
+        <section className="py-12 container px-4">
             <div className="flex justify-center flex-wrap gap-3 mb-8">
                 {categories.map(category => (
                     <Button
@@ -110,29 +110,31 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
 
 
 const ProductCarouselSkeleton = () => (
-    <section className="pt-12">
-        <Skeleton className="h-8 w-48 mb-4" />
-        <Separator className="mb-6" />
-        <div className="mx-auto text-center">
-          <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-                <div key={i}>
-                     <div className="flex flex-col sm:flex-row gap-4 w-full">
-                        <Skeleton className="w-full sm:w-36 h-36 rounded-lg flex-shrink-0" />
-                        <div className="flex-grow space-y-2">
-                            <Skeleton className="h-4 w-1/4" />
-                            <Skeleton className="h-6 w-3/4" />
-                            <Skeleton className="h-8 w-1/2 mt-2" />
-                            <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
-                                <Skeleton className="h-10 w-36" />
-                                <Skeleton className="h-10 w-28" />
+    <section className="pt-12 w-full">
+        <div className="container px-4">
+            <Skeleton className="h-8 w-48 mb-4" />
+            <Separator className="mb-6" />
+            <div className="mx-auto text-center">
+              <p className="my-8 text-lg text-muted-foreground col-span-full">Just a moment, getting everything ready for you…</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                    <div key={i}>
+                         <div className="flex flex-col sm:flex-row gap-4 w-full">
+                            <Skeleton className="w-full sm:w-36 h-36 rounded-lg flex-shrink-0" />
+                            <div className="flex-grow space-y-2">
+                                <Skeleton className="h-4 w-1/4" />
+                                <Skeleton className="h-6 w-3/4" />
+                                <Skeleton className="h-8 w-1/2 mt-2" />
+                                <div className="flex items-center gap-2 mt-4 pt-4 sm:pt-0 sm:mt-auto">
+                                    <Skeleton className="h-10 w-36" />
+                                    <Skeleton className="h-10 w-28" />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     </section>
 );
@@ -142,20 +144,22 @@ const ProductCarouselSection = ({ title, products, brandName, emoji }: { title: 
     if (!products || products.length === 0) return null;
     
     return (
-        <section className="pt-12">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
-                    {title}
-                    {emoji && <span className="text-2xl">{emoji}</span>}
-                </h2>
-                 <Button variant="link" asChild>
-                    <Link href={`/${brandName}/products`}>
-                        Discover All
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
+        <section className="pt-12 w-full">
+            <div className="container px-4">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+                        {title}
+                        {emoji && <span className="text-2xl">{emoji}</span>}
+                    </h2>
+                     <Button variant="link" asChild>
+                        <Link href={`/${brandName}/products`}>
+                            Discover All
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                </div>
+                <Separator className="mb-6" />
             </div>
-            <Separator className="mb-6" />
              <Carousel
                 opts={{
                     align: "start",
@@ -163,7 +167,7 @@ const ProductCarouselSection = ({ title, products, brandName, emoji }: { title: 
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2">
+                <CarouselContent className="-ml-2 container px-4">
                     {products.map((product) => (
                         <CarouselItem key={product._id as string} className="pl-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
                             <BrandProductCard product={product} />
@@ -182,7 +186,7 @@ const PromoBannerSection = ({ brand, brandName }: { brand: IBrand | null, brandN
     if (!brand?.promoBanner) return null;
     const { imageUrl, imageHint, buttonLink } = brand.promoBanner;
     return (
-        <section className="py-12">
+        <section className="py-12 container px-4">
             <Link href={buttonLink || `/${brandName}/products`}>
                 <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-video md:aspect-[4/1]">
                     <Image
@@ -221,7 +225,7 @@ const ReviewsSection = ({ brand }: { brand: IBrand | null }) => {
 
 
   return (
-    <section className="w-full py-12 md:py-16">
+    <section className="w-full py-12 md:py-16 container px-4">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Your Cheers, Our Motivation</h2>
         </div>
@@ -335,7 +339,7 @@ export default function BrandHomePage() {
 
   if (authLoading || loading) {
     return (
-        <main className="container py-8 px-4">
+        <main className="container flex-1 py-8 px-4">
             <Skeleton className="w-full h-[90px] md:h-[90px]" />
             <ProductCarouselSkeleton />
             <ProductCarouselSkeleton />
@@ -354,7 +358,7 @@ export default function BrandHomePage() {
   }
   
   return (
-    <main className="flex-1">
+    <main className="flex-1 w-full">
         <section className="w-full">
             <Carousel 
                 className="w-full"
@@ -385,7 +389,7 @@ export default function BrandHomePage() {
             </Carousel>
         </section>
       
-      <div className="container px-4">
+      
         <CategoryGrid brand={brand} />
         
         <ProductCarouselSection title="Trending Products" products={trendingProducts} brandName={brandName} emoji="📈" />
@@ -394,7 +398,7 @@ export default function BrandHomePage() {
 
         <PromoBannerSection brand={brand} brandName={brandName} />
         <ReviewsSection brand={brand} />
-      </div>
+      
 
     </main>
   );
