@@ -43,6 +43,7 @@ import type { IBrand } from "@/models/brand.model";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { ScrollArea } from "../ui/scroll-area";
 
 const mainNavItem = { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" };
 
@@ -164,11 +165,11 @@ const SidebarContent = ({ className }: { className?: string}) => {
 
     return (
         <div className={cn("flex h-full flex-col", className)}>
-        <div className="flex-1 overflow-y-auto py-2 no-scrollbar">
-            <div className="px-4 py-2">
-                <BrandSelector />
-            </div>
-             <nav className="grid items-start gap-1 px-4 text-sm font-medium">
+        <div className="px-4 py-2 border-b">
+            <BrandSelector />
+        </div>
+         <ScrollArea className="flex-1 overflow-y-auto py-2">
+            <nav className="grid items-start gap-1 px-4 text-sm font-medium">
                 <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname === href && "bg-muted text-primary")}>
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
@@ -181,10 +182,10 @@ const SidebarContent = ({ className }: { className?: string}) => {
                     </Link>
                 ))}
             </nav>
-        </div>
+        </ScrollArea>
         <div className="mt-auto border-t p-2">
             <div className="flex items-center justify-between">
-                <UserNav isCollapsed={true} />
+                <UserNav />
                 <div className="flex items-center gap-1">
                     <ThemeToggle />
                     <Button variant="ghost" size="icon" className="h-9 w-9"><HelpCircle className="h-4 w-4" /></Button>
@@ -199,7 +200,7 @@ export function MobileAdminHeader() {
     const [open, setOpen] = useState(false);
 
     return (
-        <header className="flex md:hidden h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
+        <header className="flex md:hidden h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
                     <Button variant="outline" size="icon" className="shrink-0">
@@ -228,7 +229,7 @@ export function MobileAdminHeader() {
 
 export function AdminSidebar() {
     return (
-        <aside className="hidden md:flex h-full max-h-screen flex-col gap-2 border-r bg-background">
+        <aside className="hidden md:flex h-screen max-h-screen flex-col gap-2 border-r bg-background sticky top-0">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                 <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
                     <Store className="h-6 w-6 text-primary" />
