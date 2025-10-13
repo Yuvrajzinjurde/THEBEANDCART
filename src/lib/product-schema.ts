@@ -63,23 +63,11 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
     path: ["sellingPrice"],
 })
 .refine(data => {
-    // If there are no variants, there must be top-level images.
-    if (!data.variants || data.variants.length === 0) {
-        return Array.isArray(data.images) && data.images.length > 0;
-    }
-    // If there are variants, each must have an image.
-    return data.variants.every(v => Array.isArray(v.images) && v.images.length > 0);
-}, {
-    message: "Each product or variant must have at least one image.",
-    path: ["images"],
-})
-.refine(data => {
     // If there are no variants, the top-level SKU is required.
     if (!data.variants || data.variants.length === 0) {
         return !!data.sku && data.sku.length > 0;
     }
-    // If there are variants, this check doesn't apply to the top-level SKU.
-    // Each variant's SKU is checked within the VariantSchema.
+    // If there are variants, each variant's SKU is checked within the VariantSchema.
     return true;
 }, {
     message: "SKU is required for products without variants.",
@@ -150,3 +138,4 @@ export const SuggestPriceOutputSchema = z.object({
   suggestedPrice: z.number().describe('The suggested selling price for the product.'),
 });
 export type SuggestPriceOutput = z.infer<typeof SuggestPriceOutputSchema>;
+

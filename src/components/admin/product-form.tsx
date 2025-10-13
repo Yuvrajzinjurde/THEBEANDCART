@@ -75,21 +75,29 @@ const SortableImage = ({ id, url, onRemove, disabled }: { id: any; url: string; 
 };
 
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, append: (value: { value: string } | { value: string }[]) => void) => {
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string | { value: string }[]) => void, multiple: boolean) => {
     const files = e.target.files;
     if (files) {
-      const filePromises = Array.from(files).map(file => {
-        return new Promise<{ value: string }>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve({ value: reader.result as string });
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-      Promise.all(filePromises).then(newFiles => {
-        append(newFiles);
-      });
+        if (multiple) {
+            const filePromises = Array.from(files).map(file => {
+                return new Promise<{ value: string }>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        resolve({ value: reader.result as string });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+            Promise.all(filePromises).then(newFiles => {
+                onChange(newFiles);
+            });
+        } else if (files[0]) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                onChange(reader.result as string);
+            };
+            reader.readAsDataURL(files[0]);
+        }
     }
 };
 
@@ -164,11 +172,12 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                     <FormItem>
                         <FormLabel>Stock</FormLabel>
                         <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} disabled={disabled} /></FormControl>
+                        <FormMessage />
                     </FormItem>
                 )} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-                <FormField control={control} name={`variants.${index}.images`} render={() => (
+                <FormField control={control} name={`variants.${index}.images`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Variant Images</FormLabel>
                          <FormControl>
@@ -179,7 +188,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                                     accept="image/*"
                                     className="hidden"
                                     multiple
-                                    onChange={(e) => handleFileChange(e, appendVariantImage)}
+                                    onChange={(e) => handleFileChange(e, appendVariantImage as any, true)}
                                     disabled={disabled}
                                 />
                                 {!disabled && (
@@ -206,7 +215,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                         )}
                     </FormItem>
                 )} />
-                 <FormField control={control} name={`variants.${index}.videos`} render={() => (
+                 <FormField control={control} name={`variants.${index}.videos`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Variant Videos</FormLabel>
                         <FormControl>
@@ -217,7 +226,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                                     accept="video/*"
                                     className="hidden"
                                     multiple
-                                    onChange={(e) => handleFileChange(e, appendVariantVideo)}
+                                    onChange={(e) => handleFileChange(e, appendVariantVideo as any, true)}
                                     disabled={disabled}
                                 />
                                  {!disabled && (
@@ -364,7 +373,6 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 const { brand } = await res.json();
                 const categories = brand.categories || [];
                 setProductCategories(categories);
-                // Set default category if not already set and creating new product
                 if (mode === 'create' && !form.getValues('category') && categories.length > 0) {
                     form.setValue('category', categories[0], { shouldDirty: true, shouldValidate: true });
                 }
@@ -470,11 +478,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
 
   const handleSuggestPrice = async () => {
-    const { name, description, category, purchasePrice, images, variants } = watchedFormValues;
-    const firstImage = images?.[0]?.value || variants?.[0]?.images?.[0]?.value;
-
-    if (!name || !description || !category || !purchasePrice || !firstImage) {
-        toast.warn("Please fill in Name, Description, Category, Purchase Price, and upload at least one image before suggesting a price.");
+    const { name, description, category, purchasePrice, mainImage } = watchedFormValues;
+    
+    if (!name || !description || !category || !purchasePrice || !mainImage) {
+        toast.warn("Please fill in Name, Description, Category, Purchase Price, and upload a main image before suggesting a price.");
         return;
     }
     setAiError(null);
@@ -485,7 +492,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
             description,
             category,
             purchasePrice: Number(purchasePrice),
-            mainImage: firstImage,
+            mainImage: mainImage,
         });
         form.setValue('sellingPrice', result.suggestedPrice, { shouldValidate: true, shouldDirty: true });
         toast.success("AI selling price suggested!");
@@ -511,7 +518,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       form.setValue('description', result.description, { shouldValidate: true, shouldDirty: true });
       form.setValue('mrp', result.mrp, { shouldValidate: true, shouldDirty: true });
       form.setValue('sellingPrice', result.sellingPrice, { shouldValidate: true, shouldDirty: true });
-      form.setValue('category', result.category, { shouldValidate: true, shouldDirty: true });
+      form.setValue('category', result.category, { shouldValidate: true, shouldValidate: true });
       form.setValue('brand', result.brand, { shouldValidate: true, shouldDirty: true });
       form.setValue('stock', result.stock, { shouldValidate: true, shouldDirty: true });
       toast.success("Form autofilled successfully!");
@@ -537,18 +544,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const onSubmitClick = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
-
-    const firstImage = data.images?.[0]?.value || data.variants?.[0]?.images?.[0]?.value;
-    if (!firstImage) {
-        setFormError("At least one image is required for the product or its first variant.");
-        setIsSubmitting(false);
-        setIsPreviewOpen(false);
-        return;
-    }
     
     const dataToSubmit = {
       ...data,
-      mainImage: firstImage,
+      mainImage: data.mainImage,
       images: data.variants.length > 0 ? [] : data.images.map(img => img.value),
       videos: data.videos?.map(vid => vid.value),
       keywords: data.keywords?.map(tag => tag.value),
@@ -592,15 +591,14 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setFormError(null);
     const isValid = await form.trigger();
     if (!isValid) {
-        const errorMessages = getReadableErrorMessages(errors);
-        const errorMessageString = errorMessages.length > 0 
-            ? `Please fix the following errors: ${errorMessages.join('; ')}`
+        const readableErrors = getReadableErrorMessages(errors);
+        const errorMessageString = readableErrors.length > 0 
+            ? `Please fix the following errors: ${readableErrors.join('; ')}`
             : 'Please fill out all required fields.';
         setFormError(errorMessageString);
         return;
     }
     const formData = form.getValues();
-    const firstImage = formData.images?.[0]?.value || formData.variants?.[0]?.images?.[0]?.value;
 
     const mockProduct: Partial<IProduct> = {
         _id: 'preview-id',
@@ -609,9 +607,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         brand: formData.brand,
         sellingPrice: Number(formData.sellingPrice),
         mrp: Number(formData.mrp) || undefined,
-        images: firstImage ? [firstImage] : [],
-        mainImage: firstImage || '',
-        rating: 4.5, // Use a default rating for preview
+        images: formData.mainImage ? [formData.mainImage] : [],
+        mainImage: formData.mainImage,
+        rating: 4.5,
         storefront: formData.storefront,
     };
     setPreviewProduct(mockProduct);
@@ -728,14 +726,46 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                         </CardContent>
                     </Card>
 
-                    {!watchedFormValues.variants?.length && (
                     <Card>
                         <CardHeader><CardTitle>Media</CardTitle></CardHeader>
                         <CardContent className="space-y-6">
+                             <FormField control={control} name="mainImage" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Main Image</FormLabel>
+                                    <FormDescription>This is the primary image for your product listing.</FormDescription>
+                                    <FormControl>
+                                        <div className="w-full">
+                                            <Input
+                                                id="main-image-upload"
+                                                type="file"
+                                                accept="image/png, image/jpeg, image/webp, image/avif"
+                                                className="hidden"
+                                                onChange={(e) => handleFileChange(e, field.onChange, false)}
+                                                disabled={isFormDisabled}
+                                            />
+                                            {field.value ? (
+                                                <div className="relative w-48 h-48 border-2 border-dashed rounded-lg p-2">
+                                                    <Image src={field.value} alt="Main image preview" fill objectFit="contain" />
+                                                    {!isFormDisabled && <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>}
+                                                </div>
+                                            ) : (
+                                                <label htmlFor="main-image-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                                    </div>
+                                                </label>
+                                            )}
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
                             <FormField control={control} name="images" render={() => (
                                 <FormItem>
                                     <div className="flex justify-between items-center">
-                                        <FormLabel>Images</FormLabel>
+                                        <FormLabel>Additional Images</FormLabel>
                                         {!isFormDisabled && <FormDescription>Drag and drop to reorder images.</FormDescription>}
                                     </div>
                                     <FormControl>
@@ -746,7 +776,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                                 accept="image/png, image/jpeg, image/webp, image/avif"
                                                 className="hidden"
                                                 multiple
-                                                onChange={(e) => handleFileChange(e, appendImage)}
+                                                onChange={(e) => handleFileChange(e, appendImage as any, true)}
                                                 disabled={isFormDisabled}
                                             />
                                             {!isFormDisabled && (
@@ -774,54 +804,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     )}
                                 </FormItem>
                             )} />
-
-                            <FormField control={control} name="videos" render={() => (
-                                <FormItem>
-                                    <FormLabel>Videos</FormLabel>
-                                    <FormControl>
-                                        <div className="w-full">
-                                            <Input 
-                                                id="video-upload"
-                                                type="file" 
-                                                accept="video/mp4,video/webm,audio/mp3"
-                                                className="hidden"
-                                                multiple
-                                                onChange={(e) => handleFileChange(e, appendVideo)}
-                                                disabled={isFormDisabled}
-                                            />
-                                            {!isFormDisabled && (
-                                                <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">MP4, WEBM, or MP3</p>
-                                                    </div>
-                                                </label>
-                                            )}
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                    {videoFields.length > 0 && (
-                                        <div className="grid grid-cols-4 gap-4 mt-4">
-                                            {videoFields.map((field, index) => (
-                                                <div key={field.id} className="relative aspect-square">
-                                                    {field.value && (
-                                                        <video src={field.value} controls className="w-full h-full object-cover rounded-md bg-muted" />
-                                                    )}
-                                                    {!isFormDisabled && (
-                                                        <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => removeVideo(index)}>
-                                                            <X className="h-4 w-4" />
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </FormItem>
-                            )} />
                         </CardContent>
                     </Card>
-                    )}
 
                     <Card>
                         <CardHeader>
