@@ -16,7 +16,8 @@ import { useAuth, type User } from "@/hooks/use-auth";
 import Link from "next/link";
 import { LogOut, User as UserIcon, Settings, CreditCard, Package } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface UserNavProps {
     isCollapsed?: boolean;
@@ -87,16 +88,22 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
     return (
        <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
+                <Button variant="ghost" className="relative h-10 w-full justify-start gap-3 px-2">
+                    <Avatar className="h-8 w-8">
                         <AvatarFallback>{userInitial}</AvatarFallback>
                     </Avatar>
+                     <div className="flex flex-col items-start text-left">
+                        <p className="text-xs font-medium leading-none">{user.name}</p>
+                    </div>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                            {user.roles.includes('admin') ? 'Admin' : 'Customer'}
+                        </p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
