@@ -22,6 +22,7 @@ const ServerVariantSchema = VariantSchema.extend({
 const BaseProductFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
+  mainImage: z.string().url("A main image is required.").min(1, "A main image is required."),
   purchasePrice: z.coerce.number().min(0.01, "Purchase price must be greater than 0"),
   mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
@@ -66,9 +67,10 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
     if (data.variants.length === 0) {
         return Array.isArray(data.images) && data.images.length > 0;
     }
-    return true;
+    // If there are variants, each must have an image.
+    return data.variants.every(v => Array.isArray(v.images) && v.images.length > 0);
 }, {
-    message: "A product must have at least one image.",
+    message: "Each product or variant must have at least one image.",
     path: ["images"],
 })
 .refine(data => {
@@ -87,9 +89,9 @@ export const ProductFormSchema = BaseProductFormSchema.refine(data => {
     if (data.variants.length === 0) {
         return Array.isArray(data.images) && data.images.length > 0;
     }
-    return true;
+    return data.variants.every(v => Array.isArray(v.images) && v.images.length > 0);
 }, {
-    message: "A product must have at least one image.",
+    message: "Each product or variant must have at least one image.",
     path: ["images"],
 });
 

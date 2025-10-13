@@ -284,6 +284,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
+    mainImage: existingProduct.mainImage,
     sku: existingProduct.sku || '',
     category: Array.isArray(existingProduct.category) ? existingProduct.category[0] : existingProduct.category,
     images: existingProduct.images.map(img => ({value: img})),
@@ -298,6 +299,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   } : {
     name: '',
     description: '',
+    mainImage: '',
     sku: '',
     mrp: '',
     purchasePrice: 0,
@@ -433,8 +435,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
 
   const handleSuggestPrice = async () => {
-    const { name, description, category, purchasePrice, images } = watchedFormValues;
-    if (!name || !description || !category || !purchasePrice || !images || images.length === 0) {
+    const { name, description, category, purchasePrice, images, variants } = watchedFormValues;
+    const firstImage = images?.[0]?.value || variants?.[0]?.images?.[0]?.value;
+
+    if (!name || !description || !category || !purchasePrice || !firstImage) {
         toast.warn("Please fill in Name, Description, Category, Purchase Price, and upload at least one image before suggesting a price.");
         return;
     }
@@ -446,7 +450,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
             description,
             category,
             purchasePrice: Number(purchasePrice),
-            mainImage: images[0].value,
+            mainImage: firstImage,
         });
         form.setValue('sellingPrice', result.suggestedPrice, { shouldValidate: true, shouldDirty: true });
         toast.success("AI selling price suggested!");
@@ -498,9 +502,19 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const onSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
+
+    const firstImage = data.images?.[0]?.value || data.variants?.[0]?.images?.[0]?.value;
+    if (!firstImage) {
+        setFormError("At least one image is required for the product or its first variant.");
+        setIsSubmitting(false);
+        setIsPreviewOpen(false);
+        return;
+    }
+    
     const dataToSubmit = {
       ...data,
-      images: watchedFormValues.variants.length > 0 ? [] : data.images.map(img => img.value), // Use top-level images only if no variants
+      mainImage: firstImage,
+      images: data.variants.length > 0 ? [] : data.images.map(img => img.value),
       videos: data.videos?.map(vid => vid.value),
       keywords: data.keywords?.map(tag => tag.value),
       variants: data.variants.map(variant => ({
@@ -547,6 +561,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       return;
     }
     const formData = form.getValues();
+    const firstImage = formData.images?.[0]?.value || formData.variants?.[0]?.images?.[0]?.value;
+
     const mockProduct: Partial<IProduct> = {
         _id: 'preview-id',
         name: formData.name,
@@ -554,7 +570,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         brand: formData.brand,
         sellingPrice: Number(formData.sellingPrice),
         mrp: Number(formData.mrp) || undefined,
-        images: formData.images.map(img => img.value),
+        images: firstImage ? [firstImage] : [],
+        mainImage: firstImage || '',
         rating: 4.5, // Use a default rating for preview
         storefront: formData.storefront,
     };
@@ -610,21 +627,21 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     <Form {...form}>
       <form onSubmit={onSubmit} className="space-y-6">
         <Card>
-             <CardHeader>
-                <CardTitle>Create New Product</CardTitle>
-                <CardDescription>Fill in the details for your new product. Use the AI tools to speed up the process.</CardDescription>
-            </CardHeader>
-
-            {mode === 'edit' && (
-                <div className="flex items-center justify-between">
-                    <CardTitle>{isFormDisabled ? 'View Product' : 'Edit Product'}</CardTitle>
-                    <Button type="button" variant="outline" size="icon" onClick={() => setIsFormDisabled(!isFormDisabled)}>
-                        {isFormDisabled ? <Edit className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                    </Button>
+            <CardHeader>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <CardTitle>{mode === 'create' ? 'Create New Product' : (isFormDisabled ? 'View Product' : 'Edit Product')}</CardTitle>
+                        <CardDescription>Fill in the details for your product. Use the AI tools to speed up the process.</CardDescription>
+                    </div>
+                    {mode === 'edit' && (
+                        <Button type="button" variant="outline" onClick={() => setIsFormDisabled(!isFormDisabled)}>
+                            {isFormDisabled ? <><Edit className="mr-2 h-4 w-4" /> Edit</> : <><Unlock className="mr-2 h-4 w-4" /> Lock</>}
+                        </Button>
+                    )}
                 </div>
-            )}
+            </CardHeader>
             
-            <fieldset disabled={isFormDisabled} className="grid grid-cols-1 md:grid-cols-3 gap-6 group">
+            <fieldset disabled={isFormDisabled} className="grid grid-cols-1 md:grid-cols-3 gap-6 group p-6">
                 {/* Left Column */}
                 <div className="md:col-span-2 space-y-6">
                     <Card>
@@ -968,7 +985,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
             </fieldset>
 
             {!isFormDisabled && (
-                <div className="flex flex-col items-end gap-4 pt-6">
+                <div className="flex flex-col items-end gap-4 pt-6 px-6">
                     {formError && (
                         <Alert variant="destructive" className="w-full">
                             <AlertCircle className="h-4 w-4" />

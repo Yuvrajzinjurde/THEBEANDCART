@@ -5,6 +5,7 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 export interface IProduct extends Document {
   name: string;
   description: string;
+  mainImage: string;
   mrp?: number; // Original Price (Maximum Retail Price)
   sellingPrice: number; // Discounted/Selling Price
   purchasePrice?: number; // Cost price for internal calculations
@@ -29,6 +30,7 @@ export interface IProduct extends Document {
 const ProductSchema: Schema<IProduct> = new Schema({
   name: { type: String, required: true, trim: true },
   description: { type: String, required: true },
+  mainImage: { type: String, required: true },
   mrp: { type: Number, min: 0 },
   sellingPrice: { type: Number, required: true, min: 0 },
   purchasePrice: { type: Number, min: 0 },

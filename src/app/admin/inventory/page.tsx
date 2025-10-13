@@ -251,12 +251,12 @@ export default function InventoryPage() {
                                 className="cursor-pointer"
                             >
                                 <TableCell>
-                                    {product.images && product.images.length > 0 ? (
+                                    {(product.mainImage || product.images?.[0]) ? (
                                         <Image
                                             alt={product.name}
                                             className="aspect-square rounded-md object-cover"
                                             height="64"
-                                            src={product.images[0]}
+                                            src={product.mainImage || product.images[0]}
                                             width="64"
                                         />
                                     ) : (
