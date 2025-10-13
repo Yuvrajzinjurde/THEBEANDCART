@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Product from '@/models/product.model';
@@ -133,6 +134,8 @@ export async function POST(req: Request) {
             ...variant,
             styleId,
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+            // Ensure top-level images are not passed to variant products
+            images: variant.images,
         }));
 
         const newProducts = await Product.insertMany(productDocs);
