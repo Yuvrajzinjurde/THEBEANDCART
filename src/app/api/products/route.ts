@@ -120,6 +120,14 @@ export async function POST(req: Request) {
         const { variants, ...commonData } = validation.data;
         const styleId = new Types.ObjectId().toHexString();
 
+        const generateSku = (name: string, color?: string, size?: string): string => {
+            const namePart = name.slice(0, 5).toUpperCase().replace(/\s+/g, '');
+            const colorPart = color ? color.slice(0, 3).toUpperCase() : '';
+            const sizePart = size ? size.toUpperCase() : '';
+            const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return [namePart, colorPart, sizePart, randomPart].filter(Boolean).join('-');
+        };
+
         if (!variants || variants.length === 0) {
             // This is a single product without variants
             const productData = { ...commonData, styleId };
@@ -136,6 +144,7 @@ export async function POST(req: Request) {
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
             mainImage: commonData.mainImage,
             images: variant.images,
+            sku: variant.sku || generateSku(commonData.name, variant.color, variant.size),
         }));
 
         const newProducts = await Product.insertMany(productDocs);
