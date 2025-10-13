@@ -50,58 +50,55 @@ export async function PUT(
             return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
         
-        const { variants, ...updateData } = validation.data;
+        const { variants, ...commonData } = validation.data;
         const mainProduct = await Product.findById(id);
         const styleId = mainProduct?.styleId || new Types.ObjectId().toHexString();
         
         if (!variants || variants.length === 0) {
-            // Update a single product
-            const updatedProduct = await Product.findByIdAndUpdate(id, { ...updateData, styleId }, { new: true });
+            // This is a simple update for a single product without variants
+            const updatedProduct = await Product.findByIdAndUpdate(id, { ...commonData, styleId }, { new: true });
             if (!updatedProduct) {
                 return NextResponse.json({ message: 'Product not found' }, { status: 404 });
             }
-            return NextResponse.json({ message: 'Product updated successfully', product: updatedProduct }, { status: 200 });
+            return NextResponse.json({ message: 'Product updated successfully', products: [updatedProduct] }, { status: 200 });
         }
         
-        // Update a product with variants
-        const productIdsToKeep: string[] = [];
+        // This is an update for a product with variants (a catalog)
+        const variantIdsFromPayload = variants.map(v => (v as any)._id).filter(Boolean).map(vid => new Types.ObjectId(vid));
+        
+        // Delete variants that are no longer in the payload
+        await Product.deleteMany({
+            styleId: styleId,
+            _id: { $nin: variantIdsFromPayload }
+        });
+
+        // Update existing variants and insert new ones
         const bulkOps = variants.map(variant => {
             const variantData = {
-                ...updateData,
+                ...commonData,
                 ...variant,
                 styleId,
-                name: `${updateData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+                name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
             };
-
-            if ((variant as any)._id) { // Existing variant
-                const variantId = (variant as any)._id;
-                productIdsToKeep.push(variantId);
+            
+            if ((variant as any)._id) {
+                // Update existing variant
                 return {
                     updateOne: {
-                        filter: { _id: new Types.ObjectId(variantId), styleId },
+                        filter: { _id: new Types.ObjectId((variant as any)._id), styleId },
                         update: { $set: variantData },
-                    },
+                        upsert: false // Do not create a new doc if it doesn't exist
+                    }
                 };
-            } else { // New variant
+            } else {
+                // Insert new variant
                 return {
                     insertOne: {
-                        document: variantData,
-                    },
+                        document: variantData
+                    }
                 };
             }
         });
-
-        // Delete variants that were removed from the form
-        const existingVariants = await Product.find({ styleId });
-        const variantsToDelete = existingVariants.filter(v => !productIdsToKeep.includes(v._id.toString()));
-        
-        for (const variantToDelete of variantsToDelete) {
-             bulkOps.push({
-                deleteOne: {
-                    filter: { _id: variantToDelete._id }
-                }
-            });
-        }
         
         if (bulkOps.length > 0) {
             await Product.bulkWrite(bulkOps as any);

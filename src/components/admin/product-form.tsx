@@ -279,7 +279,7 @@ const getReadableErrorMessages = (errors: any): string[] => {
         if (currentVal) {
           if (currentVal.message) {
             const formattedPath = [...path, key]
-              .map(p => p.replace(/\[(\d+)\]/g, ' $1')) 
+              .map(p => p.replace(/\[(\d+)\]/g, ' $1'))
               .map(p => p.charAt(0).toUpperCase() + p.slice(1))
               .join(' -> ');
             messages.push(`${formattedPath}: ${currentVal.message}`);
@@ -327,7 +327,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     mainImage: existingProduct.mainImage || '',
     sku: existingProduct.sku || '',
     category: Array.isArray(existingProduct.category) ? existingProduct.category[0] : existingProduct.category,
-    images: existingProduct.images.map(img => ({value: img})),
+    images: (existingProduct.images || []).map(img => ({value: img})),
     videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
     keywords: (existingProduct.keywords || []).map(keyword => ({ value: keyword })),
     mrp: existingProduct.mrp || '',
@@ -335,7 +335,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     purchasePrice: (existingProduct as any).purchasePrice || 0,
     storefront: existingProduct.storefront,
     returnPeriod: existingProduct.returnPeriod || 10,
-    variants: [], // TODO: Populate variants for editing
+    variants: [],
   } : {
     name: '',
     description: '',
@@ -345,7 +345,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     purchasePrice: 0,
     sellingPrice: 0,
     category: '',
-    brand: '', // Product's actual brand
+    brand: '', 
     storefront: selectedBrand === 'All Brands' ? (storefronts[0] || '') : selectedBrand,
     images: [],
     videos: [],
@@ -638,7 +638,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const previewStyle = activeTheme ? {
       '--background': activeTheme.background,
-      '--foreground': '222.2 84% 4.9%', // Assuming dark text on light bg
+      '--foreground': '222.2 84% 4.9%', 
       '--card': activeTheme.background,
       '--card-foreground': '222.2 84% 4.9%',
       '--popover': activeTheme.background,
@@ -761,7 +761,6 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                     <FormMessage />
                                 </FormItem>
                             )} />
-
                             <FormField control={control} name="images" render={() => (
                                 <FormItem>
                                     <div className="flex justify-between items-center">
@@ -824,7 +823,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 />
                             ))}
                             {!isFormDisabled && (
-                                <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
+                                <Button type="button" variant="outline" onClick={() => appendVariant({ _id: new Date().toISOString(), size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
                                     <PlusCircle className="mr-2" />
                                     {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                                 </Button>
