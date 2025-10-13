@@ -19,39 +19,48 @@ interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (user: User, token: string) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (user: User, token: string) => void;
+  logout: () => void;
   checkUser: () => Promise<void>;
 }
 
 const fetchUserData = (token: string) => {
-  // Fire-and-forget data fetching. No need to await these.
-  Promise.all([
-    fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
-    fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
-    fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }),
-  ]).then(async ([cartRes, wishlistRes, notificationsRes]) => {
-    if (cartRes.ok) useUserStore.getState().setCart(await cartRes.json().then(d => d.cart));
-    if (wishlistRes.ok) useUserStore.getState().setWishlist(await wishlistRes.json().then(d => d.wishlist));
-    if (notificationsRes.ok) useUserStore.getState().setNotifications(await notificationsRes.json().then(d => d.notifications));
-  }).catch(error => {
-    console.error("Failed to fetch user-specific data after login:", error);
-  });
+    if (!token) return;
+    // Fire-and-forget data fetching.
+    Promise.all([
+        fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }),
+    ]).then(async ([cartRes, wishlistRes, notificationsRes]) => {
+        try {
+            if (cartRes.ok) {
+                const { cart } = await cartRes.json();
+                useUserStore.getState().setCart(cart);
+            }
+            if (wishlistRes.ok) {
+                const { wishlist } = await wishlistRes.json();
+                useUserStore.getState().setWishlist(wishlist);
+            }
+            if (notificationsRes.ok) {
+                const { notifications } = await notificationsRes.json();
+                useUserStore.getState().setNotifications(notifications);
+            }
+        } catch (error) {
+            console.error("Error fetching user data in background:", error);
+        }
+    }).catch(error => {
+        console.error("Failed to fetch user-specific data:", error);
+    });
 };
 
 const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   loading: true,
-  login: async (user, token) => {
+  login: (user, token) => {
     Cookies.set('accessToken', token, { expires: 1 / 96, path: '/' }); // 15 minutes
     set({ user, token, loading: false });
-    
-    // Fetch user-specific data in the background without blocking
     fetchUserData(token);
-    
-    // Return a resolved promise immediately to allow for fast redirects
-    return Promise.resolve();
   },
   logout: async () => {
     try {
@@ -68,17 +77,19 @@ const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   checkUser: async () => {
-    const token = Cookies.get('accessToken');
-    if (token) {
-        set({ token, loading: true }); 
+    // Only run on the client
+    if (typeof window === 'undefined') {
+        set({ loading: false });
+        return;
     }
-
+    
+    set({ loading: true });
+    
     try {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const { user: userData, token: newToken } = await res.json();
-        // Use the login function to set state and fetch data
-        await get().login(userData, newToken);
+        get().login(userData, newToken);
       } else {
         await get().logout();
       }
@@ -91,15 +102,14 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
-export const useAuth = () => {
-  return useAuthStore(state => ({
+// Export the hook
+export const useAuth = () => useAuthStore(state => ({
     user: state.user,
     loading: state.loading,
     login: state.login,
     logout: state.logout,
     token: state.token
-  }));
-};
+}));
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const checkUser = useAuthStore(state => state.checkUser);
