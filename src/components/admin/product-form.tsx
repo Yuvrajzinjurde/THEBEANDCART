@@ -318,10 +318,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(ProductFormSchemaForClient),
     defaultValues,
-    mode: 'onChange',
+    mode: 'onBlur',
   });
   
-  const { control, formState: { isDirty } } = form;
+  const { control, formState: { isDirty, errors } } = form;
 
   const selectedStorefront = useWatch({ control: form.control, name: 'storefront' });
 
@@ -557,7 +557,8 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setFormError(null);
     const isValid = await form.trigger();
     if (!isValid) {
-      setFormError("Please fill out all required fields before previewing.");
+      const errorFields = Object.keys(errors).join(', ');
+      setFormError(`Please fill out all required fields. The following fields have errors: ${errorFields}`);
       return;
     }
     const formData = form.getValues();
