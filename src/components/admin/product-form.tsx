@@ -180,7 +180,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={control} name={`variants.${index}.images`} render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Additional Images</FormLabel>
+                        <FormLabel>Variant Images</FormLabel>
                          <FormControl>
                             <div>
                                 <Input 
@@ -324,7 +324,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
-    mainImage: existingProduct.mainImage,
+    mainImage: existingProduct.mainImage || '',
     sku: existingProduct.sku || '',
     category: Array.isArray(existingProduct.category) ? existingProduct.category[0] : existingProduct.category,
     images: existingProduct.images.map(img => ({value: img})),
@@ -824,7 +824,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 />
                             ))}
                             {!isFormDisabled && (
-                                <Button type="button" variant="outline" onClick={() => appendVariant({ mainImage: '', size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
+                                <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
                                     <PlusCircle className="mr-2" />
                                     {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                                 </Button>
