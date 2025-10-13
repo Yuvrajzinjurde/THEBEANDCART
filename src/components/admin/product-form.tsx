@@ -541,10 +541,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         _id: 'preview-id',
         name: formData.name,
         category: formData.category,
+        brand: formData.brand,
         sellingPrice: Number(formData.sellingPrice),
         mrp: Number(formData.mrp) || undefined,
         images: formData.images.map(img => img.value),
         rating: 4.5, // Use a default rating for preview
+        storefront: formData.storefront,
     };
     setPreviewProduct(mockProduct);
     setIsPreviewOpen(true);
@@ -967,12 +969,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 )}
                 <div className="flex items-center gap-2">
                     <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
+                    
+                    <Button type="button" onClick={handlePreview}>
+                        {mode === 'create' ? 'Create Product' : 'Save Changes'}
+                    </Button>
+
                     <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                        <AlertDialogTrigger asChild>
-                            <Button type="button" onClick={handlePreview}>
-                                {mode === 'create' ? 'Create Product' : 'Save Changes'}
-                            </Button>
-                        </AlertDialogTrigger>
                         <AlertDialogContent className="max-w-2xl" style={previewStyle}>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Product Preview</AlertDialogTitle>
