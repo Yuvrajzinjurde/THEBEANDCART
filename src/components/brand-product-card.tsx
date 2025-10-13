@@ -73,9 +73,15 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     const carouselEl = carouselRef.current;
     if (!carouselEl) return;
 
-    const startAutoplay = () => autoplayPlugin.current.play();
+    const startAutoplay = () => {
+      if (autoplayPlugin.current && api) { // Check if api is available
+        autoplayPlugin.current.play();
+      }
+    };
     const stopAutoplay = () => {
-      autoplayPlugin.current.stop();
+      if (autoplayPlugin.current) {
+        autoplayPlugin.current.stop();
+      }
       if(api) {
         api.scrollTo(0);
       }
