@@ -23,6 +23,7 @@ export interface IProduct extends Document {
   styleId?: string; // Groups variants together
   color?: string;
   size?: string;
+  sku?: string;
 }
 
 const ProductSchema: Schema<IProduct> = new Schema({
@@ -45,6 +46,7 @@ const ProductSchema: Schema<IProduct> = new Schema({
   styleId: { type: String, index: true },
   color: { type: String },
   size: { type: String },
+  sku: { type: String, index: true, unique: true, sparse: true },
 }, { timestamps: true });
 
 // For backwards compatibility, rename 'price' to 'sellingPrice' where it might be used

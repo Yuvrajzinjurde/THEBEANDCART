@@ -124,7 +124,7 @@ const VariantItem = ({ control, index, removeVariant, disabled }: { control: Con
                     <Trash className="h-4 w-4" />
                 </Button>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                 <FormField control={control} name={`variants.${index}.size`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Size</FormLabel>
@@ -135,6 +135,13 @@ const VariantItem = ({ control, index, removeVariant, disabled }: { control: Con
                     <FormItem>
                         <FormLabel>Color</FormLabel>
                         <FormControl><Input placeholder="e.g., Blue" {...field} disabled={disabled} /></FormControl>
+                    </FormItem>
+                )} />
+                <FormField control={control} name={`variants.${index}.sku`} render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>SKU</FormLabel>
+                        <FormControl><Input placeholder="e.g., TSHIRT-BL-M" {...field} disabled={disabled} /></FormControl>
+                        <FormMessage />
                     </FormItem>
                 )} />
                 <FormField control={control} name={`variants.${index}.stock`} render={({ field }) => (
@@ -260,6 +267,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const defaultValues: ProductFormValues = existingProduct ? {
     ...existingProduct,
+    sku: existingProduct.sku || '',
     category: Array.isArray(existingProduct.category) ? existingProduct.category[0] : existingProduct.category,
     images: existingProduct.images.map(img => ({value: img})),
     videos: (existingProduct as any).videos?.map((vid: string) => ({ value: vid })) || [],
@@ -273,6 +281,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   } : {
     name: '',
     description: '',
+    sku: '',
     mrp: '',
     purchasePrice: 0,
     sellingPrice: 0,
@@ -583,20 +592,14 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 </Button>
             </div>
         )}
-        {mode === 'create' && (
-             <CardHeader className="p-0">
-                <CardTitle>Create a New Product / Catalog</CardTitle>
-                <CardDescription>
-                  Fill out the form below to add a new product to your inventory. Add variants to create a catalog.
-                </CardDescription>
-            </CardHeader>
-        )}
-
+        
         <fieldset disabled={isFormDisabled} className="grid grid-cols-1 md:grid-cols-3 gap-6 group">
             {/* Left Column */}
             <div className="md:col-span-2 space-y-6">
                  <Card>
-                    <CardHeader><CardTitle>Product Details</CardTitle></CardHeader>
+                    <CardHeader>
+                        <CardTitle>Product Details</CardTitle>
+                    </CardHeader>
                     <CardContent className="space-y-4">
                         <FormField control={control} name="name" render={({ field }) => (
                             <FormItem>
@@ -742,20 +745,29 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} disabled={isFormDisabled} />
                         ))}
                          {!isFormDisabled && (
-                            <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', stock: 0, images: [], videos: [] })}>
+                            <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
                                 <PlusCircle className="mr-2" />
                                 {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                             </Button>
                          )}
-                         {!watchedFormValues.variants?.length && (
-                            <FormField control={control} name="stock" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Stock</FormLabel>
-                                    <FormControl><Input type="number" placeholder="Enter stock quantity" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
-                                    <FormDescription>Enter stock for this product if it has no variants.</FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
+                         {watchedFormValues.variants?.length === 0 && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <FormField control={control} name="sku" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>SKU (Stock Keeping Unit)</FormLabel>
+                                        <FormControl><Input placeholder="e.g., TSHIRT-CLASSIC-WHT" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={control} name="stock" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Stock</FormLabel>
+                                        <FormControl><Input type="number" placeholder="Enter stock quantity" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl>
+                                        <FormDescription>Stock for this product if it has no variants.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
                          )}
                     </CardContent>
                 </Card>

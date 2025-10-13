@@ -7,6 +7,7 @@ const FileValueSchema = z.object({ value: z.string().url() });
 const VariantSchema = z.object({
   size: z.string().optional(),
   color: z.string().optional(),
+  sku: z.string().min(1, "SKU is required for variants."),
   stock: z.coerce.number().min(0, "Stock must be 0 or more"),
   images: z.array(FileValueSchema).min(1, "Each variant must have at least one image."),
   videos: z.array(FileValueSchema).optional(),
@@ -27,6 +28,7 @@ const BaseProductFormSchema = z.object({
   category: z.string().min(1, "Category is required"), // Main category for simplicity in form
   brand: z.string().min(1, "Product brand is required"),
   storefront: z.string().min(1, "Storefront is required"),
+  sku: z.string().optional(),
   images: z.array(z.string().url()).optional(),
   videos: z.array(z.string().url()).optional(),
   keywords: z.array(z.string()).optional(),
@@ -68,6 +70,15 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
 }, {
     message: "A product must have at least one image.",
     path: ["images"],
+})
+.refine(data => {
+    if (data.variants.length === 0) {
+        return !!data.sku && data.sku.length > 0;
+    }
+    return true;
+}, {
+    message: "SKU is required for products without variants.",
+    path: ["sku"],
 });
 
 
