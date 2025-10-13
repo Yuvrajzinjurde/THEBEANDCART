@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from 'react';
@@ -131,7 +132,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                         <FormControl><Input placeholder="e.g., M" {...field} disabled={disabled} /></FormControl>
                     </FormItem>
                 )} />
-                <FormField control={control} name={`variants.${index}.color`} render={({ field }) => (
+                 <FormField control={control} name={`variants.${index}.color`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Color</FormLabel>
                         <FormControl><Input 
@@ -269,6 +270,7 @@ const getReadableErrorMessages = (errors: any): string[] => {
           if (currentVal.message) {
             const formattedPath = [...path, key]
               .map(p => p.replace(/\[(\d+)\]/g, ' $1')) // variants[0] -> variants 0
+              .map(p => p.charAt(0).toUpperCase() + p.slice(1)) // Capitalize
               .join(' -> ');
             messages.push(`${formattedPath}: ${currentVal.message}`);
           } else if (typeof currentVal === 'object' && !Array.isArray(currentVal) && Object.keys(currentVal).length > 0) {
@@ -586,13 +588,13 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     }
   });
 
-  const handlePreview = async () => {
+ const handlePreview = async () => {
     setFormError(null);
     const isValid = await form.trigger();
     if (!isValid) {
         const errorMessages = getReadableErrorMessages(errors);
         const errorMessageString = errorMessages.length > 0 
-            ? `The following fields have errors: ${errorMessages.join(', ')}`
+            ? `Please fix the following errors: ${errorMessages.join('; ')}`
             : 'Please fill out all required fields.';
         setFormError(errorMessageString);
         return;
