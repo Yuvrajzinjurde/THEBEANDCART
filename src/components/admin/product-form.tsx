@@ -133,39 +133,11 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                 </Button>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                <FormField control={control} name={`variants.${index}.mainImage`} render={({ field }) => (
-                    <FormItem className="sm:col-span-2">
-                        <FormLabel>Main Variant Image</FormLabel>
-                        <FormControl>
-                            <div className="w-full">
-                                <Input
-                                    id={`variant-main-image-upload-${index}`}
-                                    type="file"
-                                    accept="image/png, image/jpeg, image/webp, image/avif"
-                                    className="hidden"
-                                    onChange={(e) => handleFileChange(e, field.onChange, false)}
-                                    disabled={disabled}
-                                />
-                                {field.value ? (
-                                    <div className="relative w-32 h-32 border-2 border-dashed rounded-lg p-2">
-                                        <Image src={field.value} alt="Main variant image" fill objectFit="contain" />
-                                        {!disabled && <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>}
-                                    </div>
-                                ) : (
-                                    <label htmlFor={`variant-main-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                        <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                        <p className="text-xs text-muted-foreground">Upload Main Image</p>
-                                    </label>
-                                )}
-                            </div>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
                 <FormField control={control} name={`variants.${index}.size`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Size</FormLabel>
                         <FormControl><Input placeholder="e.g., M" {...field} disabled={disabled} /></FormControl>
+                        <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={control} name={`variants.${index}.color`} render={({ field }) => (
@@ -182,6 +154,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                             }}
                             disabled={disabled} 
                         /></FormControl>
+                         <FormMessage />
                     </FormItem>
                 )} />
                 <FormField control={control} name={`variants.${index}.sku`} render={({ field }) => (
@@ -575,8 +548,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     
     const dataToSubmit = {
       ...data,
-      mainImage: data.mainImage,
-      images: data.variants.length > 0 ? [] : data.images.map(img => img.value),
+      images: data.images?.map(img => img.value),
       videos: data.videos?.map(vid => vid.value),
       keywords: data.keywords?.map(tag => tag.value),
       variants: data.variants.map(variant => ({

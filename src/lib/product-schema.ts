@@ -4,7 +4,6 @@ import { z } from 'zod';
 const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
-  mainImage: z.string().url("A main image is required for each variant.").min(1, "A main image is required for each variant."),
   size: z.string().optional(),
   color: z.string().optional(),
   sku: z.string().min(1, "SKU is required for variants."),
@@ -14,7 +13,6 @@ const VariantSchema = z.object({
 });
 
 const ServerVariantSchema = VariantSchema.extend({
-    mainImage: z.string().url(),
     images: z.array(z.string().url()).optional(),
     videos: z.array(z.string().url()).optional(),
 })
@@ -64,11 +62,9 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
     path: ["sellingPrice"],
 })
 .refine(data => {
-    // If there are no variants, the top-level SKU is required.
     if (!data.variants || data.variants.length === 0) {
         return !!data.sku && data.sku.length > 0;
     }
-    // If there are variants, each variant's SKU is checked within the VariantSchema.
     return true;
 }, {
     message: "SKU is required for products without variants.",
@@ -77,15 +73,7 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
 
 
 // Server-side schema for POST/PUT requests
-export const ProductFormSchema = BaseProductFormSchema.refine(data => {
-    if (data.variants.length === 0) {
-        return !!data.mainImage;
-    }
-    return data.variants.every(v => !!v.mainImage);
-}, {
-    message: "Each product or variant must have a main image.",
-    path: ["mainImage"],
-});
+export const ProductFormSchema = BaseProductFormSchema;
 
 
 export type ProductFormValues = z.infer<typeof ProductFormSchemaForClient>;
