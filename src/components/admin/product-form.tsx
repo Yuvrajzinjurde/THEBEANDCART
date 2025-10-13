@@ -135,7 +135,17 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                 <FormField control={control} name={`variants.${index}.color`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Color</FormLabel>
-                        <FormControl><Input placeholder="e.g., Blue" {...field} disabled={disabled} /></FormControl>
+                        <FormControl><Input 
+                            placeholder="e.g., Blue" 
+                            {...field}
+                            onBlur={(e) => {
+                                const value = e.target.value;
+                                if (value) {
+                                    field.onChange(value.charAt(0).toUpperCase() + value.slice(1).toLowerCase());
+                                }
+                            }}
+                            disabled={disabled} 
+                        /></FormControl>
                     </FormItem>
                 )} />
                 <FormField control={control} name={`variants.${index}.sku`} render={({ field }) => (
@@ -599,12 +609,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={onSubmit} className="space-y-6">
-        {mode === 'create' && (
-             <CardHeader className="px-0">
-                <CardTitle>Create New Product</CardTitle>
-                <CardDescription>Fill in the details for your new product. Use the AI tools to speed up the process.</CardDescription>
-            </CardHeader>
-        )}
+        <CardHeader className="px-0">
+            <CardTitle>Create New Product</CardTitle>
+            <CardDescription>Fill in the details for your new product. Use the AI tools to speed up the process.</CardDescription>
+        </CardHeader>
 
         {mode === 'edit' && (
             <div className="flex items-center justify-between">
@@ -970,38 +978,37 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                 <div className="flex items-center gap-2">
                     <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
                     
-                    <Button type="button" onClick={handlePreview}>
+                     <Button type="button" onClick={handlePreview}>
                         {mode === 'create' ? 'Create Product' : 'Save Changes'}
                     </Button>
-
-                    <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                        <AlertDialogContent className="max-w-2xl" style={previewStyle}>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Product Preview</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This is how your product card will appear on the storefront.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            
-                            <div className="flex justify-center p-8 bg-background rounded-lg">
-                                {previewProduct && (
-                                    <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
-                                )}
-                            </div>
-                            
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Keep Editing</AlertDialogCancel>
-                                <AlertDialogAction onClick={onSubmit} disabled={isSubmitting}>
-                                    {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                                    {isSubmitting ? 'Saving...' : 'Confirm & Save'}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
                 </div>
             </div>
         )}
         
+         <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+            <AlertDialogContent className="max-w-2xl" style={previewStyle}>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Product Preview</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This is how your product card will appear on the storefront.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                
+                <div className="flex justify-center p-8 bg-background rounded-lg">
+                    {previewProduct && (
+                        <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
+                    )}
+                </div>
+                
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Keep Editing</AlertDialogCancel>
+                    <AlertDialogAction onClick={onSubmit} disabled={isSubmitting}>
+                        {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                        {isSubmitting ? 'Saving...' : 'Confirm & Save'}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
         <AlertDialog open={isCancelAlertOpen} onOpenChange={setIsCancelAlertOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
