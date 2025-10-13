@@ -30,12 +30,6 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
@@ -46,7 +40,6 @@ import { UserNav } from "@/components/user-nav";
 import { Separator } from "@/components/ui/separator";
 import type { IBrand } from "@/models/brand.model";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const mainNavItem = { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" };
@@ -66,7 +59,7 @@ const navItems = [
   { href: "/admin/users", icon: Users, label: "Users" },
 ];
 
-const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
+const BrandSelector = () => {
     const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
     const [currentBrandDetails, setCurrentBrandDetails] = useState<IBrand | null>(null);
 
@@ -94,43 +87,12 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
         fetchBrands();
     }, [setAvailableBrands, selectedBrand]);
 
-    if (isCollapsed) {
-        return (
-            <DropdownMenu>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                                <Avatar className="h-8 w-8">
-                                    {currentBrandDetails?.logoUrl ? (
-                                        <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
-                                    ) : (
-                                        <AvatarFallback>{selectedBrand === 'All Brands' ? 'All' : selectedBrand.charAt(0).toUpperCase()}</AvatarFallback>
-                                    )}
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Switch Brand</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent className="w-56" align="start">
-                    {availableBrands.map(brand => (
-                        <DropdownMenuItem key={brand} onClick={() => setSelectedBrand(brand)}>
-                             <Check className={cn("mr-2 h-4 w-4", selectedBrand === brand ? "opacity-100" : "opacity-0")} />
-                            <span className="capitalize">{brand}</span>
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
-        )
-    }
-
     return (
         <Collapsible>
             <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-start h-12">
-                    <div className="flex items-center gap-3">
-                         <Avatar className="h-8 w-8 relative">
+                <Button variant="outline" className="w-full justify-between h-12">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                         <Avatar className="h-8 w-8 relative flex-shrink-0">
                             {currentBrandDetails?.logoUrl ? (
                                 <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
                             ) : (
@@ -139,7 +101,7 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
                         </Avatar>
                         <span className="truncate capitalize font-semibold">{selectedBrand}</span>
                     </div>
-                    <ChevronDown className="h-4 w-4 opacity-50 transition-transform ml-auto" />
+                    <ChevronDown className="h-4 w-4 opacity-50 transition-transform ml-auto flex-shrink-0" />
                 </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2 space-y-1">
@@ -162,13 +124,12 @@ const SidebarContent = ({ className }: { className?: string}) => {
 
     return (
         <div className={cn("flex h-full flex-col", className)}>
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto py-2 no-scrollbar">
-            <div className="p-2">
-                <BrandSelector isCollapsed={false} />
+        <div className="flex-1 overflow-y-auto py-2 no-scrollbar">
+            <div className="px-4 py-2">
+                <BrandSelector />
             </div>
-             <nav className="grid items-start gap-1 px-2 text-sm font-medium">
-                <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary")}>
+             <nav className="grid items-start gap-1 px-4 text-sm font-medium">
+                <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname === href && "bg-muted text-primary")}>
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
                 </Link>
@@ -181,16 +142,7 @@ const SidebarContent = ({ className }: { className?: string}) => {
                 ))}
             </nav>
         </div>
-        {/* Sidebar Footer */}
-        <div className="mt-auto border-t p-2">
-            <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Help &amp; Settings</span>
-                <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button>
-                </div>
-            </div>
-            <Separator className="my-2" />
+        <div className="mt-auto border-t p-4">
             <UserNav />
         </div>
       </div>
@@ -199,18 +151,17 @@ const SidebarContent = ({ className }: { className?: string}) => {
 
 export function MobileAdminHeader() {
     const [open, setOpen] = useState(false);
-     const { selectedBrand } = useBrandStore();
 
     return (
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <header className="flex md:hidden h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="outline" size="icon" className="sm:hidden">
+                    <Button variant="outline" size="icon" className="shrink-0">
                         <PanelLeft className="h-5 w-5" />
                         <span className="sr-only">Toggle Menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="sm:max-w-xs p-0">
+                <SheetContent side="left" className="flex flex-col p-0">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
                              <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
@@ -222,10 +173,7 @@ export function MobileAdminHeader() {
                     <SidebarContent />
                 </SheetContent>
             </Sheet>
-            {/* You can add breadcrumbs or search here if needed */}
-            <div className="relative ml-auto flex-1 md:grow-0">
-                {/* Search can go here */}
-            </div>
+            <div className="flex-1 text-center font-bold">Admin Panel</div>
             <UserNav />
         </header>
     )
@@ -233,20 +181,15 @@ export function MobileAdminHeader() {
 
 
 export function AdminSidebar() {
-    const pathname = usePathname();
-    const { href: mainHref, icon: MainIcon, label: mainLabel } = mainNavItem;
-
     return (
-        <aside className="hidden border-r bg-background sm:flex h-full">
-             <div className="flex h-full max-h-screen flex-col gap-2">
-                <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-                    <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
-                        <Store className="h-6 w-6 text-primary" />
-                        <span>Admin Panel</span>
-                    </Link>
-                </div>
-                <SidebarContent className="flex-1"/>
+        <aside className="hidden md:flex h-full max-h-screen flex-col gap-2 border-r bg-background">
+            <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
+                    <Store className="h-6 w-6 text-primary" />
+                    <span>Admin Panel</span>
+                </Link>
             </div>
+            <SidebarContent />
         </aside>
     );
 }
