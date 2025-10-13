@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Edit, Lock, Unlock, ShieldCheck } from 'lucide-react';
+import { Trash, UploadCloud, X, PlusCircle, Sparkles, GripVertical, Edit, Lock, Unlock, ShieldCheck, AlertCircle } from 'lucide-react';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -33,6 +33,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ProductCard } from '../product-card';
 import { Badge } from '../ui/badge';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 
 const SortableImage = ({ id, url, onRemove, disabled }: { id: any; url: string; onRemove: () => void; disabled: boolean }) => {
@@ -262,6 +263,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
   const [previewProduct, setPreviewProduct] = React.useState<Partial<IProduct> | null>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
   
   const [isFormDisabled, setIsFormDisabled] = React.useState(mode === 'edit');
   const [isCancelAlertOpen, setIsCancelAlertOpen] = React.useState(false);
@@ -529,6 +531,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   }
 
   const handlePreview = async () => {
+    setFormError(null);
     const isValid = await form.trigger();
     if (isValid) {
       const formData = form.getValues();
@@ -544,7 +547,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       setPreviewProduct(mockProduct);
       setIsPreviewOpen(true);
     } else {
-        toast.error("Please fill out all required fields before previewing.");
+        setFormError("Please fill out all required fields before previewing.");
     }
   };
   
@@ -595,6 +598,13 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {mode === 'create' && (
+             <CardHeader className="px-0">
+                <CardTitle>Create New Product</CardTitle>
+                <CardDescription>Fill in the details for your new product. Use the AI tools to speed up the process.</CardDescription>
+            </CardHeader>
+        )}
+
         {mode === 'edit' && (
             <div className="flex items-center justify-between">
                 <CardTitle>{isFormDisabled ? 'View Product' : 'Edit Product'}</CardTitle>
@@ -948,39 +958,46 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         </fieldset>
 
         {!isFormDisabled && (
-            <div className="flex justify-end gap-2 pt-6">
-                <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
-                
-                <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                    <AlertDialogTrigger asChild>
-                        <Button type="button" onClick={handlePreview} disabled={isSubmitting || !isDirty}>
-                            {isSubmitting && <Loader className="mr-2" />}
-                            {mode === 'create' ? 'Create Product' : 'Save Changes'}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="max-w-2xl" style={previewStyle}>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Product Preview</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This is how your product card will appear on the storefront.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        
-                        <div className="flex justify-center p-8 bg-background rounded-lg">
-                            {previewProduct && (
-                                <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
-                            )}
-                        </div>
-                        
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Keep Editing</AlertDialogCancel>
-                            <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-                                {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                                {isSubmitting ? 'Saving...' : 'Confirm & Save'}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+            <div className="flex flex-col items-end gap-4 pt-6">
+                {formError && (
+                    <Alert variant="destructive" className="w-full">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{formError}</AlertDescription>
+                    </Alert>
+                )}
+                <div className="flex items-center gap-2">
+                    <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
+                    <AlertDialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                        <AlertDialogTrigger asChild>
+                            <Button type="button" onClick={handlePreview}>
+                                {mode === 'create' ? 'Create Product' : 'Save Changes'}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="max-w-2xl" style={previewStyle}>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Product Preview</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This is how your product card will appear on the storefront.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            
+                            <div className="flex justify-center p-8 bg-background rounded-lg">
+                                {previewProduct && (
+                                    <ProductCard product={previewProduct as IProduct} className="w-full max-w-[280px]" />
+                                )}
+                            </div>
+                            
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Keep Editing</AlertDialogCancel>
+                                <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                                    {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                                    {isSubmitting ? 'Saving...' : 'Confirm & Save'}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
         )}
         
