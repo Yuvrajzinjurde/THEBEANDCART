@@ -259,23 +259,32 @@ interface ProductFormProps {
 }
 
 const getReadableErrorMessages = (errors: any): string[] => {
-    const messages: string[] = [];
-    const recurse = (obj: any, path: string[]) => {
-        for (const key in obj) {
-            const currentPath = [...path, key];
-            const currentVal = obj[key];
-            if (currentVal) {
-                if (currentVal.message) {
-                    messages.push(`${currentPath.join(' -> ')}: ${currentVal.message}`);
-                } else if (typeof currentVal === 'object') {
-                    recurse(currentVal, currentPath);
-                }
-            }
+  const messages: string[] = [];
+  const recurse = (obj: any, path: string[]) => {
+    if (!obj) return;
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const currentVal = obj[key];
+        if (currentVal) {
+          if (currentVal.message) {
+            const formattedPath = [...path, key]
+              .map(p => p.replace(/\[(\d+)\]/g, ' $1')) // variants[0] -> variants 0
+              .join(' -> ');
+            messages.push(`${formattedPath}: ${currentVal.message}`);
+          } else if (typeof currentVal === 'object' && !Array.isArray(currentVal) && Object.keys(currentVal).length > 0) {
+            recurse(currentVal, [...path, key]);
+          } else if (Array.isArray(currentVal)) {
+            currentVal.forEach((item, index) => {
+              recurse(item, [...path, `${key}[${index}]`]);
+            });
+          }
         }
+      }
     }
-    recurse(errors, []);
-    return messages;
-}
+  };
+  recurse(errors, []);
+  return messages;
+};
 
 
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
@@ -351,7 +360,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
             const res = await fetch(`/api/brands/${selectedStorefront}`);
             if (res.ok) {
                 const { brand } = await res.json();
-                setProductCategories(brand.categories || []);
+                const categories = brand.categories || [];
+                setProductCategories(categories);
+                // Set default category if not already set and creating new product
+                if (mode === 'create' && !form.getValues('category') && categories.length > 0) {
+                    form.setValue('category', categories[0], { shouldDirty: true, shouldValidate: true });
+                }
             }
         } catch (error) {
             console.error('Failed to fetch categories for brand', error);
@@ -359,7 +373,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         }
     }
     fetchBrandCategories();
-  }, [selectedStorefront]);
+  }, [selectedStorefront, form, mode]);
 
 
   const sensors = useSensors(
@@ -519,7 +533,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
 
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmitClick = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
 
     const firstImage = data.images?.[0]?.value || data.variants?.[0]?.images?.[0]?.value;
@@ -577,7 +591,10 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     const isValid = await form.trigger();
     if (!isValid) {
         const errorMessages = getReadableErrorMessages(errors);
-        setFormError(`Please fill out all required fields. The following fields have errors: ${errorMessages.join(', ')}`);
+        const errorMessageString = errorMessages.length > 0 
+            ? `The following fields have errors: ${errorMessages.join(', ')}`
+            : 'Please fill out all required fields.';
+        setFormError(errorMessageString);
         return;
     }
     const formData = form.getValues();
@@ -645,7 +662,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form className="space-y-6">
         <Card>
             <CardHeader>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1040,7 +1057,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     
                     <AlertDialogFooter>
                         <AlertDialogCancel>Keep Editing</AlertDialogCancel>
-                        <AlertDialogAction onClick={onSubmit} disabled={isSubmitting}>
+                        <AlertDialogAction onClick={onSubmitClick} disabled={isSubmitting}>
                             {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
                             {isSubmitting ? 'Saving...' : 'Confirm & Save'}
                         </AlertDialogAction>
@@ -1066,3 +1083,5 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
+
+    
