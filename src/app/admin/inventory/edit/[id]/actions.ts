@@ -21,3 +21,14 @@ export async function getProductById(productId: string): Promise<IProduct> {
         throw new Error('Could not fetch product from the database.');
     }
 }
+
+export async function getVariantsByStyleId(styleId: string): Promise<IProduct[]> {
+    await dbConnect();
+    try {
+        const variants = await Product.find({ styleId }).lean();
+        return JSON.parse(JSON.stringify(variants));
+    } catch (error) {
+        console.error(`Failed to fetch variants for style ID ${styleId}:`, error);
+        throw new Error('Could not fetch product variants from the database.');
+    }
+}

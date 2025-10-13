@@ -4,6 +4,7 @@ import { z } from 'zod';
 const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
+  _id: z.string().optional(), // Include _id for editing existing variants
   size: z.string().optional(),
   color: z.string().optional(),
   sku: z.string().min(1, "SKU is required for variants."),

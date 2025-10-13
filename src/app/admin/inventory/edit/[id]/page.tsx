@@ -7,7 +7,7 @@ import { ProductForm } from '@/components/admin/product-form';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { getProductById } from './actions';
+import { getProductById, getVariantsByStyleId } from './actions';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -16,17 +16,27 @@ export default function EditProductPage() {
   const router = useRouter();
   const productId = params.id as string;
   const [product, setProduct] = useState<IProduct | null>(null);
+  const [variants, setVariants] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!productId) return;
 
-    const fetchProduct = async () => {
+    const fetchProductData = async () => {
       try {
         setLoading(true);
         const fetchedProduct = await getProductById(productId);
         setProduct(fetchedProduct);
+        
+        if (fetchedProduct.styleId) {
+          const fetchedVariants = await getVariantsByStyleId(fetchedProduct.styleId);
+          setVariants(fetchedVariants);
+        } else {
+          // If there's no styleId, it might be a single product that's considered a variant of itself
+          setVariants([fetchedProduct]);
+        }
+
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -34,7 +44,7 @@ export default function EditProductPage() {
       }
     };
 
-    fetchProduct();
+    fetchProductData();
   }, [productId]);
 
   if (loading) {
@@ -61,7 +71,7 @@ export default function EditProductPage() {
                 <span className="sr-only">Back</span>
             </Button>
         </div>
-        <ProductForm mode="edit" existingProduct={product} />
+        <ProductForm mode="edit" existingProduct={product} existingVariants={variants} />
     </div>
   );
 }
