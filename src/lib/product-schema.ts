@@ -1,20 +1,21 @@
 
-
 import { z } from 'zod';
 
 const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
+  mainImage: z.string().url("A main image is required for each variant.").min(1, "A main image is required for each variant."),
   size: z.string().optional(),
   color: z.string().optional(),
   sku: z.string().min(1, "SKU is required for variants."),
   stock: z.coerce.number().min(0, "Stock must be 0 or more"),
-  images: z.array(FileValueSchema).min(1, "Each variant must have at least one image."),
+  images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
 });
 
 const ServerVariantSchema = VariantSchema.extend({
-    images: z.array(z.string().url()).min(1, "Each variant must have at least one image."),
+    mainImage: z.string().url(),
+    images: z.array(z.string().url()).optional(),
     videos: z.array(z.string().url()).optional(),
 })
 
@@ -26,7 +27,7 @@ const BaseProductFormSchema = z.object({
   purchasePrice: z.coerce.number().min(0.01, "Purchase price must be greater than 0"),
   mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
-  category: z.string().min(1, "Category is required"), // Main category for simplicity in form
+  category: z.string().min(1, "Category is required"),
   brand: z.string().min(1, "Product brand is required"),
   storefront: z.string().min(1, "Storefront is required"),
   sku: z.string().optional(),
@@ -78,12 +79,12 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
 // Server-side schema for POST/PUT requests
 export const ProductFormSchema = BaseProductFormSchema.refine(data => {
     if (data.variants.length === 0) {
-        return Array.isArray(data.images) && data.images.length > 0;
+        return !!data.mainImage;
     }
-    return data.variants.every(v => Array.isArray(v.images) && v.images.length > 0);
+    return data.variants.every(v => !!v.mainImage);
 }, {
-    message: "Each product or variant must have at least one image.",
-    path: ["images"],
+    message: "Each product or variant must have a main image.",
+    path: ["mainImage"],
 });
 
 
@@ -138,4 +139,3 @@ export const SuggestPriceOutputSchema = z.object({
   suggestedPrice: z.number().describe('The suggested selling price for the product.'),
 });
 export type SuggestPriceOutput = z.infer<typeof SuggestPriceOutputSchema>;
-

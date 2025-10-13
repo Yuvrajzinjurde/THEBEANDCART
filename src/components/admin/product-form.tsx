@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -133,7 +132,36 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                     <Trash className="h-4 w-4" />
                 </Button>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                <FormField control={control} name={`variants.${index}.mainImage`} render={({ field }) => (
+                    <FormItem className="sm:col-span-2">
+                        <FormLabel>Main Variant Image</FormLabel>
+                        <FormControl>
+                            <div className="w-full">
+                                <Input
+                                    id={`variant-main-image-upload-${index}`}
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/webp, image/avif"
+                                    className="hidden"
+                                    onChange={(e) => handleFileChange(e, field.onChange, false)}
+                                    disabled={disabled}
+                                />
+                                {field.value ? (
+                                    <div className="relative w-32 h-32 border-2 border-dashed rounded-lg p-2">
+                                        <Image src={field.value} alt="Main variant image" fill objectFit="contain" />
+                                        {!disabled && <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>}
+                                    </div>
+                                ) : (
+                                    <label htmlFor={`variant-main-image-upload-${index}`} className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                        <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground">Upload Main Image</p>
+                                    </label>
+                                )}
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
                 <FormField control={control} name={`variants.${index}.size`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Size</FormLabel>
@@ -179,7 +207,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={control} name={`variants.${index}.images`} render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Variant Images</FormLabel>
+                        <FormLabel>Additional Images</FormLabel>
                          <FormControl>
                             <div>
                                 <Input 
@@ -278,8 +306,8 @@ const getReadableErrorMessages = (errors: any): string[] => {
         if (currentVal) {
           if (currentVal.message) {
             const formattedPath = [...path, key]
-              .map(p => p.replace(/\[(\d+)\]/g, ' $1')) // variants[0] -> variants 0
-              .map(p => p.charAt(0).toUpperCase() + p.slice(1)) // Capitalize
+              .map(p => p.replace(/\[(\d+)\]/g, ' $1')) 
+              .map(p => p.charAt(0).toUpperCase() + p.slice(1))
               .join(' -> ');
             messages.push(`${formattedPath}: ${currentVal.message}`);
           } else if (typeof currentVal === 'object' && !Array.isArray(currentVal) && Object.keys(currentVal).length > 0) {
@@ -301,7 +329,7 @@ const getReadableErrorMessages = (errors: any): string[] => {
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
   const { selectedBrand, availableBrands: allStorefronts } = useBrandStore();
-  const { aiEnabled } = usePlatformSettingsStore();
+  const { settings: { aiEnabled } } = usePlatformSettingsStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGeneratingDesc, setIsGeneratingDesc] = React.useState(false);
   const [isGeneratingTags, setIsGeneratingTags] = React.useState(false);
@@ -553,7 +581,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       keywords: data.keywords?.map(tag => tag.value),
       variants: data.variants.map(variant => ({
         ...variant,
-        images: variant.images.map(img => img.value),
+        images: variant.images?.map(img => img.value),
         videos: variant.videos?.map(vid => vid.value),
       })),
     };
@@ -824,7 +852,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 />
                             ))}
                             {!isFormDisabled && (
-                                <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
+                                <Button type="button" variant="outline" onClick={() => appendVariant({ mainImage: '', size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
                                     <PlusCircle className="mr-2" />
                                     {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                                 </Button>
@@ -1069,5 +1097,3 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     </Form>
   );
 }
-
-    

@@ -52,11 +52,12 @@ export async function PUT(
         }
         
         const { variants, ...updateData } = validation.data;
-        const styleId = (await Product.findById(id))?.styleId || new Types.ObjectId().toHexString();
+        const mainProduct = await Product.findById(id);
+        const styleId = mainProduct?.styleId || new Types.ObjectId().toHexString();
         
         if (!variants || variants.length === 0) {
             // Update a single product
-            const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
+            const updatedProduct = await Product.findByIdAndUpdate(id, { ...updateData, styleId }, { new: true });
             if (!updatedProduct) {
                 return NextResponse.json({ message: 'Product not found' }, { status: 404 });
             }
@@ -104,7 +105,7 @@ export async function PUT(
         }
         
         if (bulkOps.length > 0) {
-            await Product.bulkWrite(bulkOps);
+            await Product.bulkWrite(bulkOps as any);
         }
 
         const updatedProducts = await Product.find({ styleId });
