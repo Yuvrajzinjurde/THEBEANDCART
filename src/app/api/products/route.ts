@@ -134,7 +134,7 @@ export async function POST(req: Request) {
             ...variant,
             styleId,
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
-            // Ensure top-level images are not passed to variant products
+            mainImage: commonData.mainImage,
             images: variant.images,
         }));
 
