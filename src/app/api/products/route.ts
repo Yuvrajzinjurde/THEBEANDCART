@@ -42,7 +42,14 @@ export async function GET(req: Request) {
     }
 
     if (keyword) {
-        query.keywords = { $in: [new RegExp(keyword, 'i')] };
+        // Search in name and keywords for a better search experience
+        const regex = new RegExp(keyword, 'i');
+        query.$or = [
+            { name: regex },
+            { keywords: { $in: [regex] } },
+            { brand: regex },
+            { category: regex }
+        ];
     }
 
     if (keywords) {
@@ -113,7 +120,7 @@ export async function POST(req: Request) {
         const { variants, ...commonData } = validation.data;
         const styleId = new Types.ObjectId().toHexString();
 
-        if (variants.length === 0) {
+        if (!variants || variants.length === 0) {
             // This is a single product without variants
             const productData = { ...commonData, styleId };
             const newProduct = new Product(productData);
@@ -127,8 +134,6 @@ export async function POST(req: Request) {
             ...variant,
             styleId,
             name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
-            // Ensure top-level images are not passed to variant products
-            images: variant.images,
         }));
 
         const newProducts = await Product.insertMany(productDocs);

@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Product from '@/models/product.model';
@@ -45,23 +46,70 @@ export async function PUT(
             return NextResponse.json({ message: 'Invalid Product ID' }, { status: 400 });
         }
 
-        // Use the server-side schema that expects flat arrays for keywords/images
         const validation = ProductFormSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
         
-        // For now, we only support updating the main product, not variants through this endpoint.
         const { variants, ...updateData } = validation.data;
+        const styleId = (await Product.findById(id))?.styleId || new Types.ObjectId().toHexString();
+        
+        if (!variants || variants.length === 0) {
+            // Update a single product
+            const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
+            if (!updatedProduct) {
+                return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+            }
+            return NextResponse.json({ message: 'Product updated successfully', product: updatedProduct }, { status: 200 });
+        }
+        
+        // Update a product with variants
+        const productIdsToKeep: string[] = [];
+        const bulkOps = variants.map(variant => {
+            const variantData = {
+                ...updateData,
+                ...variant,
+                styleId,
+                name: `${updateData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
+            };
 
-        // The updateData now correctly includes the 'keywords' field from the validated data
-        const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
+            if ((variant as any)._id) { // Existing variant
+                const variantId = (variant as any)._id;
+                productIdsToKeep.push(variantId);
+                return {
+                    updateOne: {
+                        filter: { _id: new Types.ObjectId(variantId), styleId },
+                        update: { $set: variantData },
+                    },
+                };
+            } else { // New variant
+                return {
+                    insertOne: {
+                        document: variantData,
+                    },
+                };
+            }
+        });
 
-        if (!updatedProduct) {
-            return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+        // Delete variants that were removed from the form
+        const existingVariants = await Product.find({ styleId });
+        const variantsToDelete = existingVariants.filter(v => !productIdsToKeep.includes(v._id.toString()));
+        
+        for (const variantToDelete of variantsToDelete) {
+             bulkOps.push({
+                deleteOne: {
+                    filter: { _id: variantToDelete._id }
+                }
+            });
+        }
+        
+        if (bulkOps.length > 0) {
+            await Product.bulkWrite(bulkOps);
         }
 
-        return NextResponse.json({ message: 'Product updated successfully', product: updatedProduct }, { status: 200 });
+        const updatedProducts = await Product.find({ styleId });
+
+        return NextResponse.json({ message: 'Product catalog updated successfully', products: updatedProducts }, { status: 200 });
 
     } catch (error) {
         console.error('Failed to update product:', error);
