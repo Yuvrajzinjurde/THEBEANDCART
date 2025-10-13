@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -258,6 +257,26 @@ interface ProductFormProps {
     mode: 'create' | 'edit';
     existingProduct?: IProduct;
 }
+
+const getReadableErrorMessages = (errors: any): string[] => {
+    const messages: string[] = [];
+    const recurse = (obj: any, path: string[]) => {
+        for (const key in obj) {
+            const currentPath = [...path, key];
+            const currentVal = obj[key];
+            if (currentVal) {
+                if (currentVal.message) {
+                    messages.push(`${currentPath.join(' -> ')}: ${currentVal.message}`);
+                } else if (typeof currentVal === 'object') {
+                    recurse(currentVal, currentPath);
+                }
+            }
+        }
+    }
+    recurse(errors, []);
+    return messages;
+}
+
 
 export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   const router = useRouter();
@@ -557,9 +576,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     setFormError(null);
     const isValid = await form.trigger();
     if (!isValid) {
-      const errorFields = Object.keys(errors).join(', ');
-      setFormError(`Please fill out all required fields. The following fields have errors: ${errorFields}`);
-      return;
+        const errorMessages = getReadableErrorMessages(errors);
+        setFormError(`Please fill out all required fields. The following fields have errors: ${errorMessages.join(', ')}`);
+        return;
     }
     const formData = form.getValues();
     const firstImage = formData.images?.[0]?.value || formData.variants?.[0]?.images?.[0]?.value;
