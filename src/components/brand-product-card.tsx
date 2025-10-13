@@ -38,6 +38,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const hasImages = useMemo(() => product && product.images && product.images.length > 0, [product]);
+
   const cartItem = useMemo(() => {
     return cart?.items?.find(item => {
         const productId = (item.productId as IProduct)?._id || item.productId;
@@ -66,6 +68,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   );
 
   useEffect(() => {
+    if (!hasImages) return; // Do not set up autoplay if there are no images
+
     const carouselEl = carouselRef.current;
     if (!carouselEl) return;
 
@@ -86,7 +90,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         carouselEl.removeEventListener('mouseleave', stopAutoplay);
       }
     }
-  }, [api]);
+  }, [api, hasImages]);
   
 
   const isWishlisted = useMemo(() => {
@@ -200,38 +204,47 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
-             <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
-                {product.images.slice(0, 4).map((_, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            "h-1 w-1 rounded-full transition-all duration-300",
-                            currentSlide === i ? 'bg-white w-2.5' : 'bg-white/50'
-                        )}
-                    />
-                ))}
-            </div>
-            <Carousel
-                setApi={setApi}
-                plugins={[autoplayPlugin.current]}
-                opts={{ loop: product.images.length > 1 }}
-                className="w-full h-full"
-            >
-                <CarouselContent className="h-full">
-                {product.images.map((img, index) => (
-                    <CarouselItem key={index} className="h-full">
-                        <div className="w-full aspect-square relative">
-                            <Image
-                                src={img}
-                                alt={`${product.name} image ${index + 1}`}
-                                fill
-                                className="object-cover transition-transform duration-300"
-                            />
-                        </div>
-                    </CarouselItem>
-                ))}
-                </CarouselContent>
-            </Carousel>
+            {hasImages && (
+                <>
+                <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
+                    {product.images.slice(0, 4).map((_, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                "h-1 w-1 rounded-full transition-all duration-300",
+                                currentSlide === i ? 'bg-white w-2.5' : 'bg-white/50'
+                            )}
+                        />
+                    ))}
+                </div>
+                <Carousel
+                    setApi={setApi}
+                    plugins={[autoplayPlugin.current]}
+                    opts={{ loop: product.images.length > 1 }}
+                    className="w-full h-full"
+                >
+                    <CarouselContent className="h-full">
+                    {product.images.map((img, index) => (
+                        <CarouselItem key={index} className="h-full">
+                            <div className="w-full aspect-square relative">
+                                <Image
+                                    src={img}
+                                    alt={`${product.name} image ${index + 1}`}
+                                    fill
+                                    className="object-cover transition-transform duration-300"
+                                />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                    </CarouselContent>
+                </Carousel>
+                </>
+            )}
+            {!hasImages && (
+                 <div className="w-full aspect-square relative bg-muted flex items-center justify-center">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground/30" />
+                </div>
+            )}
         </div>
 
         <Button
