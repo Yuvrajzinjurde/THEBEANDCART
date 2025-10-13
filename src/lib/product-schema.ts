@@ -8,14 +8,11 @@ const VariantSchema = z.object({
   color: z.string().optional(),
   sku: z.string().min(1, "SKU is required for variants."),
   stock: z.coerce.number().min(0, "Stock must be 0 or more"),
-  images: z.array(FileValueSchema).optional(),
-  videos: z.array(FileValueSchema).optional(),
+  images: z.array(z.string().url()).optional(),
+  videos: z.array(z.string().url()).optional(),
 });
 
-const ServerVariantSchema = VariantSchema.extend({
-    images: z.array(z.string().url()).optional(),
-    videos: z.array(z.string().url()).optional(),
-})
+const ServerVariantSchema = VariantSchema;
 
 // Base schema without the refinement, for merging.
 const BaseProductFormSchema = z.object({
@@ -43,7 +40,10 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
   images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
   keywords: z.array(z.object({ value: z.string() })).optional(),
-  variants: z.array(VariantSchema),
+  variants: z.array(VariantSchema.extend({
+      images: z.array(FileValueSchema).optional(),
+      videos: z.array(FileValueSchema).optional(),
+  })),
 }))
 .refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;

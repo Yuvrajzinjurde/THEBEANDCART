@@ -1,5 +1,4 @@
 
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Product from '@/models/product.model';
@@ -130,7 +129,12 @@ export async function POST(req: Request) {
 
         if (!variants || variants.length === 0) {
             // This is a single product without variants
-            const productData = { ...commonData, styleId };
+            const productData = { 
+                ...commonData, 
+                styleId,
+                mainImage: commonData.mainImage,
+                sku: commonData.sku || generateSku(commonData.name)
+            };
             const newProduct = new Product(productData);
             await newProduct.save();
             return NextResponse.json({ message: 'Product created successfully', products: [newProduct] }, { status: 201 });
