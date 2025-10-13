@@ -101,7 +101,7 @@ const handleDragEnd = (event: DragEndEvent, moveFn: (from: number, to: number) =
     }
 };
 
-const VariantItem = ({ control, index, removeVariant, disabled }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; disabled: boolean; }) => {
+const VariantItem = ({ control, index, removeVariant, disabled, generateSku, setValue }: { control: Control<ProductFormValues>; index: number; removeVariant: (index: number) => void; disabled: boolean; generateSku: () => string; setValue: any }) => {
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -140,7 +140,12 @@ const VariantItem = ({ control, index, removeVariant, disabled }: { control: Con
                 <FormField control={control} name={`variants.${index}.sku`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>SKU</FormLabel>
-                        <FormControl><Input placeholder="e.g., TSHIRT-BL-M" {...field} disabled={disabled} /></FormControl>
+                        <div className="flex gap-2">
+                            <FormControl>
+                                <Input placeholder="e.g., TSHIRT-BL-M" {...field} disabled={disabled} />
+                            </FormControl>
+                            {!disabled && <Button type="button" variant="outline" onClick={() => setValue(`variants.${index}.sku`, generateSku())}>Generate</Button>}
+                        </div>
                         <FormMessage />
                     </FormItem>
                 )} />
@@ -353,6 +358,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   
   const watchedFormValues = useWatch({ control });
 
+  const generateSku = (name = '', color = '', size = '') => {
+      const namePart = name.substring(0, 5).toUpperCase().replace(/\s+/g, '-');
+      const colorPart = color.substring(0, 3).toUpperCase();
+      const sizePart = size.toUpperCase();
+      return [namePart, colorPart, sizePart].filter(Boolean).join('-');
+  }
 
   const handleAIError = (error: any, context: string): string => {
     const errorMessage = error.message || '';
@@ -742,7 +753,15 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {variantFields.map((field, index) => (
-                            <VariantItem key={field.id} control={control} index={index} removeVariant={removeVariant} disabled={isFormDisabled} />
+                            <VariantItem 
+                                key={field.id} 
+                                control={control} 
+                                index={index} 
+                                removeVariant={removeVariant} 
+                                disabled={isFormDisabled} 
+                                generateSku={() => generateSku(form.watch('name'), form.watch(`variants.${index}.color`), form.watch(`variants.${index}.size`))}
+                                setValue={form.setValue}
+                            />
                         ))}
                          {!isFormDisabled && (
                             <Button type="button" variant="outline" onClick={() => appendVariant({ size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
@@ -755,7 +774,12 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 <FormField control={control} name="sku" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>SKU (Stock Keeping Unit)</FormLabel>
-                                        <FormControl><Input placeholder="e.g., TSHIRT-CLASSIC-WHT" {...field} /></FormControl>
+                                         <div className="flex gap-2">
+                                            <FormControl>
+                                                <Input placeholder="e.g., TSHIRT-CLASSIC-WHT" {...field} />
+                                            </FormControl>
+                                             {!isFormDisabled && <Button type="button" variant="outline" onClick={() => form.setValue('sku', generateSku(form.watch('name')))}>Generate</Button>}
+                                        </div>
                                         <FormMessage />
                                     </FormItem>
                                 )} />
