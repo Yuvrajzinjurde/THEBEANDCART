@@ -64,7 +64,7 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
 })
 .refine(data => {
     // If there are no variants, there must be top-level images.
-    if (data.variants.length === 0) {
+    if (!data.variants || data.variants.length === 0) {
         return Array.isArray(data.images) && data.images.length > 0;
     }
     // If there are variants, each must have an image.
@@ -74,9 +74,12 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
     path: ["images"],
 })
 .refine(data => {
-    if (data.variants.length === 0) {
+    // If there are no variants, the top-level SKU is required.
+    if (!data.variants || data.variants.length === 0) {
         return !!data.sku && data.sku.length > 0;
     }
+    // If there are variants, this check doesn't apply to the top-level SKU.
+    // Each variant's SKU is checked within the VariantSchema.
     return true;
 }, {
     message: "SKU is required for products without variants.",
