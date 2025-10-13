@@ -486,7 +486,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   };
 
 
-  async function onSubmit(data: ProductFormValues) {
+  const onSubmit = form.handleSubmit(async (data) => {
     setIsSubmitting(true);
     const dataToSubmit = {
       ...data,
@@ -499,7 +499,6 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         videos: variant.videos?.map(vid => vid.value),
       })),
     };
-
 
     const url = mode === 'create' ? '/api/products' : `/api/products/${existingProduct?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
@@ -528,14 +527,17 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }
+  });
 
   const handlePreview = async () => {
     setFormError(null);
     const isValid = await form.trigger();
-    if (isValid) {
-      const formData = form.getValues();
-      const mockProduct: Partial<IProduct> = {
+    if (!isValid) {
+      setFormError("Please fill out all required fields before previewing.");
+      return;
+    }
+    const formData = form.getValues();
+    const mockProduct: Partial<IProduct> = {
         _id: 'preview-id',
         name: formData.name,
         category: formData.category,
@@ -543,12 +545,9 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
         mrp: Number(formData.mrp) || undefined,
         images: formData.images.map(img => img.value),
         rating: 4.5, // Use a default rating for preview
-      };
-      setPreviewProduct(mockProduct);
-      setIsPreviewOpen(true);
-    } else {
-        setFormError("Please fill out all required fields before previewing.");
-    }
+    };
+    setPreviewProduct(mockProduct);
+    setIsPreviewOpen(true);
   };
   
   const handleCancel = () => {
@@ -597,7 +596,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
         {mode === 'create' && (
              <CardHeader className="px-0">
                 <CardTitle>Create New Product</CardTitle>
@@ -990,7 +989,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                             
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Keep Editing</AlertDialogCancel>
-                                <AlertDialogAction onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
+                                <AlertDialogAction onClick={onSubmit} disabled={isSubmitting}>
                                     {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
                                     {isSubmitting ? 'Saving...' : 'Confirm & Save'}
                                 </AlertDialogAction>
