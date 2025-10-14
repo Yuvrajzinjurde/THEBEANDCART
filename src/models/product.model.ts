@@ -1,37 +1,36 @@
 
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
-export interface IVariant {
+export interface IVariant extends Document {
   sku: string;
   color?: string;
   size?: string;
   availableQuantity: number;
   images: string[];
+  videos?: string[];
 }
 
 export interface IProduct extends Document {
   name: string;
   description: string;
   mainImage: string;
-  mrp?: number; // Original Price (Maximum Retail Price)
-  sellingPrice: number; // Discounted/Selling Price
-  purchasePrice?: number; // Cost price for internal calculations
+  mrp?: number;
+  sellingPrice: number;
+  purchasePrice?: number;
   category: string;
   images: string[];
   videos?: string[];
   stock: number;
   rating: number;
-  brand: string; // The product's actual brand, e.g., "Nike"
-  storefront: string; // The storefront this product belongs to, e.g., "reeva"
+  brand: string;
+  storefront: string;
   views: number;
   clicks: number;
   keywords: string[];
   returnPeriod: number;
   styleId?: string;
-  color?: string;
-  size?: string;
-  sku: string;
-  variants?: IVariant[]; // <-- Added field for multiple variants
+  sku?: string;
+  variants: IVariant[];
 }
 
 const VariantSchema = new Schema<IVariant>(
@@ -40,9 +39,10 @@ const VariantSchema = new Schema<IVariant>(
     color: { type: String },
     size: { type: String },
     availableQuantity: { type: Number, required: true, min: 0 },
-    images: [{ type: String, required: true }],
+    images: [{ type: String }],
+    videos: [{ type: String }],
   },
-  { _id: false }
+  { _id: true }
 );
 
 const ProductSchema: Schema<IProduct> = new Schema(
@@ -65,10 +65,8 @@ const ProductSchema: Schema<IProduct> = new Schema(
     keywords: { type: [String], default: [] },
     returnPeriod: { type: Number, default: 10 },
     styleId: { type: String, index: true },
-    color: { type: String },
-    size: { type: String },
-    sku: { type: String, index: true, unique: true, required: true, sparse: true },
-    variants: [VariantSchema], // <-- Added variants array
+    sku: { type: String, index: true, unique: true, sparse: true },
+    variants: [VariantSchema],
   },
   { timestamps: true }
 );
