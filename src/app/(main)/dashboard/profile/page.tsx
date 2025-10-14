@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState } from "react";
@@ -185,15 +183,6 @@ export default function ProfilePage() {
                                 </CardContent>
                             </Card>
 
-                            <Card className="group-disabled:bg-muted/30">
-                                <CardHeader>
-                                    <CardTitle>About the User</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <Label htmlFor="bio">Biographical Info</Label>
-                                    <Textarea id="bio" className="mt-2 min-h-[120px]" defaultValue="Albert Einstein was a German mathematician and physicist who developed the special and general theories of relativity. In 1921, he won the Nobel Prize for physics for his explanation of the photoelectric effect. In the following decade." disabled={!isEditing} onChange={() => setIsDirty(true)}/>
-                                </CardContent>
-                            </Card>
                         </div>
                     </div>
                 </fieldset>
