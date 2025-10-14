@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare } from "lucide-react";
+import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck } from "lucide-react";
 import { toast } from "react-toastify";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Loader } from "@/components/ui/loader";
 import { useForm, type FieldValues } from "react-hook-form";
 import type { IUser } from "@/models/user.model";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 export default function ProfilePage() {
@@ -24,6 +25,11 @@ export default function ProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
 
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otp, setOtp] = useState('');
+
   const form = useForm({
       defaultValues: {
           firstName: '',
@@ -31,6 +37,7 @@ export default function ProfilePage() {
           nickname: '',
           displayName: '',
           phone: '',
+          isPhoneVerified: false,
           whatsapp: '',
           socials: {
               website: '',
@@ -44,18 +51,21 @@ export default function ProfilePage() {
       }
   });
 
-  const { formState: { isDirty }, reset } = form;
+  const { formState: { isDirty }, reset, watch, setValue } = form;
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        form.setValue('profilePicUrl', reader.result as string, { shouldDirty: true });
+        setValue('profilePicUrl', reader.result as string, { shouldDirty: true });
       };
       reader.readAsDataURL(file);
     }
   };
+  
+  const phoneValue = watch('phone');
+  const isPhoneVerified = watch('isPhoneVerified');
 
   useEffect(() => {
     if (user) {
@@ -66,6 +76,7 @@ export default function ProfilePage() {
             nickname: u.nickname || '',
             displayName: u.displayName || '',
             phone: u.phone || '',
+            isPhoneVerified: u.isPhoneVerified || false,
             whatsapp: u.whatsapp || '',
             socials: {
                 website: u.socials?.website || '',
@@ -81,7 +92,7 @@ export default function ProfilePage() {
   }, [user, reset]);
 
 
-  const profilePicUrl = form.watch('profilePicUrl') || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`;
+  const profilePicUrl = watch('profilePicUrl') || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`;
   const email = (user as any)?.email || '';
   const username = email.split('@')[0];
 
@@ -129,6 +140,7 @@ export default function ProfilePage() {
             nickname: u.nickname || '',
             displayName: u.displayName || '',
             phone: u.phone || '',
+            isPhoneVerified: u.isPhoneVerified || false,
             whatsapp: u.whatsapp || '',
             socials: {
                 website: u.socials?.website || '',
@@ -144,6 +156,54 @@ export default function ProfilePage() {
     setIsEditing(false);
     setIsCancelAlertOpen(false);
     toast.warn("Changes discarded.");
+  };
+
+  const handleSendOtp = async () => {
+    if (!phoneValue || phoneValue.length < 10) {
+        toast.error("Please enter a valid phone number.");
+        return;
+    }
+    setIsSendingOtp(true);
+    try {
+        const res = await fetch('/api/auth/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phoneValue })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        setOtpSent(true);
+        toast.success("OTP sent to your phone number.");
+    } catch (error: any) {
+        toast.error(error.message);
+    } finally {
+        setIsSendingOtp(false);
+    }
+  };
+  
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length < 6) {
+        toast.error("Please enter a valid OTP.");
+        return;
+    }
+    setIsVerifyingOtp(true);
+    try {
+        const res = await fetch('/api/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ phone: phoneValue, code: otp })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        setValue('isPhoneVerified', true, { shouldDirty: true });
+        setOtpSent(false);
+        toast.success("Phone number verified successfully!");
+    } catch (error: any) {
+        toast.error(error.message);
+    } finally {
+        setIsVerifyingOtp(false);
+    }
   };
 
   return (
@@ -194,7 +254,7 @@ export default function ProfilePage() {
                                                     data-ai-hint="man wearing beanie"
                                                 />
                                                 {isEditing && (
-                                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => form.setValue('profilePicUrl', '')}>
+                                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => setValue('profilePicUrl', '')}>
                                                         <X className="h-4 w-4" />
                                                     </Button>
                                                 )}
@@ -255,12 +315,54 @@ export default function ProfilePage() {
                                                 <Label htmlFor="email">Email (required)</Label>
                                                 <Input id="email" type="email" value={email} disabled />
                                             </div>
-                                            <FormField control={form.control} name="phone" render={({ field }) => (
-                                                <FormItem><FormLabel className="flex items-center gap-2"><Phone className="h-4 w-4"/>Contact Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                            )}/>
-                                            <FormField control={form.control} name="whatsapp" render={({ field }) => (
-                                                <FormItem><FormLabel className="flex items-center gap-2"><MessageSquare className="h-4 w-4"/>WhatsApp</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                            )}/>
+                                            <div className="space-y-2">
+                                                <FormField control={form.control} name="phone" render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="flex items-center gap-2">
+                                                            <Phone className="h-4 w-4"/>Contact Number
+                                                            {isPhoneVerified && <ShieldCheck className="h-4 w-4 text-green-500" />}
+                                                        </FormLabel>
+                                                        <div className="flex gap-2">
+                                                            <FormControl>
+                                                                <Input {...field} disabled={isPhoneVerified || !isEditing} />
+                                                            </FormControl>
+                                                            {!isPhoneVerified && isEditing && (
+                                                                <Button type="button" variant="outline" onClick={handleSendOtp} disabled={isSendingOtp}>
+                                                                    {isSendingOtp ? <Loader /> : 'Verify'}
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}/>
+                                                {otpSent && (
+                                                    <div className="space-y-2 p-3 bg-muted rounded-md">
+                                                        <Label htmlFor="otp">Enter OTP</Label>
+                                                        <div className="flex gap-2">
+                                                            <Input id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} placeholder="123456" />
+                                                            <Button type="button" onClick={handleVerifyOtp} disabled={isVerifyingOtp}>
+                                                                {isVerifyingOtp ? <Loader /> : 'Submit'}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <FormField control={form.control} name="whatsapp" render={({ field }) => (
+                                                    <FormItem><FormLabel className="flex items-center gap-2"><MessageSquare className="h-4 w-4"/>WhatsApp</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                                )}/>
+                                            </div>
+                                             <div className="flex items-center space-x-2">
+                                                <Checkbox
+                                                  id="same-as-contact"
+                                                  onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                      setValue('whatsapp', phoneValue, { shouldDirty: true });
+                                                    }
+                                                  }}
+                                                />
+                                                <Label htmlFor="same-as-contact" className="text-sm font-normal text-muted-foreground">WhatsApp number is the same as contact number</Label>
+                                              </div>
                                         </CardContent>
                                     </Card>
 
