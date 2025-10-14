@@ -410,6 +410,35 @@ export default function ProfilePage() {
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>FAQs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="space-y-2">
+                    <h4 className="font-semibold">What happens when I update my email address (or mobile number)?</h4>
+                    <p className="text-muted-foreground text-sm">Your login email id (or mobile number) changes, likewise. You'll receive all your account related communication on your updated email address (or mobile number).</p>
+                </div>
+                <div className="space-y-2">
+                    <h4 className="font-semibold">When will my account be updated with the new email address (or mobile number)?</h4>
+                    <p className="text-muted-foreground text-sm">It happens as soon as you confirm the verification code sent to your email (or mobile) and save the changes.</p>
+                </div>
+                <div className="space-y-2">
+                    <h4 className="font-semibold">What happens to my existing account when I update my email address (or mobile number)?</h4>
+                    <p className="text-muted-foreground text-sm">Updating your email address (or mobile number) doesn't invalidate your account. Your account remains fully functional. You'll continue seeing your Order history, saved information and personal details.</p>
+                </div>
+                <div className="space-y-2">
+                    <h4 className="font-semibold">Does my Seller account get affected when I update my email address?</h4>
+                    <p className="text-muted-foreground text-sm">The platform has a 'single sign-on' policy. Any changes will reflect in your Seller account also.</p>
+                </div>
+                <Separator />
+                <div className="flex flex-col items-start gap-2">
+                    <Button variant="link" className="p-0 h-auto text-primary">Deactivate Account</Button>
+                    <Button variant="link" className="p-0 h-auto text-destructive hover:text-destructive/80">Delete Account</Button>
+                </div>
+            </CardContent>
+        </Card>
     </div>
   );
 }
