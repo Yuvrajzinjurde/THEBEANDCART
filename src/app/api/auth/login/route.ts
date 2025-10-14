@@ -58,15 +58,15 @@ export async function POST(req: Request) {
     }
     
     const accessToken = jwt.sign(
-      { roles: userRoles, name: user.firstName, brand: user.brand, userId: user._id.toString() }, // Add userId to payload
+      { roles: userRoles, name: user.firstName, brand: user.brand, userId: user._id.toString() },
       JWT_SECRET,
-      { expiresIn: '15m', subject: user._id.toString() } // Use standard 'sub' field
+      { expiresIn: '15m', subject: user._id.toString() }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id.toString() }, // Add userId to payload
+      { userId: user._id.toString() },
       JWT_REFRESH_SECRET,
-      { expiresIn: '7d', subject: user._id.toString() } // Use standard 'sub' field
+      { expiresIn: '7d', subject: user._id.toString() }
     );
 
     const accessTokenCookie = serialize('accessToken', accessToken, {
