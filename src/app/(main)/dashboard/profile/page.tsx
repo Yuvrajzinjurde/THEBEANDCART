@@ -86,14 +86,10 @@ export default function ProfilePage() {
   const username = email.split('@')[0];
 
   const handleSaveChanges = form.handleSubmit(async (data: FieldValues) => {
-    if (!user?.userId || !token) {
-        toast.error("You must be logged in to update your profile.");
-        return;
-    }
     setIsSubmitting(true);
     toast.info("Saving changes...");
     try {
-        const response = await fetch(`/api/users/${user.userId}/profile`, {
+        const response = await fetch(`/api/users/${user?.userId}/profile`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
@@ -153,7 +149,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
         <Form {...form}>
-            <form onSubmit={handleSaveChanges}>
+            <form>
                 <Card className="shadow-md">
                     <CardHeader className="flex flex-row items-start justify-between">
                         <div>
@@ -164,7 +160,7 @@ export default function ProfilePage() {
                             {isEditing && (
                                 <>
                                 <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>Cancel</Button>
-                                <Button type="submit" disabled={isSubmitting || !isDirty}>
+                                <Button type="button" onClick={handleSaveChanges} disabled={isSubmitting || !isDirty}>
                                     {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
                                     Save Changes
                                 </Button>
