@@ -90,34 +90,44 @@ export default function ProductDetails({ product: initialProduct, storefront, re
   const { uniqueColors, sizesForSelectedColor, selectedVariant } = useMemo(() => {
     const variants = initialProduct.variants || [];
     const colorMap = new Map<string, string>();
-    const sizeSet = new Set<string>();
-
+    
     variants.forEach(v => {
-        if (v.color && !colorMap.has(v.color)) {
+        if (v.color && !colorMap.has(v.color) && v.images?.[0]) {
             colorMap.set(v.color, v.images[0]);
         }
-        if (v.color === selectedColor && v.size) {
-            sizeSet.add(v.size);
-        }
     });
+
+    const sizesForColor = variants
+        .filter(v => v.color === selectedColor && v.size)
+        .map(v => v.size!);
+    const uniqueSizes = Array.from(new Set(sizesForColor)).sort();
 
     const currentVariant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
 
     return {
         uniqueColors: Array.from(colorMap.entries()).map(([color, imageUrl]) => ({ color, imageUrl })),
-        sizesForSelectedColor: Array.from(sizeSet).sort(),
+        sizesForSelectedColor: uniqueSizes,
         selectedVariant: currentVariant,
     };
-  }, [initialProduct.variants, selectedColor, selectedSize]);
+}, [initialProduct.variants, selectedColor, selectedSize]);
 
+const handleColorSelect = (color: string) => {
+    setSelectedColor(color);
+    const variantsForColor = initialProduct.variants?.filter(v => v.color === color) || [];
+    const firstSize = variantsForColor[0]?.size;
+    setSelectedSize(firstSize); // Auto-select the first available size for the new color
+};
 
-  useEffect(() => {
-    // If a variant is selected, ensure URL reflects it (hypothetical)
-    // This part might need adjustment based on how you want to handle variant URLs
-    if (selectedVariant) {
-        // console.log("Selected variant:", selectedVariant.sku);
+useEffect(() => {
+    if (initialProduct.variants && initialProduct.variants.length > 0) {
+        if (!selectedColor) {
+            const firstColor = initialProduct.variants[0].color;
+            if (firstColor) {
+                handleColorSelect(firstColor);
+            }
+        }
     }
-  }, [selectedVariant]);
+}, [initialProduct, selectedColor]);
 
   const onThumbClick = useCallback((index: number) => {
     mainApi?.scrollTo(index);
@@ -147,12 +157,20 @@ export default function ProductDetails({ product: initialProduct, storefront, re
   };
   
   const mediaItems = useMemo(() => {
-    let images = initialProduct.images || [];
+    let images: string[] = [];
     if (selectedVariant && selectedVariant.images.length > 0) {
         images = selectedVariant.images;
+    } else {
+        // Fallback: If no variant is fully selected, show images for the selected color, or the main product images.
+        const colorVariant = initialProduct.variants?.find(v => v.color === selectedColor);
+        if (colorVariant && colorVariant.images.length > 0) {
+            images = colorVariant.images;
+        } else {
+            images = initialProduct.images || [];
+        }
     }
     return images.map(url => ({ type: 'image', url }));
-  }, [initialProduct.images, selectedVariant]);
+}, [initialProduct.images, initialProduct.variants, selectedVariant, selectedColor]);
 
 
   const categoryDisplay = initialProduct.category;
@@ -384,7 +402,7 @@ export default function ProductDetails({ product: initialProduct, storefront, re
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <button
-                                        onClick={() => setSelectedColor(color)}
+                                        onClick={() => handleColorSelect(color)}
                                         className={cn(
                                             "relative h-10 w-10 rounded-full border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
                                             selectedColor === color ? "border-primary" : "border-muted"
