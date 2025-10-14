@@ -39,18 +39,35 @@ const DangerZoneAction = ({
   const [step, setStep] = useState<'initial' | 'otp'>('initial');
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const { user } = useAuth();
 
-  const handleInitialConfirm = async () => {
+  const handleInitialConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     if (!user?.phone || !user.isPhoneVerified) {
       toast.error("You must have a verified phone number to perform this action.");
+      setIsOpen(false);
       return;
     }
-    // In a real app, you would send an OTP here. We just transition the state.
-    setStep('otp');
+    setIsSendingOtp(true);
+    try {
+        const res = await fetch('/api/auth/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: user.phone })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        setStep('otp');
+    } catch (error: any) {
+        toast.error(error.message);
+    } finally {
+        setIsSendingOtp(false);
+    }
   };
 
-  const handleFinalConfirm = async () => {
+  const handleFinalConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     if (otp.length < 6) {
       toast.error("Please enter a valid 6-digit OTP.");
       return;
@@ -58,7 +75,7 @@ const DangerZoneAction = ({
     setIsSubmitting(true);
     await onConfirm(otp);
     setIsSubmitting(false);
-    // Only close and reset on successful completion
+    // Only close and reset on successful completion or if an error is handled inside onConfirm
     setIsOpen(false); 
     setStep('initial');
     setOtp('');
@@ -84,7 +101,8 @@ const DangerZoneAction = ({
         <AlertDialogHeader>
           <AlertDialogTitle>{step === 'initial' ? title : 'Enter OTP to Confirm'}</AlertDialogTitle>
           <AlertDialogDescription>
-            {step === 'initial' ? description : `An OTP has been sent to your phone. Please enter the 6-digit code to finalize this action. (Hint: use 123456)`}
+            {step === 'initial' && description}
+            {step === 'otp' && `An OTP has been sent to your phone. Please enter the 6-digit code to finalize this action. (Hint: use 123456)`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {step === 'otp' && (
@@ -101,7 +119,8 @@ const DangerZoneAction = ({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           {step === 'initial' ? (
-            <AlertDialogAction onClick={handleInitialConfirm}>
+            <AlertDialogAction onClick={handleInitialConfirm} disabled={isSendingOtp}>
+              {isSendingOtp ? <Loader className="mr-2 h-4 w-4"/> : null}
               I understand, continue
             </AlertDialogAction>
           ) : (
