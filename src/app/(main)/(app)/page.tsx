@@ -110,7 +110,7 @@ const HamperSection = () => {
 
     return (
         <section className="w-full py-12 container px-4">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20 backdrop-blur-sm">
                 <div className="relative z-10 p-8 md:p-12 text-center">
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background">
                         <Gift className="h-8 w-8 text-primary" />

@@ -207,7 +207,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-lg flex flex-col h-full"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:shadow-primary/20 flex flex-col h-full"
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
@@ -323,8 +323,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
                     </div>
                 ) : (
                     <Button
-                        variant="outline"
-                        className="w-full h-full px-4 hover:bg-primary hover:text-primary-foreground"
+                        variant="default"
+                        className="w-full h-full px-4"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
