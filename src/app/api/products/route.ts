@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Product from '@/models/product.model';
@@ -124,7 +125,7 @@ export async function POST(req: Request) {
           styleId,
           variants: (variants || []).map(v => ({
             ...v,
-            availableQuantity: v.stock, // Map stock to availableQuantity
+            availableQuantity: (v as any).stock, // Map stock to availableQuantity
           })),
         };
         
