@@ -56,13 +56,13 @@ export async function PUT(
             ...commonData,
             variants: (variants || []).map(v => ({
                 ...v,
-                availableQuantity: v.stock, // Map stock to availableQuantity
+                availableQuantity: v.availableQuantity,
             })),
         };
         
         // Calculate total stock from variants if they exist
         if (updateData.variants && updateData.variants.length > 0) {
-            updateData.stock = updateData.variants.reduce((acc: number, v: any) => acc + v.availableQuantity, 0);
+            updateData.stock = updateData.variants.reduce((acc: number, v: any) => acc + (v.availableQuantity || 0), 0);
         }
 
         const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
