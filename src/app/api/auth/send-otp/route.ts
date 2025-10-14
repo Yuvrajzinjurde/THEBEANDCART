@@ -9,16 +9,14 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const verificationServiceSid = process.env.TWILIO_VERIFICATION_SERVICE_SID;
 
-if (!accountSid || !authToken || !verificationServiceSid) {
-    console.error("Twilio environment variables are not set.");
-}
-
-const client = twilio(accountSid, authToken);
 
 export async function POST(req: Request) {
     if (!accountSid || !authToken || !verificationServiceSid) {
+        console.error("Twilio environment variables are not set.");
         return NextResponse.json({ message: 'Twilio service is not configured.' }, { status: 500 });
     }
+
+    const client = twilio(accountSid, authToken);
 
     try {
         const body = await req.json();
