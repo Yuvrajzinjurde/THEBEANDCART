@@ -17,12 +17,14 @@ const getUserIdFromToken = (req: Request): string | null => {
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as DecodedToken;
+        // Use verify on the server for security
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         return decoded.userId;
     } catch (error) {
         return null;
     }
 }
+
 
 // GET the user's cart
 export async function GET(req: Request) {
@@ -31,7 +33,8 @@ export async function GET(req: Request) {
         
         const userId = getUserIdFromToken(req);
         if (!userId) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+            // This is not an error, a guest user simply has no cart in the DB
+            return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
 
         const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
@@ -140,6 +143,8 @@ export async function DELETE(req: Request) {
         }
 
         const initialLength = cart.items.length;
+        // This will remove all variants of a product ID. If you need to remove a specific variant,
+        // you'd need to pass size/color here as well. For now, this seems acceptable.
         cart.items = cart.items.filter(item => item.productId.toString() !== productId);
 
         if (cart.items.length === initialLength) {

@@ -2,7 +2,6 @@
 "use client";
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { IBox, IBoxVariant } from '@/models/box.model';
 import type { IProduct } from '@/models/product.model';
 
@@ -28,6 +27,7 @@ type HamperActions = {
   removeProduct: (productId: string) => void;
   setNotes: (notes: { creator?: string; receiver?: string }) => void;
   setAddRose: (add: boolean) => void;
+  setFullHamperState: (state: Partial<HamperState>) => void;
   reset: () => void;
 };
 
@@ -38,7 +38,6 @@ const initialState: HamperState = {
 };
 
 const useHamperStore = create<HamperState & HamperActions>()(
-  persist(
     (set, get) => ({
       ...initialState,
       setStep: (step) => set({ step }),
@@ -60,13 +59,9 @@ const useHamperStore = create<HamperState & HamperActions>()(
         notesToReceiver: notes.receiver ?? state.notesToReceiver,
       })),
       setAddRose: (add) => set({ addRose: add }),
+      setFullHamperState: (state) => set(state),
       reset: () => set(initialState),
-    }),
-    {
-      name: 'hamper-creation-storage',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+    })
 );
 
 export default useHamperStore;

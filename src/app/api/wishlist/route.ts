@@ -17,7 +17,7 @@ const getUserIdFromToken = (req: Request): string | null => {
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as DecodedToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         return decoded.userId;
     } catch (error) {
         return null;
@@ -31,12 +31,13 @@ export async function GET(req: Request) {
 
         const userId = getUserIdFromToken(req);
         if (!userId) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+             return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
         }
 
         const wishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products',
             model: Product,
+            // Explicitly select the stock field
             select: 'name images sellingPrice mrp category rating storefront stock brand',
         });
         
@@ -86,17 +87,21 @@ export async function POST(req: Request) {
     let message: string;
 
     if (wishlist) {
+      // Wishlist exists for user
       const productIndex = wishlist.products.findIndex(p => p.toString() === productId);
 
       if (productIndex > -1) {
+        // Product is already in the wishlist, remove it
         wishlist.products.splice(productIndex, 1);
         message = 'Product removed from wishlist.';
       } else {
+        // Product is not in the wishlist, add it
         wishlist.products.push(new Types.ObjectId(productId));
         message = 'Product added to wishlist.';
       }
       await wishlist.save();
     } else {
+      // No wishlist for user, create a new one
       wishlist = await Wishlist.create({
         userId,
         products: [new Types.ObjectId(productId)],

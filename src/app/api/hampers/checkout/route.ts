@@ -19,7 +19,7 @@ const getUserIdFromToken = (req: Request): string | null => {
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as DecodedToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         return decoded.userId;
     } catch (error) {
         return null;
@@ -45,16 +45,19 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'Hamper is incomplete. Please select products, a box, and a bag.' }, { status: 400 });
     }
     
+    // Mark the hamper as complete
     hamper.isComplete = true;
     hamper.isAddedToCart = true;
     await hamper.save();
     
     let cart: ICart | null = await Cart.findOne({ userId });
     
+    // Create new cart if it doesn't exist
     if (!cart) {
         cart = await Cart.create({ userId, items: [] });
     }
 
+    // Add all products from the hamper to the cart
     for (const productId of hamper.products) {
         const product = await Product.findById(productId);
         if (product && product.stock > 0) {
@@ -62,10 +65,13 @@ export async function POST(req: Request) {
         }
     }
 
+    // Add box and bag as items in the cart
     const box = await Box.findById(hamper.boxId);
     if(box && hamper.boxVariantId) {
         const boxVariant = box.variants.find(v => (v as any)._id.equals(hamper.boxVariantId));
         if (boxVariant && boxVariant.sellingPrice > 0) {
+            // This is a simplification. A real app might have boxes as actual products.
+            // For now, we find or create a temporary "product" for the box to add to cart
             const productName = `${box.name} (${boxVariant.name})`;
             let boxProduct = await Product.findOne({ name: productName, storefront: 'hamper-assets' });
             if (!boxProduct) {

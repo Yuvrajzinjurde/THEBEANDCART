@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
@@ -16,7 +17,7 @@ const getUserIdFromToken = (req: Request): string | null => {
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as DecodedToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         return decoded.userId;
     } catch (error) {
         return null;
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
         
+        // Use findOneAndUpdate with upsert to create or update the user's active hamper
         const updatedHamper = await Hamper.findOneAndUpdate(
             { userId, isComplete: false },
             { $set: { ...validation.data, userId } },

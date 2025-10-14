@@ -8,7 +8,6 @@ import type { IBrand } from '@/models/brand.model';
 import type { ICoupon } from '@/models/coupon.model';
 import ProductDetails from '@/components/product-details';
 import { Loader } from '@/components/ui/loader';
-import useRecentlyViewedStore from '@/stores/recently-viewed-store';
 import { BrandProductCard } from '@/components/brand-product-card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
@@ -140,8 +139,6 @@ export default function ProductPage() {
   
   const [boughtTogether, setBoughtTogether] = useState<IProduct[]>([]);
 
-  const { recentlyViewed, addProduct } = useRecentlyViewedStore();
-
   useEffect(() => {
     if (!id) return;
 
@@ -161,7 +158,6 @@ export default function ProductPage() {
         const data = await productResponse.json();
         const mainProduct: IProduct = data.product;
         setProduct(mainProduct);
-        addProduct(mainProduct); // Add to recently viewed
 
         if(reviewStatsResponse.ok) {
             const stats = await reviewStatsResponse.json();
@@ -220,7 +216,7 @@ export default function ProductPage() {
     }
 
     fetchProductAndVariants();
-  }, [id, addProduct]);
+  }, [id]);
 
   if (loading) {
     return <ProductPageSkeleton />;
@@ -235,7 +231,6 @@ export default function ProductPage() {
   }
   
   const storefront = (brandName as string) || product.storefront;
-  const filteredRecentlyViewed = recentlyViewed.filter(p => p._id !== product._id);
 
   return (
       <main className="container py-8 px-4">
@@ -251,7 +246,6 @@ export default function ProductPage() {
         
         <div className="mt-16">
           <ProductCarouselSection title="Similar Products" products={similarProducts} isLoading={loadingSimilar} />
-          <ProductCarouselSection title="Recently Viewed" products={filteredRecentlyViewed} />
         </div>
       </main>
   );
