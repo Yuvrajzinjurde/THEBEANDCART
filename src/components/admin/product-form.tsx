@@ -169,7 +169,7 @@ const VariantItem = ({ control, index, removeVariant, disabled, generateSku, set
                         <FormMessage />
                     </FormItem>
                 )} />
-                <FormField control={control} name={`variants.${index}.stock`} render={({ field }) => (
+                <FormField control={control} name={`variants.${index}.availableQuantity`} render={({ field }) => (
                     <FormItem>
                         <FormLabel>Stock</FormLabel>
                         <FormControl><Input type="number" placeholder="0" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} disabled={disabled} /></FormControl>
@@ -335,7 +335,11 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     purchasePrice: (existingProduct as any).purchasePrice || 0,
     storefront: existingProduct.storefront,
     returnPeriod: existingProduct.returnPeriod || 10,
-    variants: [],
+    variants: (existingProduct.variants || []).map(v => ({
+      ...v,
+      images: (v.images || []).map(img => ({ value: img })),
+      videos: (v as any).videos?.map((vid: string) => ({ value: vid })) || [],
+    })),
   } : {
     name: '',
     description: '',
@@ -551,7 +555,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
       images: data.images?.map(img => img.value),
       videos: data.videos?.map(vid => vid.value),
       keywords: data.keywords?.map(tag => tag.value),
-      variants: data.variants.map(variant => ({
+      variants: data.variants?.map(variant => ({
         ...variant,
         images: variant.images?.map(img => img.value),
         videos: variant.videos?.map(vid => vid.value),
@@ -823,7 +827,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                 />
                             ))}
                             {!isFormDisabled && (
-                                <Button type="button" variant="outline" onClick={() => appendVariant({ _id: new Date().toISOString(), size: '', color: '', sku: '', stock: 0, images: [], videos: [] })}>
+                                <Button type="button" variant="outline" onClick={() => appendVariant({ _id: new Date().toISOString(), size: '', color: '', sku: '', availableQuantity: 0, images: [], videos: [] })}>
                                     <PlusCircle className="mr-2" />
                                     {variantFields.length > 0 ? 'Add another variant' : 'Add variants (e.g., size, color)'}
                                 </Button>
