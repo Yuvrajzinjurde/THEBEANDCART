@@ -40,6 +40,7 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error('Send OTP Error:', error);
+        // Ensure a JSON response is always sent, even on uncaught errors
         return NextResponse.json({ message: error.message || 'An internal server error occurred.' }, { status: 500 });
     }
 }
