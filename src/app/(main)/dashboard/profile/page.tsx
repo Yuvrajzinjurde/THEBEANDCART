@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck } from "lucide-react";
+import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle } from "lucide-react";
 import { toast } from "react-toastify";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Loader } from "@/components/ui/loader";
@@ -18,10 +18,99 @@ import type { IUser } from "@/models/user.model";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+
+const DangerZoneAction = ({
+  action,
+  title,
+  description,
+  buttonText,
+  onConfirm,
+}: {
+  action: 'deactivate' | 'delete';
+  title: string;
+  description: string;
+  buttonText: string;
+  onConfirm: (otp: string) => Promise<void>;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [step, setStep] = useState<'initial' | 'otp'>('initial');
+  const [otp, setOtp] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+
+  const handleInitialConfirm = async () => {
+    if (!user?.phone || !user.isPhoneVerified) {
+      toast.error("You must have a verified phone number to perform this action.");
+      return;
+    }
+    // In a real app, you would send an OTP here. We reuse the static OTP logic.
+    toast.info("An OTP has been sent to your verified phone number.");
+    setStep('otp');
+  };
+
+  const handleFinalConfirm = async () => {
+    if (otp.length < 6) {
+      toast.error("Please enter a valid 6-digit OTP.");
+      return;
+    }
+    setIsSubmitting(true);
+    await onConfirm(otp);
+    setIsSubmitting(false);
+    setIsOpen(false);
+    setStep('initial');
+    setOtp('');
+  };
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      <AlertDialogTrigger asChild>
+        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={action === 'deactivate' ? "border-destructive text-destructive" : ""}>
+          {buttonText}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{step === 'initial' ? title : 'Enter OTP to Confirm'}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {step === 'initial' ? description : `Please enter the 6-digit code sent to your phone to finalize this action. (Hint: use 123456)`}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {step === 'otp' && (
+          <div className="py-4">
+             <Input 
+                id="otp" 
+                value={otp} 
+                onChange={(e) => setOtp(e.target.value)} 
+                maxLength={6} 
+                placeholder="123456"
+             />
+          </div>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => { setStep('initial'); setOtp(''); }}>Cancel</AlertDialogCancel>
+          {step === 'initial' ? (
+            <AlertDialogAction onClick={handleInitialConfirm}>
+              I understand, continue
+            </AlertDialogAction>
+          ) : (
+            <AlertDialogAction onClick={handleFinalConfirm} disabled={isSubmitting}>
+              {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+              Confirm Action
+            </AlertDialogAction>
+          )}
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
 
 
 export default function ProfilePage() {
-  const { user, token, checkUser } = useAuth();
+  const { user, token, checkUser, logout } = useAuth();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
@@ -206,6 +295,42 @@ export default function ProfilePage() {
         setIsVerifyingOtp(false);
     }
   };
+  
+    const handleDeactivate = async (otp: string) => {
+        try {
+            const res = await fetch(`/api/users/${user?._id}/deactivate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ otp })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+            toast.success("Account deactivated successfully. You have been logged out.");
+            logout();
+            router.push('/');
+        } catch (error: any) {
+            toast.error(error.message || "Failed to deactivate account.");
+        }
+    };
+    
+    const handleDeleteAccount = async (otp: string) => {
+        try {
+            const res = await fetch(`/api/users/${user?._id}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ otp })
+            });
+            if (!res.ok) {
+                 const data = await res.json();
+                 throw new Error(data.message);
+            }
+            toast.success("Account deleted successfully. We're sorry to see you go.");
+            logout();
+            router.push('/');
+        } catch (error: any) {
+            toast.error(error.message || "Failed to delete account.");
+        }
+    };
 
   return (
     <div className="space-y-6">
@@ -438,14 +563,43 @@ export default function ProfilePage() {
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-                <Separator />
-                <div className="flex flex-col items-start gap-2">
-                    <Button variant="link" className="p-0 h-auto text-primary">Deactivate Account</Button>
-                    <Button variant="link" className="p-0 h-auto text-destructive hover:text-destructive/80">Delete Account</Button>
+            </CardContent>
+        </Card>
+        
+        <Card className="border-destructive">
+            <CardHeader>
+                <AlertTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> Danger Zone</AlertTitle>
+                <CardDescription>These actions are irreversible. Please proceed with caution.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg">
+                    <div>
+                        <h4 className="font-semibold">Deactivate Account</h4>
+                        <p className="text-sm text-muted-foreground">Your account will be temporarily disabled. You can reactivate it by logging in again.</p>
+                    </div>
+                    <DangerZoneAction 
+                        action="deactivate"
+                        title="Are you sure you want to deactivate your account?"
+                        description="Your account will be temporarily disabled, but your data will be saved. You can reactivate it anytime by simply logging back in."
+                        buttonText="Deactivate Account"
+                        onConfirm={handleDeactivate}
+                    />
+                </div>
+                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg">
+                    <div>
+                        <h4 className="font-semibold">Delete Account</h4>
+                        <p className="text-sm text-muted-foreground">This will permanently delete your account and all associated data.</p>
+                    </div>
+                    <DangerZoneAction 
+                        action="delete"
+                        title="Are you sure you want to permanently delete your account?"
+                        description="This action is irreversible. All your data, including order history and wishlist, will be permanently erased."
+                        buttonText="Delete Account"
+                        onConfirm={handleDeleteAccount}
+                    />
                 </div>
             </CardContent>
         </Card>
     </div>
   );
-
-    
+}
