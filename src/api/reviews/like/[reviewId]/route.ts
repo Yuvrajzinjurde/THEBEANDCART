@@ -11,14 +11,14 @@ interface DecodedToken {
   userId: string;
 }
 
-const getAuthFromToken = (req: Request): DecodedToken | null => {
+const getAuthFromToken = (req: Request): { userId: string } | null => {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return null;
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-        return decoded;
+        return { userId: decoded.userId };
     } catch (error) {
         return null;
     }
