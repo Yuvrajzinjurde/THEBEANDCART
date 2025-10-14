@@ -37,7 +37,6 @@ export default function Header() {
   const { user, loading: authLoading } = useAuth();
   const params = useParams();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
   
   const [brand, setBrand] = useState<IBrand | null>(null);
@@ -46,8 +45,6 @@ export default function Header() {
   const { cart, wishlist } = useUserStore();
   const { settings, fetchSettings } = usePlatformSettingsStore();
 
-  const [brandName, setBrandName] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
 
@@ -57,41 +54,15 @@ export default function Header() {
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
+  const brandNameFromUrl = params.brand as string;
 
   useEffect(() => {
-    setIsClient(true);
     fetchSettings();
   }, [fetchSettings]);
 
   useEffect(() => {
-    if (!isClient) return;
-
-    const pathBrand = params.brand as string;
-    
-    const globalPrefixes = [
-      'admin', 'legal', 'wishlist', 'create-hamper', 'cart', 'search',
-      'login', 'signup', 'forgot-password', 'dashboard'
-    ];
-    
-    // Check if the current path starts with any of the global prefixes
-    // or if it's the root path.
-    const isGlobalRoute = pathname === '/' || globalPrefixes.some(route => pathname.startsWith(`/${route}`));
-    
-    if (isGlobalRoute) {
-      setBrandName(null);
-    } else if (pathBrand) {
-      setBrandName(pathBrand);
-    } else {
-      setBrandName(null); // Default to global if no brand is in the path
-    }
-  }, [pathname, params, isClient]);
-
-  useEffect(() => {
-    if (!isClient) return;
-
-    async function fetchBrandData() {
+    async function fetchData() {
         setIsLoading(true);
-        
         try {
             // Always fetch all products for search suggestions
             const productsRes = await fetch(`/api/products?limit=2000`);
@@ -100,9 +71,9 @@ export default function Header() {
                 setAllProducts(productData);
             }
 
-            // Fetch specific brand data if brandName is set
-            if (brandName) {
-                const brandRes = await fetch(`/api/brands/${brandName}`);
+            // Fetch specific brand data if brandName is in the URL
+            if (brandNameFromUrl) {
+                const brandRes = await fetch(`/api/brands/${brandNameFromUrl}`);
                 if (brandRes.ok) {
                     const { brand: brandData } = await brandRes.json();
                     setBrand(brandData);
@@ -119,15 +90,18 @@ export default function Header() {
         }
     }
 
-    fetchBrandData();
-  }, [brandName, isClient]);
+    fetchData();
+  }, [brandNameFromUrl]);
 
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
-  const effectiveBrandName = brandName || 'reeva';
-  const showSecondaryNav = brandName ? pathname === `/${brandName}/home` : pathname === '/';
+  // Determine if we are on a brand-specific page
+  const isBrandPage = !!brandNameFromUrl && !!brand;
+  
+  const effectiveBrandName = brandNameFromUrl || 'reeva';
+  const showSecondaryNav = pathname.endsWith('/home') || pathname === '/';
 
 
   const secondaryNavItems = [
@@ -138,9 +112,9 @@ export default function Header() {
   
   const categories = useMemo(() => {
     if (!brand?.categories) return [];
-    const productCategories = new Set(allProducts.filter(p => p.storefront === brandName).map(p => p.category));
+    const productCategories = new Set(allProducts.filter(p => p.storefront === brandNameFromUrl).map(p => p.category));
     return brand.categories.filter(cat => productCategories.has(cat));
-  }, [allProducts, brand, brandName]);
+  }, [allProducts, brand, brandNameFromUrl]);
   
   const allAvailableCategories = useMemo(() => {
     const categorySet = new Set<string>();
@@ -167,8 +141,8 @@ export default function Header() {
   
   // Execute search based on context
   const executeSearch = (query: string) => {
-    if (brandName) {
-      router.push(`/${brandName}/products?keyword=${encodeURIComponent(query)}`);
+    if (isBrandPage) {
+      router.push(`/${brandNameFromUrl}/products?keyword=${encodeURIComponent(query)}`);
     } else {
       router.push(`/search?keyword=${encodeURIComponent(query)}`);
     }
@@ -203,8 +177,10 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  const currentDisplayName = !isLoading && isClient && (brandName && brand ? brand.displayName : settings.platformName);
-  const homeLink = brandName ? `/${brandName}/home` : '/';
+  const currentDisplayName = !isLoading && (isBrandPage ? brand.displayName : settings.platformName);
+  const homeLink = isBrandPage ? `/${brandNameFromUrl}/home` : '/';
+  const logoUrl = isBrandPage ? brand.logoUrl : settings.platformLogoUrl;
+
 
   const DesktopNavActions = () => (
     <div className="flex items-center gap-1">
@@ -244,34 +220,12 @@ export default function Header() {
   const renderLogo = () => {
     if (isLoading) return <Skeleton className="h-8 w-8 rounded-full" />;
     
-    const logoUrl = brandName && brand?.logoUrl ? brand.logoUrl : settings.platformLogoUrl;
-    
     if (logoUrl) {
       return <Image src={logoUrl} alt="Logo" width={32} height={32} className="h-8 w-8 rounded-full object-cover" />;
     }
     
     return null;
   };
-
-  if (!isClient) {
-    return (
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center px-4">
-            <Skeleton className="h-8 w-8 rounded-full" />
-            <Skeleton className="h-6 w-24 ml-4" />
-            <div className="flex-1 mx-4">
-                <Skeleton className="h-11 w-full max-w-lg mx-auto rounded-full" />
-            </div>
-            <div className="flex items-center gap-1">
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-9 w-9 rounded-full" />
-                <Skeleton className="h-9 w-9" />
-            </div>
-        </div>
-      </header>
-    );
-  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -305,7 +259,7 @@ export default function Header() {
                           </Link>
                         )}
                         <Separator />
-                        {categories.length > 0 && (
+                        {isBrandPage && categories.length > 0 && (
                           <>
                             <h3 className="font-semibold text-muted-foreground">Categories</h3>
                             {categories.map(cat => (
@@ -344,7 +298,7 @@ export default function Header() {
                   {isLoading ? <Skeleton className="h-6 w-24" /> : currentDisplayName}
                 </span>
               </Link>
-              {brandName && categories.length > 0 && (
+              {isBrandPage && categories.length > 0 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="items-center gap-2">
@@ -435,3 +389,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
