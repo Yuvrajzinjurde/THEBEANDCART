@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     });
     
     if (!user) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Email not found. Please check your email or sign up.' }, { status: 404 });
     }
 
     if (user.status === 'blocked') {
@@ -44,17 +44,17 @@ export async function POST(req: Request) {
     const isAdmin = userRoles.includes('admin');
 
     if (!isAdmin && user.brand !== brand) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'This account is not associated with this brand.' }, { status: 401 });
     }
 
     if (!user.password) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Password not set for this account. Please use password reset.' }, { status: 401 });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Invalid password. Please try again.' }, { status: 401 });
     }
     
     const accessToken = jwt.sign(
