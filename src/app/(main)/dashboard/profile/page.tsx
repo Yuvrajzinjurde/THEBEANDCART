@@ -112,14 +112,14 @@ const DangerZoneAction = ({
 export default function ProfilePage() {
   const { user, token, checkUser, logout } = useAuth();
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
+  const [isEditing, setIsEditing = useState(false);
+  const [isSubmitting, setIsSubmitting = useState(false);
+  const [isCancelAlertOpen, setIsCancelAlertOpen = useState(false);
 
-  const [otpSent, setOtpSent] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent = useState(false);
+  const [isSendingOtp, setIsSendingOtp = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp = useState(false);
+  const [otp, setOtp = useState('');
 
   const form = useForm({
       defaultValues: {
@@ -604,3 +604,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
