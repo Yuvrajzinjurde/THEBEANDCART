@@ -88,7 +88,7 @@ export function LoginForm() {
       // Await the login function which now returns a promise
       await login(result.user, result.token);
 
-      toast.success(`Welcome back, ${result.user.name}!`);
+      toast.success(`Welcome back, ${result.user.firstName}!`);
 
       const redirectUrl = searchParams.get('redirect');
 
