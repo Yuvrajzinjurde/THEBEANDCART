@@ -46,8 +46,7 @@ const DangerZoneAction = ({
       toast.error("You must have a verified phone number to perform this action.");
       return;
     }
-    // In a real app, you would send an OTP here. We reuse the static OTP logic.
-    toast.info("An OTP has been sent to your verified phone number.");
+    // In a real app, you would send an OTP here. We just transition the state.
     setStep('otp');
   };
 
@@ -59,13 +58,23 @@ const DangerZoneAction = ({
     setIsSubmitting(true);
     await onConfirm(otp);
     setIsSubmitting(false);
-    setIsOpen(false);
+    // Only close and reset on successful completion
+    setIsOpen(false); 
     setStep('initial');
     setOtp('');
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // Reset state when closing the dialog
+      setStep('initial');
+      setOtp('');
+    }
+    setIsOpen(open);
+  }
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+    <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={action === 'deactivate' ? "border-destructive text-destructive" : ""}>
           {buttonText}
@@ -75,7 +84,7 @@ const DangerZoneAction = ({
         <AlertDialogHeader>
           <AlertDialogTitle>{step === 'initial' ? title : 'Enter OTP to Confirm'}</AlertDialogTitle>
           <AlertDialogDescription>
-            {step === 'initial' ? description : `Please enter the 6-digit code sent to your phone to finalize this action. (Hint: use 123456)`}
+            {step === 'initial' ? description : `An OTP has been sent to your phone. Please enter the 6-digit code to finalize this action. (Hint: use 123456)`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {step === 'otp' && (
@@ -90,7 +99,7 @@ const DangerZoneAction = ({
           </div>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => { setStep('initial'); setOtp(''); }}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           {step === 'initial' ? (
             <AlertDialogAction onClick={handleInitialConfirm}>
               I understand, continue
