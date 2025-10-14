@@ -420,27 +420,21 @@ export default function ProfilePage() {
             <CardContent className="space-y-6">
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1">
-                        <AccordionTrigger>What happens when I update my email address (or mobile number)?</AccordionTrigger>
+                        <AccordionTrigger>What happens when I update my email address or mobile number?</AccordionTrigger>
                         <AccordionContent>
-                        Your login email id (or mobile number) changes, likewise. You'll receive all your account related communication on your updated email address (or mobile number).
+                        Your login credentials will change accordingly. All future communications, including order updates and OTPs, will be sent to your new email or mobile number.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2">
-                        <AccordionTrigger>When will my account be updated with the new email address (or mobile number)?</AccordionTrigger>
+                        <AccordionTrigger>When will my account be updated with new details?</AccordionTrigger>
                         <AccordionContent>
-                        It happens as soon as you confirm the verification code sent to your email (or mobile) and save the changes.
+                        Your account is updated instantly after you save your changes. If you update your mobile number, it will be updated after you successfully verify it with an OTP.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3">
-                        <AccordionTrigger>What happens to my existing account when I update my email address (or mobile number)?</AccordionTrigger>
+                        <AccordionTrigger>What happens to my existing account and orders when I update my profile?</AccordionTrigger>
                         <AccordionContent>
-                        Updating your email address (or mobile number) doesn't invalidate your account. Your account remains fully functional. You'll continue seeing your Order history, saved information and personal details.
-                        </AccordionContent>
-                    </AccordionItem>
-                     <AccordionItem value="item-4">
-                        <AccordionTrigger>Does my Seller account get affected when I update my email address?</AccordionTrigger>
-                        <AccordionContent>
-                        The platform has a 'single sign-on' policy. Any changes will reflect in your Seller account also.
+                        Updating your personal details does not affect your account's existence. Your account remains fully functional, and your order history, wishlist, and cart will stay intact.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
@@ -453,4 +447,5 @@ export default function ProfilePage() {
         </Card>
     </div>
   );
-}
+
+    
