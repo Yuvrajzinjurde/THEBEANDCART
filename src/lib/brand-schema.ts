@@ -87,6 +87,7 @@ export type BrandFormValues = z.infer<typeof BrandFormSchema>;
 
 export const PlatformSettingsValidationSchema = z.object({
   platformName: z.string().min(1, "Platform name is required."),
+  platformDescription: z.string().optional(),
   platformLogoUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformFaviconUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformThemeName: z.string({ required_error: "Please select a platform theme." }),

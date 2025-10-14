@@ -29,8 +29,6 @@ export async function getThemeForRequest(pathname: string, search: string) {
 
     const pathParts = pathname.split('/').filter(p => p);
 
-    // Simplified logic: If the first part of the path is not a known global route,
-    // assume it's a brand name. This is more robust.
     const globalPrefixes = [
       'admin', 'legal', 'wishlist', 'cart', 'search',
       'login', 'signup', 'forgot-password', 'dashboard', 'create-hamper'
@@ -41,7 +39,6 @@ export async function getThemeForRequest(pathname: string, search: string) {
       isBrandRoute = true;
     }
     
-    // If we've identified a brand for the current route, fetch its theme.
     if (brandName) {
         try {
             const brand = await getBrand(brandName);
@@ -53,12 +50,10 @@ export async function getThemeForRequest(pathname: string, search: string) {
         }
     }
 
-    // If no brand-specific theme is found, or if it's a global route, use the platform's default theme.
     if (!themeName) {
         themeName = settings?.platformThemeName || 'Blue';
     }
     
-    // Find the theme object from our predefined list, falling back to a default 'Blue' theme if not found.
     const theme = themeColors.find(t => t.name === themeName) || themeColors.find(t => t.name === 'Blue');
     
     return { theme, settings, isBrandRoute };

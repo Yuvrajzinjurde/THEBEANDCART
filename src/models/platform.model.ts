@@ -6,6 +6,7 @@ const HeroBannerSchema: Schema = new Schema({
     description: { type: String, required: true },
     imageUrl: { type: String, required: true },
     imageHint: { type: String, required: true },
+    buttonLink: { type: String, required: false },
 }, { _id: false });
 
 const PromoBannerSchema: Schema = new Schema({
@@ -33,6 +34,7 @@ const SocialLinksSchema: Schema = new Schema({
 
 export interface IPlatformSettings extends Document {
   platformName: string;
+  platformDescription: string;
   platformLogoUrl: string;
   platformFaviconUrl: string;
   platformThemeName: string;
@@ -51,6 +53,7 @@ export interface IPlatformSettings extends Document {
     description: string;
     imageUrl: string;
     imageHint: string;
+    buttonLink: string;
   }[];
   featuredCategories: string[];
   promoBanner?: {
@@ -70,6 +73,7 @@ export interface IPlatformSettings extends Document {
 
 const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   platformName: { type: String, default: 'The Brand Cart' },
+  platformDescription: { type: String, default: 'Your one-stop shop for amazing brands.' },
   platformLogoUrl: { type: String, default: '' },
   platformFaviconUrl: { type: String, default: '' },
   platformThemeName: { type: String, default: 'Blue' },

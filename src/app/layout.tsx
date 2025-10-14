@@ -10,29 +10,16 @@ import type { IPlatformSettings } from '@/models/platform.model';
 import type { Metadata } from 'next';
 
 
-function ThemeInjector({ theme }: { theme: any }) {
-    if (!theme) return null;
-
-    const styles = `
-    :root {
-        --primary: ${theme.primary};
-        --background: ${theme.background};
-        --accent: ${theme.accent};
-    }
-    ${theme.name.includes('(Dark)') ? '.dark {}' : ''}
-    `;
-
-    return <style dangerouslySetInnerHTML={{ __html: styles }} />;
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = headers();
   const pathname = headersList.get('x-invoke-path') || '/';
+  // Note: getThemeForRequest is now simplified and primarily gets settings.
   const { settings } = await getThemeForRequest(pathname, '');
   const platformSettings = settings as IPlatformSettings | null;
 
   return {
-    title: platformSettings?.platformName || 'The Brand Cart',
+    title: platformSettings?.platformName || 'AuthFlow',
+    description: platformSettings?.platformDescription || 'Secure and easy authentication flow.',
     icons: {
       icon: platformSettings?.platformFaviconUrl || '/favicon.ico',
     },
@@ -45,15 +32,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = headers();
-  const pathname = headersList.get('x-invoke-path') || '/';
-  const { theme } = await getThemeForRequest(pathname, '');
 
   return (
     <html lang="en" suppressHydrationWarning className="no-scrollbar">
-        <head>
-           <ThemeInjector theme={theme} />
-        </head>
+        <head />
         <body className={cn(
             "min-h-screen font-body antialiased no-scrollbar",
             "flex flex-col"

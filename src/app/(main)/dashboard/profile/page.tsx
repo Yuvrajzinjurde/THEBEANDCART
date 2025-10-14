@@ -19,7 +19,7 @@ import type { IUser } from "@/models/user.model";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 
 
 const DangerZoneAction = ({
@@ -112,14 +112,14 @@ const DangerZoneAction = ({
 export default function ProfilePage() {
   const { user, token, checkUser, logout } = useAuth();
   const router = useRouter();
-  const [isEditing, setIsEditing = useState(false);
-  const [isSubmitting, setIsSubmitting = useState(false);
-  const [isCancelAlertOpen, setIsCancelAlertOpen = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
 
-  const [otpSent, setOtpSent = useState(false);
-  const [isSendingOtp, setIsSendingOtp = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp = useState(false);
-  const [otp, setOtp = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otp, setOtp] = useState('');
 
   const form = useForm({
       defaultValues: {
