@@ -19,7 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 
 export default function ProfilePage() {
-  const { user, checkUser } = useAuth();
+  const { user, token, checkUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function ProfilePage() {
   const username = email.split('@')[0];
 
   const handleSaveChanges = form.handleSubmit(async (data: FieldValues) => {
-    if (!user?.userId) {
+    if (!user?.userId || !token) {
         toast.error("You must be logged in to update your profile.");
         return;
     }
@@ -95,7 +95,10 @@ export default function ProfilePage() {
     try {
         const response = await fetch(`/api/users/${user.userId}/profile`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
             body: JSON.stringify(data)
         });
         const result = await response.json();
