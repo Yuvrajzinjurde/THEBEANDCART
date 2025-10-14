@@ -384,7 +384,7 @@ export default function ProfilePage() {
             toast.success("Account deleted successfully. We're sorry to see you go.");
             logout();
             router.push('/');
-        } catch (error: any) {
+        } catch (error: any) => {
             toast.error(error.message || "Failed to delete account.");
         }
     };
@@ -525,7 +525,7 @@ export default function ProfilePage() {
 
                                                 {passwordChangeStep === 'password' && (
                                                   <Form {...passwordForm}>
-                                                    <form onSubmit={onSubmitPasswordChange} className="space-y-4">
+                                                    <div className="space-y-4">
                                                         <FormItem>
                                                             <FormLabel>OTP</FormLabel>
                                                             <FormControl>
@@ -555,12 +555,12 @@ export default function ProfilePage() {
                                                         )}/>
                                                         <div className="flex gap-2">
                                                             <Button type="button" variant="outline" className="w-full" onClick={() => {setPasswordChangeStep('initial'); passwordForm.reset();}}>Cancel</Button>
-                                                            <Button type="submit" className="w-full" disabled={isSubmittingPasswordChange}>
+                                                            <Button type="button" onClick={onSubmitPasswordChange} className="w-full" disabled={isSubmittingPasswordChange}>
                                                                 {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />}
                                                                 Save Password
                                                             </Button>
                                                         </div>
-                                                    </form>
+                                                    </div>
                                                    </Form>
                                                 )}
                                             </div>
