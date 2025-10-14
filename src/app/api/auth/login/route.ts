@@ -58,23 +58,22 @@ export async function POST(req: Request) {
     }
     
     const accessToken = jwt.sign(
-      { userId: user._id, roles: userRoles, name: user.firstName, brand: user.brand },
+      { roles: userRoles, name: user.firstName, brand: user.brand },
       JWT_SECRET,
-      { expiresIn: '15m' } // Short-lived access token
+      { expiresIn: '15m', subject: user._id.toString() } // Use standard 'sub' field
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id },
+      { }, // Keep payload minimal for refresh token
       JWT_REFRESH_SECRET,
-      { expiresIn: '7d' } // Long-lived refresh token
+      { expiresIn: '7d', subject: user._id.toString() } // Use standard 'sub' field
     );
 
-    // Make accessToken accessible to client-side script
     const accessTokenCookie = serialize('accessToken', accessToken, {
-        httpOnly: false, // Important: make it readable by JS
+        httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
-        maxAge: 60 * 15, // 15 minutes
+        maxAge: 60 * 15,
         path: '/',
     });
     
@@ -82,18 +81,17 @@ export async function POST(req: Request) {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
         path: '/',
     });
 
     const response = NextResponse.json({ 
         message: 'Login successful', 
         user: {
-            name: user.firstName,
+            ...user.toObject(),
             roles: userRoles,
-            brand: user.brand
         },
-        token: accessToken // Send token in body as well
+        token: accessToken
     }, { status: 200 });
 
     response.headers.append('Set-Cookie', accessTokenCookie);

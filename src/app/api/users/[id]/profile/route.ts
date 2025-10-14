@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
@@ -37,7 +36,7 @@ export async function PUT(
     }
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
-    const requestingUserId = decoded.userId;
+    const requestingUserId = decoded.sub; // Use 'sub' field for subject (user ID)
     
     await dbConnect();
     const { id } = params;

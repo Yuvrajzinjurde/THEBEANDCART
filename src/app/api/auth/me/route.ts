@@ -33,33 +33,28 @@ export async function GET(req: NextRequest) {
         }
     }
     
-    // If access token is valid, use it to refetch full user object to ensure it's up-to-date
-    if (decodedAccessToken) {
-        const user = await User.findById(decodedAccessToken.userId).populate({ path: 'roles', model: Role }).lean();
+    if (decodedAccessToken && decodedAccessToken.sub) {
+        const user = await User.findById(decodedAccessToken.sub).populate({ path: 'roles', model: Role }).lean();
         if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
         
-        // Ensure we send back a complete and consistent user object
         const userRoles = user.roles.map((role: any) => role.name);
-        const userData = {
-            ...JSON.parse(JSON.stringify(user)),
-            roles: userRoles,
-            name: user.firstName, // for backward compatibility in some places
-        };
+        const userData = { ...JSON.parse(JSON.stringify(user)), roles: userRoles };
         delete userData.password;
 
         return NextResponse.json({ user: userData, token: accessToken });
     }
     
-    // Access token is invalid or expired, try to refresh it
     if (!refreshToken) {
         return NextResponse.json({ message: 'Unauthorized, session expired' }, { status: 401 });
     }
 
     try {
         const decodedRefreshToken = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as jwt.JwtPayload;
-        const user = await User.findById(decodedRefreshToken.userId).populate({ path: 'roles', model: Role }).lean();
+        if (!decodedRefreshToken.sub) throw new Error('Invalid refresh token');
+
+        const user = await User.findById(decodedRefreshToken.sub).populate({ path: 'roles', model: Role }).lean();
 
         if (!user || user.status === 'blocked') {
             throw new Error('Invalid user or account blocked.');
@@ -68,34 +63,29 @@ export async function GET(req: NextRequest) {
         const userRoles = user.roles.map((role: any) => role.name);
 
         const newAccessToken = jwt.sign(
-            { userId: user._id, roles: userRoles, name: user.firstName, brand: user.brand },
+            { roles: userRoles, name: user.firstName, brand: user.brand },
             JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '15m', subject: user._id.toString() }
         );
 
         const accessTokenCookie = serialize('accessToken', newAccessToken, {
-            httpOnly: false,
+            httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
             maxAge: 60 * 15,
             path: '/',
         });
         
-         const userData = {
-            ...JSON.parse(JSON.stringify(user)),
-            roles: userRoles,
-            name: user.firstName,
-        };
+         const userData = { ...JSON.parse(JSON.stringify(user)), roles: userRoles };
         delete userData.password;
 
         const response = NextResponse.json({ user: userData, token: newAccessToken });
-        
         response.headers.set('Set-Cookie', accessTokenCookie);
         
         return response;
 
     } catch (error) {
-        const expiredAccessTokenCookie = serialize('accessToken', '', { httpOnly: false, maxAge: -1, path: '/' });
+        const expiredAccessTokenCookie = serialize('accessToken', '', { httpOnly: true, maxAge: -1, path: '/' });
         const expiredRefreshTokenCookie = serialize('refreshToken', '', { httpOnly: true, maxAge: -1, path: '/' });
         
         const response = NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
