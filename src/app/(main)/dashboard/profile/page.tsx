@@ -86,10 +86,14 @@ export default function ProfilePage() {
   const username = email.split('@')[0];
 
   const handleSaveChanges = form.handleSubmit(async (data: FieldValues) => {
+    if (!user?.userId) {
+        toast.error("You must be logged in to update your profile.");
+        return;
+    }
     setIsSubmitting(true);
     toast.info("Saving changes...");
     try {
-        const response = await fetch(`/api/users/${user?.userId}/profile`, {
+        const response = await fetch(`/api/users/${user.userId}/profile`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
