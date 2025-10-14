@@ -12,7 +12,7 @@ const ChangePasswordSchema = z.object({
 });
 
 interface DecodedToken {
-  sub: string;
+  userId: string;
 }
 
 export async function POST(req: Request) {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-    const userId = decoded.sub;
+    const userId = decoded.userId;
 
     await dbConnect();
 
@@ -64,5 +64,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
-
-    

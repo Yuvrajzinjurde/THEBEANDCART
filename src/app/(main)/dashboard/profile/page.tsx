@@ -70,7 +70,6 @@ const DangerZoneAction = ({
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
-        toast.success("OTP sent to your verified phone number.");
         setStep('otp');
     } catch (error: any) {
         toast.error(error.message);
@@ -88,15 +87,18 @@ const DangerZoneAction = ({
     setIsSubmitting(true);
     await onConfirm(otp);
     setIsSubmitting(false);
-    setIsOpen(false); 
+    setIsOpen(false);
     setStep('initial');
     setOtp('');
   };
-
+  
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setStep('initial');
-      setOtp('');
+      // Reset state when dialog is closed
+      setTimeout(() => {
+        setStep('initial');
+        setOtp('');
+      }, 300); // Delay to allow animation
     }
     setIsOpen(open);
   }
@@ -118,11 +120,11 @@ const DangerZoneAction = ({
         </AlertDialogHeader>
         {step === 'otp' && (
           <div className="py-4">
-             <Input 
-                id="otp" 
-                value={otp} 
-                onChange={(e) => setOtp(e.target.value)} 
-                maxLength={6} 
+             <Input
+                id="otp"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                maxLength={6}
                 placeholder="123456"
              />
           </div>
@@ -188,7 +190,7 @@ export default function ProfilePage() {
           profilePicUrl: '',
       }
   });
-  
+
   const passwordForm = useForm({
     resolver: zodResolver(ChangePasswordSchema),
     defaultValues: {
@@ -200,7 +202,7 @@ export default function ProfilePage() {
 
 
   const { formState: { isDirty }, reset, watch, setValue } = profileForm;
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -211,7 +213,7 @@ export default function ProfilePage() {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const phoneValue = watch('phone');
   const isPhoneVerified = watch('isPhoneVerified');
 
@@ -250,9 +252,9 @@ export default function ProfilePage() {
     try {
         const response = await fetch(`/api/users/${user?._id}/profile`, {
             method: 'PUT',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` 
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(data)
         });
@@ -328,7 +330,7 @@ export default function ProfilePage() {
         setIsSendingOtp(false);
     }
   };
-  
+
   const handleVerifyOtp = async () => {
     if (!otp || otp.length < 6) {
         toast.error("Please enter a valid OTP.");
@@ -353,7 +355,7 @@ export default function ProfilePage() {
         setIsVerifyingOtp(false);
     }
   };
-  
+
     const handleDeactivate = async (otp: string) => {
         try {
             const res = await fetch(`/api/users/${user?._id}/deactivate`, {
@@ -370,7 +372,7 @@ export default function ProfilePage() {
             toast.error(error.message || "Failed to deactivate account.");
         }
     };
-    
+
     const handleDeleteAccount = async (otp: string) => {
         try {
             const res = await fetch(`/api/users/${user?._id}/delete`, {
@@ -389,7 +391,7 @@ export default function ProfilePage() {
             toast.error(error.message || "Failed to delete account.");
         }
     };
-    
+
     const handleSendPasswordOtp = async () => {
         if (!user?.phone || !user.isPhoneVerified) {
             toast.error("A verified phone number is required to change your password.");
@@ -403,7 +405,7 @@ export default function ProfilePage() {
                 body: JSON.stringify({ phone: user.phone })
             });
             if (!res.ok) throw new Error((await res.json()).message);
-            setPasswordChangeStep('password');
+            setPasswordChangeStep('otp');
             toast.success("OTP sent to your verified phone number.");
         } catch (error: any) {
             toast.error(error.message);
@@ -412,14 +414,15 @@ export default function ProfilePage() {
         }
     };
 
-    const onSubmitPasswordChange = passwordForm.handleSubmit(async (data) => {
-        // First, client-side OTP check (using static for now)
+    const handleVerifyPasswordOtp = async () => {
         if (passwordOtp !== '123456') {
             toast.error("Invalid OTP. Please try again.");
-            passwordForm.setError("currentPassword", { type: "custom", message: "OTP is incorrect" }); // a bit of a hack to show error
             return;
         }
-        
+        setPasswordChangeStep('password');
+    };
+
+    const onSubmitPasswordChange = passwordForm.handleSubmit(async (data) => {
         setIsSubmittingPasswordChange(true);
         try {
             const response = await fetch('/api/auth/change-password', {
@@ -432,6 +435,7 @@ export default function ProfilePage() {
             toast.success("Password changed successfully!");
             setPasswordChangeStep('initial');
             passwordForm.reset();
+            setPasswordOtp('');
         } catch (error: any) {
             toast.error(error.message);
         } finally {
@@ -457,7 +461,7 @@ export default function ProfilePage() {
                             {isEditing && (
                                 <>
                                 <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>Cancel</Button>
-                                <Button type="submit" form="profile-form" onClick={handleSaveChanges} disabled={isSubmitting || !isDirty}>
+                                <Button type="submit" onClick={handleSaveChanges} disabled={isSubmitting || !isDirty}>
                                     {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
                                     Save Changes
                                 </Button>
@@ -482,12 +486,12 @@ export default function ProfilePage() {
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="relative mx-auto w-40 h-40">
-                                                <Image 
+                                                <Image
                                                     src={profilePicUrl}
-                                                    alt="User profile picture" 
-                                                    width={160} 
-                                                    height={160} 
-                                                    className="rounded-lg object-cover" 
+                                                    alt="User profile picture"
+                                                    width={160}
+                                                    height={160}
+                                                    className="rounded-lg object-cover"
                                                     data-ai-hint="man wearing beanie"
                                                 />
                                                 {isEditing && (
@@ -506,18 +510,25 @@ export default function ProfilePage() {
                                             {/* Inline Password Change */}
                                             <div className="space-y-4">
                                                 {passwordChangeStep === 'initial' && (
-                                                    <Button className="w-full" type="button" onClick={() => setPasswordChangeStep('otp')}>
+                                                    <Button className="w-full" type="button" onClick={handleSendPasswordOtp} disabled={isSubmittingPasswordChange}>
+                                                         {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />}
                                                         <Lock className="mr-2 h-4 w-4" /> Change Password
                                                     </Button>
                                                 )}
 
                                                 {passwordChangeStep === 'otp' && (
                                                     <div className="space-y-2">
-                                                        <p className="text-sm text-muted-foreground">An OTP will be sent to your verified phone number.</p>
+                                                        <p className="text-sm text-muted-foreground">An OTP has been sent to your verified phone number.</p>
+                                                        <FormItem>
+                                                            <FormLabel>OTP</FormLabel>
+                                                            <FormControl>
+                                                                <Input value={passwordOtp} onChange={(e) => setPasswordOtp(e.target.value)} placeholder="Enter 6-digit OTP (123456)" />
+                                                            </FormControl>
+                                                        </FormItem>
                                                         <div className="flex gap-2">
-                                                          <Button type="button" variant="outline" className="w-full" onClick={() => setPasswordChangeStep('initial')}>Cancel</Button>
-                                                          <Button type="button" className="w-full" onClick={handleSendPasswordOtp} disabled={isSubmittingPasswordChange}>
-                                                            {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />} Send OTP
+                                                          <Button type="button" variant="outline" className="w-full" onClick={() => {setPasswordChangeStep('initial'); setPasswordOtp('')}}>Cancel</Button>
+                                                          <Button type="button" className="w-full" onClick={handleVerifyPasswordOtp}>
+                                                            Verify OTP
                                                           </Button>
                                                         </div>
                                                     </div>
@@ -526,12 +537,6 @@ export default function ProfilePage() {
                                                 {passwordChangeStep === 'password' && (
                                                   <Form {...passwordForm}>
                                                     <div className="space-y-4">
-                                                        <FormItem>
-                                                            <FormLabel>OTP</FormLabel>
-                                                            <FormControl>
-                                                                <Input value={passwordOtp} onChange={(e) => setPasswordOtp(e.target.value)} placeholder="Enter 6-digit OTP" />
-                                                            </FormControl>
-                                                        </FormItem>
                                                         <FormField control={passwordForm.control} name="currentPassword" render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>Current Password</FormLabel>
@@ -554,8 +559,8 @@ export default function ProfilePage() {
                                                             </FormItem>
                                                         )}/>
                                                         <div className="flex gap-2">
-                                                            <Button type="button" variant="outline" className="w-full" onClick={() => {setPasswordChangeStep('initial'); passwordForm.reset();}}>Cancel</Button>
-                                                            <Button type="submit" form="password-form" onClick={onSubmitPasswordChange} className="w-full" disabled={isSubmittingPasswordChange}>
+                                                            <Button type="button" variant="outline" className="w-full" onClick={() => {setPasswordChangeStep('initial'); passwordForm.reset(); setPasswordOtp('');}}>Cancel</Button>
+                                                            <Button type="button" onClick={onSubmitPasswordChange} className="w-full" disabled={isSubmittingPasswordChange}>
                                                                 {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />}
                                                                 Save Password
                                                             </Button>
@@ -731,7 +736,7 @@ export default function ProfilePage() {
                 </Accordion>
             </CardContent>
         </Card>
-        
+
         <Card className="border-destructive">
             <CardHeader>
                 <AlertTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> Danger Zone</AlertTitle>
@@ -743,7 +748,7 @@ export default function ProfilePage() {
                         <h4 className="font-semibold">Deactivate Account</h4>
                         <p className="text-sm text-muted-foreground">Your account will be temporarily disabled. You can reactivate it by logging in again.</p>
                     </div>
-                    <DangerZoneAction 
+                    <DangerZoneAction
                         action="deactivate"
                         title="Are you sure you want to deactivate your account?"
                         description="Your account will be temporarily disabled, but your data will be saved. You can reactivate it anytime by simply logging back in."
@@ -756,7 +761,7 @@ export default function ProfilePage() {
                         <h4 className="font-semibold">Delete Account</h4>
                         <p className="text-sm text-muted-foreground">This will permanently delete your account and all associated data.</p>
                     </div>
-                    <DangerZoneAction 
+                    <DangerZoneAction
                         action="delete"
                         title="Are you sure you want to permanently delete your account?"
                         description="This action is irreversible. All your data, including order history and wishlist, will be permanently erased."
