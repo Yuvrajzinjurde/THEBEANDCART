@@ -39,7 +39,7 @@ export async function getThemeForRequest(pathname: string, search: string) {
       isBrandRoute = true;
     }
     
-    if (brandName) {
+    if (isBrandRoute && brandName) {
         try {
             const brand = await getBrand(brandName);
             if (brand) {
