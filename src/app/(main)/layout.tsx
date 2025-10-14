@@ -1,10 +1,9 @@
 
 "use client";
 
-import Header from "@/components/header";
-import { GlobalFooter } from "@/components/global-footer";
-
-export default function MainSiteLayout({
+// This layout is a pass-through for the (main) group.
+// Specific layouts within sub-groups like (app) or (auth) will define the UI.
+export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -12,11 +11,7 @@ export default function MainSiteLayout({
 
   return (
     <>
-        <Header />
-        <div className="flex-1 w-full flex flex-col">
-            {children}
-        </div>
-        <GlobalFooter />
+        {children}
     </>
   );
 }
