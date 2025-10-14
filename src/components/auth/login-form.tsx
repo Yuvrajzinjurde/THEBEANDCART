@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
@@ -35,6 +35,7 @@ import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Logo } from "../logo";
 import { Skeleton } from "../ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 export function LoginForm() {
   const router = useRouter();
@@ -46,6 +47,7 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [brandName, setBrandName] = useState('reeva');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function initialize() {
@@ -74,6 +76,7 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginInput) {
     setIsSubmitting(true);
+    setError(null);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -105,7 +108,7 @@ export function LoginForm() {
 
     } catch (error: any) {
       console.error("Login Error:", error);
-      toast.error(error.message || "Invalid email or password. Please try again.");
+      setError(error.message || "Invalid email or password. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -198,6 +201,15 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
+            {error && (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Login Failed</AlertTitle>
+                    <AlertDescription>
+                        {error}
+                    </AlertDescription>
+                </Alert>
+            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && (
                 <Loader className="mr-2 h-4 w-4" />
