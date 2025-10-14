@@ -11,8 +11,8 @@ const ChangePasswordSchema = z.object({
   newPassword: z.string().min(8, 'New password must be at least 8 characters.'),
 });
 
-interface DecodedToken {
-  userId: string;
+interface DecodedToken extends jwt.JwtPayload {
+  sub: string;
 }
 
 export async function POST(req: Request) {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-    const userId = decoded.userId;
+    const userId = decoded.sub; // Correctly use 'sub' instead of 'userId'
 
     await dbConnect();
 
