@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle } from "lucide-react";
+import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useForm, type FieldValues } from "react-hook-form";
 import type { IUser } from "@/models/user.model";
@@ -21,6 +22,212 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+
+
+const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required.'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters.'),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match.",
+  path: ['confirmPassword'],
+});
+
+
+const ChangePasswordDialog = () => {
+    const { user, token } = useAuth();
+    const [isOpen, setIsOpen] = useState(false);
+    const [step, setStep] = useState<'initial' | 'otp' | 'password'>('initial');
+    const [otp, setOtp] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
+
+    const form = useForm({
+        resolver: zodResolver(ChangePasswordSchema),
+        defaultValues: {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+        }
+    });
+
+    const handleOpenChange = (open: boolean) => {
+        if (!open) {
+            // Reset state when closing
+            setStep('initial');
+            setOtp('');
+            form.reset();
+        }
+        setIsOpen(open);
+    };
+
+    const handleSendOtp = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (!user?.phone || !user.isPhoneVerified) {
+            toast.error("A verified phone number is required to change your password.");
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: user.phone })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message);
+            }
+            setStep('otp');
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (otp.length < 6) {
+            toast.error("Please enter a valid 6-digit OTP.");
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            // Static OTP check for now
+            if (otp === "123456") {
+                setStep('password');
+            } else {
+                throw new Error("Invalid OTP. Please try again.");
+            }
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+    
+    const onSubmitPassword = form.handleSubmit(async (data) => {
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message);
+            }
+            toast.success("Password changed successfully!");
+            handleOpenChange(false);
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    });
+
+    const toggleShowPassword = (field: keyof typeof showPasswords) => {
+        setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+            <DialogTrigger asChild>
+                <Button className="w-full">Change Password</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Change Password</DialogTitle>
+                    <DialogDescription>
+                        {step === 'initial' && 'A one-time password will be sent to your verified phone number.'}
+                        {step === 'otp' && `Enter the OTP sent to your phone number. (Hint: 123456)`}
+                        {step === 'password' && 'Enter your current and new passwords.'}
+                    </DialogDescription>
+                </DialogHeader>
+
+                {step === 'initial' && (
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
+                        <Button type="button" onClick={handleSendOtp} disabled={isSubmitting}>
+                            {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                            Send OTP
+                        </Button>
+                    </DialogFooter>
+                )}
+                
+                {step === 'otp' && (
+                    <div className="space-y-4">
+                        <Input
+                            id="otp"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            maxLength={6}
+                            placeholder="123456"
+                        />
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setStep('initial')}>Back</Button>
+                            <Button type="button" onClick={handleVerifyOtp} disabled={isSubmitting}>
+                                {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                                Verify OTP
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                )}
+                
+                {step === 'password' && (
+                    <Form {...form}>
+                        <form onSubmit={onSubmitPassword} className="space-y-4">
+                            <FormField control={form.control} name="currentPassword" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Current Password</FormLabel>
+                                    <div className="relative">
+                                    <FormControl><Input type={showPasswords.current ? "text" : "password"} {...field} /></FormControl>
+                                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => toggleShowPassword('current')}>{showPasswords.current ? <EyeOff/> : <Eye/>}</Button>
+                                    </div>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name="newPassword" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>New Password</FormLabel>
+                                    <div className="relative">
+                                    <FormControl><Input type={showPasswords.new ? "text" : "password"} {...field} /></FormControl>
+                                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => toggleShowPassword('new')}>{showPasswords.new ? <EyeOff/> : <Eye/>}</Button>
+                                    </div>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Confirm New Password</FormLabel>
+                                    <div className="relative">
+                                    <FormControl><Input type={showPasswords.confirm ? "text" : "password"} {...field} /></FormControl>
+                                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => toggleShowPassword('confirm')}>{showPasswords.confirm ? <EyeOff/> : <Eye/>}</Button>
+                                    </div>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}/>
+                             <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setStep('otp')}>Back</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
+                                    Change Password
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                )}
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 
 const DangerZoneAction = ({
@@ -42,7 +249,6 @@ const DangerZoneAction = ({
   const [step, setStep] = useState<'initial' | 'otp'>('initial');
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const { user } = useAuth();
 
   const handleInitialConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -52,7 +258,7 @@ const DangerZoneAction = ({
       setIsOpen(false);
       return;
     }
-    setIsSendingOtp(true);
+    setIsSubmitting(true);
     try {
         const res = await fetch('/api/auth/send-otp', {
             method: 'POST',
@@ -65,7 +271,7 @@ const DangerZoneAction = ({
     } catch (error: any) {
         toast.error(error.message);
     } finally {
-        setIsSendingOtp(false);
+        setIsSubmitting(false);
     }
   };
 
@@ -78,7 +284,6 @@ const DangerZoneAction = ({
     setIsSubmitting(true);
     await onConfirm(otp);
     setIsSubmitting(false);
-    // Only close and reset on successful completion or if an error is handled inside onConfirm
     setIsOpen(false); 
     setStep('initial');
     setOtp('');
@@ -86,7 +291,6 @@ const DangerZoneAction = ({
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // Reset state when closing the dialog
       setStep('initial');
       setOtp('');
     }
@@ -122,8 +326,8 @@ const DangerZoneAction = ({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           {step === 'initial' ? (
-            <AlertDialogAction onClick={handleInitialConfirm} disabled={isSendingOtp}>
-              {isSendingOtp ? <Loader className="mr-2 h-4 w-4"/> : null}
+            <AlertDialogAction onClick={handleInitialConfirm} disabled={isSubmitting}>
+              {isSubmitting ? <Loader className="mr-2 h-4 w-4"/> : null}
               I understand, continue
             </AlertDialogAction>
           ) : (
@@ -423,15 +627,7 @@ export default function ProfilePage() {
                                             </Button>
                                             <Input id="profile-pic-upload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                                             <Separator />
-                                            <div>
-                                                <Label htmlFor="old-password">Old Password</Label>
-                                                <Input id="old-password" type="password" defaultValue="••••••••" disabled={!isEditing} />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="new-password">New Password</Label>
-                                                <Input id="new-password" type="password" disabled={!isEditing} />
-                                            </div>
-                                            <Button type="button" className="w-full" disabled={!isEditing}>Change Password</Button>
+                                            <ChangePasswordDialog />
                                         </CardContent>
                                     </Card>
                                 </div>
@@ -637,5 +833,7 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
 
     
