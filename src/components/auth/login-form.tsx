@@ -39,7 +39,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { settings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
   const { login } = useAuth();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,14 +48,16 @@ export function LoginForm() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const urlBrand = searchParams.get('brand');
-    if (urlBrand) {
-        setBrandName(urlBrand);
-    }
-    if (settings.platformName) {
+    async function initialize() {
+        await fetchSettings();
+        const urlBrand = searchParams.get('brand');
+        if (urlBrand) {
+            setBrandName(urlBrand);
+        }
         setLoading(false);
     }
-  }, [settings, searchParams]);
+    initialize();
+  }, [fetchSettings, searchParams]);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
