@@ -86,13 +86,13 @@ export default function ProfilePage() {
                 facebook: u.socials?.facebook || '',
                 linkedin: u.socials?.linkedin || '',
             },
-            profilePicUrl: u.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`,
+            profilePicUrl: u.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.firstName || 'default'}`,
         });
     }
   }, [user, reset]);
 
 
-  const profilePicUrl = watch('profilePicUrl') || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`;
+  const profilePicUrl = watch('profilePicUrl') || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.firstName || 'default'}`;
   const email = (user as any)?.email || '';
   const username = email.split('@')[0];
 
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                 facebook: u.socials?.facebook || '',
                 linkedin: u.socials?.linkedin || '',
             },
-            profilePicUrl: u.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`,
+            profilePicUrl: u.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.firstName || 'default'}`,
         });
     }
     setIsEditing(false);
@@ -324,11 +324,11 @@ export default function ProfilePage() {
                                                         </FormLabel>
                                                         <div className="flex gap-2">
                                                             <FormControl>
-                                                                <Input {...field} disabled={isPhoneVerified || !isEditing} />
+                                                                <Input {...field} disabled={isPhoneVerified || !isEditing || otpSent} />
                                                             </FormControl>
                                                             {!isPhoneVerified && isEditing && (
-                                                                <Button type="button" variant="outline" onClick={handleSendOtp} disabled={isSendingOtp}>
-                                                                    {isSendingOtp ? <Loader /> : 'Verify'}
+                                                                <Button type="button" variant="outline" onClick={handleSendOtp} disabled={isSendingOtp || otpSent}>
+                                                                    {isSendingOtp ? <Loader /> : (otpSent ? 'Sent' : 'Verify')}
                                                                 </Button>
                                                             )}
                                                         </div>
