@@ -16,6 +16,7 @@ export default async function MainSiteLayout({
   
   const authRoutes = ['/login', '/signup', '/forgot-password'];
   const isAdminRoute = pathname.startsWith('/admin');
+  // Check if the pathname ends with any of the auth routes
   const isAuthRoute = authRoutes.some(route => pathname.endsWith(route));
   
   const showHeaderAndFooter = !isAdminRoute && !isAuthRoute;
