@@ -105,7 +105,7 @@ const DangerZoneAction = ({
           <AlertDialogTitle>{step === 'initial' ? title : 'Enter OTP to Confirm'}</AlertDialogTitle>
           <AlertDialogDescription>
             {step === 'initial' && description}
-            {step === 'otp' && `An OTP has been sent to your phone. Please enter the 6-digit code to finalize this action. (Hint: use 123456)`}
+            {step === 'otp' && <>An OTP has been sent to your phone. Please enter the 6-digit code to finalize this action. <span className='text-xs'>(Hint: use 123456)</span></>}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {step === 'otp' && (
@@ -615,7 +615,7 @@ export default function ProfilePage() {
                         description="Your account will be temporarily disabled, but your data will be saved. You can reactivate it anytime by simply logging back in."
                         buttonText="Deactivate Account"
                         onConfirm={handleDeactivate}
-                        className="border-destructive text-destructive hover:bg-destructive/5"
+                        className="border-destructive text-destructive hover:bg-destructive/5 sm:w-48"
                     />
                 </div>
                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg">
@@ -629,6 +629,7 @@ export default function ProfilePage() {
                         description="This action is irreversible. All your data, including order history and wishlist, will be permanently erased."
                         buttonText="Delete Account"
                         onConfirm={handleDeleteAccount}
+                        className="sm:w-48"
                     />
                 </div>
             </CardContent>
