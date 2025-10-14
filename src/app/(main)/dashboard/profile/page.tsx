@@ -10,10 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff, Lock } from "lucide-react";
 import { toast } from "react-toastify";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useForm, type FieldValues } from "react-hook-form";
 import type { IUser } from "@/models/user.model";
@@ -36,214 +35,18 @@ const ChangePasswordSchema = z.object({
 });
 
 
-const ChangePasswordDialog = () => {
-    const { user, token } = useAuth();
-    const [isOpen, setIsOpen] = useState(false);
-    const [step, setStep] = useState<'initial' | 'otp' | 'password'>('initial');
-    const [otp, setOtp] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
-
-    const form = useForm({
-        resolver: zodResolver(ChangePasswordSchema),
-        defaultValues: {
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
-        }
-    });
-
-    const handleOpenChange = (open: boolean) => {
-        if (!open) {
-            // Reset state when closing
-            setStep('initial');
-            setOtp('');
-            form.reset();
-        }
-        setIsOpen(open);
-    };
-
-    const handleSendOtp = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        if (!user?.phone || !user.isPhoneVerified) {
-            toast.error("A verified phone number is required to change your password.");
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            const res = await fetch('/api/auth/send-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: user.phone })
-            });
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message);
-            }
-            setStep('otp');
-        } catch (error: any) {
-            toast.error(error.message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleVerifyOtp = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        if (otp.length < 6) {
-            toast.error("Please enter a valid 6-digit OTP.");
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            // Static OTP check for now
-            if (otp === "123456") {
-                setStep('password');
-            } else {
-                throw new Error("Invalid OTP. Please try again.");
-            }
-        } catch (error: any) {
-            toast.error(error.message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    
-    const onSubmitPassword = form.handleSubmit(async (data) => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch('/api/auth/change-password', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(data),
-            });
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.message);
-            }
-            toast.success("Password changed successfully!");
-            handleOpenChange(false);
-        } catch (error: any) {
-            toast.error(error.message);
-        } finally {
-            setIsSubmitting(false);
-        }
-    });
-
-    const toggleShowPassword = (field: keyof typeof showPasswords) => {
-        setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
-    }
-
-    return (
-        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button className="w-full">Change Password</Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Change Password</DialogTitle>
-                    <DialogDescription>
-                        {step === 'initial' && 'A one-time password will be sent to your verified phone number.'}
-                        {step === 'otp' && `Enter the OTP sent to your phone number. (Hint: 123456)`}
-                        {step === 'password' && 'Enter your current and new passwords.'}
-                    </DialogDescription>
-                </DialogHeader>
-
-                {step === 'initial' && (
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
-                        <Button type="button" onClick={handleSendOtp} disabled={isSubmitting}>
-                            {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                            Send OTP
-                        </Button>
-                    </DialogFooter>
-                )}
-                
-                {step === 'otp' && (
-                    <div className="space-y-4">
-                        <Input
-                            id="otp"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            maxLength={6}
-                            placeholder="123456"
-                        />
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setStep('initial')}>Back</Button>
-                            <Button type="button" onClick={handleVerifyOtp} disabled={isSubmitting}>
-                                {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                                Verify OTP
-                            </Button>
-                        </DialogFooter>
-                    </div>
-                )}
-                
-                {step === 'password' && (
-                    <Form {...form}>
-                        <form onSubmit={onSubmitPassword} className="space-y-4">
-                            <FormField control={form.control} name="currentPassword" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Current Password</FormLabel>
-                                    <div className="relative">
-                                    <FormControl><Input type={showPasswords.current ? "text" : "password"} {...field} /></FormControl>
-                                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => toggleShowPassword('current')}>{showPasswords.current ? <EyeOff/> : <Eye/>}</Button>
-                                    </div>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}/>
-                            <FormField control={form.control} name="newPassword" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>New Password</FormLabel>
-                                    <div className="relative">
-                                    <FormControl><Input type={showPasswords.new ? "text" : "password"} {...field} /></FormControl>
-                                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => toggleShowPassword('new')}>{showPasswords.new ? <EyeOff/> : <Eye/>}</Button>
-                                    </div>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}/>
-                            <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Confirm New Password</FormLabel>
-                                    <div className="relative">
-                                    <FormControl><Input type={showPasswords.confirm ? "text" : "password"} {...field} /></FormControl>
-                                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => toggleShowPassword('confirm')}>{showPasswords.confirm ? <EyeOff/> : <Eye/>}</Button>
-                                    </div>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}/>
-                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setStep('otp')}>Back</Button>
-                                <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting && <Loader className="mr-2 h-4 w-4" />}
-                                    Change Password
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                )}
-            </DialogContent>
-        </Dialog>
-    );
-};
-
-
 const DangerZoneAction = ({
   action,
   title,
   description,
   buttonText,
   onConfirm,
-  className
 }: {
   action: 'deactivate' | 'delete';
   title: string;
   description: string;
   buttonText: string;
   onConfirm: (otp: string) => Promise<void>;
-  className?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'initial' | 'otp'>('initial');
@@ -300,7 +103,7 @@ const DangerZoneAction = ({
   return (
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
-        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={cn("sm:w-48 justify-center", className)}>
+        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={cn("sm:w-48 justify-center", action === 'deactivate' ? 'border-destructive text-destructive hover:bg-destructive/5' : '')}>
           {buttonText}
         </Button>
       </AlertDialogTrigger>
@@ -351,12 +154,20 @@ export default function ProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
 
+  // States for phone verification
   const [otpSent, setOtpSent] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [otp, setOtp] = useState('');
 
-  const form = useForm({
+  // States for inline password change
+  const [passwordChangeStep, setPasswordChangeStep] = useState<'initial' | 'otp' | 'password'>('initial');
+  const [passwordOtp, setPasswordOtp] = useState('');
+  const [isSubmittingPasswordChange, setIsSubmittingPasswordChange] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
+
+
+  const profileForm = useForm({
       defaultValues: {
           firstName: '',
           lastName: '',
@@ -376,8 +187,18 @@ export default function ProfilePage() {
           profilePicUrl: '',
       }
   });
+  
+  const passwordForm = useForm({
+    resolver: zodResolver(ChangePasswordSchema),
+    defaultValues: {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    }
+  });
 
-  const { formState: { isDirty }, reset, watch, setValue } = form;
+
+  const { formState: { isDirty }, reset, watch, setValue } = profileForm;
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -422,7 +243,7 @@ export default function ProfilePage() {
   const email = (user as any)?.email || '';
   const username = email.split('@')[0];
 
-  const handleSaveChanges = form.handleSubmit(async (data: FieldValues) => {
+  const handleSaveChanges = profileForm.handleSubmit(async (data: FieldValues) => {
     setIsSubmitting(true);
     toast.info("Saving changes...");
     try {
@@ -567,10 +388,64 @@ export default function ProfilePage() {
             toast.error(error.message || "Failed to delete account.");
         }
     };
+    
+    const handleSendPasswordOtp = async () => {
+        if (!user?.phone || !user.isPhoneVerified) {
+            toast.error("A verified phone number is required to change your password.");
+            return;
+        }
+        setIsSubmittingPasswordChange(true);
+        try {
+            const res = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: user.phone })
+            });
+            if (!res.ok) throw new Error((await res.json()).message);
+            setPasswordChangeStep('otp');
+            toast.success("OTP sent to your verified phone number.");
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsSubmittingPasswordChange(false);
+        }
+    };
+
+    const handleVerifyPasswordOtp = async () => {
+        if (passwordOtp !== '123456') { // Static OTP check
+            toast.error("Invalid OTP. Please try again.");
+            return;
+        }
+        setPasswordChangeStep('password');
+    };
+
+    const onSubmitPasswordChange = passwordForm.handleSubmit(async (data) => {
+        setIsSubmittingPasswordChange(true);
+        try {
+            const response = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            toast.success("Password changed successfully!");
+            setPasswordChangeStep('initial');
+            passwordForm.reset();
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsSubmittingPasswordChange(false);
+        }
+    });
+
+    const toggleShowPassword = (field: keyof typeof showPasswords) => {
+        setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+    }
 
   return (
     <div className="space-y-6">
-        <Form {...form}>
+        <Form {...profileForm}>
             <form>
                 <Card className="shadow-md">
                     <CardHeader className="flex flex-row items-start justify-between">
@@ -627,7 +502,64 @@ export default function ProfilePage() {
                                             </Button>
                                             <Input id="profile-pic-upload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                                             <Separator />
-                                            <ChangePasswordDialog />
+
+                                            {/* Inline Password Change */}
+                                            <div className="space-y-4">
+                                                {passwordChangeStep === 'initial' && (
+                                                    <Button className="w-full" onClick={() => setPasswordChangeStep('otp')}>
+                                                        <Lock className="mr-2 h-4 w-4" /> Change Password
+                                                    </Button>
+                                                )}
+
+                                                {passwordChangeStep === 'otp' && (
+                                                    <div className="space-y-2">
+                                                        <p className="text-sm text-muted-foreground">An OTP will be sent to your verified phone number.</p>
+                                                        <div className="flex gap-2">
+                                                          <Button type="button" variant="outline" className="w-full" onClick={() => setPasswordChangeStep('initial')}>Cancel</Button>
+                                                          <Button type="button" className="w-full" onClick={handleSendPasswordOtp} disabled={isSubmittingPasswordChange}>
+                                                            {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />} Send OTP
+                                                          </Button>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {passwordChangeStep === 'password' && (
+                                                  <Form {...passwordForm}>
+                                                    <form onSubmit={onSubmitPasswordChange} className="space-y-4">
+                                                        <FormField control={passwordForm.control} name="currentPassword" render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Current Password</FormLabel>
+                                                                <div className="relative"><FormControl><Input type={showPasswords.current ? "text" : "password"} {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => toggleShowPassword('current')}>{showPasswords.current ? <EyeOff/> : <Eye/>}</Button></div>
+                                                                <FormMessage/>
+                                                            </FormItem>
+                                                        )}/>
+                                                        <FormField control={passwordForm.control} name="newPassword" render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>New Password</FormLabel>
+                                                                <div className="relative"><FormControl><Input type={showPasswords.new ? "text" : "password"} {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => toggleShowPassword('new')}>{showPasswords.new ? <EyeOff/> : <Eye/>}</Button></div>
+                                                                <FormMessage/>
+                                                            </FormItem>
+                                                        )}/>
+                                                        <FormField control={passwordForm.control} name="confirmPassword" render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Confirm New Password</FormLabel>
+                                                                <div className="relative"><FormControl><Input type={showPasswords.confirm ? "text" : "password"} {...field} /></FormControl><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => toggleShowPassword('confirm')}>{showPasswords.confirm ? <EyeOff/> : <Eye/>}</Button></div>
+                                                                <FormMessage/>
+                                                            </FormItem>
+                                                        )}/>
+                                                        <div className="flex gap-2">
+                                                            <Button type="button" variant="outline" className="w-full" onClick={() => {setPasswordChangeStep('initial'); passwordForm.reset();}}>Cancel</Button>
+                                                            <Button type="submit" className="w-full" disabled={isSubmittingPasswordChange}>
+                                                                {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />}
+                                                                Save Password
+                                                            </Button>
+                                                        </div>
+                                                    </form>
+                                                   </Form>
+                                                )}
+                                            </div>
+
+
                                         </CardContent>
                                     </Card>
                                 </div>
@@ -644,17 +576,17 @@ export default function ProfilePage() {
                                                     <Label htmlFor="username">Username</Label>
                                                     <Input id="username" value={username} disabled />
                                                 </div>
-                                                <FormField control={form.control} name="nickname" render={({ field }) => (
+                                                <FormField control={profileForm.control} name="nickname" render={({ field }) => (
                                                   <FormItem><FormLabel>Nickname</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                                 )} />
-                                                <FormField control={form.control} name="firstName" render={({ field }) => (
+                                                <FormField control={profileForm.control} name="firstName" render={({ field }) => (
                                                   <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                                 )} />
-                                                <FormField control={form.control} name="lastName" render={({ field }) => (
+                                                <FormField control={profileForm.control} name="lastName" render={({ field }) => (
                                                   <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                                 )} />
                                                 <div className="md:col-span-2">
-                                                    <FormField control={form.control} name="displayName" render={({ field }) => (
+                                                    <FormField control={profileForm.control} name="displayName" render={({ field }) => (
                                                       <FormItem><FormLabel>Display Name Publicly as</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                                     )} />
                                                 </div>
@@ -670,7 +602,7 @@ export default function ProfilePage() {
                                                 <Input id="email" type="email" value={email} disabled />
                                             </div>
                                             <div className="space-y-2">
-                                                <FormField control={form.control} name="phone" render={({ field }) => (
+                                                <FormField control={profileForm.control} name="phone" render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="flex items-center gap-2">
                                                             <Phone className="h-4 w-4"/>Contact Number
@@ -702,7 +634,7 @@ export default function ProfilePage() {
                                                 )}
                                             </div>
                                             <div className="md:col-span-2">
-                                                <FormField control={form.control} name="whatsapp" render={({ field }) => (
+                                                <FormField control={profileForm.control} name="whatsapp" render={({ field }) => (
                                                     <FormItem><FormLabel className="flex items-center gap-2"><MessageSquare className="h-4 w-4"/>WhatsApp</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                                 )}/>
                                             </div>
@@ -724,22 +656,22 @@ export default function ProfilePage() {
                                     <Card className="group-disabled:bg-muted/30">
                                         <CardHeader><CardTitle>Socials</CardTitle></CardHeader>
                                         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name="socials.twitter" render={({ field }) => (
+                                            <FormField control={profileForm.control} name="socials.twitter" render={({ field }) => (
                                                 <FormItem><FormLabel className="flex items-center gap-2"><Twitter className="h-4 w-4"/>Twitter</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
-                                            <FormField control={form.control} name="socials.instagram" render={({ field }) => (
+                                            <FormField control={profileForm.control} name="socials.instagram" render={({ field }) => (
                                                 <FormItem><FormLabel className="flex items-center gap-2"><Instagram className="h-4 w-4"/>Instagram</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
-                                            <FormField control={form.control} name="socials.facebook" render={({ field }) => (
+                                            <FormField control={profileForm.control} name="socials.facebook" render={({ field }) => (
                                                 <FormItem><FormLabel className="flex items-center gap-2"><Facebook className="h-4 w-4"/>Facebook</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
-                                            <FormField control={form.control} name="socials.linkedin" render={({ field }) => (
+                                            <FormField control={profileForm.control} name="socials.linkedin" render={({ field }) => (
                                                 <FormItem><FormLabel className="flex items-center gap-2"><Linkedin className="h-4 w-4"/>LinkedIn</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
-                                            <FormField control={form.control} name="socials.website" render={({ field }) => (
+                                            <FormField control={profileForm.control} name="socials.website" render={({ field }) => (
                                                 <FormItem><FormLabel className="flex items-center gap-2"><LinkIcon className="h-4 w-4"/>Website</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
-                                            <FormField control={form.control} name="socials.telegram" render={({ field }) => (
+                                            <FormField control={profileForm.control} name="socials.telegram" render={({ field }) => (
                                                 <FormItem><FormLabel className="flex items-center gap-2"><AtSign className="h-4 w-4"/>Telegram</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
                                         </CardContent>
@@ -811,7 +743,6 @@ export default function ProfilePage() {
                         description="Your account will be temporarily disabled, but your data will be saved. You can reactivate it anytime by simply logging back in."
                         buttonText="Deactivate Account"
                         onConfirm={handleDeactivate}
-                        className="border-destructive text-destructive hover:bg-destructive/5 sm:w-48"
                     />
                 </div>
                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg">
@@ -825,7 +756,6 @@ export default function ProfilePage() {
                         description="This action is irreversible. All your data, including order history and wishlist, will be permanently erased."
                         buttonText="Delete Account"
                         onConfirm={handleDeleteAccount}
-                        className="sm:w-48"
                     />
                 </div>
             </CardContent>
@@ -833,7 +763,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
-
-    
