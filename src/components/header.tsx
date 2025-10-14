@@ -67,42 +67,48 @@ export default function Header() {
     if (!isClient) return;
 
     const pathBrand = params.brand as string;
-    const queryBrand = searchParams.get('storefront');
     
-    const globalRoutes = ['/admin', '/legal', '/wishlist', '/create-hamper', '/cart', '/search', '/login', '/signup', '/forgot-password', '/dashboard'];
-    const isGlobalRoute = pathname === '/' || globalRoutes.some(route => pathname.startsWith(route));
-
+    const globalPrefixes = [
+      'admin', 'legal', 'wishlist', 'create-hamper', 'cart', 'search',
+      'login', 'signup', 'forgot-password', 'dashboard'
+    ];
+    
+    // Check if the current path starts with any of the global prefixes
+    // or if it's the root path.
+    const isGlobalRoute = pathname === '/' || globalPrefixes.some(route => pathname.startsWith(`/${route}`));
+    
     if (isGlobalRoute) {
       setBrandName(null);
+    } else if (pathBrand) {
+      setBrandName(pathBrand);
     } else {
-      const determinedBrand = pathBrand || queryBrand || 'reeva';
-      setBrandName(determinedBrand);
+      setBrandName(null); // Default to global if no brand is in the path
     }
-  }, [pathname, params, searchParams, isClient]);
+  }, [pathname, params, isClient]);
 
   useEffect(() => {
     if (!isClient) return;
 
     async function fetchBrandData() {
         setIsLoading(true);
-        const url = brandName 
-            ? `/api/products?storefront=${brandName}&limit=1000`
-            : `/api/products?limit=2000`;
         
         try {
-            const [productsRes, brandRes] = await Promise.all([
-                fetch(url),
-                brandName ? fetch(`/api/brands/${brandName}`) : Promise.resolve(null)
-            ]);
-
-            if (productsRes.ok) {
+            // Always fetch all products for search suggestions
+            const productsRes = await fetch(`/api/products?limit=2000`);
+             if (productsRes.ok) {
                 const { products: productData } = await productsRes.json();
                 setAllProducts(productData);
             }
 
-            if (brandRes && brandRes.ok) {
-                const { brand: brandData } = await brandRes.json();
-                setBrand(brandData);
+            // Fetch specific brand data if brandName is set
+            if (brandName) {
+                const brandRes = await fetch(`/api/brands/${brandName}`);
+                if (brandRes.ok) {
+                    const { brand: brandData } = await brandRes.json();
+                    setBrand(brandData);
+                } else {
+                    setBrand(null);
+                }
             } else {
                 setBrand(null);
             }
@@ -121,7 +127,7 @@ export default function Header() {
   const wishlistCount = wishlist?.products?.length ?? 0;
   
   const effectiveBrandName = brandName || 'reeva';
-  const showSecondaryNav = pathname === `/${effectiveBrandName}/home`;
+  const showSecondaryNav = brandName ? pathname === `/${brandName}/home` : pathname === '/';
 
 
   const secondaryNavItems = [
@@ -131,8 +137,8 @@ export default function Header() {
   ];
   
   const categories = useMemo(() => {
-    if (!brandName || !brand?.categories) return [];
-    const productCategories = new Set(allProducts.map(p => p.category));
+    if (!brand?.categories) return [];
+    const productCategories = new Set(allProducts.filter(p => p.storefront === brandName).map(p => p.category));
     return brand.categories.filter(cat => productCategories.has(cat));
   }, [allProducts, brand, brandName]);
   
@@ -197,7 +203,7 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  const currentDisplayName = !isLoading && isClient && (brand && brandName ? brand.displayName : settings.platformName);
+  const currentDisplayName = !isLoading && isClient && (brandName && brand ? brand.displayName : settings.platformName);
   const homeLink = brandName ? `/${brandName}/home` : '/';
 
   const DesktopNavActions = () => (
