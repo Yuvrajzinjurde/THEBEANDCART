@@ -7,10 +7,11 @@ const VariantSchema = z.object({
   _id: z.string().optional(),
   size: z.string().optional(),
   color: z.string().optional(),
-  sku: z.string().min(1, "SKU is required for variants."),
+  sku: z.string().optional(),
   availableQuantity: z.coerce.number().min(0, "Stock must be 0 or more"),
   images: z.array(z.string().url()).optional(),
   videos: z.array(z.string().url()).optional(),
+  mainImage: z.string().url().optional(),
 });
 
 const ServerVariantSchema = VariantSchema;
@@ -47,10 +48,12 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
   })).optional(),
 }))
 .refine(data => {
-    if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
-    return data.sellingPrice <= data.mrp;
+    if (data.mrp !== undefined && data.mrp !== null && data.mrp !== '' && data.sellingPrice) {
+        return data.sellingPrice < data.mrp;
+    }
+    return true;
 }, {
-  message: "Selling price cannot be greater than MRP",
+  message: "To show a discount, Selling Price must be less than MRP.",
   path: ["sellingPrice"],
 })
 .refine(data => {
