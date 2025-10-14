@@ -103,7 +103,7 @@ const DangerZoneAction = ({
   return (
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
-        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={cn("sm:w-48 justify-center", action === 'deactivate' ? 'border-destructive text-destructive hover:bg-destructive/5' : '')}>
+        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={cn("w-full sm:w-48 justify-center", action === 'deactivate' ? 'border-destructive text-destructive hover:bg-destructive/5' : '')}>
           {buttonText}
         </Button>
       </AlertDialogTrigger>
@@ -402,7 +402,7 @@ export default function ProfilePage() {
                 body: JSON.stringify({ phone: user.phone })
             });
             if (!res.ok) throw new Error((await res.json()).message);
-            setPasswordChangeStep('otp');
+            setPasswordChangeStep('password');
             toast.success("OTP sent to your verified phone number.");
         } catch (error: any) {
             toast.error(error.message);
@@ -526,6 +526,12 @@ export default function ProfilePage() {
                                                 {passwordChangeStep === 'password' && (
                                                   <Form {...passwordForm}>
                                                     <form onSubmit={onSubmitPasswordChange} className="space-y-4">
+                                                        <FormItem>
+                                                            <FormLabel>OTP</FormLabel>
+                                                            <FormControl>
+                                                                <Input value={passwordOtp} onChange={(e) => setPasswordOtp(e.target.value)} placeholder="Enter 6-digit OTP" />
+                                                            </FormControl>
+                                                        </FormItem>
                                                         <FormField control={passwordForm.control} name="currentPassword" render={({ field }) => (
                                                             <FormItem>
                                                                 <FormLabel>Current Password</FormLabel>
