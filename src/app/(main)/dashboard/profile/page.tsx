@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle } from "lucide-react";
 import { toast } from "react-toastify";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Loader } from "@/components/ui/loader";
 import { useForm, type FieldValues } from "react-hook-form";
 import type { IUser } from "@/models/user.model";
