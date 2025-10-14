@@ -142,7 +142,7 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-2">
                             {isEditing && (
                                 <>
-                                <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>Cancel</Button>
+                                <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>Cancel</Button>
                                 <Button type="submit" disabled={isSubmitting || !isDirty}>
                                     {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
                                     Save Changes
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                                 </>
                             )}
                             {!isEditing && (
-                                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                                <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit Profile
                                 </Button>
@@ -177,12 +177,12 @@ export default function ProfilePage() {
                                                     data-ai-hint="man wearing beanie"
                                                 />
                                                 {isEditing && (
-                                                    <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
+                                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
                                                         <X className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                             </div>
-                                            <Button variant="outline" className="w-full" disabled={!isEditing}>
+                                            <Button type="button" variant="outline" className="w-full" disabled={!isEditing}>
                                                 <UploadCloud className="mr-2 h-4 w-4" />
                                                 Upload Photo
                                             </Button>
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                                                 <Label htmlFor="new-password">New Password</Label>
                                                 <Input id="new-password" type="password" disabled={!isEditing} />
                                             </div>
-                                            <Button className="w-full" disabled={!isEditing}>Change Password</Button>
+                                            <Button type="button" className="w-full" disabled={!isEditing}>Change Password</Button>
                                         </CardContent>
                                     </Card>
                                 </div>
