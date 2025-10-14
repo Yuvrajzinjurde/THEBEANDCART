@@ -20,6 +20,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 
 const DangerZoneAction = ({
@@ -28,12 +29,14 @@ const DangerZoneAction = ({
   description,
   buttonText,
   onConfirm,
+  className
 }: {
   action: 'deactivate' | 'delete';
   title: string;
   description: string;
   buttonText: string;
   onConfirm: (otp: string) => Promise<void>;
+  className?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'initial' | 'otp'>('initial');
@@ -93,7 +96,7 @@ const DangerZoneAction = ({
   return (
     <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
-        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={action === 'deactivate' ? "border-destructive text-destructive" : ""}>
+        <Button variant={action === 'delete' ? 'destructive' : 'outline'} className={cn("sm:w-48 justify-center", className)}>
           {buttonText}
         </Button>
       </AlertDialogTrigger>
@@ -612,6 +615,7 @@ export default function ProfilePage() {
                         description="Your account will be temporarily disabled, but your data will be saved. You can reactivate it anytime by simply logging back in."
                         buttonText="Deactivate Account"
                         onConfirm={handleDeactivate}
+                        className="border-destructive text-destructive hover:bg-destructive/5"
                     />
                 </div>
                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg">
