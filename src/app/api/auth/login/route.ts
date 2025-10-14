@@ -58,13 +58,13 @@ export async function POST(req: Request) {
     }
     
     const accessToken = jwt.sign(
-      { roles: userRoles, name: user.firstName, brand: user.brand },
+      { roles: userRoles, name: user.firstName, brand: user.brand, userId: user._id.toString() }, // Add userId to payload
       JWT_SECRET,
       { expiresIn: '15m', subject: user._id.toString() } // Use standard 'sub' field
     );
 
     const refreshToken = jwt.sign(
-      { }, // Keep payload minimal for refresh token
+      { userId: user._id.toString() }, // Add userId to payload
       JWT_REFRESH_SECRET,
       { expiresIn: '7d', subject: user._id.toString() } // Use standard 'sub' field
     );
@@ -85,10 +85,14 @@ export async function POST(req: Request) {
         path: '/',
     });
 
+    const userResponseData = user.toObject();
+    // Add userId to the user object being sent to the client
+    userResponseData.userId = user._id.toString();
+
     const response = NextResponse.json({ 
         message: 'Login successful', 
         user: {
-            ...user.toObject(),
+            ...userResponseData,
             roles: userRoles,
         },
         token: accessToken
