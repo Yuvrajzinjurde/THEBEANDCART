@@ -8,7 +8,7 @@ import { Loader } from "@/components/ui/loader";
 
 function SignUpPageContent() {
     return (
-        <main className="container flex flex-1 items-center justify-center p-4">
+        <main className="container flex min-h-screen flex-1 items-center justify-center p-4">
             <SignUpForm />
         </main>
     )
