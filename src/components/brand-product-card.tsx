@@ -68,13 +68,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   );
 
   useEffect(() => {
-    if (!hasImages) return; // Do not set up autoplay if there are no images
+    if (!hasImages) return;
 
     const carouselEl = carouselRef.current;
     if (!carouselEl) return;
 
     const startAutoplay = () => {
-      if (autoplayPlugin.current && api) { // Check if api is available
+      // Ensure the plugin and API are ready, and there's more than one slide to play
+      if (api && autoplayPlugin.current && api.scrollSnapList().length > 1) {
         autoplayPlugin.current.play();
       }
     };
