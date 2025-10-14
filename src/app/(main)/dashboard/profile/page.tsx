@@ -326,9 +326,9 @@ export default function ProfilePage() {
                                                             <FormControl>
                                                                 <Input {...field} disabled={isPhoneVerified || !isEditing || otpSent} />
                                                             </FormControl>
-                                                            {!isPhoneVerified && isEditing && (
-                                                                <Button type="button" variant="outline" onClick={handleSendOtp} disabled={isSendingOtp || otpSent}>
-                                                                    {isSendingOtp ? <Loader /> : (otpSent ? 'Sent' : 'Verify')}
+                                                            {!isPhoneVerified && isEditing && !otpSent && (
+                                                                <Button type="button" variant="outline" onClick={handleSendOtp} disabled={isSendingOtp}>
+                                                                    {isSendingOtp ? <Loader /> : 'Send OTP'}
                                                                 </Button>
                                                             )}
                                                         </div>
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                                                         <div className="flex gap-2">
                                                             <Input id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} placeholder="123456" />
                                                             <Button type="button" onClick={handleVerifyOtp} disabled={isVerifyingOtp}>
-                                                                {isVerifyingOtp ? <Loader /> : 'Submit'}
+                                                                {isVerifyingOtp ? <Loader /> : 'Verify OTP'}
                                                             </Button>
                                                         </div>
                                                     </div>
