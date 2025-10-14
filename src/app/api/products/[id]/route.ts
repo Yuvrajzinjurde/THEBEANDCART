@@ -51,62 +51,27 @@ export async function PUT(
         }
         
         const { variants, ...commonData } = validation.data;
-        const mainProduct = await Product.findById(id);
-        const styleId = mainProduct?.styleId || new Types.ObjectId().toHexString();
         
-        if (!variants || variants.length === 0) {
-            // This is a simple update for a single product without variants
-            const updatedProduct = await Product.findByIdAndUpdate(id, { ...commonData, styleId }, { new: true });
-            if (!updatedProduct) {
-                return NextResponse.json({ message: 'Product not found' }, { status: 404 });
-            }
-            return NextResponse.json({ message: 'Product updated successfully', products: [updatedProduct] }, { status: 200 });
-        }
+        const updateData: any = {
+            ...commonData,
+            variants: (variants || []).map(v => ({
+                ...v,
+                availableQuantity: v.stock, // Map stock to availableQuantity
+            })),
+        };
         
-        // This is an update for a product with variants (a catalog)
-        const variantIdsFromPayload = variants.map(v => (v as any)._id).filter(Boolean).map(vid => new Types.ObjectId(vid));
-        
-        // Delete variants that are no longer in the payload
-        await Product.deleteMany({
-            styleId: styleId,
-            _id: { $nin: variantIdsFromPayload }
-        });
-
-        // Update existing variants and insert new ones
-        const bulkOps = variants.map(variant => {
-            const variantData = {
-                ...commonData,
-                ...variant,
-                styleId,
-                name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
-            };
-            
-            if ((variant as any)._id) {
-                // Update existing variant
-                return {
-                    updateOne: {
-                        filter: { _id: new Types.ObjectId((variant as any)._id), styleId },
-                        update: { $set: variantData },
-                        upsert: false // Do not create a new doc if it doesn't exist
-                    }
-                };
-            } else {
-                // Insert new variant
-                return {
-                    insertOne: {
-                        document: variantData
-                    }
-                };
-            }
-        });
-        
-        if (bulkOps.length > 0) {
-            await Product.bulkWrite(bulkOps as any);
+        // Calculate total stock from variants if they exist
+        if (updateData.variants && updateData.variants.length > 0) {
+            updateData.stock = updateData.variants.reduce((acc: number, v: any) => acc + v.availableQuantity, 0);
         }
 
-        const updatedProducts = await Product.find({ styleId });
+        const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
+        
+        if (!updatedProduct) {
+            return NextResponse.json({ message: 'Product not found' }, { status: 404 });
+        }
 
-        return NextResponse.json({ message: 'Product catalog updated successfully', products: updatedProducts }, { status: 200 });
+        return NextResponse.json({ message: 'Product updated successfully', product: updatedProduct }, { status: 200 });
 
     } catch (error) {
         console.error('Failed to update product:', error);

@@ -1,6 +1,13 @@
 
-
 import mongoose, { Document, Schema, Model } from 'mongoose';
+
+export interface IVariant {
+  sku: string;
+  color?: string;
+  size?: string;
+  availableQuantity: number;
+  images: string[];
+}
 
 export interface IProduct extends Document {
   name: string;
@@ -9,7 +16,7 @@ export interface IProduct extends Document {
   mrp?: number; // Original Price (Maximum Retail Price)
   sellingPrice: number; // Discounted/Selling Price
   purchasePrice?: number; // Cost price for internal calculations
-  category:  string; 
+  category: string;
   images: string[];
   videos?: string[];
   stock: number;
@@ -19,47 +26,62 @@ export interface IProduct extends Document {
   views: number;
   clicks: number;
   keywords: string[];
-  returnPeriod: number; // Number of days for return
-  // New fields for variants
-  styleId?: string; // Groups variants together
+  returnPeriod: number;
+  styleId?: string;
   color?: string;
   size?: string;
   sku: string;
+  variants?: IVariant[]; // <-- Added field for multiple variants
 }
 
-const ProductSchema: Schema<IProduct> = new Schema({
-  name: { type: String, required: true, trim: true },
-  description: { type: String, required: true },
-  mainImage: { type: String, required: true },
-  mrp: { type: Number, min: 0 },
-  sellingPrice: { type: Number, required: true, min: 0 },
-  purchasePrice: { type: Number, min: 0 },
-  category:  { type: String, required: true },
-  images: [{ type: String, required: true }],
-  videos: [{ type: String }],
-  stock: { type: Number, required: true, min: 0, default: 0 },
-  rating: { type: Number, min: 0, max: 5, default: 0 },
-  brand: { type: String, required: true },
-  storefront: { type: String, required: true, index: true },
-  views: { type: Number, default: 0 },
-  clicks: { type: Number, default: 0 },
-  keywords: { type: [String], default: [] },
-  returnPeriod: { type: Number, default: 10 },
-  styleId: { type: String, index: true },
-  color: { type: String },
-  size: { type: String },
-  sku: { type: String, index: true, unique: true, required: true, sparse: true },
-}, { timestamps: true });
+const VariantSchema = new Schema<IVariant>(
+  {
+    sku: { type: String, required: true },
+    color: { type: String },
+    size: { type: String },
+    availableQuantity: { type: Number, required: true, min: 0 },
+    images: [{ type: String, required: true }],
+  },
+  { _id: false }
+);
 
-// For backwards compatibility, rename 'price' to 'sellingPrice' where it might be used
-ProductSchema.virtual('price').get(function() {
+const ProductSchema: Schema<IProduct> = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    description: { type: String, required: true },
+    mainImage: { type: String, required: true },
+    mrp: { type: Number, min: 0 },
+    sellingPrice: { type: Number, required: true, min: 0 },
+    purchasePrice: { type: Number, min: 0 },
+    category: { type: String, required: true },
+    images: [{ type: String, required: true }],
+    videos: [{ type: String }],
+    stock: { type: Number, required: true, min: 0, default: 0 },
+    rating: { type: Number, min: 0, max: 5, default: 0 },
+    brand: { type: String, required: true },
+    storefront: { type: String, required: true, index: true },
+    views: { type: Number, default: 0 },
+    clicks: { type: Number, default: 0 },
+    keywords: { type: [String], default: [] },
+    returnPeriod: { type: Number, default: 10 },
+    styleId: { type: String, index: true },
+    color: { type: String },
+    size: { type: String },
+    sku: { type: String, index: true, unique: true, required: true, sparse: true },
+    variants: [VariantSchema], // <-- Added variants array
+  },
+  { timestamps: true }
+);
+
+// Virtual field for backwards compatibility
+ProductSchema.virtual('price').get(function () {
   return this.sellingPrice;
 });
-
 
 // Compound index to quickly find variants of a style
 ProductSchema.index({ styleId: 1, storefront: 1 });
 
-const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+const Product: Model<IProduct> =
+  mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;

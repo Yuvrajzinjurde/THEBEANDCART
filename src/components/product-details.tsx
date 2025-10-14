@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle } from 'lucide-react';
-import type { IProduct } from '@/models/product.model';
+import type { IProduct, IVariant } from '@/models/product.model';
 import type { ICoupon } from '@/models/coupon.model';
 import type { IReview } from '@/models/review.model';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,6 @@ import RatingsAndReviews from './ratings-and-reviews';
 
 interface ProductDetailsProps {
   product: IProduct;
-  variants: IProduct[];
   storefront: string;
   reviewStats: ReviewStats;
   reviews: IReview[];
@@ -61,13 +60,12 @@ const ThumbsButton: React.FC<React.PropsWithChildren<{
   )
 }
 
-export default function ProductDetails({ product: initialProduct, variants, storefront, reviewStats, reviews, coupons, children }: ProductDetailsProps) {
+export default function ProductDetails({ product: initialProduct, storefront, reviewStats, reviews, coupons, children }: ProductDetailsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, token } = useAuth();
   const { setCart, setWishlist } = useUserStore();
   
-  const [product, setProduct] = useState(initialProduct);
   const [quantity, setQuantity] = useState(1);
   
   const returnPolicySummary = `
@@ -88,45 +86,38 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
   const [isZooming, setIsZooming] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    setProduct(initialProduct);
-    setSelectedColor(initialProduct.color);
-    setSelectedSize(initialProduct.size);
-    setQuantity(1);
-  }, [initialProduct]);
-
-  const { uniqueColors, sizesForSelectedColor } = useMemo(() => {
+  
+  const { uniqueColors, sizesForSelectedColor, selectedVariant } = useMemo(() => {
+    const variants = initialProduct.variants || [];
     const colorMap = new Map<string, string>();
     const sizeSet = new Set<string>();
-    
+
     variants.forEach(v => {
-      if (v.color && !colorMap.has(v.color)) {
-        colorMap.set(v.color, v.images[0]);
-      }
-      if (v.color === selectedColor && v.size) {
-        sizeSet.add(v.size);
-      }
+        if (v.color && !colorMap.has(v.color)) {
+            colorMap.set(v.color, v.images[0]);
+        }
+        if (v.color === selectedColor && v.size) {
+            sizeSet.add(v.size);
+        }
     });
 
-    return {
-      uniqueColors: Array.from(colorMap.entries()).map(([color, imageUrl]) => ({ color, imageUrl })),
-      sizesForSelectedColor: Array.from(sizeSet).sort(),
-    };
-  }, [variants, selectedColor]);
-  
-  useEffect(() => {
-    const variant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
-    if (variant && variant._id !== product._id) {
-        router.replace(`/${storefront}/products/${variant._id}`);
-    } else if (!variant && selectedColor) {
-      const firstVariantOfColor = variants.find(v => v.color === selectedColor);
-      if (firstVariantOfColor && firstVariantOfColor._id !== product._id) {
-        router.replace(`/${storefront}/products/${firstVariantOfColor._id}`);
-      }
-    }
-  }, [selectedColor, selectedSize, variants, product._id, router, storefront]);
+    const currentVariant = variants.find(v => v.color === selectedColor && v.size === selectedSize);
 
+    return {
+        uniqueColors: Array.from(colorMap.entries()).map(([color, imageUrl]) => ({ color, imageUrl })),
+        sizesForSelectedColor: Array.from(sizeSet).sort(),
+        selectedVariant: currentVariant,
+    };
+  }, [initialProduct.variants, selectedColor, selectedSize]);
+
+
+  useEffect(() => {
+    // If a variant is selected, ensure URL reflects it (hypothetical)
+    // This part might need adjustment based on how you want to handle variant URLs
+    if (selectedVariant) {
+        // console.log("Selected variant:", selectedVariant.sku);
+    }
+  }, [selectedVariant]);
 
   const onThumbClick = useCallback((index: number) => {
     mainApi?.scrollTo(index);
@@ -154,21 +145,28 @@ export default function ProductDetails({ product: initialProduct, variants, stor
     const y = ((e.clientY - top) / height) * 100;
     setMousePosition({ x, y });
   };
+  
+  const mediaItems = useMemo(() => {
+    let images = initialProduct.images || [];
+    if (selectedVariant && selectedVariant.images.length > 0) {
+        images = selectedVariant.images;
+    }
+    return images.map(url => ({ type: 'image', url }));
+  }, [initialProduct.images, selectedVariant]);
 
-  const mediaItems = useMemo(() => [
-    ...product.images.map(url => ({ type: 'image', url })),
-  ], [product.images]);
 
-  const categoryDisplay = product.category;
-  const hasDiscount = product.mrp && product.mrp > product.sellingPrice;
-  const discountPercentage = hasDiscount ? Math.round(((product.mrp! - product.sellingPrice) / product.mrp!) * 100) : 0;
-  const amountSaved = hasDiscount ? product.mrp! - product.sellingPrice : 0;
+  const categoryDisplay = initialProduct.category;
+  const hasDiscount = initialProduct.mrp && initialProduct.mrp > initialProduct.sellingPrice;
+  const discountPercentage = hasDiscount ? Math.round(((initialProduct.mrp! - initialProduct.sellingPrice) / initialProduct.mrp!) * 100) : 0;
+  const amountSaved = hasDiscount ? initialProduct.mrp! - initialProduct.sellingPrice : 0;
+  
+  const currentStock = selectedVariant ? selectedVariant.availableQuantity : initialProduct.stock;
 
   const handleIncreaseQuantity = () => {
-    if (quantity < product.stock) {
+    if (quantity < currentStock) {
       setQuantity(q => q + 1);
     } else {
-      toast.warn(`Only ${product.stock} items available.`);
+      toast.warn(`Only ${currentStock} items available.`);
     }
   };
 
@@ -183,7 +181,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         return;
     }
     
-    if (variants.length > 1 && (!selectedColor || !selectedSize)) {
+    if ((initialProduct.variants?.length || 0) > 0 && !selectedVariant) {
         toast.warn("Please select a color and size before adding to cart.");
         return;
     }
@@ -196,7 +194,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ 
-              productId: product._id, 
+              productId: initialProduct._id, 
               quantity: quantity,
               size: selectedSize,
               color: selectedColor
@@ -204,7 +202,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
-        toast.success(`${quantity} x ${product.name} added to cart!`);
+        toast.success(`${quantity} x ${initialProduct.name} added to cart!`);
         setCart(result.cart);
     } catch (error: any) {
         throw error;
@@ -224,7 +222,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ productId: product._id }),
+            body: JSON.stringify({ productId: initialProduct._id }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
@@ -251,7 +249,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                   <CarouselItem key={index}>
                     <div className="w-full aspect-square relative bg-muted rounded-lg overflow-hidden">
                       {media.type === 'image' ? (
-                        <Image src={media.url} alt={product.name} fill className="object-cover" />
+                        <Image src={media.url} alt={initialProduct.name} fill className="object-cover" />
                       ) : (
                         <video src={media.url} controls className="w-full h-full object-cover" />
                       )}
@@ -269,7 +267,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               <div className="absolute top-0 left-full ml-4 h-full w-[400px] bg-white border rounded-lg shadow-lg hidden xl:block overflow-hidden pointer-events-none z-20">
                 <Image
                   src={mediaItems[selectedIndex].url}
-                  alt={`${product.name} zoomed`}
+                  alt={`${initialProduct.name} zoomed`}
                   fill
                   className="object-cover transition-transform duration-200 ease-out"
                   style={{ transform: 'scale(2.5)', transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
@@ -282,7 +280,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
               {mediaItems.map((media, index) => (
                 <CarouselItem key={index} className="pl-2 basis-[16.66%]">
                   <ThumbsButton onClick={() => onThumbClick(index)} selected={index === selectedIndex}>
-                    <Image src={media.url} alt={`${product.name} thumbnail ${index + 1}`} fill className="object-cover" />
+                    <Image src={media.url} alt={`${initialProduct.name} thumbnail ${index + 1}`} fill className="object-cover" />
                     {media.type === 'video' && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <PlayCircle className="w-6 h-6 text-white" />
@@ -317,22 +315,22 @@ export default function ProductDetails({ product: initialProduct, variants, stor
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink href={`/${storefront}/products?category=${categoryDisplay}`}>{categoryDisplay}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>{product.name}</BreadcrumbPage></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbPage>{initialProduct.name}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         
         <div className="mt-4">
-          <h1 className="text-3xl lg:text-4xl font-bold">{product.name}</h1>
-          <p className="text-muted-foreground mt-1">{product.brand}</p>
+          <h1 className="text-3xl lg:text-4xl font-bold">{initialProduct.name}</h1>
+          <p className="text-muted-foreground mt-1">{initialProduct.brand}</p>
         </div>
         
         <div className='space-y-2 mt-4'>
              <p className="text-sm font-semibold text-primary">Special price</p>
              <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="text-3xl font-bold">₹{product.sellingPrice.toLocaleString('en-IN')}</span>
+                <span className="text-3xl font-bold">₹{initialProduct.sellingPrice.toLocaleString('en-IN')}</span>
                 {hasDiscount && (
                     <>
-                        <span className="text-lg text-muted-foreground line-through">₹{product.mrp!.toLocaleString('en-IN')}</span>
+                        <span className="text-lg text-muted-foreground line-through">₹{initialProduct.mrp!.toLocaleString('en-IN')}</span>
                         <span className="text-lg font-semibold text-green-600">{discountPercentage}% off</span>
                           <TooltipProvider>
                             <Tooltip>
@@ -346,11 +344,11 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                                         <p className="font-bold text-base">Price details</p>
                                         <div className="flex justify-between text-sm">
                                             <p className="text-muted-foreground">Maximum Retail Price</p>
-                                            <p>₹{product.mrp!.toFixed(2)}</p>
+                                            <p>₹{initialProduct.mrp!.toFixed(2)}</p>
                                         </div>
                                         <div className="flex justify-between text-sm">
                                             <p className="text-muted-foreground">Selling Price</p>
-                                            <p>₹{product.sellingPrice.toFixed(2)}</p>
+                                            <p>₹{initialProduct.sellingPrice.toFixed(2)}</p>
                                         </div>
                                         <Separator />
                                         <div className="flex justify-between text-sm font-semibold text-green-600">
@@ -452,7 +450,7 @@ export default function ProductDetails({ product: initialProduct, variants, stor
                 </div>
             )}
             <div className="flex items-center gap-2 text-sm">
-                <p>{product.returnPeriod} days return policy</p>
+                <p>{initialProduct.returnPeriod} days return policy</p>
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger>
@@ -466,14 +464,14 @@ export default function ProductDetails({ product: initialProduct, variants, stor
 
         <Separator className="my-6" />
 
-        <div className='prose prose-sm sm:prose-base max-w-none text-muted-foreground' dangerouslySetInnerHTML={{ __html: product.description }} />
+        <div className='prose prose-sm sm:prose-base max-w-none text-muted-foreground' dangerouslySetInnerHTML={{ __html: initialProduct.description }} />
 
         {children}
 
         <Separator className="my-8" />
         
         <RatingsAndReviews 
-            productId={product._id as string} 
+            productId={initialProduct._id as string} 
             reviewStats={reviewStats} 
             reviews={reviews}
         />

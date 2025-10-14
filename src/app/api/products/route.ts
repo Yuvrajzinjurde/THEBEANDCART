@@ -119,41 +119,24 @@ export async function POST(req: Request) {
         const { variants, ...commonData } = validation.data;
         const styleId = new Types.ObjectId().toHexString();
 
-        const generateSku = (name: string, color?: string, size?: string): string => {
-            const namePart = name.slice(0, 5).toUpperCase().replace(/\s+/g, '');
-            const colorPart = color ? color.slice(0, 3).toUpperCase() : '';
-            const sizePart = size ? size.toUpperCase() : '';
-            const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-            return [namePart, colorPart, sizePart, randomPart].filter(Boolean).join('-');
+        const productData = {
+          ...commonData,
+          styleId,
+          variants: (variants || []).map(v => ({
+            ...v,
+            availableQuantity: v.stock, // Map stock to availableQuantity
+          })),
         };
-
-        if (!variants || variants.length === 0) {
-            // This is a single product without variants
-            const productData = { 
-                ...commonData, 
-                styleId,
-                mainImage: commonData.mainImage,
-                sku: commonData.sku || generateSku(commonData.name)
-            };
-            const newProduct = new Product(productData);
-            await newProduct.save();
-            return NextResponse.json({ message: 'Product created successfully', products: [newProduct] }, { status: 201 });
+        
+        // If there are variants, calculate total stock. Otherwise, use top-level stock.
+        if (productData.variants && productData.variants.length > 0) {
+            productData.stock = productData.variants.reduce((acc, v) => acc + v.availableQuantity, 0);
         }
 
-        // This is a catalog with multiple variants
-        const productDocs = variants.map(variant => ({
-            ...commonData,
-            ...variant,
-            styleId,
-            name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
-            mainImage: commonData.mainImage,
-            images: variant.images,
-            sku: variant.sku || generateSku(commonData.name, variant.color, variant.size),
-        }));
+        const newProduct = new Product(productData);
+        await newProduct.save();
 
-        const newProducts = await Product.insertMany(productDocs);
-
-        return NextResponse.json({ message: 'Product catalog created successfully', products: newProducts }, { status: 201 });
+        return NextResponse.json({ message: 'Product created successfully', product: newProduct }, { status: 201 });
 
     } catch (error) {
         console.error('Failed to create product:', error);

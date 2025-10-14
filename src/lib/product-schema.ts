@@ -4,11 +4,11 @@ import { z } from 'zod';
 const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
-  _id: z.string().optional(), // Include _id for editing existing variants
+  _id: z.string().optional(),
   size: z.string().optional(),
   color: z.string().optional(),
   sku: z.string().min(1, "SKU is required for variants."),
-  stock: z.coerce.number().min(0, "Stock must be 0 or more"),
+  availableQuantity: z.coerce.number().min(0, "Stock must be 0 or more"),
   images: z.array(z.string().url()).optional(),
   videos: z.array(z.string().url()).optional(),
 });
@@ -32,7 +32,7 @@ const BaseProductFormSchema = z.object({
   keywords: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
   returnPeriod: z.coerce.number().min(0).optional(),
-  variants: z.array(ServerVariantSchema),
+  variants: z.array(ServerVariantSchema).optional(),
 });
 
 
@@ -44,7 +44,7 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
   variants: z.array(VariantSchema.extend({
       images: z.array(FileValueSchema).optional(),
       videos: z.array(FileValueSchema).optional(),
-  })),
+  })).optional(),
 }))
 .refine(data => {
     if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;

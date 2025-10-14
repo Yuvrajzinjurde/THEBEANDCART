@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
@@ -130,7 +129,6 @@ export default function ProductPage() {
   
   const [product, setProduct] = useState<IProduct | null>(null);
   const [brand, setBrand] = useState<IBrand | null>(null);
-  const [variants, setVariants] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reviewStats, setReviewStats] = useState<ReviewStats>({ totalRatings: 0, totalReviews: 0, averageRating: 0 });
@@ -191,15 +189,6 @@ export default function ProductPage() {
               setCoupons(couponData.coupons);
           }
         }
-
-        // If the product has a styleId, fetch its variants
-        if (mainProduct.styleId) {
-          const variantsResponse = await fetch(`/api/products/variants/${mainProduct.styleId}`);
-          if (variantsResponse.ok) {
-            const variantsData = await variantsResponse.json();
-            setVariants(variantsData.variants);
-          }
-        }
         
         // Fetch similar products
         if (mainProduct.keywords && mainProduct.keywords.length > 0) {
@@ -252,7 +241,6 @@ export default function ProductPage() {
       <main className="container py-8 px-4">
         <ProductDetails 
           product={product} 
-          variants={variants.length > 0 ? variants : [product]} 
           storefront={storefront} 
           reviewStats={reviewStats}
           reviews={reviews}
