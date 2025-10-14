@@ -17,6 +17,7 @@ import { useForm, type FieldValues } from "react-hook-form";
 import type { IUser } from "@/models/user.model";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 export default function ProfilePage() {
@@ -173,7 +174,7 @@ export default function ProfilePage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         setOtpSent(true);
-        toast.success("OTP sent to your phone number.");
+        toast.success("OTP sent successfully.");
     } catch (error: any) {
         toast.error(error.message);
     } finally {
@@ -360,6 +361,7 @@ export default function ProfilePage() {
                                                       setValue('whatsapp', phoneValue, { shouldDirty: true });
                                                     }
                                                   }}
+                                                  disabled={!isEditing}
                                                 />
                                                 <Label htmlFor="same-as-contact" className="text-sm font-normal text-muted-foreground">WhatsApp number is the same as contact number</Label>
                                               </div>
@@ -416,22 +418,32 @@ export default function ProfilePage() {
                 <CardTitle>FAQs</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="space-y-2">
-                    <h4 className="font-semibold">What happens when I update my email address (or mobile number)?</h4>
-                    <p className="text-muted-foreground text-sm">Your login email id (or mobile number) changes, likewise. You'll receive all your account related communication on your updated email address (or mobile number).</p>
-                </div>
-                <div className="space-y-2">
-                    <h4 className="font-semibold">When will my account be updated with the new email address (or mobile number)?</h4>
-                    <p className="text-muted-foreground text-sm">It happens as soon as you confirm the verification code sent to your email (or mobile) and save the changes.</p>
-                </div>
-                <div className="space-y-2">
-                    <h4 className="font-semibold">What happens to my existing account when I update my email address (or mobile number)?</h4>
-                    <p className="text-muted-foreground text-sm">Updating your email address (or mobile number) doesn't invalidate your account. Your account remains fully functional. You'll continue seeing your Order history, saved information and personal details.</p>
-                </div>
-                <div className="space-y-2">
-                    <h4 className="font-semibold">Does my Seller account get affected when I update my email address?</h4>
-                    <p className="text-muted-foreground text-sm">The platform has a 'single sign-on' policy. Any changes will reflect in your Seller account also.</p>
-                </div>
+                <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>What happens when I update my email address (or mobile number)?</AccordionTrigger>
+                        <AccordionContent>
+                        Your login email id (or mobile number) changes, likewise. You'll receive all your account related communication on your updated email address (or mobile number).
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                        <AccordionTrigger>When will my account be updated with the new email address (or mobile number)?</AccordionTrigger>
+                        <AccordionContent>
+                        It happens as soon as you confirm the verification code sent to your email (or mobile) and save the changes.
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-3">
+                        <AccordionTrigger>What happens to my existing account when I update my email address (or mobile number)?</AccordionTrigger>
+                        <AccordionContent>
+                        Updating your email address (or mobile number) doesn't invalidate your account. Your account remains fully functional. You'll continue seeing your Order history, saved information and personal details.
+                        </AccordionContent>
+                    </AccordionItem>
+                     <AccordionItem value="item-4">
+                        <AccordionTrigger>Does my Seller account get affected when I update my email address?</AccordionTrigger>
+                        <AccordionContent>
+                        The platform has a 'single sign-on' policy. Any changes will reflect in your Seller account also.
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
                 <Separator />
                 <div className="flex flex-col items-start gap-2">
                     <Button variant="link" className="p-0 h-auto text-primary">Deactivate Account</Button>
