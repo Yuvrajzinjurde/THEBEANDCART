@@ -9,7 +9,7 @@ import { Loader } from '@/components/ui/loader';
 import Cookies from 'js-cookie';
 
 export interface User {
-  userId: string;
+  _id: string;
   roles: string[];
   name: string;
   brand?: string;
@@ -61,7 +61,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   login: (user, token) => {
     Cookies.set('accessToken', token, { expires: 1 / 96, path: '/' }); // 15 minutes
     set({ user, token, loading: false });
-    fetchUserData(token);
+    if(token) fetchUserData(token);
   },
   logout: async () => {
     try {

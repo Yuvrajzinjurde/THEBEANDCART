@@ -89,7 +89,7 @@ export default function ProfilePage() {
     setIsSubmitting(true);
     toast.info("Saving changes...");
     try {
-        const response = await fetch(`/api/users/${user?.userId}/profile`, {
+        const response = await fetch(`/api/users/${user?._id}/profile`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',

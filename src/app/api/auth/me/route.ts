@@ -32,11 +32,22 @@ export async function GET(req: NextRequest) {
             decodedAccessToken = null;
         }
     }
-
+    
+    // If access token is valid, use it to refetch full user object to ensure it's up-to-date
     if (decodedAccessToken) {
-        // Token is valid, return user data from token
-        // This is faster and avoids a database hit on every navigation
-        return NextResponse.json({ user: decodedAccessToken, token: accessToken });
+        const user = await User.findById(decodedAccessToken.userId).populate({ path: 'roles', model: Role }).lean();
+        if (!user) {
+            return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
+        const userRoles = user.roles.map((role: any) => role.name);
+        const userData = {
+            _id: user._id,
+            roles: userRoles,
+            name: user.firstName,
+            brand: user.brand,
+            profilePicUrl: user.profilePicUrl
+        };
+        return NextResponse.json({ user: userData, token: accessToken });
     }
     
     // Access token is invalid or expired, try to refresh it
@@ -69,10 +80,11 @@ export async function GET(req: NextRequest) {
         });
         
         const userData = {
-            userId: user._id,
+            _id: user._id,
             roles: userRoles,
             name: user.firstName,
             brand: user.brand,
+            profilePicUrl: user.profilePicUrl
         };
 
         const response = NextResponse.json({ user: userData, token: newAccessToken });
