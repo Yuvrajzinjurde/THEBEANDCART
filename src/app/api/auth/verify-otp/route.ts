@@ -1,31 +1,18 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import twilio from 'twilio';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
 import jwt from 'jsonwebtoken';
+
+const STATIC_OTP = "123456";
 
 const otpSchema = z.object({
     phone: z.string().min(10, "Invalid phone number"),
     code: z.string().min(6, "OTP must be 6 characters long"),
 });
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const verificationServiceSid = process.env.TWILIO_VERIFICATION_SERVICE_SID;
-
-if (!accountSid || !authToken || !verificationServiceSid) {
-    console.error("Twilio environment variables are not set.");
-}
-
-const client = twilio(accountSid, authToken);
-
 export async function POST(req: Request) {
-    if (!accountSid || !authToken || !verificationServiceSid) {
-        return NextResponse.json({ message: 'Twilio service is not configured.' }, { status: 500 });
-    }
-
     try {
         const authHeader = req.headers.get('authorization');
         const token = authHeader?.split(' ')[1];
@@ -47,13 +34,8 @@ export async function POST(req: Request) {
         }
         
         const { phone, code } = validation.data;
-        const formattedPhone = `+91${phone}`;
 
-        const verification_check = await client.verify.v2.services(verificationServiceSid)
-            .verificationChecks
-            .create({ to: formattedPhone, code });
-
-        if (verification_check.status === 'approved') {
+        if (code === STATIC_OTP) {
             await User.findByIdAndUpdate(userId, { 
                 phone: phone,
                 isPhoneVerified: true 
