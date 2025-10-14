@@ -1,6 +1,14 @@
 
-
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
+
+export interface ISocialLinks {
+    twitter?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+    website?: string;
+    telegram?: string;
+}
 
 export interface IUser extends Document {
   firstName: string;
@@ -8,6 +16,7 @@ export interface IUser extends Document {
   email: string;
   password?: string; // Password is not always sent back
   phone?: string;
+  whatsapp?: string;
   address: {
     street: string;
     city: string;
@@ -19,16 +28,29 @@ export interface IUser extends Document {
   roles: Types.ObjectId[];
   brand: string; // The permanent name of the brand the user belongs to
   status: 'active' | 'blocked';
+  socials?: ISocialLinks;
+  nickname?: string;
+  displayName?: string;
   createdAt: string | Date;
   updatedAt: string | Date;
 }
+
+const SocialLinksSchema: Schema<ISocialLinks> = new Schema({
+    twitter: { type: String },
+    facebook: { type: String },
+    instagram: { type: String },
+    linkedin: { type: String },
+    website: { type: String },
+    telegram: { type: String },
+}, { _id: false });
 
 const UserSchema: Schema<IUser> = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true, index: true },
-  password: { type: String, required: true, select: false },
+  password: { type: String, select: false },
   phone: { type: String },
+  whatsapp: { type: String },
   address: {
     street: { type: String },
     city: { type: String },
@@ -40,6 +62,9 @@ const UserSchema: Schema<IUser> = new Schema({
   roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
   brand: { type: String, index: true, required: true },
   status: { type: String, enum: ['active', 'blocked'], default: 'active', index: true },
+  socials: SocialLinksSchema,
+  nickname: { type: String },
+  displayName: { type: String },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
