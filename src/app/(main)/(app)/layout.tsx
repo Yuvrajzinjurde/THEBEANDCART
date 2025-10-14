@@ -1,6 +1,5 @@
-import Header from '@/components/header';
-import { GlobalFooter } from '@/components/global-footer';
 
+import AppShell from "./shell";
 
 export default function AppLayout({
   children,
@@ -9,12 +8,8 @@ export default function AppLayout({
 }>) {
 
   return (
-    <>
-        <Header />
-        <div className="flex-1 w-full flex flex-col">
-            {children}
-        </div>
-        <GlobalFooter />
-    </>
+    <AppShell>
+        {children}
+    </AppShell>
   );
 }
