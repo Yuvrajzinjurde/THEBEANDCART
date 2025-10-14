@@ -40,10 +40,22 @@ export default function ProfilePage() {
               facebook: '',
               linkedin: '',
           },
+          profilePicUrl: '',
       }
   });
 
   const { formState: { isDirty }, reset } = form;
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setValue('profilePicUrl', reader.result as string, { shouldDirty: true });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -63,12 +75,13 @@ export default function ProfilePage() {
                 facebook: u.socials?.facebook || '',
                 linkedin: u.socials?.linkedin || '',
             },
+            profilePicUrl: u.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`,
         });
     }
   }, [user, reset]);
 
 
-  const profilePicUrl = (user as unknown as IUser)?.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`;
+  const profilePicUrl = form.watch('profilePicUrl') || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`;
   const email = (user as any)?.email || '';
   const username = email.split('@')[0];
 
@@ -122,6 +135,7 @@ export default function ProfilePage() {
                 facebook: u.socials?.facebook || '',
                 linkedin: u.socials?.linkedin || '',
             },
+            profilePicUrl: u.profilePicUrl || `https://api.dicebear.com/8.x/lorelei/svg?seed=${user?.name || 'default'}`,
         });
     }
     setIsEditing(false);
@@ -177,15 +191,16 @@ export default function ProfilePage() {
                                                     data-ai-hint="man wearing beanie"
                                                 />
                                                 {isEditing && (
-                                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full">
+                                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => form.setValue('profilePicUrl', '')}>
                                                         <X className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                             </div>
-                                            <Button type="button" variant="outline" className="w-full" disabled={!isEditing}>
+                                            <Button type="button" variant="outline" className="w-full" disabled={!isEditing} onClick={() => document.getElementById('profile-pic-upload')?.click()}>
                                                 <UploadCloud className="mr-2 h-4 w-4" />
                                                 Upload Photo
                                             </Button>
+                                            <Input id="profile-pic-upload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                                             <Separator />
                                             <div>
                                                 <Label htmlFor="old-password">Old Password</Label>
