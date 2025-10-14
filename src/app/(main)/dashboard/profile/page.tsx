@@ -70,6 +70,7 @@ const DangerZoneAction = ({
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
+        toast.success("OTP sent to your verified phone number.");
         setStep('otp');
     } catch (error: any) {
         toast.error(error.message);
@@ -384,7 +385,7 @@ export default function ProfilePage() {
             toast.success("Account deleted successfully. We're sorry to see you go.");
             logout();
             router.push('/');
-        } catch (error: any) => {
+        } catch (error: any) {
             toast.error(error.message || "Failed to delete account.");
         }
     };
@@ -411,15 +412,14 @@ export default function ProfilePage() {
         }
     };
 
-    const handleVerifyPasswordOtp = async () => {
-        if (passwordOtp !== '123456') { // Static OTP check
+    const onSubmitPasswordChange = passwordForm.handleSubmit(async (data) => {
+        // First, client-side OTP check (using static for now)
+        if (passwordOtp !== '123456') {
             toast.error("Invalid OTP. Please try again.");
+            passwordForm.setError("currentPassword", { type: "custom", message: "OTP is incorrect" }); // a bit of a hack to show error
             return;
         }
-        setPasswordChangeStep('password');
-    };
-
-    const onSubmitPasswordChange = passwordForm.handleSubmit(async (data) => {
+        
         setIsSubmittingPasswordChange(true);
         try {
             const response = await fetch('/api/auth/change-password', {
@@ -457,7 +457,7 @@ export default function ProfilePage() {
                             {isEditing && (
                                 <>
                                 <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>Cancel</Button>
-                                <Button type="button" onClick={handleSaveChanges} disabled={isSubmitting || !isDirty}>
+                                <Button type="submit" form="profile-form" onClick={handleSaveChanges} disabled={isSubmitting || !isDirty}>
                                     {isSubmitting ? <Loader className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
                                     Save Changes
                                 </Button>
@@ -506,7 +506,7 @@ export default function ProfilePage() {
                                             {/* Inline Password Change */}
                                             <div className="space-y-4">
                                                 {passwordChangeStep === 'initial' && (
-                                                    <Button className="w-full" onClick={() => setPasswordChangeStep('otp')}>
+                                                    <Button className="w-full" type="button" onClick={() => setPasswordChangeStep('otp')}>
                                                         <Lock className="mr-2 h-4 w-4" /> Change Password
                                                     </Button>
                                                 )}
@@ -555,7 +555,7 @@ export default function ProfilePage() {
                                                         )}/>
                                                         <div className="flex gap-2">
                                                             <Button type="button" variant="outline" className="w-full" onClick={() => {setPasswordChangeStep('initial'); passwordForm.reset();}}>Cancel</Button>
-                                                            <Button type="button" onClick={onSubmitPasswordChange} className="w-full" disabled={isSubmittingPasswordChange}>
+                                                            <Button type="submit" form="password-form" onClick={onSubmitPasswordChange} className="w-full" disabled={isSubmittingPasswordChange}>
                                                                 {isSubmittingPasswordChange && <Loader className="mr-2 h-4 w-4" />}
                                                                 Save Password
                                                             </Button>
