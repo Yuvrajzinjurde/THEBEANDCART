@@ -20,6 +20,7 @@ const profileUpdateSchema = z.object({
     website: z.string().optional(),
     telegram: z.string().optional(),
   }).optional(),
+  profilePicUrl: z.string().optional(),
 });
 
 export async function PUT(

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useTransition } from 'react';
@@ -16,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader } from '@/components/ui/loader';
 import { Badge } from '@/components/ui/badge';
 import { getUserDetails } from './actions';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -193,6 +192,7 @@ export default function UserDetailsPage() {
                 <Card className="bg-purple-100 text-purple-800">
                     <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
                          <Avatar className="h-14 w-14 text-2xl border-2 border-purple-200">
+                            {user.profilePicUrl && <AvatarImage src={user.profilePicUrl} alt={user.firstName} />}
                             <AvatarFallback className="bg-purple-200">{userInitial}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">

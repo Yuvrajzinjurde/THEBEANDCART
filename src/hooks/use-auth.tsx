@@ -13,6 +13,7 @@ export interface User {
   roles: string[];
   name: string;
   brand?: string;
+  profilePicUrl?: string;
 }
 
 interface AuthState {
@@ -108,7 +109,8 @@ export const useAuth = () => useAuthStore(state => ({
     loading: state.loading,
     login: state.login,
     logout: state.logout,
-    token: state.token
+    token: state.token,
+    checkUser: state.checkUser, // Expose checkUser
 }));
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
