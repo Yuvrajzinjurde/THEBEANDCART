@@ -1,7 +1,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
 import Cart, { ICart } from '@/models/cart.model';
@@ -13,16 +13,27 @@ interface DecodedToken {
   userId: string;
 }
 
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
+}
+
 export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
 
     const hamper = await Hamper.findOne({ userId, isComplete: false });
 

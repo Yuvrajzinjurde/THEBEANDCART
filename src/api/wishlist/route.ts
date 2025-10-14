@@ -1,7 +1,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Wishlist, { IWishlist } from '@/models/wishlist.model';
 import Product from '@/models/product.model';
@@ -11,17 +11,28 @@ interface DecodedToken {
   userId: string;
 }
 
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return decoded.userId;
+    } catch (error) {
+        return null;
+    }
+}
+
 // GET the user's wishlist
 export async function GET(req: Request) {
     try {
         await dbConnect();
 
-        const token = req.headers.get('authorization')?.split(' ')[1];
-        if (!token) {
-            return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        const userId = getUserIdFromToken(req);
+        if (!userId) {
+             return NextResponse.json({ wishlist: { products: [] } }, { status: 200 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
-        const userId = decoded.userId;
 
         const wishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products',
@@ -38,7 +49,7 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error('Get Wishlist Error:', error);
-        if (error instanceof Error && error.name === 'ExpiredSignatureError') {
+        if (error instanceof Error && (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError')) {
             return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
         }
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
@@ -51,12 +62,10 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
 
     const { productId } = await req.json();
 
@@ -110,14 +119,9 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Wishlist Error:', error);
-    if (error instanceof Error && error.name === 'ExpiredSignatureError') {
+    if (error instanceof Error && (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError')) {
         return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
     }
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
   }
 }
-
-
-
-
-
