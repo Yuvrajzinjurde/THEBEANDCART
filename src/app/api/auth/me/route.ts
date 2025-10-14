@@ -39,14 +39,16 @@ export async function GET(req: NextRequest) {
         if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
+        
+        // Ensure we send back a complete and consistent user object
         const userRoles = user.roles.map((role: any) => role.name);
         const userData = {
-            _id: user._id,
+            ...JSON.parse(JSON.stringify(user)),
             roles: userRoles,
-            name: user.firstName,
-            brand: user.brand,
-            profilePicUrl: user.profilePicUrl
+            name: user.firstName, // for backward compatibility in some places
         };
+        delete userData.password;
+
         return NextResponse.json({ user: userData, token: accessToken });
     }
     
@@ -79,13 +81,12 @@ export async function GET(req: NextRequest) {
             path: '/',
         });
         
-        const userData = {
-            _id: user._id,
+         const userData = {
+            ...JSON.parse(JSON.stringify(user)),
             roles: userRoles,
             name: user.firstName,
-            brand: user.brand,
-            profilePicUrl: user.profilePicUrl
         };
+        delete userData.password;
 
         const response = NextResponse.json({ user: userData, token: newAccessToken });
         

@@ -14,6 +14,21 @@ export interface User {
   name: string;
   brand?: string;
   profilePicUrl?: string;
+  email?: string; // Add email to the user object
+  firstName?: string;
+  lastName?: string;
+  nickname?: string;
+  displayName?: string;
+  phone?: string;
+  whatsapp?: string;
+  socials?: {
+    website?: string;
+    telegram?: string;
+    twitter?: string;
+    instagram?: string;
+    facebook?: string;
+    linkedin?: string;
+  };
 }
 
 interface AuthState {
