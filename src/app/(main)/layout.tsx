@@ -12,15 +12,6 @@ export default function MainLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const { fetchSettings } = usePlatformSettingsStore();
-    const { checkUser } = useAuth();
-
-    useEffect(() => {
-        // Fetch critical global data once when the app layout mounts.
-        fetchSettings();
-        checkUser();
-    }, [fetchSettings, checkUser]);
-
     return (
         <>
             <Header />

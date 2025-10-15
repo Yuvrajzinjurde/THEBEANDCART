@@ -139,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ]);
     }
     initializeApp();
-  }, []);
+  }, [checkUser, fetchSettings]);
   
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
