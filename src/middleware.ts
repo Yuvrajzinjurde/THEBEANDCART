@@ -14,13 +14,13 @@ const SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 // List of API routes that require admin privileges
 const adminApiRoutes = [
   '/api/boxes',
-  '/api/brands',
+  // '/api/brands', // This should be public
   '/api/notifications/broadcast',
   '/api/orders',
   '/api/platform',
   '/api/products/bulk-update-stock',
   '/api/promotions',
-  '/api/reviews/like',
+  // '/api/reviews/like', // Liking should be for logged-in users, not just admins
   '/api/seed',
   '/api/settings',
   '/api/users',
