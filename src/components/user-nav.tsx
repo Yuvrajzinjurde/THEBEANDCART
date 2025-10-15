@@ -33,9 +33,11 @@ export function UserNav({ isCollapsed = false }: UserNavProps) {
 
   if (!user) {
     return (
-         <Button variant="ghost" asChild>
-            <Link href="/login">Login</Link>
-        </Button>
+        <Link href="/login" passHref>
+             <Button variant="ghost" asChild>
+                <a>Login</a>
+            </Button>
+        </Link>
     );
   }
 
