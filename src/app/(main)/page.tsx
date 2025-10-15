@@ -230,20 +230,34 @@ export default function LandingPage() {
         if (!settings || !settings.platformName) return; 
         try {
             setLoading(true);
-            const [productResponse, brandResponse] = await Promise.all([
-                fetch('/api/products'),
-                fetch('/api/brands'),
+            const [
+              trendingResponse,
+              topRatedResponse,
+              newestResponse,
+              brandResponse,
+            ] = await Promise.all([
+              fetch('/api/products?sortBy=popular&limit=12'),
+              fetch('/api/products?sortBy=rating&limit=12'),
+              fetch('/api/products?sortBy=newest&limit=12'),
+              fetch('/api/brands'),
             ]);
             
-            if (!productResponse.ok) throw new Error('Failed to fetch products');
-            if (!brandResponse.ok) throw new Error('Failed to fetch brands');
+            if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !brandResponse.ok) {
+              throw new Error('Failed to fetch initial page data');
+            }
             
-            const productData = await productResponse.json();
-            const fetchedProducts: IProduct[] = productData.products;
+            const [trendingData, topRatedData, newestData, brandData] = await Promise.all([
+              trendingResponse.json(),
+              topRatedResponse.json(),
+              newestResponse.json(),
+              brandResponse.json(),
+            ]);
+
+            setTrendingProducts(trendingData.products);
+            setTopRatedProducts(topRatedData.products);
+            setNewestProducts(newestData.products);
             
-            const brandData = await brandResponse.json();
             const allBrands: IBrand[] = brandData.brands;
-            
             const featuredBrandNames = settings.featuredBrands || [];
             if (featuredBrandNames.length > 0) {
                 setBrands(allBrands.filter(b => featuredBrandNames.includes(b.permanentName)));
@@ -251,26 +265,14 @@ export default function LandingPage() {
                 setBrands(allBrands);
             }
             
-            const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
-            const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));
-            const productsCopy3 = JSON.parse(JSON.stringify(fetchedProducts));
+            const allProducts = [
+                ...trendingData.products, 
+                ...topRatedData.products, 
+                ...newestData.products
+            ];
+            const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
+            setUniqueCategories(Array.from(categories).slice(0, 12));
 
-            const calculatePopularity = (p: IProduct) => (p.views || 0) + (p.clicks || 0) * 2;
-            const sortedByPopularity = productsCopy1.sort((a: IProduct, b: IProduct) => calculatePopularity(b) - calculatePopularity(a));
-            setTrendingProducts(sortedByPopularity.slice(0, 12));
-
-            const sortedByRating = productsCopy2.sort((a: IProduct, b: IProduct) => (b.rating || 0) - (a.rating || 0));
-            setTopRatedProducts(sortedByRating.slice(0, 12));
-
-            const sortedByDate = productsCopy3.sort((a: IProduct, b: IProduct) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
-            setNewestProducts(sortedByDate.slice(0, 12));
-
-            if (settings && settings.featuredCategories && settings.featuredCategories.length > 0) {
-                setUniqueCategories(settings.featuredCategories);
-            } else {
-                const categories = new Set(fetchedProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
-                setUniqueCategories(Array.from(categories).slice(0, 12));
-            }
 
           } catch (err: any) {
             setError(err.message);
@@ -279,7 +281,6 @@ export default function LandingPage() {
           }
     }
     
-    // Only run fetchData if settings are available
     if (settings && settings.platformName) {
       fetchData();
     }

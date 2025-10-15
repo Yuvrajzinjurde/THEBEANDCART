@@ -17,7 +17,7 @@ const adminApiRoutes = [
   // '/api/brands', // This should be public
   '/api/notifications/broadcast',
   '/api/orders',
-  '/api/platform',
+  // '/api/platform', // This MUST be public for the app to load
   '/api/products/bulk-update-stock',
   '/api/promotions',
   // '/api/reviews/like', // Liking should be for logged-in users, not just admins
