@@ -1,17 +1,34 @@
 
 "use client";
 
-// This layout is a pass-through for the (main) group.
-// Specific layouts within sub-groups like (app) or (auth) will define the UI.
-export default function MainLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+import { useEffect } from "react";
+import AppShell from "./(app)/shell";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { useAuth } from "@/hooks/use-auth";
+import Header from "@/components/header";
+import { GlobalFooter } from "@/components/global-footer";
 
-  return (
-    <>
-        {children}
-    </>
-  );
+export default function MainLayout({
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
+    const { fetchSettings } = usePlatformSettingsStore();
+    const { checkUser } = useAuth();
+
+    useEffect(() => {
+        // Fetch critical global data once when the app layout mounts.
+        fetchSettings();
+        checkUser();
+    }, [fetchSettings, checkUser]);
+
+    return (
+        <>
+            <Header />
+            <div className="flex-1 w-full flex flex-col">
+                {children}
+            </div>
+            <GlobalFooter />
+        </>
+    );
 }
