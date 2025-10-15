@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
@@ -78,7 +77,7 @@ const CategoryGrid = ({ brand }: { brand: IBrand }) => {
                 </div>
 
                 {/* Row 2 - Center piece is here */}
-                <div className="relative rounded-xl overflow-hidden shadow-lg bg-secondary/70 p-6 flex flex-col items-center justify-center text-center row-span-2">
+                <div className="relative rounded-xl overflow-hidden shadow-lg bg-secondary/70 p-6 flex flex-col items-center justify-center text-center row-span-2 backdrop-blur-sm">
                     <h3 className="text-2xl font-bold">{activeContent.title}</h3>
                     <p className="mt-2 mb-4 text-base opacity-90">{activeContent.description}</p>
                     <Button variant="default" size="lg" className="shadow-md" asChild>

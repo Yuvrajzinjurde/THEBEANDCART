@@ -5,9 +5,6 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
-import Header from '@/components/header';
-import { GlobalFooter } from '@/components/global-footer';
-
 
 export const metadata: Metadata = {
   title: 'The Brand Cart',
@@ -32,11 +29,7 @@ export default function RootLayout({
             "flex flex-col"
         )}>
             <AuthProvider>
-                <Header />
-                <div className="flex-1 w-full flex flex-col">
-                    {children}
-                </div>
-                <GlobalFooter />
+              {children}
             </AuthProvider>
             <ToastContainer
                 position="top-right"

@@ -13,11 +13,12 @@ const CART_UPDATE_EVENT_KEY = 'cart-last-updated';
 
 export interface User {
   _id: string;
+  userId: string;
   roles: string[];
   name: string;
   brand?: string;
   profilePicUrl?: string;
-  email?: string; // Add email to the user object
+  email?: string;
   firstName?: string;
   lastName?: string;
   nickname?: string;
@@ -46,7 +47,6 @@ interface AuthState {
 
 const fetchUserData = (token: string) => {
     if (!token) return;
-    // Fire-and-forget data fetching.
     Promise.all([
         fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch('/api/wishlist', { headers: { 'Authorization': `Bearer ${token}` } }),
@@ -78,8 +78,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   loading: true,
   login: (user, token) => {
-    Cookies.set('accessToken', token, { expires: 1 / 96, path: '/' }); // 15 minutes
-    set({ user, token, loading: false });
+    const enrichedUser = { ...user, userId: user._id };
+    Cookies.set('accessToken', token, { expires: 1 / 96, path: '/' }); 
+    set({ user: enrichedUser, token, loading: false });
     if(token) fetchUserData(token);
   },
   logout: async () => {
@@ -97,7 +98,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   checkUser: async () => {
-    // Only run on the client
     if (typeof window === 'undefined') {
         set({ loading: false });
         return;
@@ -122,7 +122,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
-// Export the hook
 export const useAuth = () => {
     const state = useAuthStore();
     return state;
@@ -133,15 +132,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { fetchSettings } = usePlatformSettingsStore();
 
   useEffect(() => {
-    // These should only run once when the app loads
-    fetchSettings();
-    checkUser();
-  }, []); // Empty dependency array ensures this runs only once
+    const initializeApp = async () => {
+      await Promise.all([
+        fetchSettings(),
+        checkUser()
+      ]);
+    }
+    initializeApp();
+  }, []);
   
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === CART_UPDATE_EVENT_KEY && token) {
-        // Cart was updated in another tab, re-fetch user data to sync
         fetchUserData(token);
       }
     };
@@ -151,7 +153,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.removeEventListener('storage', handleStorageChange);
     };
   }, [token]);
-
 
   if (loading) {
     return (
