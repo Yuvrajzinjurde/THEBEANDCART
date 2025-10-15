@@ -271,12 +271,8 @@ export default function BrandHomePage() {
   const brandName = params.brand as string;
 
   const [brand, setBrand] = useState<IBrand | null>(null);
-  
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
-  const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
-  const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
-  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
-
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -290,12 +286,9 @@ export default function BrandHomePage() {
         setLoading(true);
         setError(null);
         try {
-             const [brandResponse, productsResponse, trendingResponse, topRatedResponse, newestResponse] = await Promise.all([
+             const [brandResponse, productsResponse] = await Promise.all([
                 fetch(`/api/brands/${brandName}`),
                 fetch(`/api/products?storefront=${brandName}&limit=50`),
-                fetch(`/api/products?storefront=${brandName}&sortBy=popular&limit=12`),
-                fetch(`/api/products?storefront=${brandName}&sortBy=rating&limit=12`),
-                fetch(`/api/products?storefront=${brandName}&sortBy=newest&limit=12`)
             ]);
 
             if (!brandResponse.ok) {
@@ -309,20 +302,6 @@ export default function BrandHomePage() {
                 const { products } = await productsResponse.json();
                 setAllProducts(products);
             }
-
-            if (trendingResponse.ok) {
-                const { products } = await trendingResponse.json();
-                setTrendingProducts(products);
-            }
-             if (topRatedResponse.ok) {
-                const { products } = await topRatedResponse.json();
-                setTopRatedProducts(products);
-            }
-            if (newestResponse.ok) {
-                const { products } = await newestResponse.json();
-                setNewestProducts(products);
-            }
-
         } catch (error: any) {
             console.error(error);
             setError(error.message);
@@ -332,6 +311,27 @@ export default function BrandHomePage() {
     }
     fetchBrandAndProducts();
   }, [brandName]);
+  
+  const { trendingProducts, topRatedProducts, newestProducts } = useMemo(() => {
+    if (allProducts.length === 0) {
+      return { trendingProducts: [], topRatedProducts: [], newestProducts: [] };
+    }
+    
+    const productsCopy1 = [...allProducts];
+    const productsCopy2 = [...allProducts];
+    const productsCopy3 = [...allProducts];
+
+    const calculatePopularity = (p: IProduct) => (p.views || 0) * 1 + (p.clicks || 0) * 2;
+    const sortedByPopularity = productsCopy1.sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
+    const sortedByRating = productsCopy2.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    const sortedByDate = productsCopy3.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return {
+      trendingProducts: sortedByPopularity.slice(0, 12),
+      topRatedProducts: sortedByRating.slice(0, 12),
+      newestProducts: sortedByDate.slice(0, 12),
+    };
+  }, [allProducts]);
 
   if (authLoading || loading) {
     return (
