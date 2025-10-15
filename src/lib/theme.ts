@@ -6,10 +6,11 @@ import Brand from '@/models/brand.model';
 import PlatformSettings from '@/models/platform.model';
 import { cache } from 'react';
 
-// Wrap database calls in React's cache to prevent re-fetching on the same request
+// This file is no longer used for server-side theme determination in the layout,
+// but the functions can be useful for other server components if needed.
+
 const getBrand = cache(async (brandName: string): Promise<IBrand | null> => {
     await dbConnect();
-    // Use a case-insensitive regex to find the brand, which is more robust.
     const brand = await Brand.findOne({ permanentName: { $regex: new RegExp(`^${brandName}$`, 'i') } }).lean();
     return brand ? JSON.parse(JSON.stringify(brand)) : null;
 });

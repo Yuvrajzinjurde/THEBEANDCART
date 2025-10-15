@@ -32,6 +32,7 @@ import useUserStore from "@/stores/user-store";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Skeleton } from "./ui/skeleton";
 import { NotificationsPopover } from "./notifications-drawer";
+import { themeColors } from "@/lib/brand-schema";
 
 export default function Header() {
   const { user, loading: authLoading } = useAuth();
@@ -92,6 +93,33 @@ export default function Header() {
 
     fetchData();
   }, [brandNameFromUrl]);
+  
+  // Dynamic theme application
+  useEffect(() => {
+    const activeThemeName = brand?.themeName || settings?.platformThemeName || 'Blue';
+    const theme = themeColors.find(t => t.name === activeThemeName);
+    
+    if (theme && typeof window !== 'undefined') {
+        const root = document.documentElement;
+        root.style.setProperty('--background', theme.background);
+        root.style.setProperty('--foreground', theme.name === 'Slate (Dark)' ? '210 20% 98%' : '222.2 84% 4.9%');
+        root.style.setProperty('--card', theme.background);
+        root.style.setProperty('--card-foreground', theme.name === 'Slate (Dark)' ? '210 20% 98%' : '222.2 84% 4.9%');
+        root.style.setProperty('--popover', theme.background);
+        root.style.setProperty('--popover-foreground', theme.name === 'Slate (Dark)' ? '210 20% 98%' : '222.2 84% 4.9%');
+        root.style.setProperty('--primary', theme.primary);
+        root.style.setProperty('--primary-foreground', theme.name === 'Slate (Dark)' ? '210 20% 98%' : '210 40% 98%');
+        root.style.setProperty('--secondary', theme.accent);
+        root.style.setProperty('--secondary-foreground', theme.name === 'Slate (Dark)' ? '210 20% 98%' : '222.2 47.4% 11.2%');
+        root.style.setProperty('--muted', theme.accent);
+        root.style.setProperty('--muted-foreground', theme.name === 'Slate (Dark)' ? '217.9 15.8% 65.1%' : '215.4 16.3% 46.9%');
+        root.style.setProperty('--accent', theme.accent);
+        root.style.setProperty('--accent-foreground', theme.name === 'Slate (Dark)' ? '210 20% 98%' : '222.2 47.4% 11.2%');
+        root.style.setProperty('--border', theme.name === 'Slate (Dark)' ? '215 27.9% 16.9%' : '214.3 31.8% 91.4%');
+        root.style.setProperty('--input', theme.name === 'Slate (Dark)' ? '215 27.9% 16.9%' : '214.3 31.8% 91.4%');
+        root.style.setProperty('--ring', theme.name === 'Slate (Dark)' ? '243.8 51.5% 46.9%' : '222.2 84% 4.9%');
+    }
+}, [brand, settings]);
 
 
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
@@ -177,9 +205,9 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  const currentDisplayName = !isLoading && (isBrandPage ? brand.displayName : settings.platformName);
+  const currentDisplayName = !isLoading && (isBrandPage ? brand?.displayName : settings.platformName);
   const homeLink = isBrandPage ? `/${brandNameFromUrl}/home` : '/';
-  const logoUrl = isBrandPage ? brand.logoUrl : settings.platformLogoUrl;
+  const logoUrl = isBrandPage ? brand?.logoUrl : settings.platformLogoUrl;
 
 
   const DesktopNavActions = () => (
