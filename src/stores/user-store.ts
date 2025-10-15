@@ -7,6 +7,9 @@ import type { IWishlist } from '@/models/wishlist.model';
 import type { INotification } from '@/models/notification.model';
 import { type User, useAuth } from '@/hooks/use-auth';
 
+// Key for localStorage to signal cart updates
+const CART_UPDATE_EVENT_KEY = 'cart-last-updated';
+
 type UserDataState = {
   cart: ICart | null;
   wishlist: IWishlist | null;
@@ -25,7 +28,13 @@ const useUserStore = create<UserDataState & UserDataActions>((set, get) => ({
   cart: null,
   wishlist: null,
   notifications: [],
-  setCart: (cart) => set({ cart }),
+  setCart: (cart) => {
+    set({ cart });
+    // When the cart is updated, broadcast the change to other tabs using localStorage.
+    if (typeof window !== 'undefined') {
+        window.localStorage.setItem(CART_UPDATE_EVENT_KEY, Date.now().toString());
+    }
+  },
   setWishlist: (wishlist) => set({ wishlist }),
   setNotifications: (notifications) => set({ 
       notifications: Array.isArray(notifications) ? notifications : [],
@@ -36,7 +45,7 @@ const useUserStore = create<UserDataState & UserDataActions>((set, get) => ({
 
     set(state => ({
       notifications: state.notifications.map(n => 
-        n._id === notificationId ? { ...n, readBy: [...n.readBy, user.userId as any] } : n
+        n._id === notificationId ? { ...n, readBy: [...n.readBy, user._id as any] } : n
       ),
     }));
   },
@@ -46,10 +55,10 @@ const useUserStore = create<UserDataState & UserDataActions>((set, get) => ({
 
     set(state => ({ 
         notifications: state.notifications.map(n => {
-            if (n.readBy.includes(user.userId as any)) {
+            if (n.readBy.includes(user._id as any)) {
                 return n;
             }
-            return { ...n, readBy: [...n.readBy, user.userId as any] };
+            return { ...n, readBy: [...n.readBy, user._id as any] };
         }),
     }));
   },
@@ -60,7 +69,7 @@ export const useUnreadNotificationsCount = () => {
     const { user } = useAuth();
     const notifications = useUserStore(state => state.notifications);
     return Array.isArray(notifications) 
-        ? notifications.filter(n => !n.readBy.includes(user?.userId as any)).length 
+        ? notifications.filter(n => !n.readBy.includes(user?._id as any)).length 
         : 0;
 }
 

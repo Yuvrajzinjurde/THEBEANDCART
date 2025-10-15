@@ -8,6 +8,8 @@ import { create } from 'zustand';
 import { Loader } from '@/components/ui/loader';
 import Cookies from 'js-cookie';
 
+const CART_UPDATE_EVENT_KEY = 'cart-last-updated';
+
 export interface User {
   _id: string;
   roles: string[];
@@ -20,6 +22,7 @@ export interface User {
   nickname?: string;
   displayName?: string;
   phone?: string;
+  isPhoneVerified: boolean;
   whatsapp?: string;
   socials?: {
     website?: string;
@@ -129,12 +132,26 @@ export const useAuth = () => useAuthStore(state => ({
 }));
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const checkUser = useAuthStore(state => state.checkUser);
+  const { checkUser, token } = useAuthStore(state => ({ checkUser: state.checkUser, token: state.token }));
   const loading = useAuthStore(state => state.loading);
 
   useEffect(() => {
     checkUser();
   }, [checkUser]);
+  
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === CART_UPDATE_EVENT_KEY && token) {
+        // Cart was updated in another tab, re-fetch user data to sync
+        fetchUserData(token);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [token]);
 
 
   if (loading) {
