@@ -212,11 +212,14 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 export default function LandingPage() {
   const { settings } = usePlatformSettingsStore();
-  const [brands, setBrands] = useState<IBrand[]>([]);
+  const [featuredBrands, setFeaturedBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
+  const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
+  const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
+  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
   
   const mainCarouselPlugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
@@ -226,33 +229,40 @@ export default function LandingPage() {
     setLoading(true);
     setError(null);
     try {
+        const featuredBrandNames = settings.featuredBrands || [];
         const [
-          productsResponse,
+          trendingResponse,
+          topRatedResponse,
+          newestResponse,
+          categoriesResponse,
           brandResponse,
         ] = await Promise.all([
-          fetch('/api/products?limit=100'), // Fetch a larger batch for client-side sorting
-          fetch('/api/brands'),
+          fetch('/api/products?sortBy=popular&limit=12'),
+          fetch('/api/products?sortBy=rating&limit=12'),
+          fetch('/api/products?sortBy=newest&limit=12'),
+          fetch('/api/categories'),
+          featuredBrandNames.length > 0
+            ? fetch(`/api/brands?names=${featuredBrandNames.join(',')}`)
+            : fetch('/api/brands'),
         ]);
         
-        if (!productsResponse.ok || !brandResponse.ok) {
-          throw new Error('Failed to fetch initial page data');
+        if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
+          throw new Error('Could not load products. Please try again later.');
         }
         
-        const [productsData, brandData] = await Promise.all([
-          productsResponse.json(),
+        const [trendingData, topRatedData, newestData, categoriesData, brandData] = await Promise.all([
+          trendingResponse.json(),
+          topRatedResponse.json(),
+          newestResponse.json(),
+          categoriesResponse.json(),
           brandResponse.json(),
         ]);
 
-        setAllProducts(productsData.products);
-        
-        const allBrands: IBrand[] = brandData.brands;
-        const featuredBrandNames = settings.featuredBrands || [];
-        if (featuredBrandNames.length > 0) {
-            setBrands(allBrands.filter(b => featuredBrandNames.includes(b.permanentName)));
-        } else {
-            setBrands(allBrands);
-        }
-
+        setTrendingProducts(trendingData.products);
+        setTopRatedProducts(topRatedData.products);
+        setNewestProducts(newestData.products);
+        setUniqueCategories(categoriesData.categories.slice(0, 12));
+        setFeaturedBrands(brandData.brands);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -261,32 +271,11 @@ export default function LandingPage() {
   }, [settings.featuredBrands]);
 
   useEffect(() => {
-    // Only fetch data once the platform name is available in settings
     if (settings.platformName) {
       fetchData();
     }
   }, [settings.platformName, fetchData]);
   
-  const { trendingProducts, topRatedProducts, newestProducts, uniqueCategories } = useMemo(() => {
-    if (allProducts.length === 0) {
-      return { trendingProducts: [], topRatedProducts: [], newestProducts: [], uniqueCategories: [] };
-    }
-
-    const calculatePopularity = (p: IProduct) => (p.views || 0) * 1 + (p.clicks || 0) * 2;
-    const sortedByPopularity = [...allProducts].sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
-    const sortedByRating = [...allProducts].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    const sortedByDate = [...allProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
-    const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
-
-    return {
-      trendingProducts: sortedByPopularity.slice(0, 12),
-      topRatedProducts: sortedByRating.slice(0, 12),
-      newestProducts: sortedByDate.slice(0, 12),
-      uniqueCategories: Array.from(categories).slice(0, 12),
-    };
-  }, [allProducts]);
-
   const platformSettings = settings as IPlatformSettings;
   
   if (loading || !platformSettings || !platformSettings.platformName) {
@@ -337,11 +326,11 @@ export default function LandingPage() {
       </div>
 
         <HamperSection />
-        <ShopByBrandSection brands={brands} />
+        <ShopByBrandSection brands={featuredBrands} />
 
         {error ? (
             <div className="container px-4 text-center text-destructive py-16">
-                <p>Could not load products. Please try again later.</p>
+                <p>{error}</p>
             </div>
         ) : (
             <>
@@ -380,5 +369,3 @@ export default function LandingPage() {
     </main>
   );
 }
-
-    
