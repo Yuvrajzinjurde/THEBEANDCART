@@ -312,12 +312,12 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
             <div className="mt-2 h-9">
                  {cartItem ? (
-                    <div className="flex items-center justify-between rounded-md border w-full">
-                       <Button variant="ghost" size="icon" className="h-full" onClick={(e) => handleQuantityButtonClick(e, -1)}>
+                    <div className="flex items-center justify-between rounded-md border w-full h-full">
+                       <Button variant="ghost" size="icon" className="h-full rounded-r-none" onClick={(e) => handleQuantityButtonClick(e, -1)}>
                            {cartItem.quantity === 1 ? <Trash2 className="h-4 w-4 text-destructive" /> : <Minus className="h-4 w-4" />}
                        </Button>
                        <span className="font-bold text-sm">{cartItem.quantity}</span>
-                       <Button variant="ghost" size="icon" className="h-full" onClick={(e) => handleQuantityButtonClick(e, 1)}>
+                       <Button variant="ghost" size="icon" className="h-full rounded-l-none" onClick={(e) => handleQuantityButtonClick(e, 1)}>
                            <Plus className="h-4 w-4" />
                        </Button>
                     </div>
@@ -341,3 +341,5 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
+
+    
