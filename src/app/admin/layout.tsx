@@ -1,9 +1,10 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import { AdminSidebar, MobileAdminHeader } from "@/components/admin/admin-sidebar";
 
-export default function AdminLayout({
+function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -20,3 +21,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+export default withAuth(AdminLayout, ['admin']);
