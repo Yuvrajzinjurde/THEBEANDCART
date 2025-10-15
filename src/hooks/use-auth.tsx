@@ -7,6 +7,7 @@ import useUserStore from '@/stores/user-store';
 import { create } from 'zustand';
 import { Loader } from '@/components/ui/loader';
 import Cookies from 'js-cookie';
+import usePlatformSettingsStore from '@/stores/platform-settings-store';
 
 const CART_UPDATE_EVENT_KEY = 'cart-last-updated';
 
@@ -39,7 +40,7 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   login: (user: User, token: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   checkUser: () => Promise<void>;
 }
 
@@ -123,23 +124,19 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
 // Export the hook
 export const useAuth = () => {
-    const { user, loading, token, checkUser } = useAuthStore();
-    const login = useCallback(useAuthStore.getState().login, []);
-    const logout = useCallback(useAuthStore.getState().logout, []);
-    
-    return { user, loading, login, logout, token, checkUser };
+    const state = useAuthStore();
+    return state;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const checkUser = useAuthStore(state => state.checkUser);
-  const token = useAuthStore(state => state.token);
-  const loading = useAuthStore(state => state.loading);
-
-  const stableCheckUser = useCallback(checkUser, []);
+  const { checkUser, loading, token } = useAuthStore();
+  const { fetchSettings } = usePlatformSettingsStore();
 
   useEffect(() => {
-    stableCheckUser();
-  }, [stableCheckUser]);
+    // These should only run once when the app loads
+    fetchSettings();
+    checkUser();
+  }, []); // Empty dependency array ensures this runs only once
   
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
