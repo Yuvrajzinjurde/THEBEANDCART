@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
@@ -225,70 +225,70 @@ export default function LandingPage() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
+  const fetchData = useCallback(async () => {
+    if (!settings || !settings.platformName) return; 
+    setLoading(true);
+    setError(null);
+    try {
+        const [
+          trendingResponse,
+          topRatedResponse,
+          newestResponse,
+          brandResponse,
+        ] = await Promise.all([
+          fetch('/api/products?sortBy=popular&limit=12'),
+          fetch('/api/products?sortBy=rating&limit=12'),
+          fetch('/api/products?sortBy=newest&limit=12'),
+          fetch('/api/brands'),
+        ]);
+        
+        if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !brandResponse.ok) {
+          throw new Error('Failed to fetch initial page data');
+        }
+        
+        const [trendingData, topRatedData, newestData, brandData] = await Promise.all([
+          trendingResponse.json(),
+          topRatedResponse.json(),
+          newestResponse.json(),
+          brandResponse.json(),
+        ]);
+
+        setTrendingProducts(trendingData.products);
+        setTopRatedProducts(topRatedData.products);
+        setNewestProducts(newestData.products);
+        
+        const allBrands: IBrand[] = brandData.brands;
+        const featuredBrandNames = settings.featuredBrands || [];
+        if (featuredBrandNames.length > 0) {
+            setBrands(allBrands.filter(b => featuredBrandNames.includes(b.permanentName)));
+        } else {
+            setBrands(allBrands);
+        }
+        
+        const allProducts = [
+            ...trendingData.products, 
+            ...topRatedData.products, 
+            ...newestData.products
+        ];
+        const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
+        setUniqueCategories(Array.from(categories).slice(0, 12));
+
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+  }, [settings]);
+
   useEffect(() => {
-    async function fetchData() {
-        if (!settings || !settings.platformName) return; 
-        try {
-            setLoading(true);
-            const [
-              trendingResponse,
-              topRatedResponse,
-              newestResponse,
-              brandResponse,
-            ] = await Promise.all([
-              fetch('/api/products?sortBy=popular&limit=12'),
-              fetch('/api/products?sortBy=rating&limit=12'),
-              fetch('/api/products?sortBy=newest&limit=12'),
-              fetch('/api/brands'),
-            ]);
-            
-            if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !brandResponse.ok) {
-              throw new Error('Failed to fetch initial page data');
-            }
-            
-            const [trendingData, topRatedData, newestData, brandData] = await Promise.all([
-              trendingResponse.json(),
-              topRatedResponse.json(),
-              newestResponse.json(),
-              brandResponse.json(),
-            ]);
-
-            setTrendingProducts(trendingData.products);
-            setTopRatedProducts(topRatedData.products);
-            setNewestProducts(newestData.products);
-            
-            const allBrands: IBrand[] = brandData.brands;
-            const featuredBrandNames = settings.featuredBrands || [];
-            if (featuredBrandNames.length > 0) {
-                setBrands(allBrands.filter(b => featuredBrandNames.includes(b.permanentName)));
-            } else {
-                setBrands(allBrands);
-            }
-            
-            const allProducts = [
-                ...trendingData.products, 
-                ...topRatedData.products, 
-                ...newestData.products
-            ];
-            const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
-            setUniqueCategories(Array.from(categories).slice(0, 12));
-
-
-          } catch (err: any) {
-            setError(err.message);
-          } finally {
-            setLoading(false);
-          }
-    }
-    
     if (settings && settings.platformName) {
       fetchData();
     }
-  }, [settings]);
+  }, [settings.platformName, fetchData]);
 
   const platformSettings = settings as IPlatformSettings;
   
-  if (!platformSettings || !platformSettings.platformName) {
+  if (loading || !platformSettings || !platformSettings.platformName) {
       return <LandingPageSkeleton />;
   }
   
@@ -338,12 +338,7 @@ export default function LandingPage() {
         <HamperSection />
         <ShopByBrandSection brands={brands} />
 
-        {loading ? (
-            <div className="container px-4 flex flex-col items-center justify-center text-center py-16">
-                <Loader className="h-12 w-12" />
-                <p className="my-8 text-center text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
-            </div>
-        ) : error ? (
+        {error ? (
             <div className="container px-4 text-center text-destructive py-16">
                 <p>Could not load products. Please try again later.</p>
             </div>
@@ -384,3 +379,5 @@ export default function LandingPage() {
     </main>
   );
 }
+
+    
