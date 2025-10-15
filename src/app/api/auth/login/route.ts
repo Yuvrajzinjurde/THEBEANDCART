@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     );
 
     const accessTokenCookie = serialize('accessToken', accessToken, {
-        httpOnly: true,
+        httpOnly: false, // Allow client-side access
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
         maxAge: 60 * 15,
@@ -86,6 +86,7 @@ export async function POST(req: Request) {
     });
 
     const userResponseData = user.toObject();
+    delete userResponseData.password;
     // Add userId to the user object being sent to the client
     userResponseData.userId = user._id.toString();
 

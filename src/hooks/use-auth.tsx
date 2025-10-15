@@ -128,31 +128,18 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { checkUser, loading, token } = useAuthStore();
+  const { checkUser, loading } = useAuthStore();
   const { fetchSettings } = usePlatformSettingsStore();
 
   useEffect(() => {
     const initializeApp = async () => {
-      await Promise.all([
-        fetchSettings(),
-        checkUser()
-      ]);
+      // Fetch platform settings first as they are not dependent on user auth
+      await fetchSettings();
+      // Then check for the user
+      await checkUser();
     }
     initializeApp();
   }, [checkUser, fetchSettings]);
-  
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === CART_UPDATE_EVENT_KEY && token) {
-        fetchUserData(token);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [token]);
 
   if (loading) {
     return (
