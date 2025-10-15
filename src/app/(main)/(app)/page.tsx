@@ -152,6 +152,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     const BrandLogo = ({ brand }: { brand: IBrand }) => {
         const theme = themeColors.find(t => t.name === brand.themeName);
         const primaryColor = theme ? `hsl(${theme.primary})` : 'hsl(var(--primary))';
+        
         return (
             <Link href={`/${brand.permanentName}/home`} className="block group p-4 flex flex-col items-center flex-shrink-0">
                 <div 
