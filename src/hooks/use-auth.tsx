@@ -122,22 +122,24 @@ const useAuthStore = create<AuthState>((set, get) => ({
 }));
 
 // Export the hook
-export const useAuth = () => useAuthStore(state => ({
-    user: state.user,
-    loading: state.loading,
-    login: state.login,
-    logout: state.logout,
-    token: state.token,
-    checkUser: state.checkUser, // Expose checkUser
-}));
+export const useAuth = () => {
+    const { user, loading, token, checkUser } = useAuthStore();
+    const login = useCallback(useAuthStore.getState().login, []);
+    const logout = useCallback(useAuthStore.getState().logout, []);
+    
+    return { user, loading, login, logout, token, checkUser };
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { checkUser, token } = useAuthStore(state => ({ checkUser: state.checkUser, token: state.token }));
+  const checkUser = useAuthStore(state => state.checkUser);
+  const token = useAuthStore(state => state.token);
   const loading = useAuthStore(state => state.loading);
 
+  const stableCheckUser = useCallback(checkUser, []);
+
   useEffect(() => {
-    checkUser();
-  }, [checkUser]);
+    stableCheckUser();
+  }, [stableCheckUser]);
   
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
