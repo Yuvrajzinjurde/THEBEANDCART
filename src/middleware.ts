@@ -14,13 +14,10 @@ const SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 // List of API routes that require admin privileges
 const adminApiRoutes = [
   '/api/boxes',
-  // '/api/brands', // This should be public
   '/api/notifications/broadcast',
   '/api/orders',
-  // '/api/platform', // This MUST be public for the app to load
   '/api/products/bulk-update-stock',
   '/api/promotions',
-  // '/api/reviews/like', // Liking should be for logged-in users, not just admins
   '/api/seed',
   '/api/settings',
   '/api/users',
@@ -62,3 +59,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: '/api/:path*',
 };
+
+    

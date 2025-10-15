@@ -61,8 +61,8 @@ export default function Header() {
     async function fetchData() {
         setIsLoading(true);
         try {
-            // Always fetch products for search suggestions, but limit the initial fetch
-            const productsRes = await fetch(`/api/products?limit=500`);
+            // Fetch a smaller, more manageable number of products for search suggestions.
+            const productsRes = await fetch(`/api/products?limit=50`);
              if (productsRes.ok) {
                 const { products: productData } = await productsRes.json();
                 setAllProducts(productData);

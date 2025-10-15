@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { IProduct } from '@/models/product.model';
@@ -216,46 +216,34 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
-  const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
-  const [newestProducts, setNewestProducts] = useState<IProduct[]>([]);
-  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
+  const [allProducts, setAllProducts] = useState<IProduct[]>([]);
   
   const mainCarouselPlugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
 
   const fetchData = useCallback(async () => {
-    if (!settings || !settings.platformName) return; 
     setLoading(true);
     setError(null);
     try {
         const [
-          trendingResponse,
-          topRatedResponse,
-          newestResponse,
+          productsResponse,
           brandResponse,
         ] = await Promise.all([
-          fetch('/api/products?sortBy=popular&limit=12'),
-          fetch('/api/products?sortBy=rating&limit=12'),
-          fetch('/api/products?sortBy=newest&limit=12'),
+          fetch('/api/products?limit=100'), // Fetch a larger batch for client-side sorting
           fetch('/api/brands'),
         ]);
         
-        if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !brandResponse.ok) {
+        if (!productsResponse.ok || !brandResponse.ok) {
           throw new Error('Failed to fetch initial page data');
         }
         
-        const [trendingData, topRatedData, newestData, brandData] = await Promise.all([
-          trendingResponse.json(),
-          topRatedResponse.json(),
-          newestResponse.json(),
+        const [productsData, brandData] = await Promise.all([
+          productsResponse.json(),
           brandResponse.json(),
         ]);
 
-        setTrendingProducts(trendingData.products);
-        setTopRatedProducts(topRatedData.products);
-        setNewestProducts(newestData.products);
+        setAllProducts(productsData.products);
         
         const allBrands: IBrand[] = brandData.brands;
         const featuredBrandNames = settings.featuredBrands || [];
@@ -264,27 +252,40 @@ export default function LandingPage() {
         } else {
             setBrands(allBrands);
         }
-        
-        const allProducts = [
-            ...trendingData.products, 
-            ...topRatedData.products, 
-            ...newestData.products
-        ];
-        const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
-        setUniqueCategories(Array.from(categories).slice(0, 12));
 
       } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
-  }, [settings]);
+  }, [settings.featuredBrands]);
 
   useEffect(() => {
-    if (settings && settings.platformName) {
+    // Only fetch data once the platform name is available in settings
+    if (settings.platformName) {
       fetchData();
     }
   }, [settings.platformName, fetchData]);
+  
+  const { trendingProducts, topRatedProducts, newestProducts, uniqueCategories } = useMemo(() => {
+    if (allProducts.length === 0) {
+      return { trendingProducts: [], topRatedProducts: [], newestProducts: [], uniqueCategories: [] };
+    }
+
+    const calculatePopularity = (p: IProduct) => (p.views || 0) * 1 + (p.clicks || 0) * 2;
+    const sortedByPopularity = [...allProducts].sort((a, b) => calculatePopularity(b) - calculatePopularity(a));
+    const sortedByRating = [...allProducts].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    const sortedByDate = [...allProducts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    const categories = new Set(allProducts.map(p => Array.isArray(p.category) ? p.category[0] : p.category));
+
+    return {
+      trendingProducts: sortedByPopularity.slice(0, 12),
+      topRatedProducts: sortedByRating.slice(0, 12),
+      newestProducts: sortedByDate.slice(0, 12),
+      uniqueCategories: Array.from(categories).slice(0, 12),
+    };
+  }, [allProducts]);
 
   const platformSettings = settings as IPlatformSettings;
   
