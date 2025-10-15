@@ -226,7 +226,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     async function fetchData() {
-        if (!settings || !settings.platformName) return; // Wait for settings to be fetched initially
+        if (!settings || !settings.platformName) return; 
         try {
             setLoading(true);
             const [productResponse, brandResponse] = await Promise.all([
@@ -241,7 +241,15 @@ export default function LandingPage() {
             const fetchedProducts: IProduct[] = productData.products;
             
             const brandData = await brandResponse.json();
-            setBrands(brandData.brands);
+            const allBrands: IBrand[] = brandData.brands;
+            
+            // Filter for featured brands if they exist
+            const featuredBrandNames = settings.featuredBrands || [];
+            if (featuredBrandNames.length > 0) {
+                setBrands(allBrands.filter(b => featuredBrandNames.includes(b.permanentName)));
+            } else {
+                setBrands(allBrands); // Fallback to all brands
+            }
             
             const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
             const productsCopy2 = JSON.parse(JSON.stringify(fetchedProducts));

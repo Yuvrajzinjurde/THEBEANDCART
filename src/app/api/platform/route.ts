@@ -2,46 +2,8 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import PlatformSettings from '@/models/platform.model';
+import { PlatformSettingsValidationSchema } from '@/lib/brand-schema';
 import { z } from 'zod';
-
-const SocialLinksSchema = z.object({
-    twitter: z.string().url().optional().or(z.literal('')),
-    facebook: z.string().url().optional().or(z.literal('')),
-    instagram: z.string().url().optional().or(z.literal('')),
-    linkedin: z.string().url().optional().or(z.literal('')),
-});
-
-const FormSchema = z.object({
-  platformName: z.string().min(1),
-  platformLogoUrl: z.string().url().or(z.literal('')),
-  platformFaviconUrl: z.string().url().or(z.literal('')),
-  platformThemeName: z.string(),
-  socials: SocialLinksSchema.optional(),
-  aiEnabled: z.boolean().optional(),
-  hamperFeatureEnabled: z.boolean().optional(),
-  offersFeatureEnabled: z.boolean().optional(),
-  promoBannerEnabled: z.boolean().optional(),
-  heroBanners: z.array(z.object({
-      title: z.string(),
-      description: z.string(),
-      imageUrl: z.string(),
-      imageHint: z.string(),
-  })),
-  featuredCategories: z.array(z.string()),
-  promoBanner: z.object({
-      title: z.string(),
-      description: z.string(),
-      imageUrl: z.string(),
-      imageHint: z.string(),
-      buttonText: z.string(),
-      buttonLink: z.string(),
-  }).optional(),
-  offers: z.array(z.object({
-      title: z.string(),
-      description: z.string(),
-      code: z.string(),
-  })).optional(),
-});
 
 // GET the platform settings
 export async function GET() {
@@ -66,7 +28,11 @@ export async function POST(req: Request) {
     await dbConnect();
     const body = await req.json();
 
-    const validation = FormSchema.safeParse(body);
+    const validation = PlatformSettingsValidationSchema.extend({
+        featuredCategories: z.array(z.string()).optional(),
+        featuredBrands: z.array(z.string()).optional(),
+    }).safeParse(body);
+    
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }

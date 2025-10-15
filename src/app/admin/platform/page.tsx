@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv, Store } from 'lucide-react';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { IProduct } from '@/models/product.model';
+import type { IBrand } from '@/models/brand.model';
 import { Combobox } from '@/components/ui/combobox';
 
 
@@ -43,6 +44,7 @@ const staticDefaultValues: PlatformSettingsValues = {
     },
   ],
   featuredCategories: [],
+  featuredBrands: [],
   promoBanner: {
     title: "Mid-Season Mega Sale",
     description: "Unbeatable deals on your favorite brands. Get up to 60% off on selected items before they're gone!",
@@ -67,6 +69,7 @@ export default function PlatformSettingsPage() {
   const { settings, fetchSettings } = usePlatformSettingsStore();
   
   const [availableCategories, setAvailableCategories] = useState<{ value: string; label: string; count: number }[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<{ value: string; label: string; }[]>([]);
 
 
   const form = useForm<PlatformSettingsValues>({
@@ -79,8 +82,11 @@ export default function PlatformSettingsPage() {
     const fetchAndSetSettings = async () => {
         setIsLoading(true);
         try {
-            // Fetch products to determine categories
-            const productResponse = await fetch('/api/products');
+            const [productResponse, brandResponse] = await Promise.all([
+                fetch('/api/products'),
+                fetch('/api/brands')
+            ]);
+            
             if (productResponse.ok) {
                 const productData = await productResponse.json();
                 const products: IProduct[] = productData.products;
@@ -94,11 +100,17 @@ export default function PlatformSettingsPage() {
                 const categoriesWithOptions = Object.entries(categoryCounts)
                     .filter(([, count]) => count > 0)
                     .map(([name, count]) => ({
-                        value: name.toLowerCase(),
+                        value: name,
                         label: `${name} (${count})`,
                         count: count,
                     }));
                 setAvailableCategories(categoriesWithOptions);
+            }
+            
+            if (brandResponse.ok) {
+                 const brandData = await brandResponse.json();
+                 const brands: IBrand[] = brandData.brands;
+                 setAvailableBrands(brands.map(b => ({ value: b.permanentName, label: b.displayName })));
             }
 
             const response = await fetch('/api/platform');
@@ -117,6 +129,7 @@ export default function PlatformSettingsPage() {
                         platformThemeName: settingsData.platformThemeName || 'Blue',
                         socials: { ...defaultSocials, ...(settingsData.socials || {}) },
                         featuredCategories: (settingsData.featuredCategories || []).map((cat: string) => ({ name: cat })),
+                        featuredBrands: (settingsData.featuredBrands || []).map((brand: string) => ({ name: brand })),
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
                         offers: settingsData.offers && settingsData.offers.length > 0 ? settingsData.offers : staticDefaultValues.offers,
                         promoBanner: { ...defaultPromoBanner, ...(settingsData.promoBanner || {}) },
@@ -147,6 +160,11 @@ export default function PlatformSettingsPage() {
   const { fields: categoryFields, append: appendCategory, remove: removeCategory } = useFieldArray({
     control: form.control,
     name: 'featuredCategories',
+  });
+  
+   const { fields: brandFields, append: appendBrand, remove: removeBrand } = useFieldArray({
+    control: form.control,
+    name: 'featuredBrands',
   });
 
   const { fields: offerFields, append: appendOffer, remove: removeOffer } = useFieldArray({
@@ -179,6 +197,7 @@ export default function PlatformSettingsPage() {
     const dataToSubmit = {
         ...data,
         featuredCategories: data.featuredCategories?.map(cat => cat.name),
+        featuredBrands: data.featuredBrands?.map(brand => brand.name),
     };
 
     try {
@@ -201,6 +220,7 @@ export default function PlatformSettingsPage() {
       const newDefaults = {
           ...result,
           featuredCategories: result.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
+          featuredBrands: result.featuredBrands?.map((brand: string) => ({ name: brand })) || [],
           socials: {
               twitter: result.socials?.twitter || '',
               facebook: result.socials?.facebook || '',
@@ -533,7 +553,7 @@ export default function PlatformSettingsPage() {
                                         options={availableCategories}
                                         placeholder="Select a category..."
                                         onSelect={(selectedValue) => {
-                                            const categoryName = availableCategories.find(c => c.value === selectedValue)?.label.split(' (')[0];
+                                            const categoryName = availableCategories.find(c => c.value === selectedValue)?.value;
                                             if (categoryName && !categoryFields.some(field => field.name === categoryName)) {
                                                 appendCategory({ name: categoryName });
                                             }
@@ -552,6 +572,50 @@ export default function PlatformSettingsPage() {
                                 </div>
                             </FormControl>
                             <FormDescription>These categories will be featured on the main homepage.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Store /> Featured Brands</CardTitle>
+                <CardDescription>Select which brands to highlight on the main landing page.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <FormField
+                    control={form.control}
+                    name="featuredBrands"
+                    render={() => (
+                        <FormItem>
+                            <FormLabel>Brands</FormLabel>
+                            <FormControl>
+                                <div>
+                                    <Combobox
+                                        options={availableBrands}
+                                        placeholder="Select a brand..."
+                                        onSelect={(selectedValue) => {
+                                            const brandName = availableBrands.find(b => b.value === selectedValue)?.value;
+                                            if (brandName && !brandFields.some(field => field.name === brandName)) {
+                                                appendBrand({ name: brandName });
+                                            }
+                                        }}
+                                    />
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {brandFields.map((field, index) => (
+                                            <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
+                                                {form.getValues('featuredBrands')?.[index].name}
+                                                <button type="button" onClick={() => removeBrand(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            </FormControl>
+                            <FormDescription>These brands will be featured in the "Shop by Brand" section.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}

@@ -56,6 +56,7 @@ export interface IPlatformSettings extends Document {
     buttonLink: string;
   }[];
   featuredCategories: string[];
+  featuredBrands: string[]; // New field
   promoBanner?: {
     title: string;
     description: string;
@@ -84,6 +85,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   promoBannerEnabled: { type: Boolean, default: true },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
+  featuredBrands: { type: [String], default: [] }, // New field
   promoBanner: PromoBannerSchema,
   offers: [OfferSchema],
 }, { timestamps: true });
