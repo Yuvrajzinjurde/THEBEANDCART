@@ -1,13 +1,11 @@
+
 "use client";
 
 import { useEffect } from "react";
-import AppShell from "./(app)/shell";
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { useAuth } from "@/hooks/use-auth";
-import Header from "@/components/header";
-import { GlobalFooter } from "@/components/global-footer";
 
-export default function MainLayout({
+export default function AppLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
@@ -21,13 +19,5 @@ export default function MainLayout({
         checkUser();
     }, [fetchSettings, checkUser]);
 
-    return (
-        <>
-            <Header />
-            <div className="flex-1 w-full flex flex-col">
-                {children}
-            </div>
-            <GlobalFooter />
-        </>
-    );
+    return <>{children}</>;
 }

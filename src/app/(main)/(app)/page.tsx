@@ -244,12 +244,11 @@ export default function LandingPage() {
             const brandData = await brandResponse.json();
             const allBrands: IBrand[] = brandData.brands;
             
-            // Filter for featured brands if they exist
             const featuredBrandNames = settings.featuredBrands || [];
             if (featuredBrandNames.length > 0) {
                 setBrands(allBrands.filter(b => featuredBrandNames.includes(b.permanentName)));
             } else {
-                setBrands(allBrands); // Fallback to all brands
+                setBrands(allBrands);
             }
             
             const productsCopy1 = JSON.parse(JSON.stringify(fetchedProducts));
@@ -279,16 +278,20 @@ export default function LandingPage() {
             setLoading(false);
           }
     }
-    fetchData();
+    
+    // Only run fetchData if settings are available
+    if (settings && settings.platformName) {
+      fetchData();
+    }
   }, [settings]);
 
   const platformSettings = settings as IPlatformSettings;
   
-  if (loading || !platformSettings || !Array.isArray(platformSettings.heroBanners) || platformSettings.heroBanners.length === 0) {
+  if (!platformSettings || !platformSettings.platformName) {
       return <LandingPageSkeleton />;
   }
   
-  const heroBanners = platformSettings.heroBanners;
+  const heroBanners = platformSettings.heroBanners || [];
 
   return (
     <main className="w-full flex-1">
