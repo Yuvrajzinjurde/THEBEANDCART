@@ -61,14 +61,12 @@ export default function Header() {
     async function fetchData() {
         setIsLoading(true);
         try {
-            // Fetch a smaller, more manageable number of products for search suggestions.
             const productsRes = await fetch(`/api/products?limit=50`);
              if (productsRes.ok) {
                 const { products: productData } = await productsRes.json();
                 setAllProducts(productData);
             }
 
-            // Fetch specific brand data if brandName is in the URL
             if (brandNameFromUrl) {
                 const brandRes = await fetch(`/api/brands/${brandNameFromUrl}`);
                 if (brandRes.ok) {
@@ -121,7 +119,6 @@ export default function Header() {
   const cartCount = cart?.items?.filter(Boolean).length ?? 0;
   const wishlistCount = wishlist?.products?.length ?? 0;
   
-  // Determine if we are on a brand-specific page
   const isBrandPage = !!brandNameFromUrl && !!brand;
   
   const effectiveBrandName = brandNameFromUrl || 'reeva';
@@ -154,7 +151,6 @@ export default function Header() {
     return Array.from(categorySet);
   }, [allProducts]);
   
-  // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const query = (e.currentTarget.elements.namedItem('search') as HTMLInputElement).value;
@@ -163,7 +159,6 @@ export default function Header() {
     }
   };
   
-  // Execute search based on context
   const executeSearch = (query: string) => {
     if (isBrandPage) {
       router.push(`/${brandNameFromUrl}/products?keyword=${encodeURIComponent(query)}`);
@@ -174,7 +169,6 @@ export default function Header() {
     setIsSuggestionsOpen(false);
   };
   
-  // Handle search input change for suggestions
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -190,7 +184,6 @@ export default function Header() {
     }
   };
   
-  // Handle clicks outside search to close suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -413,5 +406,3 @@ export default function Header() {
     </header>
   );
 }
-
-    

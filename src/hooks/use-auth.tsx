@@ -133,13 +133,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initializeApp = async () => {
-      // Fetch platform settings first as they are not dependent on user auth
       await fetchSettings();
-      // Then check for the user
       await checkUser();
     }
     initializeApp();
-  }, [checkUser, fetchSettings]);
+  }, []);
 
   if (loading) {
     return (
