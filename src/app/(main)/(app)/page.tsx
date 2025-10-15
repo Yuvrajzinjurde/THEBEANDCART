@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -210,7 +211,7 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 
 export default function LandingPage() {
-  const { settings, fetchSettings } = usePlatformSettingsStore();
+  const { settings } = usePlatformSettingsStore();
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -223,11 +224,6 @@ export default function LandingPage() {
   const mainCarouselPlugin = useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true })
   );
-  
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
-
 
   useEffect(() => {
     async function fetchData() {

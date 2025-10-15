@@ -44,7 +44,7 @@ export default function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const { cart, wishlist } = useUserStore();
-  const { settings, fetchSettings } = usePlatformSettingsStore();
+  const { settings } = usePlatformSettingsStore();
 
   const [isLoading, setIsLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<IProduct[]>([]);
@@ -56,10 +56,6 @@ export default function Header() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const brandNameFromUrl = params.brand as string;
-
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
 
   useEffect(() => {
     async function fetchData() {
