@@ -178,8 +178,8 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     fetch(`/api/products/${product._id}/track`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metric: 'clicks' }),
-    }).catch(err => console.error("Failed to track click:", err));
+        body: JSON.stringify({ metric: 'views' }),
+    }).catch(err => console.error("Failed to track view:", err));
     
     router.push(`/${product.storefront}/products/${product._id}`);
   };
@@ -207,7 +207,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:shadow-primary/20 flex flex-col h-full"
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-primary/20 flex flex-col h-full"
         ref={carouselRef}
       >
         <div className="w-full relative rounded-t-lg overflow-hidden">
@@ -341,5 +341,3 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     </Link>
   );
 }
-
-    
