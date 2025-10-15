@@ -9,7 +9,7 @@ import type { IBrand } from '@/models/brand.model';
 import { Loader } from '@/components/ui/loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Gift, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowRight, Gift, Star, TrendingUp, Sparkles, Store } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -175,7 +175,11 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
     return (
         <section className="w-full py-12 container px-4">
              <div className="text-center mb-10">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Featured Brands</h2>
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center justify-center gap-2">
+                    <Store className="h-8 w-8" />
+                    Featured Brands
+                </h2>
+                <p className="mt-2 text-muted-foreground">Explore our hand-picked collection of top brands.</p>
             </div>
             {canScroll ? (
                 <Carousel
