@@ -5,6 +5,8 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
+import Header from '@/components/header';
+import { GlobalFooter } from '@/components/global-footer';
 
 
 export const metadata: Metadata = {
@@ -30,7 +32,11 @@ export default function RootLayout({
             "flex flex-col"
         )}>
             <AuthProvider>
-                {children}
+                <Header />
+                <div className="flex-1 w-full flex flex-col">
+                    {children}
+                </div>
+                <GlobalFooter />
             </AuthProvider>
             <ToastContainer
                 position="top-right"
