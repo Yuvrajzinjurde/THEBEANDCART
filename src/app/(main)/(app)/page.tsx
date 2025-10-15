@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -176,6 +174,9 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
     return (
         <section className="w-full py-12 container px-4">
+             <div className="text-center mb-10">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Shop by Brand</h2>
+            </div>
             {canScroll ? (
                 <Carousel
                     plugins={[autoplay.current]}

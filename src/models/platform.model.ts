@@ -1,4 +1,5 @@
 
+
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 const HeroBannerSchema: Schema = new Schema({
@@ -56,7 +57,7 @@ export interface IPlatformSettings extends Document {
     buttonLink: string;
   }[];
   featuredCategories: string[];
-  featuredBrands: string[]; // New field
+  featuredBrands: string[];
   promoBanner?: {
     title: string;
     description: string;
@@ -85,7 +86,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   promoBannerEnabled: { type: Boolean, default: true },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
-  featuredBrands: { type: [String], default: [] }, // New field
+  featuredBrands: { type: [String], default: [] },
   promoBanner: PromoBannerSchema,
   offers: [OfferSchema],
 }, { timestamps: true });

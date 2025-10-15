@@ -98,7 +98,7 @@ export const PlatformSettingsValidationSchema = z.object({
   promoBannerEnabled: z.boolean().optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
   featuredCategories: z.array(z.object({ name: z.string() })).optional(),
-  featuredBrands: z.array(z.object({ name: z.string() })).optional(), // New field
+  featuredBrands: z.array(z.object({ name: z.string() })).optional(),
   promoBanner: promoBannerSchema.extend({
     title: z.string().optional(),
     description: z.string().optional(),
