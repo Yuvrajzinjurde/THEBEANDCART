@@ -71,17 +71,24 @@ export const GlobalFooter = () => {
                         )}
                         <span className="font-bold capitalize">{displayData.name}</span>
                     </div>
-                    <div className="flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
-                        <Link href={`${displayData.baseLink || ''}/legal/about-us`} className="hover:text-primary">About Us</Link>
-                        <Link href={`${displayData.baseLink || ''}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
-                        <Link href={`${displayData.baseLink || ''}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
+                    <div className="flex items-center gap-x-6 gap-y-2">
+                        <div className="hidden sm:flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                            <Link href={`${displayData.baseLink || ''}/legal/about-us`} className="hover:text-primary">About Us</Link>
+                            <Link href={`${displayData.baseLink || ''}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
+                            <Link href={`${displayData.baseLink || ''}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
+                        </div>
+                        <div className="flex space-x-4">
+                           {displayData.socials?.twitter && <Link href={displayData.socials.twitter} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Twitter className="h-5 w-5" /></Link>}
+                           {displayData.socials?.facebook && <Link href={displayData.socials.facebook} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Facebook className="h-5 w-5" /></Link>}
+                           {displayData.socials?.instagram && <Link href={displayData.socials.instagram} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Instagram className="h-5 w-5" /></Link>}
+                           {displayData.socials?.linkedin && <Link href={displayData.socials.linkedin} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Linkedin className="h-5 w-5" /></Link>}
+                        </div>
                     </div>
-                    <div className="flex space-x-4">
-                       {displayData.socials?.twitter && <Link href={displayData.socials.twitter} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Twitter className="h-5 w-5" /></Link>}
-                       {displayData.socials?.facebook && <Link href={displayData.socials.facebook} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Facebook className="h-5 w-5" /></Link>}
-                       {displayData.socials?.instagram && <Link href={displayData.socials.instagram} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Instagram className="h-5 w-5" /></Link>}
-                       {displayData.socials?.linkedin && <Link href={displayData.socials.linkedin} className="text-muted-foreground hover:text-primary" target="_blank" rel="noopener noreferrer"><Linkedin className="h-5 w-5" /></Link>}
-                    </div>
+                </div>
+                <div className="mt-4 sm:hidden flex gap-x-6 gap-y-2 flex-wrap justify-center text-sm text-muted-foreground">
+                    <Link href={`${displayData.baseLink || ''}/legal/about-us`} className="hover:text-primary">About Us</Link>
+                    <Link href={`${displayData.baseLink || ''}/legal/privacy-policy`} className="hover:text-primary">Policies</Link>
+                    <Link href={`${displayData.baseLink || ''}/legal/contact-us`} className="hover:text-primary">Contact Us</Link>
                 </div>
                  <div className="mt-4 border-t pt-4 text-center">
                     <p className="text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {displayData.name}. All rights reserved.</p>
