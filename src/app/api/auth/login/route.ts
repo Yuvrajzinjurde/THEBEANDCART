@@ -64,9 +64,9 @@ export async function POST(req: Request) {
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id.toString() },
+      { sub: user._id.toString() },
       JWT_REFRESH_SECRET,
-      { expiresIn: '7d', subject: user._id.toString() }
+      { expiresIn: '7d' }
     );
 
     const accessTokenCookie = serialize('accessToken', accessToken, {
@@ -87,8 +87,8 @@ export async function POST(req: Request) {
 
     const userResponseData = user.toObject();
     delete userResponseData.password;
-    // Add userId to the user object being sent to the client
-    userResponseData.userId = user._id.toString();
+    
+    (userResponseData as any).userId = user._id.toString();
 
     const response = NextResponse.json({ 
         message: 'Login successful', 

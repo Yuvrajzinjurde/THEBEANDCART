@@ -11,16 +11,14 @@ interface DecodedToken {
   userId: string;
 }
 
-// This function is simple and doesn't verify the token, it just decodes it.
-// For a production app, you'd want to verify it against the secret.
-const getAuthFromToken = (req: Request): DecodedToken | null => {
+const getAuthFromToken = (req: Request): { userId: string } | null => {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as DecodedToken;
-        return decoded;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return { userId: decoded.userId };
     } catch (error) {
         return null;
     }

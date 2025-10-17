@@ -21,7 +21,7 @@ const getAuthFromToken = (req: Request): DecodedToken | null => {
     if (!token) return null;
 
     try {
-        const decoded = jwt.decode(token) as DecodedToken;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         return decoded;
     } catch (error) {
         return null;

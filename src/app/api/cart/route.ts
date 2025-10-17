@@ -16,7 +16,6 @@ const getUserIdFromToken = (req: Request): string | null => {
     if (!token) return null;
 
     try {
-        // Use verify on the server for security
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
         return decoded.userId;
     } catch (error) {

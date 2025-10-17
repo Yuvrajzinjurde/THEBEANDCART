@@ -42,6 +42,8 @@ export async function GET(req: NextRequest) {
         const userRoles = user.roles.map((role: any) => role.name);
         const userData = { ...JSON.parse(JSON.stringify(user)), roles: userRoles };
         delete userData.password;
+        
+        (userData as any).userId = user._id.toString();
 
         return NextResponse.json({ user: userData, token: accessToken });
     }
@@ -78,7 +80,7 @@ export async function GET(req: NextRequest) {
         
          const userData = { ...JSON.parse(JSON.stringify(user)), roles: userRoles };
         delete userData.password;
-        // Add userId to the user object being sent to the client
+        
         (userData as any).userId = user._id.toString();
 
         const response = NextResponse.json({ user: userData, token: newAccessToken });
