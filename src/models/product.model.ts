@@ -1,4 +1,3 @@
-
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 export interface IVariant extends Document {
@@ -84,6 +83,9 @@ ProductSchema.index({ styleId: 1, storefront: 1 });
 
 // Index for sorting
 ProductSchema.index({ storefront: 1, createdAt: -1 });
+ProductSchema.index({ storefront: 1, 'rating': -1 });
+ProductSchema.index({ storefront: 1, 'clicks': -1, 'views': -1 });
+ProductSchema.index({ storefront: 1, 'sellingPrice': 1 });
 
 
 const Product: Model<IProduct> =
