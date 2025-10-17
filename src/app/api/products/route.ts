@@ -38,7 +38,7 @@ export async function GET(req: Request) {
     }
 
     if (colors) {
-        query.color = { $in: colors.split(',') };
+        query['variants.color'] = { $in: colors.split(',') };
     }
 
     if (keyword) {

@@ -26,10 +26,11 @@ export async function GET(
             return NextResponse.json({ reviews }, { status: 200 });
         }
 
-        // Find all variant IDs with the same styleId
+        // Find all variant product IDs with the same styleId
         const variants = await Product.find({ styleId: currentProduct.styleId }, '_id');
         const variantIds = variants.map(v => v._id);
 
+        // Find all reviews that belong to any of these variant products
         const reviews = await Review.find({ productId: { $in: variantIds } }).sort({ likes: -1 }).limit(10);
 
         return NextResponse.json({ reviews }, { status: 200 });
