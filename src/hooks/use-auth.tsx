@@ -105,8 +105,19 @@ const useAuthStore = create<AuthState>((set, get) => ({
     
     set({ loading: true });
     
+    const token = Cookies.get('accessToken');
+    if (!token) {
+        await get().logout();
+        set({ loading: false });
+        return;
+    }
+
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch('/api/auth/me', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const { user: userData, token: newToken } = await res.json();
         get().login(userData, newToken);
