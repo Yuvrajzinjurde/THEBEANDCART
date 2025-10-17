@@ -229,45 +229,48 @@ export default function LandingPage() {
     setLoading(true);
     setError(null);
     try {
-        const featuredBrandNames = settings.featuredBrands || [];
-        const [
-          trendingResponse,
-          topRatedResponse,
-          newestResponse,
-          categoriesResponse,
-          brandResponse,
-        ] = await Promise.all([
-          fetch('/api/products?sortBy=popular&limit=12'),
-          fetch('/api/products?sortBy=rating&limit=12'),
-          fetch('/api/products?sortBy=newest&limit=12'),
-          fetch('/api/categories'),
-          featuredBrandNames.length > 0
-            ? fetch(`/api/brands?names=${featuredBrandNames.join(',')}`)
-            : fetch('/api/brands'),
-        ]);
-        
-        if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
-          throw new Error('Could not load products. Please try again later.');
-        }
-        
-        const [trendingData, topRatedData, newestData, categoriesData, brandData] = await Promise.all([
-          trendingResponse.json(),
-          topRatedResponse.json(),
-          newestResponse.json(),
-          categoriesResponse.json(),
-          brandResponse.json(),
-        ]);
+      const featuredBrandNames = settings.featuredBrands || [];
+      const brandFetch =
+        featuredBrandNames.length > 0
+          ? fetch(`/api/brands?names=${featuredBrandNames.join(',')}`)
+          : Promise.resolve(new Response(JSON.stringify({ brands: [] }), { status: 200 }));
 
-        setTrendingProducts(trendingData.products);
-        setTopRatedProducts(topRatedData.products);
-        setNewestProducts(newestData.products);
-        setUniqueCategories(categoriesData.categories.slice(0, 12));
-        setFeaturedBrands(brandData.brands);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      const [
+        trendingResponse,
+        topRatedResponse,
+        newestResponse,
+        categoriesResponse,
+        brandResponse,
+      ] = await Promise.all([
+        fetch('/api/products?sortBy=popular&limit=12'),
+        fetch('/api/products?sortBy=rating&limit=12'),
+        fetch('/api/products?sortBy=newest&limit=12'),
+        fetch('/api/categories'),
+        brandFetch,
+      ]);
+
+      if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
+        throw new Error('Could not load products. Please try again later.');
       }
+
+      const [trendingData, topRatedData, newestData, categoriesData, brandData] = await Promise.all([
+        trendingResponse.json(),
+        topRatedResponse.json(),
+        newestResponse.json(),
+        categoriesResponse.json(),
+        brandResponse.json(),
+      ]);
+
+      setTrendingProducts(trendingData.products);
+      setTopRatedProducts(topRatedData.products);
+      setNewestProducts(newestData.products);
+      setUniqueCategories(categoriesData.categories.slice(0, 12));
+      setFeaturedBrands(brandData.brands);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [settings]);
 
   useEffect(() => {
