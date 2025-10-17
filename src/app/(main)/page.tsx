@@ -228,55 +228,53 @@ export default function LandingPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    try {
-      const featuredBrandNames = settings.featuredBrands || [];
-      const brandFetch =
-        featuredBrandNames.length > 0
-          ? fetch(`/api/brands?names=${featuredBrandNames.join(',')}`)
-          : Promise.resolve(new Response(JSON.stringify({ brands: [] }), { status: 200 }));
+    const featuredBrandNames = settings.featuredBrands || [];
+    const brandFetch =
+      featuredBrandNames.length > 0
+        ? fetch(`/api/brands?names=${featuredBrandNames.join(',')}`)
+        : Promise.resolve(new Response(JSON.stringify({ brands: [] }), { status: 200 }));
 
-      const [
-        trendingResponse,
-        topRatedResponse,
-        newestResponse,
-        categoriesResponse,
-        brandResponse,
-      ] = await Promise.all([
-        fetch('/api/products?sortBy=popular&limit=12'),
-        fetch('/api/products?sortBy=rating&limit=12'),
-        fetch('/api/products?sortBy=newest&limit=12'),
-        fetch('/api/categories'),
-        brandFetch,
-      ]);
+    const [
+      trendingResponse,
+      topRatedResponse,
+      newestResponse,
+      categoriesResponse,
+      brandResponse,
+    ] = await Promise.all([
+      fetch('/api/products?sortBy=popular&limit=12'),
+      fetch('/api/products?sortBy=rating&limit=12'),
+      fetch('/api/products?sortBy=newest&limit=12'),
+      fetch('/api/categories'),
+      brandFetch,
+    ]);
 
-      if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
+    if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
         throw new Error('Could not load products. Please try again later.');
-      }
-
-      const [trendingData, topRatedData, newestData, categoriesData, brandData] = await Promise.all([
-        trendingResponse.json(),
-        topRatedResponse.json(),
-        newestResponse.json(),
-        categoriesResponse.json(),
-        brandResponse.json(),
-      ]);
-
-      setTrendingProducts(trendingData.products);
-      setTopRatedProducts(topRatedData.products);
-      setNewestProducts(newestData.products);
-      setUniqueCategories(categoriesData.categories.slice(0, 12));
-      setFeaturedBrands(brandData.brands);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  }, [settings]);
+
+    const [trendingData, topRatedData, newestData, categoriesData, brandData] = await Promise.all([
+      trendingResponse.json(),
+      topRatedResponse.json(),
+      newestResponse.json(),
+      categoriesResponse.json(),
+      brandResponse.json(),
+    ]);
+
+    setTrendingProducts(trendingData.products);
+    setTopRatedProducts(topRatedData.products);
+    setNewestProducts(newestData.products);
+    setUniqueCategories(categoriesData.categories.slice(0, 12));
+    setFeaturedBrands(brandData.brands);
+    setLoading(false);
+  }, [settings.featuredBrands]);
 
   useEffect(() => {
-    // We depend on featuredBrands being available in settings before fetching
     if (settings.featuredBrands) {
-      fetchData();
+      fetchData().catch(err => {
+        // Re-throw the error to be caught by Next.js error boundary or unhandled rejection handler
+        // This makes the actual error visible in the console for debugging.
+        throw err;
+      });
     }
   }, [settings.featuredBrands, fetchData]);
   
@@ -284,6 +282,14 @@ export default function LandingPage() {
   
   if (loading || !platformSettings || !platformSettings.platformName) {
       return <LandingPageSkeleton />;
+  }
+  
+  if (error) {
+      return (
+        <main className="container flex-1 py-8 px-4 text-center text-destructive">
+            <p>{error}</p>
+        </main>
+      )
   }
   
   const heroBanners = platformSettings.heroBanners || [];
