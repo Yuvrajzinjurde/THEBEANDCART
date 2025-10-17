@@ -211,10 +211,9 @@ const ShopByBrandSection = ({ brands }: { brands: IBrand[] }) => {
 
 
 export default function LandingPage() {
-  const { settings } = usePlatformSettingsStore();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
   const [featuredBrands, setFeaturedBrands] = useState<IBrand[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const [trendingProducts, setTrendingProducts] = useState<IProduct[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<IProduct[]>([]);
@@ -227,12 +226,6 @@ export default function LandingPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
-    const featuredBrandNames = settings.featuredBrands || [];
-    const brandFetch =
-      featuredBrandNames.length > 0
-        ? fetch(`/api/brands?names=${featuredBrandNames.join(',')}`)
-        : Promise.resolve(new Response(JSON.stringify({ brands: [] }), { status: 200 }));
 
     const [
       trendingResponse,
@@ -245,7 +238,7 @@ export default function LandingPage() {
       fetch('/api/products?sortBy=rating&limit=12'),
       fetch('/api/products?sortBy=newest&limit=12'),
       fetch('/api/categories'),
-      brandFetch,
+      fetch('/api/brands'), // Fetch all brands
     ]);
 
     if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
@@ -264,32 +257,35 @@ export default function LandingPage() {
     setTopRatedProducts(topRatedData.products);
     setNewestProducts(newestData.products);
     setUniqueCategories(categoriesData.categories.slice(0, 12));
-    setFeaturedBrands(brandData.brands);
+    
+    // Filter brands on the client side after fetching
+    const allBrands: IBrand[] = brandData.brands;
+    const featuredBrandNames = settings.featuredBrands || [];
+    const filteredBrands = allBrands.filter(brand => featuredBrandNames.includes(brand.permanentName));
+    setFeaturedBrands(filteredBrands);
+
     setLoading(false);
   }, [settings.featuredBrands]);
 
   useEffect(() => {
-    if (settings.featuredBrands) {
+    fetchSettings(); // Make sure settings are loaded first
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    // Only fetch data once we have some settings loaded
+    if (settings.platformName) {
       fetchData().catch(err => {
         // Re-throw the error to be caught by Next.js error boundary or unhandled rejection handler
         // This makes the actual error visible in the console for debugging.
         throw err;
       });
     }
-  }, [settings.featuredBrands, fetchData]);
+  }, [settings.platformName, fetchData]);
   
   const platformSettings = settings as IPlatformSettings;
   
   if (loading || !platformSettings || !platformSettings.platformName) {
       return <LandingPageSkeleton />;
-  }
-  
-  if (error) {
-      return (
-        <main className="container flex-1 py-8 px-4 text-center text-destructive">
-            <p>{error}</p>
-        </main>
-      )
   }
   
   const heroBanners = platformSettings.heroBanners || [];
@@ -338,44 +334,38 @@ export default function LandingPage() {
         <HamperSection />
         <ShopByBrandSection brands={featuredBrands} />
 
-        {error ? (
-            <div className="container px-4 text-center text-destructive py-16">
-                <p>{error}</p>
-            </div>
-        ) : (
-            <>
-                <ProductCarouselSection title="Trending Now" products={trendingProducts} emoji="📈" />
-                
-                <PromoBannerSection settings={platformSettings} />
-                
-                <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} emoji="⭐" />
-                <ProductCarouselSection title="Newest Arrivals" products={newestProducts} emoji="✨" />
-                
-                {uniqueCategories.length > 0 && (
-                    <section className="pt-16 container px-4">
-                        <div className="text-center mb-10">
-                            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {uniqueCategories.map(category => (
-                                <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
-                                    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                        <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                                             <span className="text-3xl mb-2">🛍️</span>
-                                             <h3 className="text-sm font-semibold truncate w-full">{category}</h3>
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                )}
-                 <section className="py-16 text-center container px-4">
-                    <h2 className="text-2xl font-bold text-foreground">A Personalized Experience, Coming Soon</h2>
-                    <p className="mt-2 max-w-xl mx-auto text-muted-foreground">We’ll soon let you design your own cart experience. Stay tuned for AI-driven suggestions and more!</p>
+        <>
+            <ProductCarouselSection title="Trending Now" products={trendingProducts} emoji="📈" />
+            
+            <PromoBannerSection settings={platformSettings} />
+            
+            <ProductCarouselSection title="Top Rated Picks" products={topRatedProducts} emoji="⭐" />
+            <ProductCarouselSection title="Newest Arrivals" products={newestProducts} emoji="✨" />
+            
+            {uniqueCategories.length > 0 && (
+                <section className="pt-16 container px-4">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Explore by Category</h2>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {uniqueCategories.map(category => (
+                            <Link key={category} href={`/reeva/products?category=${encodeURIComponent(category)}`} className="block group">
+                                <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                    <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                                         <span className="text-3xl mb-2">🛍️</span>
+                                         <h3 className="text-sm font-semibold truncate w-full">{category}</h3>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        ))}
+                    </div>
                 </section>
-            </>
-        )}
+            )}
+             <section className="py-16 text-center container px-4">
+                <h2 className="text-2xl font-bold text-foreground">A Personalized Experience, Coming Soon</h2>
+                <p className="mt-2 max-w-xl mx-auto text-muted-foreground">We’ll soon let you design your own cart experience. Stay tuned for AI-driven suggestions and more!</p>
+            </section>
+        </>
     </main>
   );
 }
