@@ -53,16 +53,16 @@ const ProductSchema: Schema<IProduct> = new Schema(
     mrp: { type: Number, min: 0 },
     sellingPrice: { type: Number, required: true, min: 0 },
     purchasePrice: { type: Number, min: 0 },
-    category: { type: String, required: true },
+    category: { type: String, required: true, index: true },
     images: [{ type: String, required: true }],
     videos: [{ type: String }],
     stock: { type: Number, required: true, min: 0, default: 0 },
     rating: { type: Number, min: 0, max: 5, default: 0 },
-    brand: { type: String, required: true },
+    brand: { type: String, required: true, index: true },
     storefront: { type: String, required: true, index: true },
     views: { type: Number, default: 0 },
     clicks: { type: Number, default: 0 },
-    keywords: { type: [String], default: [] },
+    keywords: { type: [String], default: [], index: true },
     returnPeriod: { type: Number, default: 10 },
     styleId: { type: String, index: true },
     sku: { type: String, index: true, unique: true, sparse: true },
@@ -76,8 +76,15 @@ ProductSchema.virtual('price').get(function () {
   return this.sellingPrice;
 });
 
+// Enable text index for keyword search optimization
+ProductSchema.index({ name: 'text', brand: 'text', category: 'text', keywords: 'text' });
+
 // Compound index to quickly find variants of a style
 ProductSchema.index({ styleId: 1, storefront: 1 });
+
+// Index for sorting
+ProductSchema.index({ storefront: 1, createdAt: -1 });
+
 
 const Product: Model<IProduct> =
   mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
