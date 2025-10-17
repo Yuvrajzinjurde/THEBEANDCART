@@ -268,13 +268,14 @@ export default function LandingPage() {
       } finally {
         setLoading(false);
       }
-  }, [settings.featuredBrands]);
+  }, [settings]);
 
   useEffect(() => {
-    if (settings.platformName) {
+    // We depend on featuredBrands being available in settings before fetching
+    if (settings.featuredBrands) {
       fetchData();
     }
-  }, [settings.platformName, fetchData]);
+  }, [settings.featuredBrands, fetchData]);
   
   const platformSettings = settings as IPlatformSettings;
   
