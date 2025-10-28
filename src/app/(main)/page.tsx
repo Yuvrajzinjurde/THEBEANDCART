@@ -225,8 +225,13 @@ export default function LandingPage() {
   );
 
   const fetchData = useCallback(async () => {
+    if (!settings) return;
+
     setLoading(true);
 
+    const featuredBrandNames = settings.featuredBrands || [];
+    const brandQuery = featuredBrandNames.length > 0 ? `?names=${featuredBrandNames.join(',')}` : '';
+    
     const [
       trendingResponse,
       topRatedResponse,
@@ -238,49 +243,46 @@ export default function LandingPage() {
       fetch('/api/products?sortBy=rating&limit=12'),
       fetch('/api/products?sortBy=newest&limit=12'),
       fetch('/api/categories'),
-      fetch('/api/brands'), // Fetch all brands
+      brandQuery ? fetch(`/api/brands${brandQuery}`) : Promise.resolve(null),
     ]);
 
-    if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok || !brandResponse.ok) {
+    if (!trendingResponse.ok || !topRatedResponse.ok || !newestResponse.ok || !categoriesResponse.ok) {
         throw new Error('Could not load products. Please try again later.');
     }
+    
+    if(brandResponse && !brandResponse.ok) {
+        console.warn('Could not load featured brands.');
+    }
 
-    const [trendingData, topRatedData, newestData, categoriesData, brandData] = await Promise.all([
-      trendingResponse.json(),
-      topRatedResponse.json(),
-      newestResponse.json(),
-      categoriesResponse.json(),
-      brandResponse.json(),
-    ]);
-
+    const trendingData = await trendingResponse.json();
+    const topRatedData = await topRatedResponse.json();
+    const newestData = await newestResponse.json();
+    const categoriesData = await categoriesResponse.json();
+    
     setTrendingProducts(trendingData.products);
     setTopRatedProducts(topRatedData.products);
     setNewestProducts(newestData.products);
     setUniqueCategories(categoriesData.categories.slice(0, 12));
     
-    // Filter brands on the client side after fetching
-    const allBrands: IBrand[] = brandData.brands;
-    const featuredBrandNames = settings.featuredBrands || [];
-    const filteredBrands = allBrands.filter(brand => featuredBrandNames.includes(brand.permanentName));
-    setFeaturedBrands(filteredBrands);
-
+    if (brandResponse) {
+        const brandData = await brandResponse.json();
+        setFeaturedBrands(brandData.brands);
+    }
+    
     setLoading(false);
-  }, [settings.featuredBrands]);
+  }, [settings]);
 
   useEffect(() => {
-    fetchSettings(); // Make sure settings are loaded first
+    fetchSettings();
   }, [fetchSettings]);
 
   useEffect(() => {
-    // Only fetch data once we have some settings loaded
-    if (settings.platformName) {
+    if (settings) {
       fetchData().catch(err => {
-        // Re-throw the error to be caught by Next.js error boundary or unhandled rejection handler
-        // This makes the actual error visible in the console for debugging.
-        throw err;
+        console.error("Failed to fetch landing page data:", err);
       });
     }
-  }, [settings.platformName, fetchData]);
+  }, [settings, fetchData]);
   
   const platformSettings = settings as IPlatformSettings;
   
