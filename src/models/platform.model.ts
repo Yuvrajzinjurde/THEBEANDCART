@@ -1,5 +1,4 @@
 
-
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 const HeroBannerSchema: Schema = new Schema({
@@ -78,7 +77,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   platformDescription: { type: String, default: 'Your one-stop shop for amazing brands.' },
   platformLogoUrl: { type: String, default: '' },
   platformFaviconUrl: { type: String, default: '' },
-  platformThemeName: { type: String, default: 'Blue' },
+  platformThemeName: { type: String, default: 'Slate (Dark)' },
   socials: SocialLinksSchema,
   aiEnabled: { type: Boolean, default: true },
   hamperFeatureEnabled: { type: Boolean, default: true },
