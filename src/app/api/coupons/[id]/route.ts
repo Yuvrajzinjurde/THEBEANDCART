@@ -51,9 +51,6 @@ export async function PUT(
     }
     
     const updateData = validation.data;
-    if (updateData.type === 'free-shipping') {
-      delete (updateData as any).value;
-    }
 
     const coupon = await Coupon.findByIdAndUpdate(id, updateData, { new: true });
 

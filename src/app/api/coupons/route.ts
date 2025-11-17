@@ -47,9 +47,6 @@ export async function POST(req: Request) {
     }
     
     const couponData = { code, ...rest };
-    if (couponData.type === 'free-shipping') {
-      delete couponData.value;
-    }
 
     const newCoupon = new Coupon(couponData);
     await newCoupon.save();

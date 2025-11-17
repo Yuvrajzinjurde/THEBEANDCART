@@ -48,7 +48,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: '' as any, // Initialize as empty string to make it a controlled component
+      value: '' as any,
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -76,7 +76,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+    if (['e', 'E', '+', '-'].includes(e.key)) {
       e.preventDefault();
     }
   };
@@ -84,10 +84,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
-    // Create a mutable copy of the data to send
     const dataToSubmit: Partial<CouponFormValues> = { ...data };
 
-    // If the type is 'free-shipping', remove the value property before sending
     if (dataToSubmit.type === 'free-shipping') {
         delete dataToSubmit.value;
     }
@@ -107,7 +105,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        // Log the detailed error from the API
         console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }

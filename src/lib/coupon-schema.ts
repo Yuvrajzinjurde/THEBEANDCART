@@ -19,7 +19,7 @@ export const CouponFormSchema = z.object({
         });
     }
 
-    // 2. 'value' is required and must be in range for 'percentage' or 'fixed' types
+    // 2. 'value' is required for 'percentage' or 'fixed' types
     if (data.type === 'percentage' || data.type === 'fixed') {
         if (typeof data.value !== 'number') {
             ctx.addIssue({
@@ -44,8 +44,11 @@ export const CouponFormSchema = z.object({
     
     // 3. 'value' must NOT exist for 'free-shipping'
     if (data.type === 'free-shipping' && data.value !== undefined) {
-      // This is handled in the form submission logic, but good to have as a safeguard if ever needed.
-      // For now, we don't add an issue here as the client logic cleans it up.
+      ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Value should not be set for free shipping coupons.",
+          path: ["value"],
+      });
     }
 });
 
