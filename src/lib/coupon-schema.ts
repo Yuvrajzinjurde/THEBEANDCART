@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 const valuedCouponSchema = z.object({
   type: z.enum(['percentage', 'fixed']),
-  value: z.coerce.number().min(0, "Discount value must be non-negative."),
+  value: z.coerce.number({
+    invalid_type_error: "Discount value must be a number.",
+    required_error: "A value is required for this discount type.",
+  }).min(0, "Value must be non-negative."),
 });
 
 const freeShippingCouponSchema = z.object({

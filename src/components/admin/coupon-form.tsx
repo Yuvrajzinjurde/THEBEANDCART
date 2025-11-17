@@ -78,7 +78,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Allow backspace, delete, tab, escape, enter, and period
-    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', '.'].includes(e.key) ||
+    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
+        (e.key === '.' && !(e.target as HTMLInputElement).value.includes('.')) ||
         // Allow: Ctrl+A, Command+A
         (e.key === 'a' && (e.ctrlKey || e.metaKey)) ||
         // Allow: Ctrl+C, Command+C
@@ -101,12 +102,15 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
+    // Explicitly handle the 'value' field based on discount type
     const dataToSubmit: Record<string, any> = { ...data };
     
     if (data.type === 'free-shipping') {
       delete dataToSubmit.value;
     }
     
+    console.log("Submitting Data:", dataToSubmit);
+
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -120,6 +124,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
+        // Log the detailed error from the API
         console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
@@ -189,7 +194,14 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormLabel>Discount Type</FormLabel>
                     <FormControl>
                         <RadioGroup
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value === 'free-shipping') {
+                            form.setValue('value', undefined as any); // Clear value for free shipping
+                          } else {
+                            form.setValue('value', 0); // Reset to 0 for other types
+                          }
+                        }}
                         value={field.value}
                         className="flex flex-col sm:flex-row sm:items-center gap-4"
                         >
