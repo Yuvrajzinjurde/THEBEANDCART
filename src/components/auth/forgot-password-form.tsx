@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import { ForgotPasswordSchema, ResetPasswordSchema, type ForgotPasswordInput, type ResetPasswordInput } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -215,3 +216,5 @@ export function ForgotPasswordForm() {
     </Card>
   );
 }
+
+    

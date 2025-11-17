@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff, Lock } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Loader } from "@/components/ui/loader";
 import { useForm, type FieldValues } from "react-hook-form";
@@ -305,7 +305,7 @@ export default function ProfilePage() {
     }
     setIsEditing(false);
     setIsCancelAlertOpen(false);
-    toast.warn("Changes discarded.");
+    toast.warning("Changes discarded.");
   };
 
   const handleSendOtp = async () => {
@@ -774,3 +774,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

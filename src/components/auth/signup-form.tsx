@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import { SignUpSchema, type SignUpInput } from "@/lib/auth";
 import { Button } from "@/components/ui/button";

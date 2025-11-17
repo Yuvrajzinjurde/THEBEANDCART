@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -247,3 +247,5 @@ export function LoginForm() {
     </main>
   );
 }
+
+    
