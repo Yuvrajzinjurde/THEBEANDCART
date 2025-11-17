@@ -3,33 +3,50 @@ import { z } from 'zod';
 export const CouponFormSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
   type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.coerce.number({ invalid_type_error: 'Discount value must be a number.' }).optional(),
-  minPurchase: z.coerce.number({ invalid_type_error: 'Minimum purchase must be a number.' }).min(0).default(0),
+  value: z.coerce.number().optional(),
+  minPurchase: z.coerce.number().min(0, "Minimum purchase must be a positive number.").default(0),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
 })
-.refine(data => {
-    if (data.startDate && data.endDate) {
-        return data.endDate > data.startDate;
+.superRefine((data, ctx) => {
+    // 1. End date must be after start date
+    if (data.startDate && data.endDate && data.endDate <= data.startDate) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "End date must be after the start date.",
+            path: ["endDate"],
+        });
     }
-    return true;
-}, {
-    message: "End date must be after start date.",
-    path: ["endDate"],
-})
-.refine(data => {
-    if (data.type === 'percentage') {
-      if (typeof data.value !== 'number') return false; // Must have a value
-      return data.value >= 0 && data.value <= 100;
+
+    // 2. 'value' is required and must be in range for 'percentage' or 'fixed' types
+    if (data.type === 'percentage' || data.type === 'fixed') {
+        if (typeof data.value !== 'number') {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "A discount value is required.",
+                path: ["value"],
+            });
+        } else if (data.value < 0) {
+             ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Discount value cannot be negative.",
+                path: ["value"],
+            });
+        } else if (data.type === 'percentage' && data.value > 100) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Percentage value cannot exceed 100.",
+                path: ["value"],
+            });
+        }
     }
-    if (data.type === 'fixed') {
-      return typeof data.value === 'number' && data.value >= 0; // Must have a value
+    
+    // 3. 'value' must NOT exist for 'free-shipping'
+    if (data.type === 'free-shipping' && data.value !== undefined) {
+      // This is handled in the form submission logic, but good to have as a safeguard if ever needed.
+      // For now, we don't add an issue here as the client logic cleans it up.
     }
-    return true;
-}, {
-    message: "A valid discount value is required and must be within the correct range for the selected type.",
-    path: ["value"],
 });
 
 

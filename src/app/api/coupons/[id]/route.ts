@@ -49,8 +49,13 @@ export async function PUT(
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
+    
+    const updateData = validation.data;
+    if (updateData.type === 'free-shipping') {
+      delete (updateData as any).value;
+    }
 
-    const coupon = await Coupon.findByIdAndUpdate(id, validation.data, { new: true });
+    const coupon = await Coupon.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!coupon) {
       return NextResponse.json({ message: 'Coupon not found' }, { status: 404 });

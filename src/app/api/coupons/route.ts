@@ -40,13 +40,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { code } = validation.data;
+    const { code, ...rest } = validation.data;
     const existingCoupon = await Coupon.findOne({ code });
     if (existingCoupon) {
         return NextResponse.json({ message: `Coupon code '${code}' already exists.` }, { status: 409 });
     }
+    
+    const couponData = { code, ...rest };
+    if (couponData.type === 'free-shipping') {
+      delete couponData.value;
+    }
 
-    const newCoupon = new Coupon(validation.data);
+    const newCoupon = new Coupon(couponData);
     await newCoupon.save();
 
     return NextResponse.json({ message: 'Coupon created successfully', coupon: newCoupon }, { status: 201 });

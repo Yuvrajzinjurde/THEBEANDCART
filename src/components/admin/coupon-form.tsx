@@ -48,7 +48,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: '' as any, // Start with empty string to make it a controlled component
+      value: '' as any, // Initialize as empty string to make it a controlled component
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -74,7 +74,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
     form.setValue('code', `SALE${randomPart}`, { shouldValidate: true });
   };
-
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (['e', 'E', '+', '-', '.'].includes(e.key)) {
       e.preventDefault();
@@ -83,13 +83,17 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
+    
+    // Create a mutable copy of the data to send
+    const dataToSubmit: Partial<CouponFormValues> = { ...data };
 
-    const dataToSubmit: any = { ...data };
-    // Only remove value if type is free-shipping
+    // If the type is 'free-shipping', remove the value property before sending
     if (dataToSubmit.type === 'free-shipping') {
-      delete dataToSubmit.value;
+        delete dataToSubmit.value;
     }
     
+    console.log("Submitting data:", dataToSubmit);
+
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -103,6 +107,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
+        // Log the detailed error from the API
+        console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
 
