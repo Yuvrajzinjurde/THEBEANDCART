@@ -39,7 +39,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
         ...existingCoupon,
         code: existingCoupon.code || '',
         type: existingCoupon.type || 'percentage',
-        value: existingCoupon.value !== undefined ? existingCoupon.value : '',
+        value: existingCoupon.value, // Keep as is, schema will handle it
         minPurchase: existingCoupon.minPurchase || 0,
         brand: existingCoupon.brand || 'All Brands',
         startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
@@ -50,7 +50,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: '', // Initialize as empty string to avoid uncontrolled input error
+      value: '', // Start with an empty string
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -88,6 +88,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
+    console.log("Submitting to API:", url, "with data:", JSON.stringify(dataToSubmit, null, 2));
+
     try {
       const response = await fetch(url, {
         method,
@@ -98,6 +100,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
+        // Log the detailed error from the API
+        console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
 
@@ -210,7 +214,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                                   placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
                                   {...field}
                                   value={field.value ?? ''}
-                                  onChange={e => field.onChange(e.target.valueAsNumber)}
+                                  onChange={e => field.onChange(e.target.value)}
                                 />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}
