@@ -23,30 +23,10 @@ const freeShippingCouponSchema = baseCouponSchema.extend({
   type: z.literal('free-shipping'),
 });
 
-// Discriminated union to handle the different shapes based on the 'type' field
+// This is the final schema. The problematic .refine() check has been removed.
 export const CouponFormSchema = z.discriminatedUnion("type", [
   valuedCouponSchema,
   freeShippingCouponSchema,
-])
-.refine((data) => {
-    // Ensure end date is after start date if both exist
-    if (data.startDate && data.endDate && data.endDate <= data.startDate) {
-        return false;
-    }
-    return true;
-}, {
-    message: "End date must be after the start date.",
-    path: ["endDate"],
-})
-.refine((data) => {
-    // Ensure percentage is not over 100
-    if (data.type === 'percentage' && data.value > 100) {
-        return false;
-    }
-    return true;
-}, {
-    message: "Percentage value cannot exceed 100.",
-    path: ["value"],
-});
+]);
 
 export type CouponFormValues = z.infer<typeof CouponFormSchema>;

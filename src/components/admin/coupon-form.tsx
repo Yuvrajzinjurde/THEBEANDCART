@@ -78,23 +78,16 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow backspace, delete, tab, escape, enter, and period
+    // Allow backspace, delete, tab, escape, enter
     if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
-        (e.key === '.' && !(e.target as HTMLInputElement).value.includes('.')) ||
         // Allow: Ctrl+A, Command+A
         (e.key === 'a' && (e.ctrlKey || e.metaKey)) ||
-        // Allow: Ctrl+C, Command+C
-        (e.key === 'c' && (e.ctrlKey || e.metaKey)) ||
-        // Allow: Ctrl+V, Command+V
-        (e.key === 'v' && (e.ctrlKey || e.metaKey)) ||
-        // Allow: Ctrl+X, Command+X
-        (e.key === 'x' && (e.ctrlKey || e.metaKey)) ||
         // Allow: home, end, left, right
         e.key.startsWith('Arrow')) {
       return;
     }
-    // Ensure that it is a number and stop the keypress
-    if (isNaN(Number(e.key))) {
+    // Ensure that it is a number and stop the keypress if not
+    if (isNaN(Number(e.key)) && e.key !== '.') {
         e.preventDefault();
     }
   };
@@ -106,7 +99,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     // Explicitly handle the 'value' field based on discount type
     const dataToSubmit: Record<string, any> = { ...data };
     
-    if (data.type === 'free-shipping') {
+    if (data.type === 'free-shipping' && 'value' in dataToSubmit) {
       delete dataToSubmit.value;
     }
 
@@ -238,7 +231,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                                   inputMode="decimal"
                                   placeholder={discountType === 'percentage' ? 'e.g., 10' : 'e.g., 100'}
                                   {...field}
-                                  value={field.value ?? ''}
                                   onKeyDown={handleKeyDown}
                                 />
                             </FormControl>
