@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Edit, Trash2, PlusCircle } from 'lucide-react';
 
 import type { IBrand } from '@/models/brand.model';

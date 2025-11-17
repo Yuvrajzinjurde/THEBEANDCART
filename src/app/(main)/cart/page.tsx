@@ -31,7 +31,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import type { IProduct } from "@/models/product.model";
 import type { IBrand } from "@/models/brand.model";
 import type { ICartItem } from "@/models/cart.model";

@@ -1,7 +1,6 @@
 
 import './globals.css';
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -31,18 +30,7 @@ export default function RootLayout({
             <AuthProvider>
               {children}
             </AuthProvider>
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
+            <Toaster />
         </body>
     </html>
   );

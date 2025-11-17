@@ -1,11 +1,12 @@
 
+
 "use client";
 
 import React from 'react';
 import { useForm, useFieldArray, useWatch, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -445,7 +446,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const handleGenerateDescription = async () => {
       if (!watchedFormValues.name) {
-          toast.warn("Please enter a product name first.");
+          toast.warning("Please enter a product name first.");
           return;
       }
       setAiError(null);
@@ -464,7 +465,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
   
   const handleGenerateTags = async () => {
     if (!watchedFormValues.name || !watchedFormValues.description) {
-      toast.warn("Please enter a product name and description first.");
+      toast.warning("Please enter a product name and description first.");
       return;
     }
     setAiError(null);
@@ -486,7 +487,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     const { name, description, category, purchasePrice, mainImage } = watchedFormValues;
     
     if (!name || !description || !category || !purchasePrice || !mainImage) {
-        toast.warn("Please fill in Name, Description, Category, Purchase Price, and upload a main image before suggesting a price.");
+        toast.warning("Please fill in Name, Description, Category, Purchase Price, and upload a main image before suggesting a price.");
         return;
     }
     setAiError(null);
@@ -512,7 +513,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
 
   const handleAutofill = async () => {
     if (!watchedFormValues.name) {
-      toast.warn("Please enter a product name to autofill the form.");
+      toast.warning("Please enter a product name to autofill the form.");
       return;
     }
     setAiError(null);

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { MoreHorizontal, UserX, UserCheck, Eye } from 'lucide-react';
 import type { IUser } from '@/models/user.model';
 import { Button } from '@/components/ui/button';

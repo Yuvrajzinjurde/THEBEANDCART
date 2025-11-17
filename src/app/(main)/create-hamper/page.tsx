@@ -23,7 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { BrandProductCard } from "@/components/brand-product-card";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "react-toastify";
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -446,7 +446,7 @@ const Step5_Notes = () => {
     
     const handleGenerateMessage = async () => {
         if (!occasion || products.length === 0) {
-            toast.warn("Please select an occasion and add products to the hamper first.");
+            toast.warning("Please select an occasion and add products to the hamper first.");
             return;
         }
         setIsGeneratingMessage(true);

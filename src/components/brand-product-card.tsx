@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -14,7 +15,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
 import React, { useMemo, useState, useEffect, useRef } from 'react';

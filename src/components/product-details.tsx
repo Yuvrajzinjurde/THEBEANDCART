@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -22,7 +23,7 @@ import {
 } from "@/components/ui/carousel"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from './ui/breadcrumb';
 import { useAuth } from '@/hooks/use-auth';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import useUserStore from '@/stores/user-store';
 import { Badge } from './ui/badge';
 import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
@@ -184,7 +185,7 @@ useEffect(() => {
     if (quantity < currentStock) {
       setQuantity(q => q + 1);
     } else {
-      toast.warn(`Only ${currentStock} items available.`);
+      toast.warning(`Only ${currentStock} items available.`);
     }
   };
 
@@ -200,7 +201,7 @@ useEffect(() => {
     }
     
     if ((initialProduct.variants?.length || 0) > 0 && !selectedVariant) {
-        toast.warn("Please select a color and size before adding to cart.");
+        toast.warning("Please select a color and size before adding to cart.");
         return;
     }
 

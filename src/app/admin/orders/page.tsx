@@ -37,7 +37,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 
 export default function OrdersPage() {
@@ -75,7 +75,7 @@ export default function OrdersPage() {
         const { orders } = await response.json();
 
         if (orders.length === 0) {
-            toast.warn("No orders found in the selected date range.");
+            toast.warning("No orders found in the selected date range.");
             return;
         }
         

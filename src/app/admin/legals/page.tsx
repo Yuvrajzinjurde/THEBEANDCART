@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { toast } from "react-toastify";
+import { toast } from 'sonner';
 import { Loader } from "@/components/ui/loader";
 import { Landmark, Save, UploadCloud, ArrowLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,7 +90,7 @@ export default function LegalsPage() {
   const handleSave = () => {
     const currentDoc = documents[activeDocType];
     if (!currentDoc || !currentDoc.content) {
-        toast.warn("No content to save.");
+        toast.warning("No content to save.");
         return;
     }
 

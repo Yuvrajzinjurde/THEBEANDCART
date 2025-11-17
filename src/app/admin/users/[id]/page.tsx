@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, ShoppingCart, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import * as XLSX from "xlsx";
 
 import type { UserDetails } from './actions';
@@ -129,7 +129,7 @@ export default function UserDetailsPage() {
     
     const handleDownload = () => {
         if (!details || !details.orders || details.orders.length === 0) {
-            toast.warn("No orders to export for this user.");
+            toast.warning("No orders to export for this user.");
             return;
         }
 
