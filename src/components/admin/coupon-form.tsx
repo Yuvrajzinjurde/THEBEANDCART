@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useEffect } from 'react';
@@ -51,7 +50,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: undefined,
+      value: '' as any, // Initialize as empty string to avoid uncontrolled input error
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
