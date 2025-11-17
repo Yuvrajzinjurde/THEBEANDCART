@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Coupon from '@/models/coupon.model';

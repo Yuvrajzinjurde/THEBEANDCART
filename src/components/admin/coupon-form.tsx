@@ -33,21 +33,31 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues: any = React.useMemo(() => (existingCoupon ? {
-      ...existingCoupon,
-      value: existingCoupon.value ?? '',
-      minPurchase: existingCoupon.minPurchase ?? '',
-      startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
-      endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
-  } : {
-    code: '',
-    type: 'percentage',
-    value: '',
-    minPurchase: '',
-    brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
-    startDate: undefined,
-    endDate: undefined
-  }), [existingCoupon, selectedBrand]);
+  const defaultValues: CouponFormValues = React.useMemo(() => {
+    if (existingCoupon) {
+      // For editing, transform the data to match the form's expected types.
+      return {
+        ...existingCoupon,
+        code: existingCoupon.code || '',
+        type: existingCoupon.type || 'percentage',
+        value: existingCoupon.value !== undefined ? existingCoupon.value : undefined,
+        minPurchase: existingCoupon.minPurchase || 0,
+        brand: existingCoupon.brand || 'All Brands',
+        startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
+        endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
+      };
+    }
+    // For creating, set sensible defaults.
+    return {
+      code: '',
+      type: 'percentage',
+      value: undefined,
+      minPurchase: 0,
+      brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
+      startDate: undefined,
+      endDate: undefined
+    };
+  }, [existingCoupon, selectedBrand]);
 
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(CouponFormSchema),
@@ -59,13 +69,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   useEffect(() => {
     if (discountType === 'free-shipping') {
-      form.setValue('value', undefined);
+      form.setValue('value', undefined, { shouldValidate: true });
     }
   }, [discountType, form]);
 
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
-    form.setValue('code', `SALE${randomPart}`);
+    form.setValue('code', `SALE${randomPart}`, { shouldValidate: true });
   };
 
   async function onSubmit(data: CouponFormValues) {
@@ -193,7 +203,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             <FormControl>
                                 <Input 
                                   type="number"
-                                  placeholder="0"
+                                  placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
                                   {...field}
                                 />
                             </FormControl>

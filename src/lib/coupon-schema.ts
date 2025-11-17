@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const CouponFormSchema = z.object({
@@ -33,13 +32,12 @@ export const CouponFormSchema = z.object({
     if (data.type === 'fixed') {
       return typeof data.value === 'number' && data.value >= 0; // Must have a value
     }
-    if (data.type === 'free-shipping') {
-      return data.value === undefined; // Must NOT have a value
-    }
+    // For free-shipping, value can be undefined, which the preprocess step handles.
     return true;
 }, {
     message: "A valid discount value is required and must be within the correct range for the selected type.",
     path: ["value"],
 });
+
 
 export type CouponFormValues = z.infer<typeof CouponFormSchema>;
