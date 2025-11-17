@@ -39,7 +39,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
         ...existingCoupon,
         code: existingCoupon.code || '',
         type: existingCoupon.type || 'percentage',
-        value: existingCoupon.value !== undefined ? existingCoupon.value : undefined,
+        value: existingCoupon.value !== undefined ? existingCoupon.value : '',
         minPurchase: existingCoupon.minPurchase || 0,
         brand: existingCoupon.brand || 'All Brands',
         startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
@@ -50,7 +50,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: '' as any, // Initialize as empty string to avoid uncontrolled input error
+      value: '', // Initialize as empty string to avoid uncontrolled input error
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -79,6 +79,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
+
+    const dataToSubmit: any = { ...data };
+    if (dataToSubmit.type === 'free-shipping') {
+      delete dataToSubmit.value;
+    }
     
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
@@ -87,7 +92,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSubmit),
       });
 
       const result = await response.json();
@@ -204,6 +209,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                                   type="number"
                                   placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
                                   {...field}
+                                  value={field.value ?? ''}
+                                  onChange={e => field.onChange(e.target.valueAsNumber)}
                                 />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}
@@ -229,6 +236,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                               placeholder="0"
                               {...field}
                               className="pl-7"
+                              value={field.value ?? ''}
+                              onChange={e => field.onChange(e.target.valueAsNumber)}
                             />
                         </FormControl>
                     </div>
