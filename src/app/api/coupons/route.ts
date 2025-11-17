@@ -40,15 +40,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { code, ...rest } = validation.data;
+    const { code } = validation.data;
     const existingCoupon = await Coupon.findOne({ code });
     if (existingCoupon) {
         return NextResponse.json({ message: `Coupon code '${code}' already exists.` }, { status: 409 });
     }
     
-    const couponData = { code, ...rest };
-
-    const newCoupon = new Coupon(couponData);
+    const newCoupon = new Coupon(validation.data);
     await newCoupon.save();
 
     return NextResponse.json({ message: 'Coupon created successfully', coupon: newCoupon }, { status: 201 });

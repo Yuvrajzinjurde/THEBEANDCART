@@ -1,16 +1,35 @@
 import { z } from 'zod';
 
-export const CouponFormSchema = z.object({
+// Base schema with common fields
+const baseCouponSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
-  type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.coerce.number().optional(),
   minPurchase: z.coerce.number().min(0, "Minimum purchase must be a positive number.").default(0),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
-})
-.superRefine((data, ctx) => {
-    // 1. End date must be after start date
+});
+
+// Schema for coupons that have a numeric value
+const valuedCouponSchema = baseCouponSchema.extend({
+  type: z.enum(['percentage', 'fixed']),
+  value: z.coerce.number({
+    required_error: "A discount value is required.",
+    invalid_type_error: "Discount value must be a number.",
+  }).min(0, "Discount value cannot be negative."),
+});
+
+// Schema for free shipping coupons (no value)
+const freeShippingCouponSchema = baseCouponSchema.extend({
+  type: z.literal('free-shipping'),
+  value: z.undefined().optional(), // Ensure value is not present
+});
+
+// Union of the different coupon types
+export const CouponFormSchema = z.union([
+  valuedCouponSchema,
+  freeShippingCouponSchema,
+]).superRefine((data, ctx) => {
+    // End date must be after start date
     if (data.startDate && data.endDate && data.endDate <= data.startDate) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -18,39 +37,14 @@ export const CouponFormSchema = z.object({
             path: ["endDate"],
         });
     }
-
-    // 2. 'value' is required for 'percentage' or 'fixed' types
-    if (data.type === 'percentage' || data.type === 'fixed') {
-        if (typeof data.value !== 'number') {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "A discount value is required.",
-                path: ["value"],
-            });
-        } else if (data.value < 0) {
-             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Discount value cannot be negative.",
-                path: ["value"],
-            });
-        } else if (data.type === 'percentage' && data.value > 100) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Percentage value cannot exceed 100.",
-                path: ["value"],
-            });
-        }
-    }
-    
-    // 3. 'value' must NOT exist for 'free-shipping'
-    if (data.type === 'free-shipping' && data.value !== undefined) {
-      ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Value should not be set for free shipping coupons.",
-          path: ["value"],
-      });
+    // Percentage value cannot exceed 100
+    if (data.type === 'percentage' && data.value && data.value > 100) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Percentage value cannot exceed 100.",
+            path: ["value"],
+        });
     }
 });
-
 
 export type CouponFormValues = z.infer<typeof CouponFormSchema>;

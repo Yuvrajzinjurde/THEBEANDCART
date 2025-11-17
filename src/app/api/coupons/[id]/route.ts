@@ -50,9 +50,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
     
-    const updateData = validation.data;
-
-    const coupon = await Coupon.findByIdAndUpdate(id, updateData, { new: true });
+    const coupon = await Coupon.findByIdAndUpdate(id, validation.data, { new: true });
 
     if (!coupon) {
       return NextResponse.json({ message: 'Coupon not found' }, { status: 404 });

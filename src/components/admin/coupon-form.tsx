@@ -32,7 +32,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues: CouponFormValues = React.useMemo(() => {
+  const defaultValues: Partial<CouponFormValues> = React.useMemo(() => {
     if (existingCoupon) {
       return {
         ...existingCoupon,
@@ -48,7 +48,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: '' as any,
+      value: undefined,
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -84,13 +84,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
-    const dataToSubmit: Partial<CouponFormValues> = { ...data };
-
-    if (dataToSubmit.type === 'free-shipping') {
-        delete dataToSubmit.value;
-    }
+    // Create a mutable copy of the data
+    const dataToSubmit = { ...data };
     
-    console.log("Submitting data:", dataToSubmit);
+    // Explicitly remove the 'value' field if the type is 'free-shipping'
+    if (dataToSubmit.type === 'free-shipping') {
+      delete (dataToSubmit as Partial<CouponFormValues>).value;
+    }
 
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
@@ -217,6 +217,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                                   type="number"
                                   placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
                                   {...field}
+                                  value={field.value ?? ''}
                                   onKeyDown={handleKeyDown}
                                 />
                             </FormControl>
