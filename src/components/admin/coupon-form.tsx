@@ -32,25 +32,25 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const defaultValues: Partial<CouponFormValues> = React.useMemo(() => {
     if (existingCoupon) {
-        const base = {
-            ...existingCoupon,
-            code: existingCoupon.code || '',
-            minPurchase: existingCoupon.minPurchase || 0,
-            brand: existingCoupon.brand || 'All Brands',
-            startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
-            endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
-        }
-        if (existingCoupon.type === 'free-shipping') {
-            return {
-                ...base,
-                type: 'free-shipping',
-            }
-        }
+      const base = {
+        code: existingCoupon.code,
+        type: existingCoupon.type,
+        minPurchase: existingCoupon.minPurchase,
+        brand: existingCoupon.brand,
+        startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
+        endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
+      };
+      if (existingCoupon.type === 'free-shipping') {
         return {
-            ...base,
-            type: existingCoupon.type,
-            value: existingCoupon.value,
-        }
+          ...base,
+          type: 'free-shipping',
+        };
+      }
+      return {
+        ...base,
+        type: existingCoupon.type,
+        value: existingCoupon.value || 0,
+      };
     }
     return {
       code: '',
@@ -59,9 +59,10 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
-      endDate: undefined
+      endDate: undefined,
     };
   }, [existingCoupon, selectedBrand]);
+
 
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(CouponFormSchema),
@@ -93,8 +94,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       return;
     }
     // Ensure that it is a number and stop the keypress
-    if (e.key < '0' || e.key > '9') {
-      e.preventDefault();
+    if (isNaN(Number(e.key))) {
+        e.preventDefault();
     }
   };
 
@@ -108,8 +109,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     if (data.type === 'free-shipping') {
       delete dataToSubmit.value;
     }
-    
-    console.log("Submitting Data:", dataToSubmit);
 
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
@@ -124,7 +123,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        // Log the detailed error from the API
         console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
@@ -195,12 +193,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormControl>
                         <RadioGroup
                         onValueChange={(value) => {
-                          field.onChange(value);
-                          if (value === 'free-shipping') {
-                            form.setValue('value', undefined as any); // Clear value for free shipping
-                          } else {
-                            form.setValue('value', 0); // Reset to 0 for other types
-                          }
+                          field.onChange(value as CouponFormValues['type']);
                         }}
                         value={field.value}
                         className="flex flex-col sm:flex-row sm:items-center gap-4"
@@ -240,11 +233,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                          <div className="relative">
                             {discountType === 'fixed' && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>}
                             <FormControl>
-                                <Input 
+                                <Input
                                   type="text"
                                   inputMode="decimal"
-                                  placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
+                                  placeholder={discountType === 'percentage' ? 'e.g., 10' : 'e.g., 100'}
                                   {...field}
+                                  value={field.value ?? ''}
                                   onKeyDown={handleKeyDown}
                                 />
                             </FormControl>
@@ -266,7 +260,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                      <div className="relative">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
                         <FormControl>
-                            <Input 
+                            <Input
                               type="text"
                               inputMode="decimal"
                               placeholder="0"

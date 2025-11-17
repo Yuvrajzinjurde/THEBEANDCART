@@ -1,10 +1,9 @@
-
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 export interface ICoupon extends Document {
   code: string;
   type: 'percentage' | 'fixed' | 'free-shipping';
-  value?: number;
+  value?: number; // Optional: not present for 'free-shipping'
   minPurchase: number;
   brand: string; // 'All Brands' or a specific brand permanentName
   startDate?: Date;
