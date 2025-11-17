@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -48,7 +48,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     return {
       code: '',
       type: 'percentage',
-      value: undefined,
+      value: 0,
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -85,11 +85,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     setIsSubmitting(true);
     
     // Create a mutable copy of the data
-    const dataToSubmit = { ...data };
+    const dataToSubmit: Record<string, any> = { ...data };
     
     // Explicitly remove the 'value' field if the type is 'free-shipping'
     if (dataToSubmit.type === 'free-shipping') {
-      delete (dataToSubmit as Partial<CouponFormValues>).value;
+      delete dataToSubmit.value;
     }
 
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
@@ -105,6 +105,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
+        // Log the detailed error from the API
         console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
