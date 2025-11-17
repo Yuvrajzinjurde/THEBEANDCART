@@ -34,23 +34,21 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const defaultValues: CouponFormValues = React.useMemo(() => {
     if (existingCoupon) {
-      // For editing, transform the data to match the form's expected types.
       return {
         ...existingCoupon,
         code: existingCoupon.code || '',
         type: existingCoupon.type || 'percentage',
-        value: existingCoupon.value, // Keep as is, schema will handle it
+        value: existingCoupon.value,
         minPurchase: existingCoupon.minPurchase || 0,
         brand: existingCoupon.brand || 'All Brands',
         startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
         endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
       };
     }
-    // For creating, set sensible defaults.
     return {
       code: '',
       type: 'percentage',
-      value: '', // Start with an empty string
+      value: '' as any, // Start with empty string to make it a controlled component
       minPurchase: 0,
       brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
       startDate: undefined,
@@ -77,18 +75,23 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
     form.setValue('code', `SALE${randomPart}`, { shouldValidate: true });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
 
     const dataToSubmit: any = { ...data };
+    // Only remove value if type is free-shipping
     if (dataToSubmit.type === 'free-shipping') {
       delete dataToSubmit.value;
     }
     
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
-
-    console.log("Submitting to API:", url, "with data:", JSON.stringify(dataToSubmit, null, 2));
 
     try {
       const response = await fetch(url, {
@@ -100,8 +103,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        // Log the detailed error from the API
-        console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
 
@@ -213,8 +214,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                                   type="number"
                                   placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
                                   {...field}
-                                  value={field.value ?? ''}
-                                  onChange={e => field.onChange(e.target.value)}
+                                  onKeyDown={handleKeyDown}
                                 />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}
@@ -240,8 +240,7 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                               placeholder="0"
                               {...field}
                               className="pl-7"
-                              value={field.value ?? ''}
-                              onChange={e => field.onChange(e.target.valueAsNumber)}
+                              onKeyDown={handleKeyDown}
                             />
                         </FormControl>
                     </div>
