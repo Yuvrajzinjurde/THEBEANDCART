@@ -44,7 +44,13 @@ export async function POST(req: Request) {
         { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
     );
 
-    return NextResponse.json(settings, { status: 200 });
+    // After saving, re-format the response to match the client's expectation of { name: string }[]
+    const responseData = settings.toObject();
+    responseData.featuredCategories = (responseData.featuredCategories || []).map((name: string) => ({ name }));
+    responseData.featuredBrands = (responseData.featuredBrands || []).map((name: string) => ({ name }));
+
+
+    return NextResponse.json(responseData, { status: 200 });
 
   } catch (error) {
     console.error('Failed to save platform settings:', error);

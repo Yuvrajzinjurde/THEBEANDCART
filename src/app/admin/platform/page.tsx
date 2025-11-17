@@ -216,18 +216,7 @@ export default function PlatformSettingsPage() {
       
       await fetchSettings();
       
-      const newDefaults = {
-          ...result,
-          featuredCategories: result.featuredCategories?.map((cat: string) => ({ name: cat })) || [],
-          featuredBrands: result.featuredBrands?.map((brand: string) => ({ name: brand })) || [],
-          socials: {
-              twitter: result.socials?.twitter || '',
-              facebook: result.socials?.facebook || '',
-              instagram: result.socials?.instagram || '',
-              linkedin: result.socials?.linkedin || '',
-          },
-      };
-      form.reset(newDefaults, { keepDirty: false });
+      form.reset(result, { keepDirty: false });
 
     } catch (error: any) {
       console.error("Submission Error:", error);
