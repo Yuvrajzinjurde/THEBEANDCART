@@ -3,14 +3,8 @@ import { z } from 'zod';
 export const CouponFormSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
   type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'Discount value must be a number.' }).optional()
-  ),
-  minPurchase: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
-    z.number({ invalid_type_error: 'Minimum purchase must be a number.' }).min(0)
-  ),
+  value: z.coerce.number({ invalid_type_error: 'Discount value must be a number.' }).optional(),
+  minPurchase: z.coerce.number({ invalid_type_error: 'Minimum purchase must be a number.' }).min(0).default(0),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
@@ -32,7 +26,6 @@ export const CouponFormSchema = z.object({
     if (data.type === 'fixed') {
       return typeof data.value === 'number' && data.value >= 0; // Must have a value
     }
-    // For free-shipping, value can be undefined, which the preprocess step handles.
     return true;
 }, {
     message: "A valid discount value is required and must be within the correct range for the selected type.",
