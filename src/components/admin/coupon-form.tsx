@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -21,7 +20,6 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { ICoupon } from '@/models/coupon.model';
 
-
 interface CouponFormProps {
   mode: 'create' | 'edit';
   existingCoupon?: ICoupon;
@@ -34,16 +32,25 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const defaultValues: Partial<CouponFormValues> = React.useMemo(() => {
     if (existingCoupon) {
-      return {
-        ...existingCoupon,
-        code: existingCoupon.code || '',
-        type: existingCoupon.type || 'percentage',
-        value: existingCoupon.value,
-        minPurchase: existingCoupon.minPurchase || 0,
-        brand: existingCoupon.brand || 'All Brands',
-        startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
-        endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
-      };
+        const base = {
+            ...existingCoupon,
+            code: existingCoupon.code || '',
+            minPurchase: existingCoupon.minPurchase || 0,
+            brand: existingCoupon.brand || 'All Brands',
+            startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
+            endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
+        }
+        if (existingCoupon.type === 'free-shipping') {
+            return {
+                ...base,
+                type: 'free-shipping',
+            }
+        }
+        return {
+            ...base,
+            type: existingCoupon.type,
+            value: existingCoupon.value,
+        }
     }
     return {
       code: '',
@@ -58,17 +65,11 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
 
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(CouponFormSchema),
-    defaultValues,
+    defaultValues: defaultValues as CouponFormValues,
     mode: 'onChange',
   });
 
   const discountType = form.watch('type');
-
-  useEffect(() => {
-    if (discountType === 'free-shipping') {
-      form.setValue('value', undefined, { shouldValidate: true });
-    }
-  }, [discountType, form]);
 
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -76,22 +77,36 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (['e', 'E', '+', '-'].includes(e.key)) {
+    // Allow backspace, delete, tab, escape, enter, and period
+    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', '.'].includes(e.key) ||
+        // Allow: Ctrl+A, Command+A
+        (e.key === 'a' && (e.ctrlKey || e.metaKey)) ||
+        // Allow: Ctrl+C, Command+C
+        (e.key === 'c' && (e.ctrlKey || e.metaKey)) ||
+        // Allow: Ctrl+V, Command+V
+        (e.key === 'v' && (e.ctrlKey || e.metaKey)) ||
+        // Allow: Ctrl+X, Command+X
+        (e.key === 'x' && (e.ctrlKey || e.metaKey)) ||
+        // Allow: home, end, left, right
+        e.key.startsWith('Arrow')) {
+      return;
+    }
+    // Ensure that it is a number and stop the keypress
+    if (e.key < '0' || e.key > '9') {
       e.preventDefault();
     }
   };
 
+
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
-    // Create a mutable copy of the data
     const dataToSubmit: Record<string, any> = { ...data };
     
-    // Explicitly remove the 'value' field if the type is 'free-shipping'
-    if (dataToSubmit.type === 'free-shipping') {
+    if (data.type === 'free-shipping') {
       delete dataToSubmit.value;
     }
-
+    
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -105,7 +120,6 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        // Log the detailed error from the API
         console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
@@ -215,10 +229,10 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                             {discountType === 'fixed' && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>}
                             <FormControl>
                                 <Input 
-                                  type="number"
+                                  type="text"
+                                  inputMode="decimal"
                                   placeholder={discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
                                   {...field}
-                                  value={field.value ?? ''}
                                   onKeyDown={handleKeyDown}
                                 />
                             </FormControl>
@@ -241,7 +255,8 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
                         <FormControl>
                             <Input 
-                              type="number"
+                              type="text"
+                              inputMode="decimal"
                               placeholder="0"
                               {...field}
                               className="pl-7"
