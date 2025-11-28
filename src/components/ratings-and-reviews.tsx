@@ -14,7 +14,7 @@ import { format, parseISO } from 'date-fns';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader } from './ui/loader';
