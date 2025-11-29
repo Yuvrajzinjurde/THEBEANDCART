@@ -64,6 +64,7 @@ export async function PUT(
     }
     
     const body = await req.json();
+
     const validation = profileUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
