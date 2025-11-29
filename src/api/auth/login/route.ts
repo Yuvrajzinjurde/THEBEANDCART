@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
     );
 
     const accessTokenCookie = serialize('accessToken', accessToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
         maxAge: 60 * 15,

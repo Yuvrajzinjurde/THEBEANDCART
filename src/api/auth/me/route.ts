@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
         );
 
         const accessTokenCookie = serialize('accessToken', newAccessToken, {
-            httpOnly: true,
+            httpOnly: false,
             secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
             maxAge: 60 * 15,
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
         return response;
 
     } catch (error) {
-        const expiredAccessTokenCookie = serialize('accessToken', '', { httpOnly: true, maxAge: -1, path: '/' });
+        const expiredAccessTokenCookie = serialize('accessToken', '', { httpOnly: false, maxAge: -1, path: '/' });
         const expiredRefreshTokenCookie = serialize('refreshToken', '', { httpOnly: true, maxAge: -1, path: '/' });
         
         const response = NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

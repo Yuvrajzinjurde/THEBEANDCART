@@ -13,7 +13,7 @@ const CART_UPDATE_EVENT_KEY = 'cart-last-updated';
 
 export interface User {
   _id: string;
-  sub: string; // Ensure sub is part of the User interface for consistency
+  sub: string;
   roles: string[];
   name: string;
   brand?: string;
@@ -98,22 +98,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   checkUser: async () => {
-    if (typeof window === 'undefined') {
-        set({ loading: false });
-        return;
-    }
-    
-    const accessToken = Cookies.get('accessToken');
-    if (!accessToken) {
-        set({ user: null, token: null, loading: false });
-        return;
-    }
-    
     set({ loading: true });
-    
     try {
-      const res = await fetch('/api/auth/me'); // This endpoint will handle token refresh if needed
-      
+      const res = await fetch('/api/auth/me');
       if (res.ok) {
         const { user: userData, token: newToken } = await res.json();
         get().login(userData, newToken);
@@ -124,7 +111,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
       console.error('Failed to check user status', error);
       await get().logout();
     } finally {
-        set({ loading: false });
+      set({ loading: false });
     }
   },
 }));
@@ -144,7 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await checkUser();
     }
     initializeApp();
-  }, []);
+  }, [checkUser, fetchSettings]);
 
   if (loading) {
     return (
