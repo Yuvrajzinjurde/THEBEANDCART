@@ -26,6 +26,7 @@ export interface IOrder extends Document {
     country: string;
     addressType: string;
   };
+  isFreeGiftAdded: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
 }
@@ -60,6 +61,7 @@ const OrderSchema: Schema<IOrder> = new Schema({
     country: { type: String, required: true },
     addressType: { type: String, required: true },
   },
+  isFreeGiftAdded: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // Pre-save hook to generate the numeric order ID

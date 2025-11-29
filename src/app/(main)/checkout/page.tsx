@@ -22,19 +22,16 @@ import { cn } from '@/lib/utils';
 import useCartSettingsStore from '@/stores/cart-settings-store';
 
 
-const freeGiftProduct: Partial<IProduct> = {
-    _id: '66a9354045a279093079919f', // Use the static ID for the gift
-    name: 'Surprise Gift',
-    brand: 'From us, to you!',
-    images: [], // No image needed as we'll use an icon
-    sellingPrice: 0,
-    storefront: 'platform',
-    category: 'Gift',
-    description: 'A special something, from us to you!',
-    stock: 1,
-    rating: 5,
-};
-
+const GiftBoxIcon = () => (
+    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary drop-shadow-lg">
+        <rect x="20" y="45" width="60" height="30" rx="3" fill="currentColor" fillOpacity="0.9"/>
+        <path d="M50 45V75" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        <rect x="20" y="30" width="60" height="15" rx="3" fill="currentColor"/>
+        <path d="M30 30H70" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M50 10C40 10 30 20 30 30H50V10Z" fill="currentColor"/>
+        <path d="M50 10C60 10 70 20 70 30H50V10Z" fill="currentColor"/>
+    </svg>
+)
 
 const SHIPPING_COST = 50;
 const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
@@ -87,20 +84,11 @@ export default function CheckoutPage() {
         return { subtotal: sub, totalDiscount: discount, milestoneDiscount: milestoneDisc, shipping: ship, grandTotal: grand, cartItems: items };
     }, [cart, cartSettings]);
     
-    // Add the free gift to the display list if threshold is met
-    const displayItems = useMemo(() => {
-        const items = [...cartItems];
-        if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.product as IProduct)._id === '66a9354045a279093079919f')) {
-            items.push({
-                productId: '66a9354045a279093079919f' as any,
-                quantity: 1,
-                size: undefined,
-                color: undefined,
-                product: freeGiftProduct as IProduct
-            });
-        }
-        return items;
-    }, [cartItems, subtotal, cartSettings]);
+    // Determine if the free gift should be included based on cart value
+    const isFreeGiftIncluded = useMemo(() => {
+        return cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold;
+    }, [subtotal, cartSettings]);
+
 
     const handlePlaceOrder = async () => {
         if (!selectedAddressId) {
@@ -120,9 +108,6 @@ export default function CheckoutPage() {
                 size: item.size
             }));
 
-            // Determine if the free gift should be included
-            const hasFreeGift = cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold;
-
             const response = await fetch('/api/orders/place', {
                 method: 'POST',
                 headers: {
@@ -133,17 +118,15 @@ export default function CheckoutPage() {
                     items: itemsToOrder,
                     subtotal: subtotal,
                     shippingAddressId: selectedAddressId,
-                    hasFreeGift: hasFreeGift,
+                    isFreeGiftAdded: isFreeGiftIncluded,
                 }),
             });
 
             const result = await response.json();
 
-             if (!response.ok) {
-                 if (result.message) {
-                    throw new Error(result.message);
-                }
-                throw new Error('Could not place order.');
+            if (!response.ok) {
+                 const errorDetails = result.errors ? Object.entries(result.errors).map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`).join('; ') : '';
+                 throw new Error(result.message + (errorDetails ? ` ${errorDetails}`: ''));
             }
             
             setCart(null); 
@@ -152,7 +135,7 @@ export default function CheckoutPage() {
 
         } catch (error: any) {
             console.error("Checkout failed", error);
-            toast.error(error.message);
+            toast.error(error.message || 'Could not place order.');
         } finally {
             setIsPlacingOrder(false);
         }
@@ -217,17 +200,23 @@ export default function CheckoutPage() {
                         </Card>
                         
                         <Card>
-                            <CardHeader><CardTitle>Order Items ({displayItems.length})</CardTitle></CardHeader>
+                            <CardHeader><CardTitle>Order Items ({cartItems.length + (isFreeGiftIncluded ? 1 : 0)})</CardTitle></CardHeader>
                             <CardContent className="divide-y">
-                                {displayItems.map(item => (
+                                {isFreeGiftIncluded && (
+                                     <div className="flex items-center gap-4 py-4 first:pt-0">
+                                        <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center p-2">
+                                            <GiftBoxIcon />
+                                        </div>
+                                        <div className="flex-grow">
+                                            <p className="font-semibold">Surprise Gift</p>
+                                            <p className="text-sm text-muted-foreground">From us, to you!</p>
+                                        </div>
+                                        <p className="font-semibold text-green-600">FREE</p>
+                                    </div>
+                                )}
+                                {cartItems.map(item => (
                                     <div key={(item.product as IProduct)._id} className="flex items-center gap-4 py-4 first:pt-0">
-                                        {(item.product as IProduct)._id === '66a9354045a279093079919f' ? (
-                                            <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center">
-                                                <Gift className="w-8 h-8 text-primary"/>
-                                            </div>
-                                        ) : (
-                                            <Image src={item.product.images[0]} alt={item.product.name} width={64} height={64} className="rounded-md border object-cover" />
-                                        )}
+                                        <Image src={item.product.images[0]} alt={item.product.name} width={64} height={64} className="rounded-md border object-cover" />
                                         <div className="flex-grow">
                                             <p className="font-semibold">{item.product.name}</p>
                                             <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
