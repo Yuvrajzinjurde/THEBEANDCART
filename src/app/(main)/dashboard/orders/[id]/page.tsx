@@ -32,13 +32,8 @@ interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
   productId: IProduct;
 }
 
-// The shipping address now includes fullName and phone, but they are optional on the base type
-// so we make them required for display here.
-interface PopulatedShippingAddress extends IOrder['shippingAddress'] {
-    fullName: string;
-    phone: string;
-    addressType: string;
-}
+// Define the shipping address type based on the IOrder interface
+type PopulatedShippingAddress = IOrder['shippingAddress'];
 
 interface PopulatedOrder extends Omit<IOrder, 'products' | 'shippingAddress'> {
   products: PopulatedOrderProduct[];
