@@ -4,7 +4,7 @@ import { serialize } from 'cookie';
 
 export async function POST() {
     const accessTokenCookie = serialize('accessToken', '', {
-        httpOnly: false, // Match the setting in login
+        httpOnly: false, // Ensure this matches the login route
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
         expires: new Date(0),

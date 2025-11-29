@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
         );
 
         const accessTokenCookie = serialize('accessToken', newAccessToken, {
-            httpOnly: false, // Allow client-side access
+            httpOnly: false, // Make it accessible to client-side script
             secure: process.env.NODE_ENV !== 'development',
             sameSite: 'strict',
             maxAge: 60 * 15,

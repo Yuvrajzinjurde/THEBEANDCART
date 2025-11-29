@@ -103,9 +103,14 @@ const useAuthStore = create<AuthState>((set, get) => ({
         return;
     }
     
+    const accessToken = Cookies.get('accessToken');
+    if (!accessToken) {
+        set({ user: null, token: null, loading: false });
+        return;
+    }
+    
     set({ loading: true });
     
-    // Check for refresh token in httpOnly cookie by calling the /me endpoint
     try {
       const res = await fetch('/api/auth/me'); // This endpoint will handle token refresh if needed
       
@@ -126,12 +131,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
 export const useAuth = () => {
     const state = useAuthStore();
-    // Add a memoized token that reads from cookies as a fallback.
-    const token = React.useMemo(() => {
-        return state.token || Cookies.get('accessToken') || null;
-    }, [state.token]);
-
-    return { ...state, token };
+    return state;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
