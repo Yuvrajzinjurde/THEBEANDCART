@@ -12,11 +12,11 @@ import { Loader } from "@/components/ui/loader";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import type { IOrder } from "@/models/order.model";
+import type { IOrder, IOrderProduct } from "@/models/order.model";
 import type { IProduct } from "@/models/product.model";
 
 // Define the populated order type here
-interface PopulatedOrderProduct extends IOrder['products'][0] {
+interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
   productId: IProduct;
 }
 
