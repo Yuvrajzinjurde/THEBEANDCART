@@ -4,12 +4,9 @@ import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
 import Product from '@/models/product.model';
 import User from '@/models/user.model';
-import Notification from '@/models/notification.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import Role from '@/models/role.model';
-import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
     productId: z.string().refine(val => Types.ObjectId.isValid(val)),
@@ -22,6 +19,7 @@ const OrderItemSchema = z.object({
 const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
     subtotal: z.number().min(0),
+    shippingAddressId: z.string().refine(val => Types.ObjectId.isValid(val)),
 });
 
 interface DecodedToken {
@@ -59,7 +57,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Invalid order data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { items, subtotal } = validation.data;
+        const { items, subtotal, shippingAddressId } = validation.data;
         
         if (items.length === 0) {
             return NextResponse.json({ message: 'Cannot place an empty order.' }, { status: 400 });
@@ -96,12 +94,17 @@ export async function POST(req: Request) {
         
         // Allow a small tolerance for floating point inaccuracies
         if (Math.abs(calculatedSubtotal - subtotal) > 0.01) {
-            return NextResponse.json({ message: `Total amount mismatch. Please try again.` }, { status: 409 });
+            return NextResponse.json({ message: `Total amount mismatch. Please try again. Client: ${subtotal}, Server: ${calculatedSubtotal}` }, { status: 409 });
         }
         
         const user = await User.findById(userId);
         if (!user) {
              return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
+        
+        const shippingAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).equals(shippingAddressId));
+        if (!shippingAddress) {
+            return NextResponse.json({ message: 'Shipping address not found.' }, { status: 404 });
         }
 
 
@@ -109,20 +112,19 @@ export async function POST(req: Request) {
         const newOrder = new Order({
             userId,
             products: items.map(item => ({...item, productId: new Types.ObjectId(item.productId)})),
-            totalAmount: calculatedSubtotal, // Use the server-calculated total
+            totalAmount: calculatedSubtotal, // The server-verified subtotal becomes the order's total amount
             status: 'pending',
             brand: auth.brand,
-            shippingAddress: user.address,
+            shippingAddress: shippingAddress.toObject(),
         });
         
         await newOrder.save();
         await Product.bulkWrite(bulkWriteOps);
-
+        
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
     } catch (error: any) {
         console.error('Place Order Error:', error);
-        // Return the actual error message for better debugging on the client
         return NextResponse.json({ message: `An internal server error occurred: ${error.message}` }, { status: 500 });
     }
 }
