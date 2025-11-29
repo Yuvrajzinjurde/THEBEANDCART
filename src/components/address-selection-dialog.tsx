@@ -13,6 +13,7 @@ import { PlusCircle, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
 import { AddressForm } from './address-form';
+import { Badge } from './ui/badge';
 
 interface AddressSelectionDialogProps {
   isOpen: boolean;
@@ -101,7 +102,10 @@ export function AddressSelectionDialog({ isOpen, setIsOpen, orderId, onSaveSucce
                                     >
                                         <RadioGroupItem value={address._id} id={address._id || `address-${index}`} className="mt-1" />
                                         <div className="flex-grow">
-                                            <p className="font-semibold">{address.fullName}</p>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="font-semibold">{address.fullName}</p>
+                                                <Badge variant="outline" className="capitalize">{address.addressType}</Badge>
+                                            </div>
                                             <p className="text-muted-foreground text-sm">{address.street}, {address.city}, {address.state} - {address.zip}</p>
                                             <p className="text-muted-foreground text-sm">Mobile: {address.phone}</p>
                                         </div>
