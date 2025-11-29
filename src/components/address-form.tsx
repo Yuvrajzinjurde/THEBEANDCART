@@ -109,6 +109,7 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
             if (data._id) { // Editing existing address
                 updatedAddresses = currentAddresses.map(addr => addr._id === data._id ? finalData : addr);
             } else { // Adding new address
+                // Correctly add a temporary but unique _id for the new address
                 updatedAddresses = [...currentAddresses, { ...finalData, _id: new Date().toISOString() }];
             }
             
@@ -138,16 +139,16 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>Street Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>Street Address</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
                 <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                    <FormField control={form.control} name="state" render={({ field }) => (<FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                    <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
+                    <FormField control={form.control} name="state" render={({ field }) => (<FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
                 </div>
                     <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                    <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                    <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
+                    <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)}/>
                 </div>
 
                     <FormField control={form.control} name="addressType" render={({ field }) => (
@@ -181,7 +182,7 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
                         <FormField control={form.control} name="customAddressType" render={({ field }) => (
                         <FormItem>
                             <FormLabel>Custom Address Type</FormLabel>
-                            <FormControl><Input placeholder="e.g., Weekend Home" {...field} /></FormControl>
+                            <FormControl><Input placeholder="e.g., Weekend Home" {...field} value={field.value || ''} /></FormControl>
                             <FormMessage />
                         </FormItem>
                     )}/>
