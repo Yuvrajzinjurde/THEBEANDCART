@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
-import Product, { IProduct } from '@/models/product.model';
+import Product from '@/models/product.model';
 import User from '@/models/user.model';
 import Notification from '@/models/notification.model';
 import Cart from '@/models/cart.model';
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
         const validation = PlaceOrderSchema.safeParse(body);
 
         if (!validation.success) {
+            console.error("Order validation failed:", validation.error.flatten());
             return NextResponse.json({ message: 'Invalid order data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 

@@ -93,7 +93,7 @@ export default function CheckoutPage() {
         const items = [...cartItems];
         if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.product as IProduct)._id === 'free-gift-id')) {
             items.push({
-                productId: freeGiftProduct as any,
+                productId: 'free-gift-id' as any,
                 quantity: 1,
                 size: undefined,
                 color: undefined,
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                                             <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                                         </div>
                                         <p className="font-semibold">
-                                            {(item.product as IProduct)._id === 'free-gift-id' ? 'FREE' : `₹${(item.product.sellingPrice * item.quantity).toLocaleString()}`}
+                                            {(item.product as IProduct).sellingPrice === 0 ? 'FREE' : `₹${(item.product.sellingPrice * item.quantity).toLocaleString()}`}
                                         </p>
                                     </div>
                                 ))}
