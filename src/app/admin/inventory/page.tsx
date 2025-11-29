@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Loader } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -251,12 +251,12 @@ export default function InventoryPage() {
                                 className="cursor-pointer"
                             >
                                 <TableCell>
-                                    {product.images && product.images.length > 0 ? (
+                                    {(product.mainImage || product.images?.[0]) ? (
                                         <Image
                                             alt={product.name}
                                             className="aspect-square rounded-md object-cover"
                                             height="64"
-                                            src={product.images[0]}
+                                            src={product.mainImage || product.images[0]}
                                             width="64"
                                         />
                                     ) : (

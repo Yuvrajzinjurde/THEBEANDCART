@@ -1,107 +1,156 @@
-
 "use client";
 
-import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
-import useUserStore from '@/stores/user-store';
-import { Loader } from '@/components/ui/loader';
+import React, {
+  useEffect,
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+} from "react";
+import { useRouter } from "next/navigation";
+import useUserStore from "@/stores/user-store";
+import { create } from "zustand";
+import { Loader } from "@/components/ui/loader";
+import Cookies from "js-cookie";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+
+const CART_UPDATE_EVENT_KEY = "cart-last-updated";
 
 export interface User {
-  userId: string;
+  _id: string;
+  sub: string;
   roles: string[];
   name: string;
-  exp: number;
   brand?: string;
   profilePicUrl?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  nickname?: string;
+  displayName?: string;
+  phone?: string;
+  isPhoneVerified: boolean;
+  whatsapp?: string;
+  socials?: {
+    website?: string;
+    telegram?: string;
+    twitter?: string;
+    instagram?: string;
+    facebook?: string;
+    linkedin?: string;
+  };
 }
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
-  loading: boolean;
-  login: (token: string) => void;
-  logout: () => void;
   token: string | null;
+  loading: boolean;
+  login: (user: User, token: string) => void;
+  logout: () => Promise<void>;
+  checkUser: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  login: () => {},
-  logout: () => {},
-  token: null,
-});
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const { setCart, setWishlist } = useUserStore();
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setToken(null);
-    setCart(null);
-    setWishlist(null);
-    // We don't force a redirect here anymore, to avoid issues.
-    // Components should handle the redirect based on the user state.
-  }, [setCart, setWishlist]);
-  
-  const login = useCallback((newToken: string) => {
-    localStorage.setItem('token', newToken);
-    try {
-        const decoded = jwtDecode<User>(newToken);
-        setUser(decoded);
-        setToken(newToken);
-    } catch (error) {
-        console.error("Failed to decode token on login:", error);
-        logout();
-    }
-  }, [logout]);
-
-  useEffect(() => {
-    const initializeAuth = () => {
-      setLoading(true);
-      const storedToken = localStorage.getItem('token');
-      
-      if (storedToken) {
-        try {
-          const decoded = jwtDecode<User>(storedToken);
-          if (decoded.exp * 1000 < Date.now()) {
-            console.log("Session expired, logging out.");
-            logout();
-          } else {
-            setUser(decoded);
-            setToken(storedToken);
-          }
-        } catch (error) {
-          console.error("Invalid token found, logging out.", error);
-          logout();
+const fetchUserData = (token: string) => {
+  if (!token) return;
+  Promise.all([
+    fetch("/api/cart", { headers: { Authorization: `Bearer ${token}` } }),
+    fetch("/api/wishlist", { headers: { Authorization: `Bearer ${token}` } }),
+    fetch("/api/notifications", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  ])
+    .then(async ([cartRes, wishlistRes, notificationsRes]) => {
+      try {
+        if (cartRes.ok) {
+          const { cart } = await cartRes.json();
+          useUserStore.getState().setCart(cart);
         }
+        if (wishlistRes.ok) {
+          const { wishlist } = await wishlistRes.json();
+          useUserStore.getState().setWishlist(wishlist);
+        }
+        if (notificationsRes.ok) {
+          const { notifications } = await notificationsRes.json();
+          useUserStore.getState().setNotifications(notifications);
+        }
+      } catch (error) {
+        console.error("Error fetching user data in background:", error);
       }
-      setLoading(false);
-    };
-    
-    initializeAuth();
-  }, [logout]);
-  
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout, token }}>
-      {loading ? (
-        <div className="flex h-screen w-full items-center justify-center">
-            <Loader className="h-12 w-12" />
-        </div>
-      ) : children}
-    </AuthContext.Provider>
-  );
+    })
+    .catch((error) => {
+      console.error("Failed to fetch user-specific data:", error);
+    });
 };
 
+const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  token: null,
+  loading: true,
+  login: (user, token) => {
+    const enrichedUser = { ...user, sub: user._id };
+    Cookies.set("accessToken", token, { expires: 1 / 96, path: "/" });
+    set({ user: enrichedUser, token, loading: false });
+    if (token) fetchUserData(token);
+  },
+  logout: async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      Cookies.remove("accessToken");
+      Cookies.remove("refreshToken");
+      set({ user: null, token: null, loading: false });
+      useUserStore.getState().setCart(null);
+      useUserStore.getState().setWishlist(null);
+      useUserStore.getState().setNotifications([]);
+    }
+  },
+  checkUser: async () => {
+    set({ loading: true });
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const { user: userData, token: newToken } = await res.json();
+        get().login(userData, newToken);
+      } else {
+        await get().logout();
+      }
+    } catch (error) {
+      console.error("Failed to check user status", error);
+      await get().logout();
+    } finally {
+      set({ loading: false });
+    }
+  },
+}));
+
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  const state = useAuthStore();
+  return state;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { checkUser, loading } = useAuthStore();
+  const { fetchSettings } = usePlatformSettingsStore();
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      await fetchSettings();
+      await checkUser();
+    };
+    initializeApp();
+  }, [checkUser, fetchSettings]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader className="h-12 w-12" />
+      </div>
+    );
   }
-  return context;
+
+  return <>{children}</>;
 };

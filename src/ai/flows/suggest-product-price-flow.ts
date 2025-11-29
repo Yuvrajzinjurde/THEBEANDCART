@@ -21,7 +21,7 @@ const suggestPricePrompt = ai.definePrompt({
   name: 'suggestPricePrompt',
   input: {schema: SuggestPriceInputSchema},
   output: {schema: SuggestPriceOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  model: 'gemini-pro',
   prompt: `You are a highly experienced e-commerce pricing strategist for the Indian market. Your task is to suggest an optimal selling price for a new product.
 
   Analyze the following product details:

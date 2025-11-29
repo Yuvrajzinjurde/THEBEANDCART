@@ -4,7 +4,7 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -40,7 +40,7 @@ export default function SettingsPage() {
                 }
             }
         } catch (error) {
-            console.error("Failed to fetch cart settings", error);
+            console.error("Failed to fetch cart settings:", error);
             toast.error("Could not load cart settings. Displaying default values.");
         } finally {
             setIsLoading(false);

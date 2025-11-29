@@ -1,14 +1,26 @@
 
-
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Cart, { ICart } from '@/models/cart.model';
 import Product from '@/models/product.model';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
+}
+
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return decoded.sub;
+    } catch (error) {
+        return null;
+    }
 }
 
 
@@ -17,6 +29,7 @@ export async function GET(req: Request) {
     try {
         await dbConnect();
         
+<<<<<<< HEAD
         const token = req.headers.get('authorization')?.split(' ')[1];
         if (!token) {
             // Return empty cart for guests, not an error
@@ -32,8 +45,15 @@ export async function GET(req: Request) {
         }
         
         const userId = decoded.userId;
+=======
+        const userId = getUserIdFromToken(req);
+        if (!userId) {
+            // This is not an error, a guest user simply has no cart in the DB
+            return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
+        }
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
-        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
         if (!cart) {
             return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
@@ -42,6 +62,12 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error('Get Cart Error:', error);
+<<<<<<< HEAD
+=======
+        if (error instanceof Error && (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError')) {
+            return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
+        }
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
     }
 }
@@ -51,12 +77,10 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
 
     const { productId, quantity, size, color } = await req.json();
 
@@ -103,12 +127,12 @@ export async function POST(req: Request) {
       });
     }
 
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
     return NextResponse.json({ message: 'Cart updated successfully', cart: populatedCart }, { status: 200 });
   } catch (error) {
     console.error('Update Cart Error:', error);
-    if (error instanceof Error && error.name === 'ExpiredSignatureError') {
+    if (error instanceof Error && (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError')) {
         return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
     }
     return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
@@ -120,12 +144,10 @@ export async function DELETE(req: Request) {
     try {
         await dbConnect();
 
-        const token = req.headers.get('authorization')?.split(' ')[1];
-        if (!token) {
+        const userId = getUserIdFromToken(req);
+        if (!userId) {
             return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         }
-        const decoded = jwtDecode<DecodedToken>(token);
-        const userId = decoded.userId;
         
         const { searchParams } = new URL(req.url);
         const productId = searchParams.get('productId');
@@ -149,7 +171,7 @@ export async function DELETE(req: Request) {
         }
 
         await cart.save();
-        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
         return NextResponse.json({ message: 'Product removed from cart', cart: populatedCart }, { status: 200 });
 

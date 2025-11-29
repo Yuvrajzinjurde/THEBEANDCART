@@ -1,38 +1,40 @@
 
-
 import { z } from 'zod';
 
 const FileValueSchema = z.object({ value: z.string().url() });
 
 const VariantSchema = z.object({
+  _id: z.string().optional(),
   size: z.string().optional(),
   color: z.string().optional(),
-  stock: z.coerce.number().min(0, "Stock must be 0 or more"),
-  images: z.array(FileValueSchema).min(1, "Each variant must have at least one image."),
-  videos: z.array(FileValueSchema).optional(),
+  sku: z.string().optional(),
+  availableQuantity: z.coerce.number().min(0, "Stock must be 0 or more"),
+  images: z.array(z.string().url()).optional(),
+  videos: z.array(z.string().url()).optional(),
+  mainImage: z.string().url().optional(),
 });
 
-const ServerVariantSchema = VariantSchema.extend({
-    images: z.array(z.string().url()).min(1, "Each variant must have at least one image."),
-    videos: z.array(z.string().url()).optional(),
-})
+const ServerVariantSchema = VariantSchema;
 
 // Base schema without the refinement, for merging.
 const BaseProductFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().min(1, "Description is required"),
+  mainImage: z.string().url("A main image is required.").min(1, "A main image is required."),
   purchasePrice: z.coerce.number().min(0.01, "Purchase price must be greater than 0"),
   mrp: z.coerce.number().min(0, "MRP must be a positive number").optional().or(z.literal('')),
   sellingPrice: z.coerce.number().min(0.01, "Selling price must be greater than 0"),
-  category: z.string().min(1, "Category is required"), // Main category for simplicity in form
+  category: z.string().min(1, "Category is required"),
   brand: z.string().min(1, "Product brand is required"),
   storefront: z.string().min(1, "Storefront is required"),
+  sku: z.string().optional(),
   images: z.array(z.string().url()).optional(),
   videos: z.array(z.string().url()).optional(),
   keywords: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
   returnPeriod: z.coerce.number().min(0).optional(),
-  variants: z.array(ServerVariantSchema),
+  maxOrderQuantity: z.coerce.number().min(1, "Max order quantity must be at least 1").optional().default(5),
+  variants: z.array(ServerVariantSchema).optional(),
 });
 
 
@@ -41,13 +43,18 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
   images: z.array(FileValueSchema).optional(),
   videos: z.array(FileValueSchema).optional(),
   keywords: z.array(z.object({ value: z.string() })).optional(),
-  variants: z.array(VariantSchema),
+  variants: z.array(VariantSchema.extend({
+      images: z.array(FileValueSchema).optional(),
+      videos: z.array(FileValueSchema).optional(),
+  })).optional(),
 }))
 .refine(data => {
-    if (data.mrp === undefined || data.mrp === null || data.mrp === '') return true;
-    return data.sellingPrice <= data.mrp;
+    if (data.mrp !== undefined && data.mrp !== null && data.mrp !== '' && data.sellingPrice) {
+        return data.sellingPrice < data.mrp;
+    }
+    return true;
 }, {
-  message: "Selling price cannot be greater than MRP",
+  message: "To show a discount, Selling Price must be less than MRP.",
   path: ["sellingPrice"],
 })
 .refine(data => {
@@ -60,27 +67,18 @@ export const ProductFormSchemaForClient = BaseProductFormSchema.merge(z.object({
     path: ["sellingPrice"],
 })
 .refine(data => {
-    // If there are no variants, there must be top-level images.
-    if (data.variants.length === 0) {
-        return Array.isArray(data.images) && data.images.length > 0;
+    if (!data.variants || data.variants.length === 0) {
+        return !!data.sku && data.sku.length > 0;
     }
     return true;
 }, {
-    message: "A product must have at least one image.",
-    path: ["images"],
+    message: "SKU is required for products without variants.",
+    path: ["sku"],
 });
 
 
 // Server-side schema for POST/PUT requests
-export const ProductFormSchema = BaseProductFormSchema.refine(data => {
-    if (data.variants.length === 0) {
-        return Array.isArray(data.images) && data.images.length > 0;
-    }
-    return true;
-}, {
-    message: "A product must have at least one image.",
-    path: ["images"],
-});
+export const ProductFormSchema = BaseProductFormSchema;
 
 
 export type ProductFormValues = z.infer<typeof ProductFormSchemaForClient>;
@@ -109,7 +107,7 @@ export const GenerateTagsInputSchema = z.object({
   productName: z.string().describe('The name of the product.'),
   description: z.string().describe('The description of the product.'),
 });
-export type GenerateTagsInput = z.infer<typeof GenerateTagsInputSchema>;
+export type GenerateTagsInput = z.infer<typeof GenerateTagsInput>;
 
 export const GenerateTagsOutputSchema = z.object({
   tags: z.array(z.string()).describe('An array of 5-7 relevant, single-word tags for the product.'),

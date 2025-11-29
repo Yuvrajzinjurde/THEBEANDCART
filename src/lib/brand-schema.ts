@@ -2,10 +2,11 @@
 import { z } from 'zod';
 
 export const bannerSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
+  title: z.string().optional(),
+  description: z.string().optional(),
   imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
   imageHint: z.string().min(1, "Image hint is required"),
+  buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
 const reviewSchema = z.object({
@@ -16,32 +17,23 @@ const reviewSchema = z.object({
 });
 
 const promoBannerSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  imageUrl: z.string(),
-  imageHint: z.string(),
-  buttonText: z.string(),
-  buttonLink: z.string(),
-}).refine(data => {
-    // If any field is filled, all fields (except optionals like imageHint) must be filled.
-    const fields = [data.title, data.description, data.imageUrl, data.buttonText, data.buttonLink];
-    const filledFields = fields.filter(f => f && f.length > 0).length;
-    // It's either all empty (0) or all filled (5).
-    if (filledFields > 0 && filledFields < 5) return false;
-    if (data.buttonLink && data.buttonLink.length > 0) {
-        if (!z.string().url().safeParse(data.buttonLink).success) return false;
-    }
-    return true;
-}, {
-    message: "To use the promo banner, all fields must be filled out with a valid link.",
-    path: ['buttonLink'],
+  title: z.string().optional(),
+  description: z.string().optional(),
+  imageUrl: z.string().optional(),
+  imageHint: z.string().optional(),
+  buttonText: z.string().optional(),
+  buttonLink: z.string().url().optional().or(z.literal('')),
 });
 
-
-const categoryBannerSchema = z.object({
-  categoryName: z.string().min(1, "Category name is required"),
-  imageUrl: z.string().url("Must be a valid URL or data URI.").min(1, "Image is required"),
-  imageHint: z.string().min(1, "Image hint is required"),
+const categoryGridItemSchema = z.object({
+    category: z.string().min(1, "Category is required."),
+    title: z.string().min(1, "Title is required."),
+    description: z.string().min(1, "Description is required."),
+    images: z.array(z.object({
+        url: z.string().url("Must be a valid URL.").min(1, "Image URL is required."),
+        hint: z.string().optional(),
+    })).max(8, "You can upload a maximum of 8 images per category."),
+    buttonLink: z.string().min(1, "Button link is required."),
 });
 
 export const themeSchema = z.object({
@@ -54,10 +46,10 @@ export const themeSchema = z.object({
 export type Theme = z.infer<typeof themeSchema>;
 
 const SocialLinksSchema = z.object({
-    twitter: z.string().url().optional().or(z.literal('')),
-    facebook: z.string().url().optional().or(z.literal('')),
-    instagram: z.string().url().optional().or(z.literal('')),
-    linkedin: z.string().url().optional().or(z.literal('')),
+    twitter: z.string().url("Invalid Twitter URL").or(z.literal('')).optional(),
+    facebook: z.string().url("Invalid Facebook URL").or(z.literal('')).optional(),
+    instagram: z.string().url("Invalid Instagram URL").or(z.literal('')).optional(),
+    linkedin: z.string().url("Invalid LinkedIn URL").or(z.literal('')).optional(),
 });
 
 export const BrandFormSchema = z.object({
@@ -68,16 +60,21 @@ export const BrandFormSchema = z.object({
   themeName: z.string(),
   theme: themeSchema,
   reviews: z.array(reviewSchema).optional(),
-  promoBanner: promoBannerSchema.optional(),
-  categoryBanners: z.array(categoryBannerSchema).optional(),
+  promoBanner: promoBannerSchema.extend({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    buttonText: z.string().optional(),
+  }).optional(),
   categories: z.array(z.string()).optional(),
   socials: SocialLinksSchema.optional(),
+  categoryGrid: z.array(categoryGridItemSchema).optional(),
 });
 
 export type BrandFormValues = z.infer<typeof BrandFormSchema>;
 
 export const PlatformSettingsValidationSchema = z.object({
   platformName: z.string().min(1, "Platform name is required."),
+  platformDescription: z.string().optional(),
   platformLogoUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformFaviconUrl: z.string().url("Must be a valid URL.").optional().or(z.literal('')),
   platformThemeName: z.string().min(1, "A theme must be selected."),
@@ -85,9 +82,21 @@ export const PlatformSettingsValidationSchema = z.object({
   aiEnabled: z.boolean().optional(),
   hamperFeatureEnabled: z.boolean().optional(),
   promoBannerEnabled: z.boolean().optional(),
+  cancellableOrderStatus: z.enum(['pending', 'ready-to-ship']).optional(),
   heroBanners: z.array(bannerSchema).min(1, "At least one hero banner is required."),
+<<<<<<< HEAD
   featuredCategories: z.array(z.string()).optional(),
   promoBanner: promoBannerSchema.optional(),
+=======
+  featuredCategories: z.array(z.object({ name: z.string() })).optional(),
+  featuredBrands: z.array(z.object({ name: z.string() })).optional(),
+  promoBanner: promoBannerSchema.extend({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    buttonText: z.string().optional(),
+  }).optional(),
+  offers: z.array(offerSchema).optional(),
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 });
 
 export type PlatformSettingsValues = z.infer<typeof PlatformSettingsValidationSchema>;

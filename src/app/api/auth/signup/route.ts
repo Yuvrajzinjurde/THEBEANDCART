@@ -69,8 +69,12 @@ export async function POST(req: Request) {
       lastName: lastName || 'User',
       roles: [userRole._id],
       brand: brand, // Save the brand permanent name
+<<<<<<< HEAD
       isEmailVerified: true, // Mark email as verified
       addresses: [], // Start with an empty array
+=======
+      addresses: [] // Initialize with an empty array
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
     });
 
     await newUser.save();

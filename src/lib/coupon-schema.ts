@@ -1,45 +1,32 @@
-
 import { z } from 'zod';
 
-export const CouponFormSchema = z.object({
+// Base schema for fields common to all coupon types
+const baseCouponSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
-  type: z.enum(['percentage', 'fixed', 'free-shipping']),
-  value: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
-    z.number({ invalid_type_error: 'Discount value must be a number.' }).optional()
-  ),
-  minPurchase: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
-    z.number({ invalid_type_error: 'Minimum purchase must be a number.' }).min(0)
-  ),
+  minPurchase: z.coerce.number().min(0, "Minimum purchase must be a positive number.").default(0),
   brand: z.string().min(1, "A brand must be selected."),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
-})
-.refine(data => {
-    if (data.startDate && data.endDate) {
-        return data.endDate > data.startDate;
-    }
-    return true;
-}, {
-    message: "End date must be after start date.",
-    path: ["endDate"],
-})
-.refine(data => {
-    if (data.type === 'percentage') {
-      if (typeof data.value !== 'number') return false; // Must have a value
-      return data.value >= 0 && data.value <= 100;
-    }
-    if (data.type === 'fixed') {
-      return typeof data.value === 'number' && data.value >= 0; // Must have a value
-    }
-    if (data.type === 'free-shipping') {
-      return data.value === undefined; // Must NOT have a value
-    }
-    return true;
-}, {
-    message: "A valid discount value is required and must be within the correct range for the selected type.",
-    path: ["value"],
 });
+
+// Schema for coupons that have a numeric value
+const valuedCouponSchema = baseCouponSchema.extend({
+  type: z.enum(['percentage', 'fixed']),
+  value: z.coerce.number({
+    required_error: "A value is required for this discount type.",
+    invalid_type_error: "Discount value must be a number.",
+  }).min(0, "Value cannot be negative."),
+});
+
+// Schema for free shipping coupons, which have no value
+const freeShippingCouponSchema = baseCouponSchema.extend({
+  type: z.literal('free-shipping'),
+});
+
+// This is the final schema. The problematic .refine() check has been removed.
+export const CouponFormSchema = z.discriminatedUnion("type", [
+  valuedCouponSchema,
+  freeShippingCouponSchema,
+]);
 
 export type CouponFormValues = z.infer<typeof CouponFormSchema>;

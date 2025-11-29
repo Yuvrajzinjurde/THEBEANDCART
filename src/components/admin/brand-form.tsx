@@ -6,12 +6,16 @@ import React, { useState, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+<<<<<<< HEAD
 import { Trash, UploadCloud, X, Star, Crop, Palette } from 'lucide-react';
+=======
+import { Trash, UploadCloud, X, Star, Crop, PlusCircle, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react';
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 import type { IBrand } from '@/models/brand.model';
 import { Loader } from '../ui/loader';
 import { Textarea } from '../ui/textarea';
@@ -35,6 +39,7 @@ import Cropper, { type Point, type Area } from 'react-easy-crop';
 import { getCroppedImg } from '@/lib/crop-image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { Slider } from '../ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface BrandFormProps {
   mode: 'create' | 'edit';
@@ -115,6 +120,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [uncroppedLogo, setUncroppedLogo] = useState<string | null>(null);
 
+<<<<<<< HEAD
   const defaultValues: Partial<BrandFormValues> = React.useMemo(() => (
     existingBrand ? {
       ...existingBrand,
@@ -155,33 +161,93 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
         { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
         { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
       ],
+=======
+  const defaultValues: Partial<BrandFormValues> = React.useMemo(() => {
+     if (existingBrand) {
+        const brand = existingBrand as any; 
+        return {
+            ...brand,
+            themeName: brand.themeName || 'Rose',
+            socials: brand.socials || { twitter: '', facebook: '', instagram: '', linkedin: '' },
+            promoBanner: {
+                imageUrl: brand.promoBanner?.imageUrl || '',
+                imageHint: brand.promoBanner?.imageHint || '',
+                buttonLink: brand.promoBanner?.buttonLink || '',
+            },
+            categoryGrid: brand.categoryGrid || [],
+        };
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
     }
-  ), [existingBrand]);
+    return {
+        displayName: "Aura",
+        permanentName: "aura",
+        logoUrl: "https://picsum.photos/seed/aurora-logo/200/200",
+        themeName: "Rose",
+        categories: ["Wellness", "Skincare", "Makeup", "Haircare", "Fragrance", "Body Care", "Men's Grooming", "Beauty Tools"],
+        banners: [
+            { imageUrl: "https://picsum.photos/seed/natural-glow/1600/400", imageHint: "skincare model", buttonLink: "#" },
+            { imageUrl: "https://picsum.photos/seed/summer-radiance/1600/400", imageHint: "summer beach", buttonLink: "#" },
+        ],
+        categoryGrid: [],
+        promoBanner: {
+            imageUrl: "https://picsum.photos/seed/promo-offer/1600/400",
+            imageHint: "beauty products",
+            buttonLink: "#",
+        },
+        reviews: [
+            { customerName: "Priya S.", rating: 5, reviewText: "The Vitamin C serum is a game changer! My skin has never felt brighter.", customerAvatarUrl: "https://picsum.photos/seed/priya/100/100" },
+            { customerName: "Rahul M.", rating: 4, reviewText: "Great products, especially the men's line. The beard oil is fantastic.", customerAvatarUrl: "https://picsum.photos/seed/rahul/100/100" },
+            { customerName: "Anjali K.", rating: 5, reviewText: "I'm in love with the fragrances. They last all day and are so unique!", customerAvatarUrl: "https://picsum.photos/seed/anjali/100/100" },
+        ],
+        socials: { twitter: '#', facebook: '#', instagram: '#', linkedin: '#' },
+    };
+  }, [existingBrand]);
 
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(BrandFormSchema),
     defaultValues,
     mode: 'onChange',
   });
+  
+  React.useEffect(() => {
+    if (existingBrand) {
+        const brandData = {
+            ...existingBrand,
+            themeName: existingBrand.themeName || 'Rose',
+            socials: existingBrand.socials || { twitter: '', facebook: '', instagram: '', linkedin: '' },
+            promoBanner: {
+                imageUrl: existingBrand.promoBanner?.imageUrl || '',
+                imageHint: existingBrand.promoBanner?.imageHint || '',
+                buttonLink: existingBrand.promoBanner?.buttonLink || '',
+            },
+            categoryGrid: existingBrand.categoryGrid || [],
+        };
+        form.reset(brandData);
+    }
+  }, [existingBrand, form]);
 
   const { fields: bannerFields, append: appendBanner, remove: removeBanner } = useFieldArray({
     control: form.control,
     name: 'banners',
   });
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
   const { fields: reviewFields, append: appendReview, remove: removeReview } = useFieldArray({
     control: form.control,
     name: 'reviews',
-  });
-
-  const { fields: categoryBannerFields, append: appendCategoryBanner, remove: removeCategoryBanner } = useFieldArray({
-    control: form.control,
-    name: 'categoryBanners',
   });
   
   const { fields: categoryFields, append: appendCategory, remove: removeCategory } = useFieldArray({
     control: form.control,
     name: 'categories',
+  });
+
+   const { fields: gridItemFields, append: appendGridItem, remove: removeGridItem } = useFieldArray({
+    control: form.control,
+    name: 'categoryGrid',
   });
 
 
@@ -203,7 +269,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
       reader.readAsDataURL(file);
     }
   };
-  
+    
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -268,6 +334,9 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
   }
   
   const isFormDirty = form.formState.isDirty;
+
+  const availableCategories = form.watch('categories') || [];
+
 
   return (
     <>
@@ -404,11 +473,122 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                 />
             </CardContent>
         </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Social Media Links</CardTitle>
+                <CardDescription>Enter the URLs for your brand's social media profiles.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="socials.twitter" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Twitter/> Twitter</FormLabel><FormControl><Input placeholder="https://twitter.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.facebook" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Facebook/> Facebook</FormLabel><FormControl><Input placeholder="https://facebook.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.instagram" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Instagram/> Instagram</FormLabel><FormControl><Input placeholder="https://instagram.com/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                <FormField control={form.control} name="socials.linkedin" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><Linkedin/> LinkedIn</FormLabel><FormControl><Input placeholder="https://linkedin.com/company/yourbrand" {...field} /></FormControl><FormMessage /></FormItem>)}/>
+            </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Category Image Grid</CardTitle>
+            <CardDescription>Manage the filterable content grid on the brand homepage.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+             {gridItemFields.map((field, index) => (
+              <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6">
+                            <Trash className="h-4 w-4" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>This will permanently remove this category's content from the grid. This action cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => removeGridItem(index)}>Continue</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                <FormField control={form.control} name={`categoryGrid.${index}.category`} render={({ field }) => ( <FormItem><FormLabel>Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent>{['All', ...availableCategories].map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name={`categoryGrid.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input placeholder="e.g. /category/new-arrivals" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem> )}/>
+                
+                <FormField
+                    control={form.control}
+                    name={`categoryGrid.${index}.images`}
+                    render={({ field: imageArrayField }) => {
+                        const handleImageFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const files = e.target.files;
+                            if (files) {
+                                const filePromises = Array.from(files).slice(0, 8 - (imageArrayField.value?.length || 0)).map(file => {
+                                    return new Promise<{ url: string; hint: string }>((resolve) => {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            resolve({ url: reader.result as string, hint: file.name });
+                                        };
+                                        reader.readAsDataURL(file);
+                                    });
+                                });
+                                Promise.all(filePromises).then(newImages => {
+                                    const currentImages = imageArrayField.value || [];
+                                    imageArrayField.onChange([...currentImages, ...newImages]);
+                                });
+                            }
+                        };
+                        
+                        const removeImage = (imgIndex: number) => {
+                             const currentImages = imageArrayField.value || [];
+                             imageArrayField.onChange(currentImages.filter((_, i) => i !== imgIndex));
+                        }
+
+                        return (
+                            <FormItem>
+                                <FormLabel>Images (up to 8)</FormLabel>
+                                <FormControl>
+                                    <div className="w-full">
+                                        <Input id={`grid-image-upload-${index}`} type="file" accept="image/*" multiple className="hidden" onChange={handleImageFilesChange} />
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {(imageArrayField.value || []).map((img, imgIndex) => (
+                                                <div key={imgIndex} className="relative w-full aspect-square border-2 border-dashed rounded-lg p-1">
+                                                    <Image src={img.url} alt="Grid item preview" fill objectFit="contain" />
+                                                    <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-5 w-5" onClick={() => removeImage(imgIndex)}><X className="h-3 w-3" /></Button>
+                                                </div>
+                                            ))}
+                                             {(imageArrayField.value?.length || 0) < 8 && (
+                                                <label htmlFor={`grid-image-upload-${index}`} className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                                    <UploadCloud className="w-6 h-6 text-muted-foreground" />
+                                                    <p className="text-xs text-muted-foreground mt-1">Upload</p>
+                                                </label>
+                                            )}
+                                        </div>
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        );
+                    }}
+                />
+              </div>
+            ))}
+             <Button type="button" variant="outline" onClick={() => appendGridItem({ category: '', title: '', description: '', images: [], buttonLink: '' })}>
+                <PlusCircle className="mr-2 h-4 w-4"/>
+                Add Category Content
+            </Button>
+          </CardContent>
+        </Card>
         
         <Card>
             <CardHeader>
+<<<<<<< HEAD
                 <CardTitle>Homepage Banners</CardTitle>
                 <CardDescription>Manage the carousel banners on the homepage. Recommended dimensions: 1600x400px.</CardDescription>
+=======
+                <CardTitle>Homepage Hero Banners</CardTitle>
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -430,18 +610,12 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
+                       
                         <FormField
                             control={form.control}
-                            name={`banners.${index}.title`}
+                            name={`banners.${index}.buttonLink`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`banners.${index}.description`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Banner Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/collection" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                          <FormField
@@ -450,6 +624,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             render={({ field: imageField }) => (
                                 <FormItem>
                                     <FormLabel>Banner Image</FormLabel>
+                                    <FormDescription>Required dimensions: 1600x400px</FormDescription>
                                     <FormControl>
                                        <div className="w-full">
                                             <Input
@@ -491,11 +666,12 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                             control={form.control}
                             name={`banners.${index}.imageHint`}
                             render={({ field }) => (
-                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g., 'fashion model'" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                             )}
                         />
                     </div>
                 ))}
+<<<<<<< HEAD
                 <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
@@ -573,29 +749,29 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     </div>
                 ))}
                 <Button type="button" variant="outline" onClick={() => appendCategoryBanner({ categoryName: '', imageUrl: '', imageHint: '' })}>Add Category Banner</Button>
+=======
+                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             </CardContent>
         </Card>
         
         <Card>
             <CardHeader>
                 <CardTitle>Promotional Banner</CardTitle>
-                <CardDescription>A large banner to highlight a special campaign or collection.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => (
-                    <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
-                <FormField control={form.control} name="promoBanner.description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
+                    <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input type="url" placeholder="https://example.com/sale" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
+                        <FormDescription>Required dimensions: 1600x400px</FormDescription>
                          <FormControl>
                            <div className="w-full">
-                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1600, height: 400 })} />
                                 {field.value ? (
-                                    <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
+                                    <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                         <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
                                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
                                     </div>
@@ -604,7 +780,7 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                             <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
-                                            <p className="text-xs text-muted-foreground">Required dimensions: 1200x600px</p>
+                                            <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                         </div>
                                     </label>
                                 )}
@@ -614,16 +790,8 @@ export function BrandForm({ mode, existingBrand }: BrandFormProps) {
                     </FormItem>
                 )}/>
                 <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => (
-                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'summer collection'" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )}/>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => (
-                        <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => (
-                        <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem>
-                    )}/>
-                </div>
             </CardContent>
         </Card>
 

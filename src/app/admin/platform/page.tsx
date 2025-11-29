@@ -1,17 +1,21 @@
 
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+<<<<<<< HEAD
 import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv, PlusCircle } from 'lucide-react';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors, type Theme } from '@/lib/brand-schema';
+=======
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv, Store, Package } from 'lucide-react';
+import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -20,14 +24,20 @@ import { Switch } from '@/components/ui/switch';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { IProduct } from '@/models/product.model';
+<<<<<<< HEAD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+=======
+import type { IBrand } from '@/models/brand.model';
+import { Combobox } from '@/components/ui/combobox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
 
 const staticDefaultValues: PlatformSettingsValues = {
   platformName: 'The Brand Cart',
   platformLogoUrl: '',
   platformFaviconUrl: '',
-  platformThemeName: 'Blue',
+  platformThemeName: 'Slate (Dark)',
   socials: { twitter: '', facebook: '', instagram: '', linkedin: '' },
   aiEnabled: true,
   hamperFeatureEnabled: true,
@@ -38,17 +48,30 @@ const staticDefaultValues: PlatformSettingsValues = {
       description: "Discover curated collections from the world's most innovative brands.",
       imageUrl: "https://picsum.photos/seed/style-elevate/1600/400",
       imageHint: "fashion collection",
+      buttonLink: ''
     },
   ],
   featuredCategories: [],
+  featuredBrands: [],
   promoBanner: {
     title: "Mid-Season Mega Sale",
     description: "Unbeatable deals on your favorite brands. Get up to 60% off on selected items before they're gone!",
-    imageUrl: "https://picsum.photos/seed/mega-sale/1200/600",
+    imageUrl: "https://picsum.photos/seed/mega-sale/1600/400",
     imageHint: "shopping discount",
     buttonText: "Explore Deals",
     buttonLink: "/#",
   },
+<<<<<<< HEAD
+=======
+  offers: [
+    {
+      title: "First-Time Shopper",
+      description: "Get a flat 25% off on your very first order with us.",
+      code: "WELCOME25",
+    },
+  ],
+  cancellableOrderStatus: 'pending',
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 };
 
 
@@ -57,8 +80,13 @@ export default function PlatformSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const { settings, fetchSettings } = usePlatformSettingsStore();
   
+<<<<<<< HEAD
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+=======
+  const [availableCategories, setAvailableCategories] = useState<{ value: string; label: string; count: number }[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<{ value: string; label: string; }[]>([]);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
 
   const form = useForm<PlatformSettingsValues>({
@@ -71,8 +99,16 @@ export default function PlatformSettingsPage() {
     const fetchAndSetSettings = async () => {
         setIsLoading(true);
         try {
+<<<<<<< HEAD
             // Fetch products to determine categories
             const productResponse = await fetch('/api/products?limit=2000');
+=======
+            const [productResponse, brandResponse] = await Promise.all([
+                fetch('/api/products'),
+                fetch('/api/brands')
+            ]);
+            
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             if (productResponse.ok) {
                 const productData = await productResponse.json();
                 const products: IProduct[] = productData.products;
@@ -85,8 +121,28 @@ export default function PlatformSettingsPage() {
                             if(typeof cat === 'string') categorySet.add(cat)
                         });
                     }
+<<<<<<< HEAD
                 });
                 setAvailableCategories(Array.from(categorySet).sort());
+=======
+                    return acc;
+                }, {} as Record<string, number>);
+
+                const categoriesWithOptions = Object.entries(categoryCounts)
+                    .filter(([, count]) => count > 0)
+                    .map(([name, count]) => ({
+                        value: name,
+                        label: `${name} (${count})`,
+                        count: count,
+                    }));
+                setAvailableCategories(categoriesWithOptions);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
+            }
+            
+            if (brandResponse.ok) {
+                 const brandData = await brandResponse.json();
+                 const brands: IBrand[] = brandData.brands;
+                 setAvailableBrands(brands.map(b => ({ value: b.permanentName, label: b.displayName })));
             }
 
             const response = await fetch('/api/platform');
@@ -102,11 +158,17 @@ export default function PlatformSettingsPage() {
                         platformName: settingsData.platformName || '',
                         platformLogoUrl: settingsData.platformLogoUrl || '',
                         platformFaviconUrl: settingsData.platformFaviconUrl || '',
-                        platformThemeName: settingsData.platformThemeName || 'Blue',
+                        platformThemeName: settingsData.platformThemeName || 'Slate (Dark)',
                         socials: { ...defaultSocials, ...(settingsData.socials || {}) },
+<<<<<<< HEAD
                         featuredCategories: settingsData.featuredCategories || [],
+=======
+                        featuredCategories: (settingsData.featuredCategories || []).map((cat: string) => ({ name: cat })),
+                        featuredBrands: (settingsData.featuredBrands || []).map((brand: string) => ({ name: brand })),
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
                         promoBanner: { ...defaultPromoBanner, ...(settingsData.promoBanner || {}) },
+                        cancellableOrderStatus: settingsData.cancellableOrderStatus || 'pending',
                     };
                     form.reset(sanitizedSettings);
                 } else {
@@ -135,6 +197,11 @@ export default function PlatformSettingsPage() {
     control: form.control,
     name: 'featuredCategories',
   });
+  
+   const { fields: brandFields, append: appendBrand, remove: removeBrand } = useFieldArray({
+    control: form.control,
+    name: 'featuredBrands',
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void, dimensions?: { width: number, height: number }) => {
     const file = e.target.files?.[0];
@@ -158,6 +225,14 @@ export default function PlatformSettingsPage() {
   
   async function onSubmit(data: PlatformSettingsValues) {
     setIsSubmitting(true);
+<<<<<<< HEAD
+=======
+    const dataToSubmit = {
+        ...data,
+        featuredCategories: data.featuredCategories?.map(cat => cat.name),
+        featuredBrands: data.featuredBrands?.map(brand => brand.name),
+    };
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
     try {
       const response = await fetch('/api/platform', {
@@ -176,7 +251,11 @@ export default function PlatformSettingsPage() {
       
       await fetchSettings();
       
+<<<<<<< HEAD
       form.reset(data, { keepDirty: false });
+=======
+      form.reset(result, { keepDirty: false });
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
     } catch (error: any) {
       console.error("Submission Error:", error);
@@ -313,8 +392,8 @@ export default function PlatformSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Feature Controls</CardTitle>
-            <CardDescription>Enable or disable major features across the entire platform.</CardDescription>
+            <CardTitle>Feature & Policy Controls</CardTitle>
+            <CardDescription>Enable or disable major features and set platform-wide policies.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
              <FormField
@@ -356,13 +435,36 @@ export default function PlatformSettingsPage() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="cancellableOrderStatus"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base flex items-center gap-2"><Package /> Order Cancellation Policy</FormLabel>
+                        <FormDescription>Allow customers to cancel orders up to this status.</FormDescription>
+                    </div>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="ready-to-ship">Ready to Ship</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
 
         <Card>
             <CardHeader>
                 <CardTitle>Homepage Hero Banners</CardTitle>
-                <CardDescription>Manage the carousel banners on the main landing page. Recommended dimensions: 1600x200px.</CardDescription>
+                <CardDescription>Manage the carousel banners on the main landing page. Required dimensions: 1600x400px.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  {bannerFields.map((field, index) => (
@@ -370,17 +472,15 @@ export default function PlatformSettingsPage() {
                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeBanner(index)}>
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <FormField control={form.control} name={`heroBanners.${index}.title`} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                        <FormField control={form.control} name={`heroBanners.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
                          <FormField control={form.control} name={`heroBanners.${index}.imageUrl`} render={({ field: imageField }) => (
                             <FormItem>
                                 <FormLabel>Banner Image</FormLabel>
-                                <FormDescription>Required dimensions: 1600x200px</FormDescription>
+                                <FormDescription>Required dimensions: 1600x400px</FormDescription>
                                 <FormControl>
                                    <div className="w-full">
-                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 200 })} />
+                                        <Input id={`banner-upload-${index}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, imageField.onChange, { width: 1600, height: 400 })} />
                                         {imageField.value ? (
-                                            <div className="relative w-full aspect-[8/1] border-2 border-dashed rounded-lg p-2">
+                                            <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                                 <Image src={imageField.value} alt="Banner preview" fill objectFit="cover" />
                                                 <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => imageField.onChange('')}><X className="h-4 w-4" /></Button>
                                             </div>
@@ -398,9 +498,10 @@ export default function PlatformSettingsPage() {
                             </FormItem>
                         )}/>
                          <FormField control={form.control} name={`heroBanners.${index}.imageHint`} render={({ field }) => ( <FormItem><FormLabel>Image Hint (for AI)</FormLabel><FormControl><Input placeholder="e.g. 'fashion model'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                         <FormField control={form.control} name={`heroBanners.${index}.buttonLink`} render={({ field }) => ( <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input placeholder="e.g. /reeva/products" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                     </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '' })}>Add Banner</Button>
+                <Button type="button" variant="outline" onClick={() => appendBanner({ title: '', description: '', imageUrl: '', imageHint: '', buttonLink: '' })}>Add Banner</Button>
             </CardContent>
         </Card>
         
@@ -410,17 +511,15 @@ export default function PlatformSettingsPage() {
                 <CardDescription>A large banner to highlight a special campaign or collection.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <FormField control={form.control} name="promoBanner.title" render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name="promoBanner.description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
+                 <FormField control={form.control} name="promoBanner.imageUrl" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Image</FormLabel>
-                        <FormDescription>Required dimensions: 1200x600px</FormDescription>
+                        <FormDescription>Required dimensions: 1600x400px</FormDescription>
                          <FormControl>
                            <div className="w-full">
-                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1200, height: 600 })} />
+                                <Input id="promo-banner-upload" type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, field.onChange, { width: 1600, height: 400 })} />
                                 {field.value ? (
-                                    <div className="relative w-full aspect-[2/1] border-2 border-dashed rounded-lg p-2">
+                                    <div className="relative w-full aspect-[4/1] border-2 border-dashed rounded-lg p-2">
                                         <Image src={field.value} alt="Promo banner preview" fill objectFit="cover" />
                                         <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => field.onChange('')}><X className="h-4 w-4" /></Button>
                                     </div>
@@ -429,6 +528,7 @@ export default function PlatformSettingsPage() {
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                             <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
                                             <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                            <p className="text-xs text-muted-foreground">Required dimensions: 1600x400px</p>
                                         </div>
                                     </label>
                                 )}
@@ -437,11 +537,8 @@ export default function PlatformSettingsPage() {
                         <FormMessage />
                     </FormItem>
                 )}/>
-                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                 <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="promoBanner.buttonText" render={({ field }) => ( <FormItem><FormLabel>Button Text</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                    <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link</FormLabel><FormControl><Input type="url" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                </div>
+                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                 <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input placeholder="e.g. /search?keyword=sale" {...field} /></FormControl><FormMessage /></FormItem> )}/>
             </CardContent>
         </Card>
         
@@ -471,6 +568,7 @@ export default function PlatformSettingsPage() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Categories</FormLabel>
+<<<<<<< HEAD
                             <div className="flex items-center gap-2">
                                 <Select onValueChange={setSelectedCategory} value={selectedCategory}>
                                     <SelectTrigger>
@@ -481,6 +579,28 @@ export default function PlatformSettingsPage() {
                                             .filter(cat => !field.value?.includes(cat))
                                             .map(category => (
                                             <SelectItem key={category} value={category}>{category}</SelectItem>
+=======
+                            <FormControl>
+                                <div>
+                                    <Combobox
+                                        options={availableCategories}
+                                        placeholder="Select a category..."
+                                        onSelect={(selectedValue) => {
+                                            const categoryName = availableCategories.find(c => c.value === selectedValue)?.value;
+                                            if (categoryName && !categoryFields.some(field => field.name === categoryName)) {
+                                                appendCategory({ name: categoryName });
+                                            }
+                                        }}
+                                    />
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {categoryFields.map((field, index) => (
+                                            <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
+                                                {form.getValues('featuredCategories')?.[index].name}
+                                                <button type="button" onClick={() => removeCategory(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -509,6 +629,50 @@ export default function PlatformSettingsPage() {
                                 ))}
                             </div>
                             <FormDescription>These categories will be featured on the main homepage.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Store /> Featured Brands</CardTitle>
+                <CardDescription>Select which brands to highlight on the main landing page.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <FormField
+                    control={form.control}
+                    name="featuredBrands"
+                    render={() => (
+                        <FormItem>
+                            <FormLabel>Brands</FormLabel>
+                            <FormControl>
+                                <div>
+                                    <Combobox
+                                        options={availableBrands}
+                                        placeholder="Select a brand..."
+                                        onSelect={(selectedValue) => {
+                                            const brandName = availableBrands.find(b => b.value === selectedValue)?.value;
+                                            if (brandName && !brandFields.some(field => field.name === brandName)) {
+                                                appendBrand({ name: brandName });
+                                            }
+                                        }}
+                                    />
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {brandFields.map((field, index) => (
+                                            <Badge key={field.id} variant="secondary" className="flex items-center gap-1 capitalize">
+                                                {form.getValues('featuredBrands')?.[index].name}
+                                                <button type="button" onClick={() => removeBrand(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            </FormControl>
+                            <FormDescription>These brands will be featured in the "Shop by Brand" section.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}

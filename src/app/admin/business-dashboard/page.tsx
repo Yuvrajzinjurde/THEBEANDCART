@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import useBrandStore from "@/stores/brand-store";
 import { getDashboardStats, type DashboardStats } from "../dashboard/actions";
 import { Loader } from "@/components/ui/loader";
@@ -41,8 +41,8 @@ const EmptyState = () => (
 );
 
 const DashboardSkeleton = () => (
-    <div className="flex-1 space-y-6 text-center">
-        <Skeleton className="h-8 w-64" />
+    <div className="flex-1 space-y-6">
+        <Skeleton className="h-8 w-64 mb-4" />
         <Card>
             <CardHeader>
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
@@ -96,7 +96,7 @@ const DashboardSkeleton = () => (
                 </div>
             </CardContent>
         </Card>
-        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
+        <p className="mt-8 text-lg text-muted-foreground text-center">Just a moment, getting everything ready for you…</p>
     </div>
 );
 
@@ -108,6 +108,7 @@ function BusinessDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('7d');
   const [chartView, setChartView] = useState<ChartView>('orders');
+  const [isPending, startTransition] = useTransition();
   
   const now = new Date();
   const dateRanges = {
@@ -120,16 +121,17 @@ function BusinessDashboardPage() {
   
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const dashboardData = await getDashboardStats(selectedBrand);
-        setData(dashboardData);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch dashboard data');
-      } finally {
-        setLoading(false);
-      }
+      startTransition(async () => {
+        setError(null);
+        try {
+          const dashboardData = await getDashboardStats(selectedBrand);
+          setData(dashboardData);
+        } catch (err: any) {
+          setError(err.message || 'Failed to fetch dashboard data');
+        } finally {
+          setLoading(false);
+        }
+      });
     };
 
     fetchData();
@@ -243,7 +245,9 @@ function BusinessDashboardPage() {
             </div>
 
             <div className="h-[300px] w-full">
-            {hasChartData ? (
+            {isPending ? (
+              <DashboardSkeleton />
+            ) : hasChartData ? (
                <ChartContainer config={chartConfig} className="h-full w-full">
                     <AreaChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -279,7 +283,7 @@ function BusinessDashboardPage() {
             )}
             </div>
 
-            <div className="flex flex-wrap gap-4 items-center justify-start border-t pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-center justify-start border-t pt-4">
                 <StatCard title="Total Views" value={(totalViews || 0).toLocaleString()} change={percentageChanges.views} />
                 <StatCard title="Total Clicks" value={(totalClicks || 0).toLocaleString()} change={percentageChanges.clicks} />
                 <StatCard title="Total Orders" value={(totalOrders || 0).toLocaleString()} change={percentageChanges.orders}/>

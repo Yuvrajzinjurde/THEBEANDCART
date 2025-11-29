@@ -1,24 +1,21 @@
 
+
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star, Info, ArrowLeft, ArrowRight } from "lucide-react";
+import { Heart, ShoppingCart, Star, Info, Plus, Minus, Trash2 } from "lucide-react";
 import type { IProduct } from "@/models/product.model";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { Separator } from "./ui/separator";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import useUserStore from "@/stores/user-store";
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -33,9 +30,11 @@ interface BrandProductCardProps {
 
 export function BrandProductCard({ product, className }: BrandProductCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, token } = useAuth();
-  const { wishlist, setWishlist, setCart } = useUserStore();
+  const { wishlist, setWishlist, cart, setCart } = useUserStore();
   const [api, setApi] = useState<CarouselApi>();
+<<<<<<< HEAD
   const [hasVariants, setHasVariants] = useState(false);
 
   const autoplay = useRef(
@@ -68,6 +67,73 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
     }
     checkVariants();
   }, [product.styleId]);
+=======
+  
+  const carouselRef = useRef<HTMLDivElement>(null);
+  
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const hasImages = useMemo(() => product && product.images && product.images.length > 0, [product]);
+
+  const cartItem = useMemo(() => {
+    return cart?.items?.find(item => {
+        const productId = (item.productId as IProduct)?._id || item.productId;
+        return productId?.toString() === product._id.toString();
+    });
+  }, [cart, product._id]);
+
+
+  useEffect(() => {
+    if (!api) return;
+    
+    const onSelect = () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    };
+    
+    api.on("select", onSelect);
+    onSelect(); // Set initial value
+
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
+
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true, playOnInit: false })
+  );
+
+  useEffect(() => {
+    if (!hasImages) return;
+
+    const carouselEl = carouselRef.current;
+    if (!carouselEl) return;
+
+    const startAutoplay = () => {
+      // Ensure the plugin and API are ready, and there's more than one slide to play
+      if (api && autoplayPlugin.current && api.scrollSnapList().length > 1) {
+        autoplayPlugin.current.play();
+      }
+    };
+    const stopAutoplay = () => {
+      if (autoplayPlugin.current) {
+        autoplayPlugin.current.stop();
+      }
+      if(api) {
+        api.scrollTo(0);
+      }
+    };
+
+    carouselEl.addEventListener('mouseenter', startAutoplay);
+    carouselEl.addEventListener('mouseleave', stopAutoplay);
+
+    return () => {
+      if (carouselEl) {
+        carouselEl.removeEventListener('mouseenter', startAutoplay);
+        carouselEl.removeEventListener('mouseleave', stopAutoplay);
+      }
+    }
+  }, [api, hasImages]);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
   
 
   const isWishlisted = useMemo(() => {
@@ -79,9 +145,13 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) {
+    if (!user || !token) {
         toast.info("Please log in to add items to your wishlist.");
+<<<<<<< HEAD
         router.push(`/login?callbackUrl=/${product.storefront}/home`);
+=======
+        router.push(`/login?redirect=${pathname}`);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         return;
     }
     try {
@@ -95,12 +165,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
+        toast.success(result.message);
         setWishlist(result.wishlist);
     } catch (error: any) {
-        toast.error("Something went wrong. We apologize for the inconvenience, please try again later.");
+        toast.error(error.message);
     }
   };
 
+<<<<<<< HEAD
   const handleCartClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -130,16 +202,56 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
         toast.success("Added to cart!");
     } catch (error: any) {
         toast.error(error.message || "Something went wrong. We apologize for the inconvenience, please try again later.");
+=======
+  const handleUpdateCart = async (quantity: number) => {
+     if (!user || !token) {
+        toast.info("Please log in to manage your cart.");
+        router.push(`/login?redirect=${pathname}`);
+        return;
+    }
+    if (quantity > 0) {
+        try {
+            const response = await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ productId: product._id, quantity, size: product.size, color: product.color }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            if (quantity > (cartItem?.quantity || 0)) {
+              toast.success(`Added ${product.name} to cart!`);
+            }
+            setCart(result.cart);
+        } catch (error: any) {
+            throw error;
+        }
+    } else {
+         try {
+            const response = await fetch(`/api/cart?productId=${product._id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            setCart(result.cart);
+        } catch (error: any) {
+            throw error;
+        }
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
     }
   };
+
 
   const handleCardClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     fetch(`/api/products/${product._id}/track`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metric: 'clicks' }),
-    }).catch(err => console.error("Failed to track click:", err));
+        body: JSON.stringify({ metric: 'views' }),
+    }).catch(err => console.error("Failed to track view:", err));
     
     router.push(`/${product.storefront}/products/${product._id}`);
   };
@@ -149,8 +261,14 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
   const rating = typeof product.rating === 'number' ? product.rating : 0;
   const hasDiscount = mrp > sellingPrice;
   const discountPercentage = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
-  const amountSaved = hasDiscount ? mrp - sellingPrice : 0;
   const categoryDisplay = Array.isArray(product.category) ? product.category[0] : product.category;
+
+  const handleQuantityButtonClick = (e: React.MouseEvent, amount: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleUpdateCart((cartItem?.quantity || 0) + amount);
+  };
+
 
   return (
     <Link 
@@ -163,6 +281,7 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
       <motion.div 
         whileHover={{ y: -5 }}
         transition={{ duration: 0.2 }}
+<<<<<<< HEAD
         className="relative overflow-hidden rounded-lg border bg-card shadow-sm transition-all duration-300 group-hover/card:shadow-lg flex flex-col h-full"
       >
         <div className="w-full">
@@ -191,89 +310,137 @@ export function BrandProductCard({ product, className }: BrandProductCardProps) 
 
         <div className="absolute top-2 right-2 z-10 flex flex-col items-center gap-1.5 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
           <Button
+=======
+        className="relative rounded-lg border bg-card shadow-sm transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-primary/20 flex flex-col h-full"
+        ref={carouselRef}
+      >
+        <div className="w-full relative rounded-t-lg overflow-hidden">
+            {hasImages && (
+                <>
+                <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
+                    {product.images.slice(0, 4).map((_, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                "h-1 w-1 rounded-full transition-all duration-300",
+                                currentSlide === i ? 'bg-white w-2.5' : 'bg-white/50'
+                            )}
+                        />
+                    ))}
+                </div>
+                <Carousel
+                    setApi={setApi}
+                    plugins={[autoplayPlugin.current]}
+                    opts={{ loop: product.images.length > 1 }}
+                    className="w-full h-full"
+                >
+                    <CarouselContent className="h-full">
+                    {product.images.map((img, index) => (
+                        <CarouselItem key={index} className="h-full">
+                            <div className="w-full aspect-square relative">
+                                <Image
+                                    src={img}
+                                    alt={`${product.name} image ${index + 1}`}
+                                    fill
+                                    className="object-cover transition-transform duration-300"
+                                />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                    </CarouselContent>
+                </Carousel>
+                </>
+            )}
+            {!hasImages && (
+                 <div className="w-full aspect-square relative bg-muted flex items-center justify-center">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground/30" />
+                </div>
+            )}
+        </div>
+
+        <Button
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             size="icon"
             variant="secondary"
             className={cn(
-                "rounded-full w-8 h-8 shadow-md hover:bg-background",
+                "absolute top-2 right-2 rounded-full w-8 h-8 shadow-md hover:bg-background z-10",
                 isWishlisted ? "text-primary hover:text-primary/90" : "hover:text-red-500"
             )}
             onClick={handleWishlistClick}
             aria-label="Add to wishlist"
           >
             <Heart className={cn("h-4 w-4", isWishlisted && "fill-current")} />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full w-8 h-8 shadow-md hover:bg-background"
-            onClick={handleCartClick}
-            aria-label="Add to cart"
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
-        </div>
+        </Button>
 
         <div className="p-3 flex flex-col flex-grow">
-          <div className="flex-grow">
-            <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
-            <div className="min-h-[2.5rem] my-0.5">
-                <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{product.name}</h3>
+            <div className="flex-grow space-y-1 mb-1">
+                <p className="text-xs text-muted-foreground truncate">{categoryDisplay}</p>
+                <h3 className="text-sm font-semibold text-foreground leading-tight truncate h-5">{product.name}</h3>
             </div>
-          </div>
-          
-          <div className="mt-auto pt-1">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-                <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
+
+             <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => {
+                    const ratingValue = i + 1;
+                    return (
+                        <Star
+                            key={i}
+                            className={cn(
+                                "h-4 w-4",
+                                rating >= ratingValue ? "text-green-500 fill-green-500" : "text-gray-300"
+                            )}
+                        />
+                    );
+                })}
+                 <span className="text-xs text-muted-foreground ml-1">({rating.toFixed(1)})</span>
             </div>
-              <div className="flex items-baseline gap-x-2 flex-wrap">
-                  <p className="text-base font-bold text-foreground">
-                      ₹{sellingPrice.toLocaleString('en-IN')}
-                  </p>
-                  {hasDiscount && (
-                      <p className="text-xs font-medium text-muted-foreground line-through">
-                          ₹{mrp.toLocaleString('en-IN')}
-                      </p>
-                  )}
-              </div>
-              
-              <div className="min-h-[16px]">
-                  {hasDiscount && (
-                      <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-semibold text-green-600">
-                              {discountPercentage}% off
-                          </span>
-                           <TooltipProvider>
-                              <Tooltip>
-                                  <TooltipTrigger asChild>
-                                      <button className="cursor-pointer" onClick={(e) => {e.preventDefault(); e.stopPropagation();}}>
-                                          <Info className="h-3 w-3 text-muted-foreground" />
-                                      </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="p-3 w-64" side="top" align="center">
-                                      <div className="space-y-2">
-                                          <p className="font-bold text-base">Price details</p>
-                                          <div className="flex justify-between text-sm">
-                                              <p className="text-muted-foreground">Maximum Retail Price</p>
-                                              <p>₹{mrp.toFixed(2)}</p>
-                                          </div>
-                                          <div className="flex justify-between text-sm">
-                                              <p className="text-muted-foreground">Selling Price</p>
-                                              <p>₹{sellingPrice.toFixed(2)}</p>
-                                          </div>
-                                          <Separator />
-                                          <div className="flex justify-between text-sm font-semibold text-green-600">
-                                          <p>Overall you save</p>
-                                          <p>₹{amountSaved.toFixed(2)} ({discountPercentage}%)</p>
-                                          </div>
-                                      </div>
-                                  </TooltipContent>
-                              </Tooltip>
-                          </TooltipProvider>
-                      </div>
-                  )}
-              </div>
-          </div>
+            
+            <div className="mt-1">
+                 <div className="flex items-baseline gap-x-2 flex-wrap">
+                    <p className="text-base font-bold text-foreground">
+                        ₹{sellingPrice.toLocaleString('en-IN')}
+                    </p>
+                    {hasDiscount && (
+                        <p className="text-xs font-medium text-muted-foreground line-through">
+                            ₹{mrp.toLocaleString('en-IN')}
+                        </p>
+                    )}
+                </div>
+            
+                <div className="min-h-[16px]">
+                    {hasDiscount && (
+                        <span className="text-xs font-semibold text-green-600">
+                            {discountPercentage}% off
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            <div className="mt-2 h-9">
+                 {cartItem ? (
+                    <div className="flex items-center justify-between rounded-md border w-full h-full">
+                       <Button variant="ghost" size="icon" className="h-full rounded-r-none" onClick={(e) => handleQuantityButtonClick(e, -1)}>
+                           {cartItem.quantity === 1 ? <Trash2 className="h-4 w-4 text-destructive" /> : <Minus className="h-4 w-4" />}
+                       </Button>
+                       <span className="font-bold text-sm">{cartItem.quantity}</span>
+                       <Button variant="ghost" size="icon" className="h-full rounded-l-none" onClick={(e) => handleQuantityButtonClick(e, 1)}>
+                           <Plus className="h-4 w-4" />
+                       </Button>
+                    </div>
+                ) : (
+                    <Button
+                        variant="default"
+                        className="w-full h-full px-4"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleUpdateCart(1);
+                        }}
+                    >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        ADD TO CART
+                    </Button>
+                )}
+            </div>
         </div>
       </motion.div>
     </Link>

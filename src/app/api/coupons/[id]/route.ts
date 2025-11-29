@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Coupon from '@/models/coupon.model';
@@ -50,7 +49,7 @@ export async function PUT(
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
-
+    
     const coupon = await Coupon.findByIdAndUpdate(id, validation.data, { new: true });
 
     if (!coupon) {

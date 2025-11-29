@@ -15,12 +15,15 @@ import {
   Settings,
   HelpCircle,
   Sun,
+  Moon,
+  Laptop,
   Briefcase,
   TicketPercent,
   Landmark,
   Home,
   Box,
   ShoppingCart,
+  Radio,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -28,26 +31,31 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import useBrandStore from "@/stores/brand-store";
+<<<<<<< HEAD
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { Button } from "../ui/button";
 import { UserNav } from "../user-nav";
 import { Separator } from "../ui/separator";
+=======
+import { Button } from "@/components/ui/button";
+import { UserNav } from "@/components/user-nav";
+import { Separator } from "@/components/ui/separator";
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 import type { IBrand } from "@/models/brand.model";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+<<<<<<< HEAD
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Logo } from "../logo";
+=======
+import { ScrollArea } from "../ui/scroll-area";
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
 const mainNavItem = { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" };
 
@@ -57,6 +65,7 @@ const navItems = [
   { href: "/admin/business-dashboard", icon: Briefcase, label: "Business Dashboard" },
   { href: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { href: "/admin/legals", icon: Landmark, label: "Legal" },
+  { href: "/admin/notifications", icon: Radio, label: "Broadcast" },
   { href: "/admin/orders", icon: Package, label: "Orders" },
   { href: "/admin/platform", icon: Home, label: "Platform" },
   { href: "/admin/promotions", icon: TicketPercent, label: "Promotions" },
@@ -65,7 +74,7 @@ const navItems = [
   { href: "/admin/users", icon: Users, label: "Users" },
 ];
 
-const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
+const BrandSelector = () => {
     const { selectedBrand, availableBrands, setSelectedBrand, setAvailableBrands } = useBrandStore();
     const [currentBrandDetails, setCurrentBrandDetails] = useState<IBrand | null>(null);
 
@@ -93,43 +102,12 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
         fetchBrands();
     }, [setAvailableBrands, selectedBrand]);
 
-    if (isCollapsed) {
-        return (
-            <DropdownMenu>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                                <Avatar className="h-8 w-8">
-                                    {currentBrandDetails?.logoUrl ? (
-                                        <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
-                                    ) : (
-                                        <AvatarFallback>{selectedBrand === 'All Brands' ? 'All' : selectedBrand.charAt(0).toUpperCase()}</AvatarFallback>
-                                    )}
-                                </Avatar>
-                            </Button>
-                        </DropdownMenuTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Switch Brand</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent className="w-56" align="start">
-                    {availableBrands.map(brand => (
-                        <DropdownMenuItem key={brand} onClick={() => setSelectedBrand(brand)}>
-                             <Check className={cn("mr-2 h-4 w-4", selectedBrand === brand ? "opacity-100" : "opacity-0")} />
-                            <span className="capitalize">{brand}</span>
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
-        )
-    }
-
     return (
         <Collapsible>
             <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-start h-12">
-                    <div className="flex items-center gap-3">
-                         <Avatar className="h-8 w-8">
+                <Button variant="outline" className="w-full justify-between h-12">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                         <Avatar className="h-8 w-8 relative flex-shrink-0">
                             {currentBrandDetails?.logoUrl ? (
                                 <Image src={currentBrandDetails.logoUrl} alt={currentBrandDetails.displayName} fill className="object-cover"/>
                             ) : (
@@ -138,7 +116,7 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
                         </Avatar>
                         <span className="truncate capitalize font-semibold">{selectedBrand}</span>
                     </div>
-                    <ChevronDown className="h-4 w-4 opacity-50 transition-transform ml-auto" />
+                    <ChevronDown className="h-4 w-4 opacity-50 transition-transform ml-auto flex-shrink-0" />
                 </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2 space-y-1">
@@ -155,19 +133,56 @@ const BrandSelector = ({ isCollapsed }: { isCollapsed: boolean }) => {
     )
 }
 
-const SidebarContent = () => {
+const ThemeToggle = () => {
+    // A simplified theme toggle. A real app would use a theme provider.
+    const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark');
+        if (theme === 'system') {
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            root.classList.add(systemTheme);
+            return;
+        }
+        root.classList.add(theme);
+    };
+
+    return (
+         <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-9 w-9">
+                    <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleThemeChange('light')}>
+                    <Sun className="mr-2 h-4 w-4" /> Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleThemeChange('dark')}>
+                    <Moon className="mr-2 h-4 w-4" /> Dark
+                </DropdownMenuItem>
+                 <DropdownMenuItem onClick={() => handleThemeChange('system')}>
+                    <Laptop className="mr-2 h-4 w-4" /> System
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
+
+
+const SidebarContent = ({ className }: { className?: string}) => {
     const pathname = usePathname();
     const { href, icon: Icon, label } = mainNavItem;
 
     return (
-        <>
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto py-2 no-scrollbar">
-            <div className="p-2">
-                <BrandSelector isCollapsed={false} />
-            </div>
-             <nav className="flex flex-col gap-1 px-2 text-sm font-medium">
-                <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname.startsWith(href) && "bg-muted text-primary")}>
+        <div className={cn("flex h-full flex-col", className)}>
+        <div className="px-4 py-2 border-b">
+            <BrandSelector />
+        </div>
+         <ScrollArea className="flex-1 overflow-y-auto py-2">
+            <nav className="grid items-start gap-1 px-4 text-sm font-medium">
+                <Link href={href} className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary", pathname === href && "bg-muted text-primary")}>
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
                 </Link>
@@ -179,29 +194,23 @@ const SidebarContent = () => {
                     </Link>
                 ))}
             </nav>
-        </div>
-        {/* Sidebar Footer */}
-        <div className="mt-auto border-t">
-            <div className="p-2">
-                <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Help &amp; Settings</span>
-                    <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8"><Sun className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8"><HelpCircle className="h-4 w-4" /></Button>
-                    </div>
+        </ScrollArea>
+        <div className="mt-auto border-t p-2">
+            <div className="flex items-center justify-between">
+                <UserNav />
+                <div className="flex items-center gap-1">
+                    <ThemeToggle />
+                    <Button variant="ghost" size="icon" className="h-9 w-9"><HelpCircle className="h-4 w-4" /></Button>
                 </div>
             </div>
-            <Separator className="my-0" />
-            <div className="p-2">
-                <UserNav />
-            </div>
         </div>
-      </>
+      </div>
     )
 }
 
 export function MobileAdminHeader() {
     const [open, setOpen] = useState(false);
+<<<<<<< HEAD
     const { settings } = usePlatformSettingsStore();
 
     return (
@@ -214,22 +223,32 @@ export function MobileAdminHeader() {
                 )}
                 <span>Admin Panel</span>
             </Link>
+=======
+
+    return (
+        <header className="flex md:hidden h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" className="shrink-0">
                         <PanelLeft className="h-5 w-5" />
                         <span className="sr-only">Toggle Menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-64 flex flex-col p-0">
+                <SheetContent side="left" className="flex flex-col p-0">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>
+<<<<<<< HEAD
                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
                                 {settings.platformLogoUrl ? (
                                     <Image src={settings.platformLogoUrl} alt="Logo" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
                                 ) : (
                                     <Logo className="h-6 w-6 text-primary" />
                                 )}
+=======
+                             <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
+                                <Store className="h-6 w-6 text-primary" />
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
                                 <span>Admin Panel</span>
                             </Link>
                         </SheetTitle>
@@ -237,12 +256,15 @@ export function MobileAdminHeader() {
                     <SidebarContent />
                 </SheetContent>
             </Sheet>
+            <div className="flex-1 text-center font-bold">Admin Panel</div>
+            <UserNav />
         </header>
     )
 }
 
 
 export function AdminSidebar() {
+<<<<<<< HEAD
     const pathname = usePathname();
     const { settings } = usePlatformSettingsStore();
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -330,6 +352,17 @@ export function AdminSidebar() {
                     </div>
                 </div>
             </TooltipProvider>
+=======
+    return (
+        <aside className="hidden md:flex h-screen max-h-screen flex-col gap-2 border-r bg-background sticky top-0">
+            <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-lg">
+                    <Store className="h-6 w-6 text-primary" />
+                    <span>Admin Panel</span>
+                </Link>
+            </div>
+            <SidebarContent />
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         </aside>
     );
 }

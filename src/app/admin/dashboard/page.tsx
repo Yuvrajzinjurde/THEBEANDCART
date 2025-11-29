@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 const DashboardSkeleton = () => (
-    <div className="flex-1 space-y-6 text-center">
+    <div className="flex-1 space-y-6">
         <div className="space-y-2">
             <Skeleton className="h-8 w-1/2" />
             <Skeleton className="h-5 w-1/3" />
@@ -33,7 +32,6 @@ const DashboardSkeleton = () => (
                 </Card>
             ))}
         </div>
-        <p className="mt-8 text-lg text-muted-foreground">Just a moment, getting everything ready for you…</p>
     </div>
 );
 
@@ -105,60 +103,60 @@ function AdminDashboardPage() {
       </div>
       
        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-blue-100 text-blue-800">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <IndianRupee className="h-4 w-4" />
+            <IndianRupee className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">₹{(stats.totalRevenue || 0).toLocaleString('en-IN')}</div>
             <PercentageChange value={stats.percentageChanges.revenue || 0} />
           </CardContent>
         </Card>
-        <Card className="bg-red-100 text-red-800">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Loss</CardTitle>
-            <Info className="h-4 w-4" />
+            <Info className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">₹{(stats.totalLoss || 0).toLocaleString('en-IN')}</div>
             <PercentageChange value={stats.percentageChanges.loss || 0} />
           </CardContent>
         </Card>
-        <Card className="bg-green-100 text-green-800">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Inventory Value</CardTitle>
-            <ShoppingCart className="h-4 w-4" />
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">₹{(stats.totalInventoryValue || 0).toLocaleString('en-IN')}</div>
             <PercentageChange value={stats.percentageChanges.inventory || 0} />
           </CardContent>
         </Card>
-        <Card className="bg-green-100 text-green-800">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <Package className="h-4 w-4" />
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{(stats.totalOrders || 0)}</div>
              <PercentageChange value={stats.percentageChanges.orders || 0} />
           </CardContent>
         </Card>
-        <Card className="bg-orange-100 text-orange-800">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4" />
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{(stats.totalProducts || 0)}</div>
              <p className="text-xs text-muted-foreground">Count of all listed products</p>
           </CardContent>
         </Card>
-        <Card className="bg-purple-100 text-purple-800">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{(stats.totalUsers || 0)}</div>

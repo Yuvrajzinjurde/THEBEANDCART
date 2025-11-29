@@ -8,7 +8,7 @@ import type { IProduct } from '@/models/product.model';
 export async function getProductsByBrand(brand: string): Promise<IProduct[]> {
     await dbConnect();
     try {
-        // Corrected the query to filter by 'storefront' to match the database model and usage.
+        // Corrected the query to filter by 'permanentName' to match the database model and usage.
         const query = brand === 'All Brands' ? {} : { storefront: brand };
         const products = await Product.find(query).sort({ createdAt: -1 }).lean();
         

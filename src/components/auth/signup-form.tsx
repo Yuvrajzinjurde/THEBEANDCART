@@ -5,9 +5,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+<<<<<<< HEAD
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, MailCheck } from "lucide-react";
 import { toast } from "react-toastify";
+=======
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
 import { SignUpSchema, type SignUpInput } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -28,18 +34,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Logo } from "@/components/logo";
 import { PasswordStrength } from "./password-strength";
 import { Loader } from "../ui/loader";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import Image from "next/image";
 
 type FormStep = 'details' | 'otp';
 
 export function SignUpForm() {
   const router = useRouter();
+<<<<<<< HEAD
   const params = useParams();
   const searchParams = useSearchParams();
   const brand = params.brand as string || 'reeva';
   
+=======
+  const { settings } = usePlatformSettingsStore();
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -59,7 +70,11 @@ export function SignUpForm() {
       email: "",
       password: "",
       confirmPassword: "",
+<<<<<<< HEAD
       brand: brand,
+=======
+      brand: "reeva", // Default brand for new signups
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
     },
     mode: 'onChange',
   });
@@ -78,9 +93,15 @@ export function SignUpForm() {
       if (!response.ok) {
         throw new Error(result.message || 'Failed to send OTP.');
       }
+<<<<<<< HEAD
       toast.success(`An OTP has been sent to ${data.email}.`);
       setOtpForVerification(result.otpForVerification); // Store the static OTP for client-side check
       setStep('otp');
+=======
+
+      toast.success("Account created successfully. Please log in.");
+      router.push(`/login`);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -132,6 +153,7 @@ export function SignUpForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="items-center text-center">
+<<<<<<< HEAD
         <Logo />
         <CardTitle className="text-2xl font-bold">
           {step === 'details' ? 'Create an Account' : 'Verify Your Email'}
@@ -140,6 +162,18 @@ export function SignUpForm() {
           {step === 'details' 
             ? "Get started by creating your account."
             : `We've sent a 6-digit code to ${form.getValues('email')}.`}
+=======
+        {settings?.platformLogoUrl ? (
+            <div className="relative h-14 w-14 rounded-full">
+                <Image src={settings.platformLogoUrl} alt="Logo" fill className="object-cover" />
+            </div>
+        ) : (
+            <div className="h-14 w-14 rounded-full bg-muted" />
+        )}
+        <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
+        <CardDescription>
+          Get started with your new account.
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -200,7 +234,14 @@ export function SignUpForm() {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
+<<<<<<< HEAD
           <Link href={`/login${callbackUrl ? `?callbackUrl=${callbackUrl}`: ''}`} className="font-medium text-primary hover:underline">
+=======
+          <Link
+            href={`/login`}
+            className="font-medium text-primary hover:underline"
+          >
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             Log in
           </Link>
         </p>
@@ -208,3 +249,5 @@ export function SignUpForm() {
     </Card>
   );
 }
+
+    

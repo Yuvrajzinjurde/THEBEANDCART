@@ -4,6 +4,7 @@ import dbConnect from '@/lib/mongodb';
 import Coupon from '@/models/coupon.model';
 import { CouponFormSchema } from '@/lib/coupon-schema';
 
+
 export async function GET(req: Request) {
   try {
     await dbConnect();
@@ -41,11 +42,12 @@ export async function POST(req: Request) {
     }
 
     const { code } = validation.data;
-    const existingCoupon = await Coupon.findOne({ code });
+    // Use a case-insensitive regex to ensure the uniqueness check matches the database index behavior
+    const existingCoupon = await Coupon.findOne({ code: { $regex: new RegExp(`^${code}$`, 'i') } });
     if (existingCoupon) {
         return NextResponse.json({ message: `Coupon code '${code}' already exists.` }, { status: 409 });
     }
-
+    
     const newCoupon = new Coupon(validation.data);
     await newCoupon.save();
 

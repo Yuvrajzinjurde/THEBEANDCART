@@ -2,7 +2,11 @@
 "use client";
 
 import { useEffect } from 'react';
+<<<<<<< HEAD
 import { useRouter, usePathname } from 'next/navigation';
+=======
+import { usePathname, useRouter } from 'next/navigation';
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 import { useAuth } from '@/hooks/use-auth';
 import { Loader } from '../ui/loader';
 
@@ -21,8 +25,13 @@ const withAuth = <P extends object>(
       }
 
       if (!user) {
+<<<<<<< HEAD
         // If not logged in, redirect to global login page with a callback
         router.replace(`/login?callbackUrl=${pathname}`);
+=======
+        // If not logged in, redirect to login page with the current path as a redirect parameter
+        router.replace(`/login?redirect=${pathname}`);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         return;
       }
 
@@ -34,11 +43,18 @@ const withAuth = <P extends object>(
         if (userRoles.includes('admin')) {
           router.replace('/admin/dashboard');
         } else {
+<<<<<<< HEAD
           // Redirect to main homepage as a default for unauthorized users
           router.replace('/');
         }
       }
     }, [user, loading, router, pathname, allowedRoles]);
+=======
+          router.replace('/');
+        }
+      }
+    }, [user, loading, router, pathname]);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
     // While loading or if user is not yet determined, show a loader
     if (loading || !user) {
@@ -50,7 +66,7 @@ const withAuth = <P extends object>(
     }
     
     // If authorized, render the component
-    const isAuthorized = allowedRoles.some(role => user.roles.includes(role));
+    const isAuthorized = user && allowedRoles.some(role => user.roles.includes(role));
     if (isAuthorized) {
       return <WrappedComponent {...props} />;
     }

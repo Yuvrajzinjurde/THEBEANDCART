@@ -7,7 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import { toast } from "react-toastify";
+=======
+import { toast } from "sonner";
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
 import { ForgotPasswordSchema, ResetPasswordSchema, type ForgotPasswordInput, type ResetPasswordInput } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -28,14 +32,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Logo } from "@/components/logo";
 import { Loader } from "../ui/loader";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import Image from "next/image";
 
 type FormStep = "email" | "reset";
 type CombinedFormData = ForgotPasswordInput & ResetPasswordInput;
 
 export function ForgotPasswordForm() {
   const router = useRouter();
+<<<<<<< HEAD
+=======
+  const { settings } = usePlatformSettingsStore();
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<FormStep>("email");
   const [showPassword, setShowPassword] = useState(false);
@@ -104,7 +113,11 @@ export function ForgotPasswordForm() {
        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
             <CardHeader className="items-center text-center">
-              <Logo />
+              {settings?.platformLogoUrl ? (
+                <Image src={settings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+              ) : (
+                  <div className="h-14 w-14 rounded-full bg-muted" />
+              )}
               <CardTitle className="text-2xl font-bold">
                 {step === 'email' ? 'Forgot Password?' : 'Reset Your Password'}
               </CardTitle>
@@ -189,14 +202,35 @@ export function ForgotPasswordForm() {
               </Button>
             </CardContent>
              <CardFooter className="justify-center">
+<<<<<<< HEAD
                 <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
                     <Link href={`/login`} className="font-medium text-primary hover:underline">
                     Back to Log in
                     </Link>
                 </Button>
+=======
+                {step === 'email' ? (
+                     <Button variant="link" asChild className="p-0 text-sm text-muted-foreground">
+                        <Link href={`/login`} className="font-medium text-primary hover:underline">
+                        Back to Log in
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button variant="link" asChild className="p-0 text-sm text-muted-foreground" onClick={() => {
+                        setStep('email');
+                        form.reset(); // Reset form state when going back
+                    }}>
+                        <Link href="#" className="font-medium text-primary hover:underline">
+                        Back to email entry
+                        </Link>
+                    </Button>
+                )}
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             </CardFooter>
           </form>
         </Form>
     </Card>
   );
 }
+
+    

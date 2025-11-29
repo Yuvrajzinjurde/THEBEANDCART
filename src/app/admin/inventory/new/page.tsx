@@ -18,13 +18,7 @@ export default function NewProductPage() {
             </Button>
         </div>
         <Card>
-        <CardHeader>
-            <CardTitle>Create a New Product / Catalog</CardTitle>
-            <CardDescription>
-            Fill out the form below to add a new product to your inventory. Add variants to create a catalog.
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
             <ProductForm mode="create" />
         </CardContent>
         </Card>

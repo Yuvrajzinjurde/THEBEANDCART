@@ -6,12 +6,7 @@ import { cn } from '@/lib/utils';
 import ReactConfetti from 'react-confetti';
 import { useWindowSize } from '@react-hook/window-size';
 import { Truck, Tag, Gift } from 'lucide-react';
-
-const milestones = [
-  { threshold: 399, reward: "Free Delivery", icon: Truck },
-  { threshold: 799, reward: "Extra 10% Off", icon: Tag },
-  { threshold: 999, reward: "Free Gift", icon: Gift },
-];
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
 
 const ActiveGiftBox = ({ className }: { className?: string }) => (
     <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("text-primary drop-shadow-lg", className)}>
@@ -55,7 +50,7 @@ const Milestone = ({
     isUnlocked,
     onUnlock,
 }: {
-    milestone: typeof milestones[0];
+    milestone: { threshold: number; reward: string; icon: React.ElementType };
     isUnlocked: boolean;
     onUnlock: () => void;
 }) => {
@@ -104,6 +99,14 @@ const Milestone = ({
 
 export function CartProgressBar({ currentValue }: { currentValue: number }) {
   const { width, height } = useWindowSize();
+  const { settings } = usePlatformSettingsStore();
+
+  const milestones = useMemo(() => [
+      { threshold: settings.freeShippingThreshold || 399, reward: "Free Delivery", icon: Truck },
+      { threshold: settings.extraDiscountThreshold || 799, reward: "Extra 10% Off", icon: Tag },
+      { threshold: settings.freeGiftThreshold || 999, reward: "Free Gift", icon: Gift },
+  ], [settings]);
+
   const [unlocked, setUnlocked] = useState<boolean[]>(milestones.map(m => currentValue >= m.threshold));
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -116,12 +119,13 @@ export function CartProgressBar({ currentValue }: { currentValue: number }) {
     if (JSON.stringify(newUnlocked) !== JSON.stringify(unlocked)) {
         setUnlocked(newUnlocked);
     }
-  }, [currentValue, unlocked]);
+  }, [currentValue, unlocked, milestones]);
 
   const progressPercentage = useMemo(() => {
     const highestThreshold = milestones[milestones.length - 1].threshold;
+    if (highestThreshold === 0) return 100;
     return Math.min((currentValue / highestThreshold) * 100, 100);
-  }, [currentValue]);
+  }, [currentValue, milestones]);
 
 
   const highestUnlockedIndex = unlocked.lastIndexOf(true);

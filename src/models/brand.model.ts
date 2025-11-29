@@ -1,14 +1,26 @@
 
+
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 interface IBanner {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     imageUrl: string;
     imageHint: string;
+    buttonLink?: string;
 }
 
+<<<<<<< HEAD
 interface IReview {
+=======
+interface IOffer {
+    title: string;
+    description: string;
+    code: string;
+}
+
+export interface IReview {
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
     customerName: string;
     rating: number;
     reviewText: string;
@@ -16,18 +28,20 @@ interface IReview {
 }
 
 interface IPromoBanner {
-    title: string;
-    description: string;
-    imageUrl: string;
-    imageHint: string;
-    buttonText: string;
-    buttonLink: string;
+    title?: string;
+    description?: string;
+    imageUrl?: string;
+    imageHint?: string;
+    buttonText?: string;
+    buttonLink?: string;
 }
 
-interface ICategoryBanner {
-    categoryName: string;
-    imageUrl: string;
-    imageHint: string;
+export interface ICategoryGridItem {
+    category: string;
+    title: string;
+    description: string;
+    images: { url: string; hint?: string }[];
+    buttonLink: string;
 }
 
 interface ISocialLinks {
@@ -53,16 +67,17 @@ export interface IBrand extends Document {
   theme: ITheme;
   reviews: IReview[];
   promoBanner: IPromoBanner;
-  categoryBanners: ICategoryBanner[];
   categories: string[];
   socials?: ISocialLinks;
+  categoryGrid: ICategoryGridItem[];
 }
 
 const BannerSchema: Schema<IBanner> = new Schema({
-    title: { type: String, required: true },
-    description: { type: String, required: true },
+    title: { type: String },
+    description: { type: String },
     imageUrl: { type: String, required: true },
     imageHint: { type: String, required: true },
+    buttonLink: { type: String },
 }, { _id: false });
 
 const ReviewSchema: Schema<IReview> = new Schema({
@@ -73,19 +88,25 @@ const ReviewSchema: Schema<IReview> = new Schema({
 }, { _id: false });
 
 const PromoBannerSchema: Schema<IPromoBanner> = new Schema({
+    title: { type: String },
+    description: { type: String },
+    imageUrl: { type: String },
+    imageHint: { type: String },
+    buttonText: { type: String },
+    buttonLink: { type: String },
+}, { _id: false });
+
+const CategoryGridItemSchema: Schema<ICategoryGridItem> = new Schema({
+    category: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    imageHint: { type: String, required: true },
-    buttonText: { type: String, required: true },
+    images: [{
+        url: { type: String, required: true },
+        hint: { type: String }
+    }],
     buttonLink: { type: String, required: true },
 }, { _id: false });
 
-const CategoryBannerSchema: Schema<ICategoryBanner> = new Schema({
-    categoryName: { type: String, required: true },
-    imageUrl: { type: String, required: true },
-    imageHint: { type: String, required: true },
-}, { _id: false });
 
 const SocialLinksSchema: Schema<ISocialLinks> = new Schema({
     twitter: { type: String },
@@ -110,9 +131,9 @@ const BrandSchema: Schema<IBrand> = new Schema({
   theme: { type: ThemeSchema, required: true },
   reviews: [ReviewSchema],
   promoBanner: PromoBannerSchema,
-  categoryBanners: [CategoryBannerSchema],
   categories: { type: [String], default: [] },
   socials: SocialLinksSchema,
+  categoryGrid: { type: [CategoryGridItemSchema], default: [] },
 }, { timestamps: true });
 
 const Brand: Model<IBrand> = mongoose.models.Brand || mongoose.model<IBrand>('Brand', BrandSchema);

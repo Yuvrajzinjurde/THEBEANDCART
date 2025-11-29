@@ -1,7 +1,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
 import Cart, { ICart } from '@/models/cart.model';
@@ -10,19 +10,30 @@ import Box from '@/models/box.model';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
+}
+
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return decoded.sub;
+    } catch (error) {
+        return null;
+    }
 }
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
 
     const hamper = await Hamper.findOne({ userId, isComplete: false });
 
@@ -61,10 +72,11 @@ export async function POST(req: Request) {
         if (boxVariant && boxVariant.sellingPrice > 0) {
             // This is a simplification. A real app might have boxes as actual products.
             // For now, we find or create a temporary "product" for the box to add to cart
-            let boxProduct = await Product.findOne({ name: boxVariant.name, storefront: 'hamper-assets' });
+            const productName = `${box.name} (${boxVariant.name})`;
+            let boxProduct = await Product.findOne({ name: productName, storefront: 'hamper-assets' });
             if (!boxProduct) {
                 boxProduct = new Product({
-                    name: `${box.name} (${boxVariant.name})`,
+                    name: productName,
                     storefront: 'hamper-assets',
                     category: 'Packaging',
                     brand: 'Packaging',
@@ -83,10 +95,11 @@ export async function POST(req: Request) {
     if(bag && hamper.bagVariantId) {
         const bagVariant = bag.variants.find(v => (v as any)._id.equals(hamper.bagVariantId));
         if (bagVariant && bagVariant.sellingPrice > 0) {
-            let bagProduct = await Product.findOne({ name: bagVariant.name, storefront: 'hamper-assets' });
+            const productName = `${bag.name} (${bagVariant.name})`;
+            let bagProduct = await Product.findOne({ name: productName, storefront: 'hamper-assets' });
              if (!bagProduct) {
                 bagProduct = new Product({
-                    name: `${bag.name} (${bagVariant.name})`,
+                    name: productName,
                     storefront: 'hamper-assets',
                     category: 'Packaging',
                     brand: 'Packaging',
@@ -102,7 +115,7 @@ export async function POST(req: Request) {
     }
 
     await cart.save();
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
 
     return NextResponse.json({ message: 'Hamper added to cart!', cart: populatedCart }, { status: 200 });

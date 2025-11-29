@@ -39,7 +39,7 @@ const suggestBoxesPrompt = ai.definePrompt({
   name: 'suggestBoxesPrompt',
   input: { schema: SuggestBoxesInputSchema },
   output: { schema: SuggestBoxesOutputSchema },
-  model: 'googleai/gemini-1.5-flash',
+  model: 'gemini-pro',
   prompt: `You are an expert gift curator. Your task is to recommend the best packaging options for a gift hamper based on a specific occasion.
 
 Analyze the user's selected occasion: {{{occasion}}}

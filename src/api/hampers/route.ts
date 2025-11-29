@@ -1,13 +1,27 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
+}
+
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return decoded.sub;
+    } catch (error) {
+        return null;
+    }
 }
 
 const HamperUpdateSchema = z.object({
@@ -26,12 +40,9 @@ const HamperUpdateSchema = z.object({
 export async function GET(req: Request) {
     await dbConnect();
     try {
-        const token = req.headers.get('authorization')?.split(' ')[1];
-        if (!token) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        const userId = getUserIdFromToken(req);
+        if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         
-        const decoded = jwtDecode<DecodedToken>(token);
-        const userId = decoded.userId;
-
         const hamper = await Hamper.findOne({ userId, isComplete: false });
 
         return NextResponse.json({ hamper }, { status: 200 });
@@ -47,11 +58,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     await dbConnect();
     try {
-        const token = req.headers.get('authorization')?.split(' ')[1];
-        if (!token) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-
-        const decoded = jwtDecode<DecodedToken>(token);
-        const userId = decoded.userId;
+        const userId = getUserIdFromToken(req);
+        if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
 
         const body = await req.json();
         const validation = HamperUpdateSchema.safeParse(body);
@@ -79,12 +87,9 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
     await dbConnect();
     try {
-        const token = req.headers.get('authorization')?.split(' ')[1];
-        if (!token) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+        const userId = getUserIdFromToken(req);
+        if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
         
-        const decoded = jwtDecode<DecodedToken>(token);
-        const userId = decoded.userId;
-
         await Hamper.deleteOne({ userId, isComplete: false });
 
         return NextResponse.json({ message: 'Hamper progress discarded' }, { status: 200 });

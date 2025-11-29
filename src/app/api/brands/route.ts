@@ -4,10 +4,18 @@ import dbConnect from '@/lib/mongodb';
 import Brand from '@/models/brand.model';
 import { BrandFormSchema } from '@/lib/brand-schema';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await dbConnect();
-    const brands = await Brand.find({}).sort({ displayName: 1 });
+    const { searchParams } = new URL(req.url);
+    const names = searchParams.get('names');
+
+    let query = {};
+    if (names) {
+      query = { permanentName: { $in: names.split(',') } };
+    }
+
+    const brands = await Brand.find(query).sort({ displayName: 1 });
     return NextResponse.json({ brands }, { status: 200 });
   } catch (error) {
     console.error('Failed to fetch brands:', error);

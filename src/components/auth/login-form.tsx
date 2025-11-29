@@ -5,10 +5,16 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+<<<<<<< HEAD
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+=======
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
 import { LoginSchema, type LoginInput } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -31,6 +37,7 @@ import {
 } from "@/components/ui/form";
 import { Loader } from "../ui/loader";
 import Image from "next/image";
+<<<<<<< HEAD
 import usePlatformSettingsStore from "@/stores/platform-settings-store";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -50,6 +57,38 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   
   const callbackUrl = searchParams.get('callbackUrl') || null;
+=======
+import type { IBrand } from "@/models/brand.model";
+import usePlatformSettingsStore from "@/stores/platform-settings-store";
+import { Logo } from "../logo";
+import { Skeleton } from "../ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+
+export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { settings, fetchSettings } = usePlatformSettingsStore();
+  const { login } = useAuth();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [brandName, setBrandName] = useState('reeva');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function initialize() {
+        await fetchSettings();
+        const urlBrand = searchParams.get('brand');
+        if (urlBrand) {
+            setBrandName(urlBrand);
+        }
+        setLoading(false);
+    }
+    initialize();
+  }, [fetchSettings, searchParams]);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -59,9 +98,14 @@ export function LoginForm() {
       brand: 'reeva'
     },
   });
+  
+  useEffect(() => {
+    form.setValue('brand', brandName);
+  }, [brandName, form]);
 
   async function onSubmit(data: LoginInput) {
     setIsSubmitting(true);
+    setError(null);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -75,6 +119,7 @@ export function LoginForm() {
         throw new Error(result.message || "An error occurred during login.");
       }
       
+<<<<<<< HEAD
       login(result.token);
 
       toast.success(`Welcome back, ${result.name}!`);
@@ -83,31 +128,49 @@ export function LoginForm() {
           router.push(callbackUrl);
           return;
       }
+=======
+      // Await the login function which now returns a promise
+      await login(result.user, result.token);
 
-      // Decode token to get roles and redirect
-      const decoded = jwtDecode<DecodedToken>(result.token);
-      if (decoded.roles.includes('admin')) {
+      toast.success(`Welcome back, ${result.user.firstName}!`);
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
+
+      const redirectUrl = searchParams.get('redirect');
+
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else if (result.user.roles.includes('admin')) {
         router.push("/admin/dashboard");
       } else {
-        const userBrand = decoded.brand || 'reeva'; // Default to reeva if no brand
+        const userBrand = result.user.brand || 'reeva';
         router.push(`/${userBrand}/home`);
       }
 
     } catch (error: any) {
       console.error("Login Error:", error);
-      toast.error(error.message || "Invalid email or password. Please try again.");
+      setError(error.message || "Invalid email or password. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <main className="container flex flex-1 items-center justify-center p-4">
+    <Card className="w-full max-w-md shadow-md">
       <CardHeader className="items-center text-center">
+<<<<<<< HEAD
         {platformSettings?.platformLogoUrl ? (
             <Image src={platformSettings.platformLogoUrl} alt="Logo" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+=======
+        {loading ? (
+          <Skeleton className="h-14 w-14 rounded-full" />
+        ) : settings?.platformLogoUrl ? (
+            <div className="relative h-14 w-14 rounded-full">
+                <Image src={settings.platformLogoUrl} alt="Logo" fill className="object-cover" />
+            </div>
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         ) : (
-            <div className="h-14 w-14 rounded-full bg-muted" />
+            <Logo className="h-14 w-14" />
         )}
         <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
         <CardDescription>
@@ -183,6 +246,15 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
+            {error && (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Login Failed</AlertTitle>
+                    <AlertDescription>
+                        {error}
+                    </AlertDescription>
+                </Alert>
+            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && (
                 <Loader className="mr-2 h-4 w-4" />
@@ -192,17 +264,37 @@ export function LoginForm() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="flex flex-col gap-4">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
+<<<<<<< HEAD
             href={`/signup${callbackUrl ? `?callbackUrl=${callbackUrl}`: ''}`}
+=======
+            href={`/signup`}
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
             className="font-medium text-primary hover:underline"
           >
             Sign up
           </Link>
         </p>
+         <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                Or
+                </span>
+            </div>
+        </div>
+        <Button variant="outline" className="w-full" asChild>
+            <Link href="/">Continue Shopping</Link>
+        </Button>
       </CardFooter>
     </Card>
+    </main>
   );
 }
+
+    

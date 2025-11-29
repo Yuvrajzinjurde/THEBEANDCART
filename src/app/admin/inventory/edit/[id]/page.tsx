@@ -22,7 +22,7 @@ export default function EditProductPage() {
   useEffect(() => {
     if (!productId) return;
 
-    const fetchProduct = async () => {
+    const fetchProductData = async () => {
       try {
         setLoading(true);
         const fetchedProduct = await getProductById(productId);
@@ -34,7 +34,7 @@ export default function EditProductPage() {
       }
     };
 
-    fetchProduct();
+    fetchProductData();
   }, [productId]);
 
   if (loading) {

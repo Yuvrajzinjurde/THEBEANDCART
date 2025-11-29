@@ -1,7 +1,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Hamper from '@/models/hamper.model';
 import Cart, { ICart } from '@/models/cart.model';
@@ -10,19 +10,30 @@ import Box from '@/models/box.model';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
+}
+
+const getUserIdFromToken = (req: Request): string | null => {
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) return null;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+        return decoded.sub;
+    } catch (error) {
+        return null;
+    }
 }
 
 export async function POST(req: Request) {
   try {
     await dbConnect();
 
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const decoded = jwtDecode<DecodedToken>(token);
-    const userId = decoded.userId;
 
     const hamper = await Hamper.findOne({ userId, isComplete: false });
 
@@ -104,7 +115,7 @@ export async function POST(req: Request) {
     }
 
     await cart.save();
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
 
     return NextResponse.json({ message: 'Hamper added to cart!', cart: populatedCart }, { status: 200 });

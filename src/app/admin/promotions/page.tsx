@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Edit, Trash2, PlusCircle, TicketPercent } from 'lucide-react';
 import { format } from 'date-fns';
 

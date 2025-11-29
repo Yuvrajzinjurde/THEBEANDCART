@@ -1,31 +1,25 @@
 
 "use client";
 
+import withAuth from "@/components/auth/with-auth";
 import { AdminSidebar, MobileAdminHeader } from "@/components/admin/admin-sidebar";
-import { useEffect } from "react";
 
-export default function AdminLayout({
+function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
-  useEffect(() => {
-    document.documentElement.classList.add('theme-admin');
-    return () => {
-      document.documentElement.classList.remove('theme-admin');
-    };
-  }, []);
-
   return (
-    <div className="flex w-full bg-muted/40 min-h-screen">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <AdminSidebar />
-      <main className="flex-1 flex flex-col">
+      <div className="flex flex-col">
         <MobileAdminHeader />
-        <div className="flex-1 p-4 sm:p-6">
-            {children}
-        </div>
-      </main>
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
+
+export default withAuth(AdminLayout, ['admin']);

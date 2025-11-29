@@ -55,8 +55,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
         const allProducts = await Product.find(brandQuery).lean();
         const allProductsObject: IProduct[] = JSON.parse(JSON.stringify(allProducts));
 
-        const adminRoleId = await Types.ObjectId.createFromHexString('66a55e97573d808e7c1e5a5b'); // Assuming this is the admin role ID
-        const userQuery: any = { roles: { $ne: adminRoleId } };
+        const userQuery: any = { roles: { $ne: new Types.ObjectId('66a55e97573d808e7c1e5a5b') } }; // Exclude Admin
         if (brand !== 'All Brands') {
             userQuery.brand = brand;
         }
@@ -77,8 +76,8 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
 
         // === Order Stats (Current & Previous) ===
         const orderBrandQuery = brand === 'All Brands' ? {} : { brand: brand };
-        const currentOrders = await Order.find({ ...orderBrandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } });
-        const previousOrders = await Order.find({ ...orderBrandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: prevSevenDaysAgo, $lt: sevenDaysAgo } });
+        const currentOrders = await Order.find({ ...orderBrandQuery, status: { $nin: ['cancelled', 'pending'] }, createdAt: { $gte: sevenDaysAgo } });
+        const previousOrders = await Order.find({ ...orderBrandQuery, status: { $nin: ['cancelled', 'pending'] }, createdAt: { $gte: prevSevenDaysAgo, $lt: sevenDaysAgo } });
         
         const totalOrders = currentOrders.length;
         const prevTotalOrders = previousOrders.length;
@@ -88,7 +87,7 @@ export async function getDashboardStats(brand: string): Promise<DashboardStats> 
 
         // === Chart Data (Last 7 Days) ===
         const dailyStats = await Order.aggregate([
-          { $match: { ...orderBrandQuery, status: { $ne: 'cancelled' }, createdAt: { $gte: sevenDaysAgo } } },
+          { $match: { ...orderBrandQuery, status: { $nin: ['cancelled', 'pending'] }, createdAt: { $gte: sevenDaysAgo } } },
           { $group: {
               _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
               sales: { $sum: "$totalAmount" },

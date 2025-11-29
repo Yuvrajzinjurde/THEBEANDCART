@@ -38,11 +38,18 @@ export async function GET(req: Request) {
     }
 
     if (colors) {
-        query.color = { $in: colors.split(',') };
+        query['variants.color'] = { $in: colors.split(',') };
     }
 
     if (keyword) {
-        query.keywords = { $in: [new RegExp(keyword, 'i')] };
+        // Search in name and keywords for a better search experience
+        const regex = new RegExp(keyword, 'i');
+        query.$or = [
+            { name: regex },
+            { keywords: { $in: [regex] } },
+            { brand: regex },
+            { category: regex }
+        ];
     }
 
     if (keywords) {
@@ -113,27 +120,24 @@ export async function POST(req: Request) {
         const { variants, ...commonData } = validation.data;
         const styleId = new Types.ObjectId().toHexString();
 
-        if (variants.length === 0) {
-            // This is a single product without variants
-            const productData = { ...commonData, styleId };
-            const newProduct = new Product(productData);
-            await newProduct.save();
-            return NextResponse.json({ message: 'Product created successfully', products: [newProduct] }, { status: 201 });
+        const productData = {
+          ...commonData,
+          styleId,
+          variants: (variants || []).map(v => ({
+            ...v,
+            availableQuantity: (v as any).stock, // Map stock to availableQuantity
+          })),
+        };
+        
+        // If there are variants, calculate total stock. Otherwise, use top-level stock.
+        if (productData.variants && productData.variants.length > 0) {
+            productData.stock = productData.variants.reduce((acc, v) => acc + v.availableQuantity, 0);
         }
 
-        // This is a catalog with multiple variants
-        const productDocs = variants.map(variant => ({
-            ...commonData,
-            ...variant,
-            styleId,
-            name: `${commonData.name} - ${variant.color || ''} ${variant.size || ''}`.trim(),
-            // Ensure top-level images are not passed to variant products
-            images: variant.images,
-        }));
+        const newProduct = new Product(productData);
+        await newProduct.save();
 
-        const newProducts = await Product.insertMany(productDocs);
-
-        return NextResponse.json({ message: 'Product catalog created successfully', products: newProducts }, { status: 201 });
+        return NextResponse.json({ message: 'Product created successfully', product: newProduct }, { status: 201 });
 
     } catch (error) {
         console.error('Failed to create product:', error);

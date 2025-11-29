@@ -1,6 +1,6 @@
 
-
 import './globals.css';
+<<<<<<< HEAD
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { headers } from 'next/headers';
@@ -9,10 +9,22 @@ import type { IPlatformSettings } from '@/models/platform.model';
 import { cn } from '@/lib/utils';
 import { Providers } from './providers';
 import { WhatsAppSupport } from '@/components/whatsapp-support';
+=======
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
+import type { Metadata } from 'next';
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
-function ThemeInjector({ theme }: { theme: any }) {
-    if (!theme) return null;
+export const metadata: Metadata = {
+  title: 'The Brand Cart',
+  description: 'Your one-stop shop for amazing brands.',
+  icons: {
+    icon: '/favicon.ico',
+  },
+};
 
+<<<<<<< HEAD
     const styles = `
     :root {
         --primary: ${theme.primary};
@@ -21,15 +33,15 @@ function ThemeInjector({ theme }: { theme: any }) {
     }
     ${theme.name && theme.name.includes('(Dark)') ? '.dark {}' : ''}
     `;
+=======
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
 
-    return <style dangerouslySetInnerHTML={{ __html: styles }} />;
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+<<<<<<< HEAD
   const headersList = headers();
   const pathname = headersList.get('x-next-pathname') || '';
   const searchParams = headersList.get('x-next-search') || '';
@@ -63,6 +75,20 @@ export default async function RootLayout({
                 pauseOnHover
                 theme="light"
             />
+=======
+
+  return (
+    <html lang="en" suppressHydrationWarning className="no-scrollbar">
+        <head />
+        <body className={cn(
+            "min-h-screen font-body antialiased no-scrollbar",
+            "flex flex-col"
+        )}>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+            <Toaster position="top-right" />
+>>>>>>> 81a0047e5ec12db80da74c44e0a5c54d6cfcaa25
         </body>
     </html>
   );

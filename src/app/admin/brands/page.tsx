@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Edit, Trash2, PlusCircle } from 'lucide-react';
 
 import type { IBrand } from '@/models/brand.model';
@@ -111,13 +111,15 @@ export default function ManageBrandsPage() {
               {brands.map((brand) => (
                 <TableRow key={brand.permanentName}>
                   <TableCell className="hidden sm:table-cell">
-                    <Image
-                      alt={`${brand.displayName} logo`}
-                      className="aspect-square rounded-md object-contain"
-                      height="40"
-                      src={brand.logoUrl}
-                      width="40"
-                    />
+                    <div className="aspect-square rounded-md object-contain relative h-10 w-10">
+                        <Image
+                        alt={`${brand.displayName} logo`}
+                        className="rounded-md"
+                        src={brand.logoUrl}
+                        fill
+                        style={{ objectFit: 'contain' }}
+                        />
+                    </div>
                   </TableCell>
                   <TableCell className="font-medium">{brand.displayName}</TableCell>
                   <TableCell className="hidden md:table-cell font-mono text-sm">{brand.permanentName}</TableCell>
@@ -165,3 +167,5 @@ export default function ManageBrandsPage() {
     </Card>
   );
 }
+
+    

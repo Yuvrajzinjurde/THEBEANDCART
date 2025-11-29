@@ -1,9 +1,8 @@
 
-
 "use client";
 
 import { useEffect, useState, useTransition } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { MoreHorizontal, UserX, UserCheck, Eye } from 'lucide-react';
 import type { IUser } from '@/models/user.model';
 import { Button } from '@/components/ui/button';
@@ -34,6 +33,7 @@ import { getUsers, updateUserStatus } from './actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const TableSkeleton = () => (
     <div className="text-center">
@@ -47,7 +47,8 @@ const TableSkeleton = () => (
                 <TableBody>
                     {[...Array(5)].map((_, i) => (
                         <TableRow key={i}>
-                            {[...Array(5)].map((_, j) => (
+                            <TableCell><div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-5 w-32" /></div></TableCell>
+                            {[...Array(4)].map((_, j) => (
                                 <TableCell key={j}><Skeleton className="h-5 w-full" /></TableCell>
                             ))}
                         </TableRow>
@@ -137,7 +138,15 @@ export default function UsersPage() {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user._id as string}>
-                  <TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9">
+                            {user.profilePicUrl && <AvatarImage src={user.profilePicUrl} alt={user.firstName} />}
+                            <AvatarFallback>{user.firstName?.charAt(0)}{user.lastName?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span>{`${user.firstName} ${user.lastName}`}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground">{user.email}</TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">{user.brand}</Badge>

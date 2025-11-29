@@ -1,12 +1,10 @@
-
-
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -22,7 +20,6 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { ICoupon } from '@/models/coupon.model';
 
-
 interface CouponFormProps {
   mode: 'create' | 'edit';
   existingCoupon?: ICoupon;
@@ -33,44 +30,79 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
   const { selectedBrand, availableBrands } = useBrandStore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const defaultValues: any = React.useMemo(() => (existingCoupon ? {
-      ...existingCoupon,
-      value: existingCoupon.value ?? '',
-      minPurchase: existingCoupon.minPurchase ?? '',
-      startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
-      endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
-  } : {
-    code: '',
-    type: 'percentage',
-    value: '',
-    minPurchase: '',
-    brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
-    startDate: undefined,
-    endDate: undefined
-  }), [existingCoupon, selectedBrand]);
+  const defaultValues: Partial<CouponFormValues> = React.useMemo(() => {
+    if (existingCoupon) {
+      const base = {
+        code: existingCoupon.code,
+        type: existingCoupon.type,
+        minPurchase: existingCoupon.minPurchase,
+        brand: existingCoupon.brand,
+        startDate: existingCoupon.startDate ? new Date(existingCoupon.startDate) : undefined,
+        endDate: existingCoupon.endDate ? new Date(existingCoupon.endDate) : undefined,
+      };
+      if (existingCoupon.type === 'free-shipping') {
+        return {
+          ...base,
+          type: 'free-shipping',
+        };
+      }
+      return {
+        ...base,
+        type: existingCoupon.type,
+        value: existingCoupon.value || 0,
+      };
+    }
+    return {
+      code: '',
+      type: 'percentage',
+      value: 0,
+      minPurchase: 0,
+      brand: selectedBrand === 'All Brands' ? 'All Brands' : selectedBrand,
+      startDate: undefined,
+      endDate: undefined,
+    };
+  }, [existingCoupon, selectedBrand]);
+
 
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(CouponFormSchema),
-    defaultValues,
+    defaultValues: defaultValues as CouponFormValues,
     mode: 'onChange',
   });
 
   const discountType = form.watch('type');
 
-  useEffect(() => {
-    if (discountType === 'free-shipping') {
-      form.setValue('value', undefined);
-    }
-  }, [discountType, form]);
-
   const generateRandomCode = () => {
     const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
-    form.setValue('code', `SALE${randomPart}`);
+    form.setValue('code', `SALE${randomPart}`, { shouldValidate: true });
   };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow backspace, delete, tab, escape, enter
+    if (['Backspace', 'Delete', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
+        // Allow: Ctrl+A, Command+A
+        (e.key === 'a' && (e.ctrlKey || e.metaKey)) ||
+        // Allow: home, end, left, right
+        e.key.startsWith('Arrow')) {
+      return;
+    }
+    // Ensure that it is a number and stop the keypress if not
+    if (isNaN(Number(e.key)) && e.key !== '.') {
+        e.preventDefault();
+    }
+  };
+
 
   async function onSubmit(data: CouponFormValues) {
     setIsSubmitting(true);
     
+    // Explicitly handle the 'value' field based on discount type
+    const dataToSubmit: Record<string, any> = { ...data };
+    
+    if (data.type === 'free-shipping' && 'value' in dataToSubmit) {
+      delete dataToSubmit.value;
+    }
+
     const url = mode === 'create' ? '/api/coupons' : `/api/coupons/${existingCoupon?._id}`;
     const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -78,12 +110,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSubmit),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
+        console.error("API Error Response:", result);
         throw new Error(result.message || `Failed to ${mode} coupon.`);
       }
 
@@ -152,7 +185,9 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                     <FormLabel>Discount Type</FormLabel>
                     <FormControl>
                         <RadioGroup
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value as CouponFormValues['type']);
+                        }}
                         value={field.value}
                         className="flex flex-col sm:flex-row sm:items-center gap-4"
                         >
@@ -191,10 +226,12 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                          <div className="relative">
                             {discountType === 'fixed' && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>}
                             <FormControl>
-                                <Input 
-                                  type="number"
-                                  placeholder="0"
+                                <Input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder={discountType === 'percentage' ? 'e.g., 10' : 'e.g., 100'}
                                   {...field}
+                                  onKeyDown={handleKeyDown}
                                 />
                             </FormControl>
                              {discountType === 'percentage' && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">%</span>}
@@ -215,11 +252,13 @@ export function CouponForm({ mode, existingCoupon }: CouponFormProps) {
                      <div className="relative">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
                         <FormControl>
-                            <Input 
-                              type="number"
+                            <Input
+                              type="text"
+                              inputMode="decimal"
                               placeholder="0"
                               {...field}
                               className="pl-7"
+                              onKeyDown={handleKeyDown}
                             />
                         </FormControl>
                     </div>

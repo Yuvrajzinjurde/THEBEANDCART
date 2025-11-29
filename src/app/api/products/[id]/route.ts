@@ -45,18 +45,28 @@ export async function PUT(
             return NextResponse.json({ message: 'Invalid Product ID' }, { status: 400 });
         }
 
-        // Use the server-side schema that expects flat arrays for keywords/images
         const validation = ProductFormSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
         
-        // For now, we only support updating the main product, not variants through this endpoint.
-        const { variants, ...updateData } = validation.data;
+        const { variants, ...commonData } = validation.data;
+        
+        const updateData: any = {
+            ...commonData,
+            variants: (variants || []).map(v => ({
+                ...v,
+                availableQuantity: v.availableQuantity,
+            })),
+        };
+        
+        // Calculate total stock from variants if they exist
+        if (updateData.variants && updateData.variants.length > 0) {
+            updateData.stock = updateData.variants.reduce((acc: number, v: any) => acc + (v.availableQuantity || 0), 0);
+        }
 
-        // The updateData now correctly includes the 'keywords' field from the validated data
         const updatedProduct = await Product.findByIdAndUpdate(id, updateData, { new: true });
-
+        
         if (!updatedProduct) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
         }
