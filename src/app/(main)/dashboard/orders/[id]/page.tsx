@@ -128,11 +128,11 @@ export default function OrderDetailsPage() {
         }
     };
     
-    const handleAddressSaveSuccess = () => {
+    const handleAddressSaveSuccess = async () => {
         toast.success("Shipping address updated successfully!");
         setIsAddressModalOpen(false);
-        fetchOrderDetails(); 
-        checkUser(); 
+        await checkUser(); // Re-fetch user data to get updated addresses
+        await fetchOrderDetails(); // Re-fetch order details to show the new address
     };
 
 
