@@ -12,7 +12,7 @@ import { Loader } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Package, MapPin, CreditCard, Truck } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, CreditCard, Truck, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -92,6 +92,8 @@ export default function OrderDetailsPage() {
     if (!order) {
         return <div>Order not found.</div>;
     }
+    
+    const deliveryDate = format(new Date(order.updatedAt), 'MMM dd');
 
     return (
         <div className="space-y-6">
@@ -130,21 +132,43 @@ export default function OrderDetailsPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Package /> Items in this order ({order.products.length})</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                             <div className="space-y-4">
-                                {order.products.map(({ productId, quantity, price }) => (
-                                    <div key={productId._id} className="flex items-center gap-4">
-                                        <div className="relative w-16 h-16 rounded-md overflow-hidden border">
-                                            <Image src={productId.images[0]} alt={productId.name} fill className="object-cover" />
+                        <CardContent className="divide-y">
+                            {order.products.map(({ productId: product, quantity, price }) => (
+                                <div key={product._id} className="grid grid-cols-1 md:grid-cols-6 gap-4 py-4 first:pt-0">
+                                    <Link href={`/${product.storefront}/products/${product._id}`} className="md:col-span-3 flex items-start gap-4 group">
+                                        <div className="relative w-20 h-20 rounded-md overflow-hidden border flex-shrink-0">
+                                            <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
                                         </div>
-                                        <div className="flex-grow">
-                                            <p className="font-semibold">{productId.name}</p>
+                                        <div>
+                                            <p className="font-semibold group-hover:text-primary transition-colors">{product.name}</p>
                                             <p className="text-sm text-muted-foreground">Qty: {quantity}</p>
+                                            {(product as any).color && <p className="text-sm text-muted-foreground">Color: {(product as any).color}</p>}
                                         </div>
-                                        <p className="text-sm font-medium">₹{(price * quantity).toLocaleString('en-IN')}</p>
+                                    </Link>
+                                    <div className="md:col-span-1 text-left md:text-right">
+                                        <p className="font-semibold">₹{(price * quantity).toLocaleString('en-IN')}</p>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="md:col-span-2 text-left">
+                                        {order.status === 'delivered' ? (
+                                            <>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                                                    <p className="font-semibold">Delivered on {deliveryDate}</p>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground ml-4">Your item has been delivered</p>
+                                                <Button variant="link" asChild className="p-0 h-auto ml-4 mt-1 text-primary">
+                                                    <Link href={`/${product.storefront}/products/${product._id}#reviews`}><Star className="mr-1 h-4 w-4" />Rate & Review Product</Link>
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                 <span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                                                 <p className="font-semibold capitalize">{order.status}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
                 </div>
@@ -168,4 +192,5 @@ export default function OrderDetailsPage() {
             </div>
         </div>
     );
-}
+
+    
