@@ -17,7 +17,7 @@ const addressSchema = z.object({
   country: z.string().min(1, 'Country is required'),
   isDefault: z.boolean().optional(),
   addressType: z.string().min(1, 'Address type is required'),
-});
+}).catchall(z.any()); // Allow other fields to pass through without validation
 
 
 const profileUpdateSchema = z.object({
@@ -85,7 +85,6 @@ export async function PUT(
 
   } catch (error: any) {
     console.error('Failed to update user profile:', error);
-    // Return the actual error message for better debugging
     if (error instanceof z.ZodError) {
         return NextResponse.json({ message: 'Validation Error', errors: error.flatten() }, { status: 400 });
     }
