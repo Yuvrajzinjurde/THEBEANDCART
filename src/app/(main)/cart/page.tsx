@@ -427,7 +427,7 @@ export default function CartPage() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ items: itemsToOrder, totalAmount: grandTotal }),
+            body: JSON.stringify({ items: itemsToOrder, subtotal: subtotal }),
         });
 
         const result = await response.json();

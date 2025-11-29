@@ -273,9 +273,12 @@ useEffect(() => {
       const items = [{ 
           productId: initialProduct._id, 
           quantity, 
+          price: initialProduct.sellingPrice,
           size: selectedSize,
           color: selectedColor 
       }];
+      
+      const subtotal = initialProduct.sellingPrice * quantity;
 
       const response = await fetch('/api/orders/place', {
           method: 'POST',
@@ -283,7 +286,7 @@ useEffect(() => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ items, totalAmount: initialProduct.sellingPrice * quantity }),
+          body: JSON.stringify({ items, subtotal: subtotal }),
       });
 
       const result = await response.json();
