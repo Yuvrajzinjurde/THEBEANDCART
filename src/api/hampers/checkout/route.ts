@@ -10,7 +10,7 @@ import Box from '@/models/box.model';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
 }
 
 const getUserIdFromToken = (req: Request): string | null => {
@@ -20,7 +20,7 @@ const getUserIdFromToken = (req: Request): string | null => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-        return decoded.userId;
+        return decoded.sub;
     } catch (error) {
         return null;
     }
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
     }
 
     await cart.save();
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
 
     return NextResponse.json({ message: 'Hamper added to cart!', cart: populatedCart }, { status: 200 });

@@ -11,7 +11,7 @@ import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
   name: string;
 }
 
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     if (!auth) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const userId = new Types.ObjectId(auth.userId);
+    const userId = new Types.ObjectId(auth.sub);
     const userName = auth.name;
 
     const body = await req.json();
@@ -62,18 +62,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    const variantIds = product.styleId 
+    // Get all variant IDs that share the same styleId, or just the product's own ID
+    const productIdsForCheck = product.styleId 
         ? (await Product.find({ styleId: product.styleId }, '_id')).map(p => p._id)
         : [productObjectId];
 
-    const existingReview = await Review.findOne({ productId: { $in: variantIds }, userId });
+    const existingReview = await Review.findOne({ productId: { $in: productIdsForCheck }, userId });
     if (existingReview) {
         return NextResponse.json({ message: 'You have already reviewed this product.' }, { status: 409 });
     }
     
     const hasPurchased = await Order.findOne({
       userId,
-      'products.productId': { $in: variantIds },
+      'products.productId': { $in: productIdsForCheck },
       status: 'delivered'
     });
 
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
     }
 
     const newReview = new Review({
-        productId: productObjectId,
+        productId: productObjectId, // Associate review with the specific variant purchased
         userId,
         userName,
         rating,
@@ -92,15 +93,16 @@ export async function POST(req: Request) {
 
     await newReview.save();
 
+    // Recalculate average rating for all products sharing the styleId
     const stats = await Review.aggregate([
-        { $match: { productId: { $in: variantIds } } },
+        { $match: { productId: { $in: productIdsForCheck } } },
         { $group: { _id: null, avgRating: { $avg: '$rating' } } }
     ]);
 
     if (stats.length > 0) {
         const newAverageRating = stats[0].avgRating;
         await Product.updateMany(
-            { _id: { $in: variantIds } },
+            { _id: { $in: productIdsForCheck } },
             { $set: { rating: newAverageRating } }
         );
     }
