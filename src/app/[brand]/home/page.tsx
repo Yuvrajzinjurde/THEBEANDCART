@@ -28,7 +28,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CouponCard } from '@/components/coupon-card';
 import Header from '@/components/header';
-
+///
 
 type GroupedProducts = {
   [category: string]: IProduct[];
