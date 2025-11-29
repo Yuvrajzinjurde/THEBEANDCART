@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff, Lock } from "lucide-react";
+import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff, Lock, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Loader } from "@/components/ui/loader";
@@ -179,6 +179,13 @@ export default function ProfilePage() {
           phone: '',
           isPhoneVerified: false,
           whatsapp: '',
+          address: {
+            street: '',
+            city: '',
+            state: '',
+            zip: '',
+            country: '',
+          },
           socials: {
               website: '',
               telegram: '',
@@ -228,6 +235,13 @@ export default function ProfilePage() {
             phone: u.phone || '',
             isPhoneVerified: u.isPhoneVerified || false,
             whatsapp: u.whatsapp || '',
+            address: {
+                street: u.address?.street || '',
+                city: u.address?.city || '',
+                state: u.address?.state || '',
+                zip: u.address?.zip || '',
+                country: u.address?.country || '',
+            },
             socials: {
                 website: u.socials?.website || '',
                 telegram: u.socials?.telegram || '',
@@ -292,6 +306,13 @@ export default function ProfilePage() {
             phone: u.phone || '',
             isPhoneVerified: u.isPhoneVerified || false,
             whatsapp: u.whatsapp || '',
+            address: {
+                street: u.address?.street || '',
+                city: u.address?.city || '',
+                state: u.address?.state || '',
+                zip: u.address?.zip || '',
+                country: u.address?.country || '',
+            },
             socials: {
                 website: u.socials?.website || '',
                 telegram: u.socials?.telegram || '',
@@ -661,6 +682,19 @@ export default function ProfilePage() {
                                                 />
                                                 <Label htmlFor="same-as-contact" className="text-sm font-normal text-muted-foreground">WhatsApp number is the same as contact number</Label>
                                               </div>
+                                        </CardContent>
+                                    </Card>
+                                    
+                                     <Card className="group-disabled:bg-muted/30">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2"><MapPin/> Shipping Address</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField control={profileForm.control} name="address.street" render={({ field }) => (<FormItem className="md:col-span-2"><FormLabel>Street Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                                            <FormField control={profileForm.control} name="address.city" render={({ field }) => (<FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                                            <FormField control={profileForm.control} name="address.state" render={({ field }) => (<FormItem><FormLabel>State / Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                                            <FormField control={profileForm.control} name="address.zip" render={({ field }) => (<FormItem><FormLabel>Zip / Postal Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                                            <FormField control={profileForm.control} name="address.country" render={({ field }) => (<FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
                                         </CardContent>
                                     </Card>
 
