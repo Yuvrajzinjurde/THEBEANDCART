@@ -109,7 +109,6 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
             if (data._id) { // Editing existing address
                 updatedAddresses = currentAddresses.map(addr => addr._id === data._id ? finalData : addr);
             } else { // Adding new address
-                // Correctly add a temporary but unique _id for the new address
                 updatedAddresses = [...currentAddresses, { ...finalData, _id: new Date().toISOString() }];
             }
             
@@ -122,9 +121,9 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
                 body: JSON.stringify({ addresses: updatedAddresses }),
             });
 
+            const result = await response.json();
             if (!response.ok) {
-                const result = await response.json();
-                throw new Error(result.message || "Failed to save address.");
+                throw new Error(result.message || "An internal server error occurred");
             }
             
             onSaveSuccess();

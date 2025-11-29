@@ -16,7 +16,9 @@ const addressSchema = z.object({
   zip: z.string().min(1, 'ZIP code is required'),
   country: z.string().min(1, 'Country is required'),
   isDefault: z.boolean().optional(),
+  addressType: z.string().min(1, 'Address type is required'),
 });
+
 
 const profileUpdateSchema = z.object({
   firstName: z.string().min(1).optional(),
