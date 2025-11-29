@@ -126,7 +126,12 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
 export const useAuth = () => {
     const state = useAuthStore();
-    return state;
+    // Add a memoized token that reads from cookies as a fallback.
+    const token = React.useMemo(() => {
+        return state.token || Cookies.get('accessToken') || null;
+    }, [state.token]);
+
+    return { ...state, token };
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
