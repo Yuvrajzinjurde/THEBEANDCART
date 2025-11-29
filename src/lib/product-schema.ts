@@ -33,7 +33,7 @@ const BaseProductFormSchema = z.object({
   keywords: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
   returnPeriod: z.coerce.number().min(0).optional(),
-  maxOrderQuantity: z.coerce.number().min(1, "Max order quantity must be at least 1").optional().default(1),
+  maxOrderQuantity: z.coerce.number().min(1, "Max order quantity must be at least 1").optional().default(5),
   variants: z.array(ServerVariantSchema).optional(),
 });
 
@@ -107,7 +107,7 @@ export const GenerateTagsInputSchema = z.object({
   productName: z.string().describe('The name of the product.'),
   description: z.string().describe('The description of the product.'),
 });
-export type GenerateTagsInput = z.infer<typeof GenerateTagsInputSchema>;
+export type GenerateTagsInput = z.infer<typeof GenerateTagsInput>;
 
 export const GenerateTagsOutputSchema = z.object({
   tags: z.array(z.string()).describe('An array of 5-7 relevant, single-word tags for the product.'),

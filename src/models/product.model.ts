@@ -65,7 +65,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     clicks: { type: Number, default: 0 },
     keywords: { type: [String], default: [], index: true },
     returnPeriod: { type: Number, default: 10 },
-    maxOrderQuantity: { type: Number, default: 1 },
+    maxOrderQuantity: { type: Number, default: 5 },
     styleId: { type: String, index: true },
     sku: { type: String, index: true, unique: true, sparse: true },
     variants: [VariantSchema],
