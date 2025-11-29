@@ -48,6 +48,7 @@ export interface IPlatformSettings extends Document {
   hamperFeatureEnabled: boolean;
   offersFeatureEnabled: boolean;
   promoBannerEnabled: boolean;
+  cancellableOrderStatus: 'pending' | 'ready-to-ship';
   heroBanners: {
     title: string;
     description: string;
@@ -83,6 +84,7 @@ const PlatformSettingsSchema: Schema<IPlatformSettings> = new Schema({
   hamperFeatureEnabled: { type: Boolean, default: true },
   offersFeatureEnabled: { type: Boolean, default: true },
   promoBannerEnabled: { type: Boolean, default: true },
+  cancellableOrderStatus: { type: String, enum: ['pending', 'ready-to-ship'], default: 'pending' },
   heroBanners: [HeroBannerSchema],
   featuredCategories: { type: [String], default: [] },
   featuredBrands: { type: [String], default: [] },

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv, Store } from 'lucide-react';
+import { Trash, UploadCloud, X, Home, Save, Bot, Gift, Sparkles, Twitter, Facebook, Instagram, Linkedin, Palette, Tv, Store, Package } from 'lucide-react';
 import { PlatformSettingsValidationSchema, type PlatformSettingsValues, themeColors } from '@/lib/brand-schema';
 import { Loader } from '@/components/ui/loader';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { IProduct } from '@/models/product.model';
 import type { IBrand } from '@/models/brand.model';
 import { Combobox } from '@/components/ui/combobox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const staticDefaultValues: PlatformSettingsValues = {
@@ -58,7 +59,8 @@ const staticDefaultValues: PlatformSettingsValues = {
       description: "Get a flat 25% off on your very first order with us.",
       code: "WELCOME25",
     },
-  ]
+  ],
+  cancellableOrderStatus: 'pending',
 };
 
 
@@ -132,6 +134,7 @@ export default function PlatformSettingsPage() {
                         heroBanners: settingsData.heroBanners && settingsData.heroBanners.length > 0 ? settingsData.heroBanners : staticDefaultValues.heroBanners,
                         offers: settingsData.offers && settingsData.offers.length > 0 ? settingsData.offers : staticDefaultValues.offers,
                         promoBanner: { ...defaultPromoBanner, ...(settingsData.promoBanner || {}) },
+                        cancellableOrderStatus: settingsData.cancellableOrderStatus || 'pending',
                     };
                     form.reset(sanitizedSettings);
                 } else {
@@ -350,8 +353,8 @@ export default function PlatformSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Feature Controls</CardTitle>
-            <CardDescription>Enable or disable major features across the entire platform.</CardDescription>
+            <CardTitle>Feature & Policy Controls</CardTitle>
+            <CardDescription>Enable or disable major features and set platform-wide policies.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
              <FormField
@@ -403,6 +406,29 @@ export default function PlatformSettingsPage() {
                     <FormDescription>Show or hide the large promotional banner on the main landing page.</FormDescription>
                   </div>
                   <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cancellableOrderStatus"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base flex items-center gap-2"><Package /> Order Cancellation Policy</FormLabel>
+                        <FormDescription>Allow customers to cancel orders up to this status.</FormDescription>
+                    </div>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="ready-to-ship">Ready to Ship</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </FormItem>
               )}
             />
@@ -485,7 +511,7 @@ export default function PlatformSettingsPage() {
                         <FormMessage />
                     </FormItem>
                 )}/>
-                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g. 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                <FormField control={form.control} name="promoBanner.imageHint" render={({ field }) => ( <FormItem><FormLabel>Image Hint</FormLabel><FormControl><Input placeholder="e.g., 'summer collection'" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                  <FormField control={form.control} name="promoBanner.buttonLink" render={({ field }) => ( <FormItem><FormLabel>Button Link (Optional)</FormLabel><FormControl><Input placeholder="e.g. /search?keyword=sale" {...field} /></FormControl><FormMessage /></FormItem> )}/>
             </CardContent>
         </Card>
