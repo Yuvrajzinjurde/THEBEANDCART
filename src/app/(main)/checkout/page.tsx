@@ -125,7 +125,8 @@ export default function CheckoutPage() {
 
             if (!response.ok) {
                  const errorDetails = result.errors ? Object.entries(result.errors).map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`).join('; ') : '';
-                 throw new Error(result.message + (errorDetails ? ` ${errorDetails}`: ''));
+                 const finalMessage = result.message + (errorDetails ? ` (${errorDetails})` : '');
+                 throw new Error(finalMessage);
             }
             
             setCart(null); 
