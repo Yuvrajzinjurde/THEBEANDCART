@@ -1,18 +1,17 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/use-auth';
-import type { IOrder, IOrderProduct } from '@/models/order.model';
+import type { IOrder, IOrderProduct, IAddress } from '@/models/order.model';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Package, MapPin, CreditCard, Truck, Star } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Truck, Star, Edit, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -24,13 +23,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import usePlatformSettingsStore from '@/stores/platform-settings-store';
+import { AddressFormDialog } from '@/components/address-form-dialog';
+
 
 interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
   productId: IProduct;
 }
 
-interface PopulatedOrder extends Omit<IOrder, 'products'> {
+interface PopulatedOrder extends Omit<IOrder, 'products' | 'shippingAddress'> {
   products: PopulatedOrderProduct[];
+  shippingAddress: IAddress;
 }
 
 const OrderDetailsSkeleton = () => (
@@ -51,41 +55,88 @@ const OrderDetailsSkeleton = () => (
 export default function OrderDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const { token, loading: authLoading } = useAuth();
+    const { user, token, loading: authLoading, checkUser } = useAuth();
     const orderId = params.id as string;
+    const { settings, fetchSettings } = usePlatformSettingsStore();
 
     const [order, setOrder] = useState<PopulatedOrder | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+    
+    const fetchOrderDetails = useCallback(async () => {
+        if (!orderId || !token) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/orders/${orderId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to fetch order details.");
+            }
+            const { order } = await response.json();
+            setOrder(order);
+        } catch (error: any) {
+            toast.error(error.message);
+            router.push('/dashboard/orders');
+        } finally {
+            setLoading(false);
+        }
+    }, [orderId, token, router]);
 
     useEffect(() => {
-        if (!orderId || !token) return;
-
-        const fetchOrderDetails = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`/api/orders/${orderId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || "Failed to fetch order details.");
-                }
-                const { order } = await response.json();
-                setOrder(order);
-            } catch (error: any) {
-                toast.error(error.message);
-                router.push('/dashboard/orders');
-            } finally {
-                setLoading(false);
-            }
-        };
-
+        fetchSettings();
         if (!authLoading) {
             fetchOrderDetails();
         }
-    }, [orderId, token, authLoading, router]);
+    }, [orderId, token, authLoading, router, fetchSettings, fetchOrderDetails]);
 
-    if (loading) {
+    const isCancellable = useMemo(() => {
+        if (!order || !settings) return false;
+        if (['cancelled', 'delivered', 'shipped'].includes(order.status)) return false;
+
+        const cancellableUntilStatus = settings.cancellableOrderStatus || 'pending';
+        if (cancellableUntilStatus === 'ready-to-ship') {
+            return ['pending', 'on-hold', 'ready-to-ship'].includes(order.status);
+        }
+        return ['pending', 'on-hold'].includes(order.status);
+    }, [order, settings]);
+    
+    const isAddressEditable = useMemo(() => {
+        if (!order) return false;
+        return !['shipped', 'delivered', 'cancelled'].includes(order.status);
+    }, [order]);
+    
+     const handleCancelOrder = async () => {
+        if (!order) return;
+        setIsCancelling(true);
+        toast.info("Cancelling your order...");
+        try {
+            const response = await fetch(`/api/orders/${order._id}/cancel`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            toast.success("Order cancelled successfully.");
+            setOrder(result.order);
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setIsCancelling(false);
+        }
+    };
+    
+    const handleAddressSaveSuccess = () => {
+        toast.success("Address updated successfully!");
+        setIsAddressModalOpen(false);
+        fetchOrderDetails(); // Re-fetch order to show updated address
+        checkUser(); // Re-fetch user to update address book in context
+    };
+
+
+    if (loading || authLoading) {
         return <OrderDetailsSkeleton />;
     }
 
@@ -113,14 +164,34 @@ export default function OrderDetailsPage() {
             
              <Card>
                 <CardHeader>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                         <div>
                             <CardTitle>Order #{order.orderId}</CardTitle>
                             <CardDescription>Placed on {format(new Date(order.createdAt), 'PPP')}</CardDescription>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-start sm:self-center">
                             <span className="text-lg font-bold">₹{order.totalAmount.toLocaleString('en-IN')}</span>
                             <Badge variant="secondary" className="capitalize">{order.status}</Badge>
+                             {isCancellable && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="sm" disabled={isCancelling}>
+                                            {isCancelling ? <Loader className="mr-2" /> : <XCircle className="mr-2 h-4 w-4" />}
+                                            Cancel Order
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>This action will cancel your order. This cannot be undone.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Go Back</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleCancelOrder}>Confirm Cancellation</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
                         </div>
                     </div>
                 </CardHeader>
@@ -174,11 +245,18 @@ export default function OrderDetailsPage() {
                 </div>
                 <div className="space-y-6">
                     <Card>
-                        <CardHeader><CardTitle className="flex items-center gap-2"><MapPin /> Shipping Address</CardTitle></CardHeader>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle className="flex items-center gap-2"><MapPin /> Shipping Address</CardTitle>
+                            {isAddressEditable && (
+                                <Button variant="outline" size="sm" onClick={() => setIsAddressModalOpen(true)}><Edit className="mr-2 h-4 w-4" />Change</Button>
+                            )}
+                        </CardHeader>
                         <CardContent className="text-sm space-y-1">
+                            <p className="font-semibold">{order.shippingAddress.fullName}</p>
                             <p>{order.shippingAddress.street}</p>
                             <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}</p>
                             <p>{order.shippingAddress.country}</p>
+                             <p>Phone: {order.shippingAddress.phone}</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -190,7 +268,14 @@ export default function OrderDetailsPage() {
                     </Card>
                 </div>
             </div>
+             {user && (
+                <AddressFormDialog 
+                    isOpen={isAddressModalOpen} 
+                    setIsOpen={setIsAddressModalOpen} 
+                    userId={user._id} 
+                    onSaveSuccess={handleAddressSaveSuccess}
+                />
+            )}
         </div>
     );
-
-    
+}
