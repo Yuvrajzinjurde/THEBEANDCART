@@ -52,8 +52,15 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
     const form = useForm<AddressFormValues>({
         resolver: zodResolver(addressFormSchema),
         defaultValues: {
+            fullName: '',
+            phone: '',
+            street: '',
+            city: '',
+            state: '',
+            zip: '',
             country: 'India',
             addressType: 'Home',
+            customAddressType: '',
         }
     });
 
