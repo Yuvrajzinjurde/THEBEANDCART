@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -303,14 +304,16 @@ export default function CartPage() {
   const handleQuantityChange = async (productId: string, product: IProduct, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
     
-    const maxQuantity = product.maxOrderQuantity || 1;
-    if (newQuantity > maxQuantity) {
-        toast.warning(`You can only add up to ${maxQuantity} units of this item.`);
-        return;
-    }
-    
-    if (newQuantity > (product.stock ?? 0)) {
-        toast.warning(`Only ${product.stock} items available.`);
+    const maxQuantity = product.maxOrderQuantity || 5;
+    const stock = product.stock || 0;
+    const finalMaxQuantity = Math.min(maxQuantity, stock);
+
+    if (newQuantity > finalMaxQuantity) {
+        if (newQuantity > stock) {
+            toast.warning(`Only ${stock} items available.`);
+        } else {
+            toast.warning(`You can only add up to ${maxQuantity} units of this item.`);
+        }
         return;
     }
 
