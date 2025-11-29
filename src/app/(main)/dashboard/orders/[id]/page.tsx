@@ -11,7 +11,7 @@ import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowLeft, Package, MapPin, Truck, Star, Edit, XCircle } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Truck, Star, Edit, XCircle, Gift } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -215,11 +215,19 @@ export default function OrderDetailsPage() {
                             <CardTitle className="flex items-center gap-2"><Package /> Items in this order ({order.products.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="divide-y">
-                            {order.products.map(({ productId: product, quantity, price }) => (
-                                <div key={product._id as string} className="grid grid-cols-1 md:grid-cols-6 gap-4 py-4 first:pt-0">
-                                    <Link href={`/${product.storefront}/products/${product._id}`} className="md:col-span-3 flex items-start gap-4 group">
-                                        <div className="relative w-20 h-20 rounded-md overflow-hidden border flex-shrink-0">
-                                            <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                            {order.products.map(({ productId: product, quantity, price }) => {
+                                const isGift = product && product._id.toString() === '66a9354045a279093079919f';
+                                return (
+                                <div key={product?._id as string} className="grid grid-cols-1 md:grid-cols-6 gap-4 py-4 first:pt-0">
+                                    <Link href={isGift ? '#' : `/${product.storefront}/products/${product._id}`} className="md:col-span-3 flex items-start gap-4 group">
+                                        <div className="relative w-20 h-20 rounded-md overflow-hidden border flex-shrink-0 bg-muted">
+                                            {isGift ? (
+                                                <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                                                    <Gift className="w-8 h-8 text-primary" />
+                                                </div>
+                                            ) : (
+                                                <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                                            )}
                                         </div>
                                         <div>
                                             <p className="font-semibold group-hover:text-primary transition-colors">{product.name}</p>
@@ -228,7 +236,7 @@ export default function OrderDetailsPage() {
                                         </div>
                                     </Link>
                                     <div className="md:col-span-1 text-left md:text-right">
-                                        <p className="font-semibold">₹{(price * quantity).toLocaleString('en-IN')}</p>
+                                        <p className="font-semibold">{isGift ? 'FREE' : `₹${(price * quantity).toLocaleString('en-IN')}`}</p>
                                     </div>
                                     <div className="md:col-span-2 text-left">
                                         {order.status === 'delivered' ? (
@@ -238,9 +246,11 @@ export default function OrderDetailsPage() {
                                                     <p className="font-semibold">Delivered on {deliveryDate}</p>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground ml-4">Your item has been delivered</p>
-                                                <Button variant="link" asChild className="p-0 h-auto ml-4 mt-1 text-primary">
-                                                    <Link href={`/${product.storefront}/products/${product._id}#reviews`}><Star className="mr-1 h-4 w-4" />Rate & Review Product</Link>
-                                                </Button>
+                                                {!isGift && (
+                                                    <Button variant="link" asChild className="p-0 h-auto ml-4 mt-1 text-primary">
+                                                        <Link href={`/${product.storefront}/products/${product._id}#reviews`}><Star className="mr-1 h-4 w-4" />Rate & Review Product</Link>
+                                                    </Button>
+                                                )}
                                             </>
                                         ) : (
                                             <div className="flex items-center gap-2">
@@ -250,7 +260,7 @@ export default function OrderDetailsPage() {
                                         )}
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </CardContent>
                     </Card>
                 </div>
