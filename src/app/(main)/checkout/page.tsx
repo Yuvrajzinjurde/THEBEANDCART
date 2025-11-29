@@ -15,7 +15,7 @@ import { PlusCircle, ArrowLeft, Home, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { IProduct, ICartItem } from '@/models/cart.model';
 import Image from 'next/image';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { AddressFormDialog } from '@/components/address-form-dialog';
 import { cn } from '@/lib/utils';
 import useCartSettingsStore from '@/stores/cart-settings-store';
@@ -251,4 +251,3 @@ export default function CheckoutPage() {
         </>
     );
 }
-
