@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
@@ -22,6 +23,7 @@ const OrderItemSchema = z.object({
 const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
     subtotal: z.number().min(0),
+    shippingAddressId: z.string().refine(val => Types.ObjectId.isValid(val)),
 });
 
 interface DecodedToken {
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Invalid order data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { items, subtotal } = validation.data;
+        const { items, subtotal, shippingAddressId } = validation.data;
         
         if (items.length === 0) {
             return NextResponse.json({ message: 'Cannot place an empty order.' }, { status: 400 });
@@ -96,12 +98,17 @@ export async function POST(req: Request) {
         
         // Allow a small tolerance for floating point inaccuracies
         if (Math.abs(calculatedSubtotal - subtotal) > 0.01) {
-            return NextResponse.json({ message: `Total amount mismatch. Please try again.` }, { status: 409 });
+            return NextResponse.json({ message: `Total amount mismatch. Please try again. Client: ${subtotal}, Server: ${calculatedSubtotal}` }, { status: 409 });
         }
         
         const user = await User.findById(userId);
         if (!user) {
              return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        }
+        
+        const shippingAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).equals(shippingAddressId));
+        if (!shippingAddress) {
+            return NextResponse.json({ message: 'Shipping address not found.' }, { status: 404 });
         }
 
 
@@ -109,50 +116,34 @@ export async function POST(req: Request) {
         const newOrder = new Order({
             userId,
             products: items.map(item => ({...item, productId: new Types.ObjectId(item.productId)})),
-            totalAmount: calculatedSubtotal, // Use the server-calculated total
+            totalAmount: calculatedSubtotal, // The server-verified subtotal becomes the order's total amount
             status: 'pending',
             brand: auth.brand,
-            shippingAddress: user.address,
+            shippingAddress: shippingAddress.toObject(),
         });
         
         await newOrder.save();
         await Product.bulkWrite(bulkWriteOps);
 
-        // --- Notifications ---
-        const adminRole = await mongoose.model('Role').findOne({ name: 'admin' });
-        const admins = adminRole ? await User.find({ roles: adminRole._id }) : [];
-        const adminIds = admins.map(admin => admin._id);
-        
-        const notificationPayloads = [];
-        
-        // For customer
-        notificationPayloads.push({
-            recipientUsers: [userId],
-            title: 'Order Placed!',
-            message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
-            type: 'order_success',
-            link: `/dashboard/orders`,
-        });
-
-        // For admins if there are any
-        if (adminIds.length > 0) {
-            notificationPayloads.push({
-                recipientUsers: adminIds,
-                title: 'New Order Received',
-                message: `A new order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed.`,
-                type: 'new_order_admin',
-                link: `/admin/orders`,
+        // --- Notification for customer ---
+        try {
+            await Notification.create({
+                recipientUsers: [userId],
+                title: 'Order Placed!',
+                message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
+                type: 'order_success',
+                link: `/dashboard/orders`,
             });
+        } catch (notificationError) {
+            // Log the error but don't fail the entire order process
+            console.error("Failed to create customer notification:", notificationError);
         }
         
-        if (notificationPayloads.length > 0) {
-            await Notification.insertMany(notificationPayloads);
-        }
 
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Place Order Error:', error);
-        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+        return NextResponse.json({ message: `An internal server error occurred: ${error.message}` }, { status: 500 });
     }
 }

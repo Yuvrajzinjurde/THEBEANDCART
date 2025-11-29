@@ -1,9 +1,10 @@
 
+
 "use client";
 
 import { useEffect, useState, useTransition } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, ShoppingCart, XCircle } from 'lucide-react';
+import { ArrowLeft, Search, FileSpreadsheet, User as UserIcon, Mail, Phone, ShoppingCart, XCircle, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import * as XLSX from "xlsx";
@@ -188,8 +189,8 @@ export default function UserDetailsPage() {
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                <Card className="bg-purple-100 text-purple-800">
+            <div className="grid gap-6 md:grid-cols-3">
+                <Card className="bg-purple-100 text-purple-800 md:col-span-1">
                     <CardHeader className="flex-row items-center gap-4 space-y-0 pb-2">
                          <Avatar className="h-14 w-14 text-2xl border-2 border-purple-200">
                             {user.profilePicUrl && <AvatarImage src={user.profilePicUrl} alt={user.firstName} />}
@@ -221,19 +222,32 @@ export default function UserDetailsPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-blue-100 text-blue-800">
-                    <CardHeader className="flex-row items-center gap-4 space-y-0 pb-4">
-                        <UserIcon className="h-6 w-6"/>
-                        <CardTitle>Contact Details</CardTitle>
+                <Card className="bg-blue-100 text-blue-800 md:col-span-2">
+                    <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
+                        <div className="flex items-center gap-4">
+                            <UserIcon className="h-6 w-6"/>
+                            <CardTitle>User Info</CardTitle>
+                        </div>
                     </CardHeader>
-                    <CardContent className="grid gap-y-3 text-sm">
-                         <div className="flex items-center gap-4">
-                            <Mail className="h-4 w-4" />
-                            <div className="truncate">{user.email}</div>
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                         <div className="flex items-start gap-3">
+                            <Mail className="h-4 w-4 mt-0.5 shrink-0" />
+                            <div><span className="font-semibold">Email:</span> {user.email}</div>
                          </div>
-                          <div className="flex items-center gap-4">
-                            <Phone className="h-4 w-4" />
-                            <div>{user.phone || 'N/A'}</div>
+                          <div className="flex items-start gap-3">
+                            <Phone className="h-4 w-4 mt-0.5 shrink-0" />
+                            <div><span className="font-semibold">Phone:</span> {user.phone || 'N/A'}</div>
+                         </div>
+                         <div className="flex items-start gap-3 sm:col-span-2">
+                            <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                            <div>
+                                <span className="font-semibold">Default Address:</span>
+                                {user.addresses && user.addresses.length > 0 ? (
+                                    <span> {user.addresses[0].street}, {user.addresses[0].city}, {user.addresses[0].state} - {user.addresses[0].zip}</span>
+                                ) : (
+                                    ' N/A'
+                                )}
+                            </div>
                          </div>
                          <div className="flex items-center gap-4">
                             <p className="text-xs font-mono bg-blue-200/80 rounded px-2 py-1">

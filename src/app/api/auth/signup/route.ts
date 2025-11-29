@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
@@ -39,14 +40,7 @@ export async function POST(req: Request) {
       lastName: lastName || 'User',
       roles: [userRole._id],
       brand: brand, // Save the brand permanent name
-      // Add default empty values for other required fields
-      address: {
-        street: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: '',
-      }
+      addresses: [] // Initialize with an empty array
     });
 
     await newUser.save();

@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
@@ -6,11 +7,15 @@ import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 
 const addressSchema = z.object({
-  street: z.string().optional().or(z.literal('')),
-  city: z.string().optional().or(z.literal('')),
-  state: z.string().optional().or(z.literal('')),
-  zip: z.string().optional().or(z.literal('')),
-  country: z.string().optional().or(z.literal('')),
+  _id: z.string().optional(),
+  fullName: z.string().min(1, 'Full name is required'),
+  phone: z.string().min(1, 'Phone number is required'),
+  street: z.string().min(1, 'Street is required'),
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State is required'),
+  zip: z.string().min(1, 'ZIP code is required'),
+  country: z.string().min(1, 'Country is required'),
+  isDefault: z.boolean().optional(),
 });
 
 const profileUpdateSchema = z.object({
@@ -20,7 +25,7 @@ const profileUpdateSchema = z.object({
   displayName: z.string().optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   whatsapp: z.string().optional().or(z.literal('')),
-  address: addressSchema.optional(),
+  addresses: z.array(addressSchema).optional(),
   socials: z.object({
     twitter: z.string().optional().or(z.literal('')),
     facebook: z.string().optional().or(z.literal('')),
@@ -59,7 +64,6 @@ export async function PUT(
     }
     
     const body = await req.json();
-
     const validation = profileUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });

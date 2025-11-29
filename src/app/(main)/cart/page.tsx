@@ -384,6 +384,7 @@ export default function CartPage() {
   const totalDiscount = useMemo(() =>
     cart?.items?.reduce((acc, item) => {
       const product = item.productId as IProduct;
+      if (!product) return acc;
       const mrp = product.mrp || product.sellingPrice;
       return acc + (mrp - product.sellingPrice) * item.quantity;
     }, 0) || 0,
@@ -402,50 +403,13 @@ export default function CartPage() {
   
   const deliveryDate = format(addDays(new Date(), 5), 'EEE, MMM d');
 
-  const handleCheckout = async () => {
-    if (!user || !token) {
+  const handleCheckout = () => {
+    if (!user) {
       toast.info("Please log in to proceed to checkout.");
-      router.push(`/login?redirect=${pathname}`);
+      router.push(`/login?redirect=/checkout`);
       return;
     }
-
-    setIsCheckingOut(true);
-    toast.info("Placing your order...");
-
-    try {
-        const itemsToOrder = cart?.items?.map(item => ({
-            productId: (item.productId as IProduct)._id,
-            quantity: item.quantity,
-            price: (item.productId as IProduct).sellingPrice,
-            color: item.color,
-            size: item.size
-        }));
-
-        const response = await fetch('/api/orders/place', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ items: itemsToOrder, subtotal: subtotal }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.message || 'Could not place order.');
-        }
-
-        setCart(null); // Clear the cart on successful order
-        toast.success("Order placed successfully!");
-        router.push(`/dashboard/orders`);
-
-    } catch (error: any) {
-        console.error("Checkout failed", error);
-        toast.error(error.message);
-    } finally {
-        setIsCheckingOut(false);
-    }
+    router.push('/checkout');
   };
 
 
@@ -518,6 +482,7 @@ export default function CartPage() {
                             <CardContent className="divide-y p-0 mt-4">
                                 {cartItems.map(item => {
                                     const isGift = item.product._id === 'free-gift-id';
+                                    if (!item.product) return null;
                                     const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                                     const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
                                     const isOutOfStock = !isGift && (item.product.stock ?? 0) === 0;
@@ -643,7 +608,7 @@ export default function CartPage() {
                                 </div>
                                 <Button size="lg" className="w-full h-12 text-base mt-4" onClick={handleCheckout} disabled={hasOutOfStockItems || isCheckingOut}>
                                     {isCheckingOut ? <Loader className="mr-2"/> : null}
-                                    {hasOutOfStockItems ? 'Item unavailable' : (isCheckingOut ? 'Placing Order...' : 'Proceed to Checkout')}
+                                    {hasOutOfStockItems ? 'Item unavailable' : (isCheckingOut ? 'Proceeding...' : 'Proceed to Checkout')}
                                 </Button>
                                 {hasOutOfStockItems && <p className="text-xs text-destructive text-center">Please remove unavailable items to proceed.</p>}
                             </CardContent>
