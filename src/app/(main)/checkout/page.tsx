@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, type User } from '@/hooks/use-auth';
 import useUserStore from '@/stores/user-store';
@@ -16,7 +17,6 @@ import { toast } from 'sonner';
 import { IProduct, ICartItem } from '@/models/cart.model';
 import Image from 'next/image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { AddressFormDialog } from '@/components/address-form-dialog';
 import { cn } from '@/lib/utils';
 import useCartSettingsStore from '@/stores/cart-settings-store';
 
@@ -30,8 +30,6 @@ export default function CheckoutPage() {
     const { settings: cartSettings } = useCartSettingsStore();
     const [selectedAddressId, setSelectedAddressId] = useState<string | undefined>(undefined);
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-    const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
-    const [editingAddress, setEditingAddress] = useState<any>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -40,9 +38,9 @@ export default function CheckoutPage() {
     }, [authLoading, user, router]);
     
     useEffect(() => {
-        // Set the default selected address to the first one if available
         if (user?.addresses && user.addresses.length > 0) {
-            setSelectedAddressId(user.addresses[0]._id);
+            const defaultAddress = user.addresses.find(a => a.isDefault) || user.addresses[0];
+            setSelectedAddressId(defaultAddress._id);
         }
     }, [user?.addresses]);
 
@@ -121,15 +119,6 @@ export default function CheckoutPage() {
         }
     };
     
-    const handleEditAddress = (address: any) => {
-        setEditingAddress(address);
-        setIsAddressFormOpen(true);
-    };
-
-    const handleAddNewAddress = () => {
-        setEditingAddress(null);
-        setIsAddressFormOpen(true);
-    };
 
     if (authLoading || !user || !cart) {
         return <div className="flex h-screen w-full items-center justify-center"><Loader className="h-12 w-12"/></div>;
@@ -171,17 +160,19 @@ export default function CheckoutPage() {
                                                         <p className="text-muted-foreground text-sm">{address.street}, {address.city}, {address.state} - {address.zip}</p>
                                                         <p className="text-muted-foreground text-sm">Mobile: {address.phone}</p>
                                                     </div>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => { e.preventDefault(); handleEditAddress(address); }}>
-                                                        <Edit className="h-4 w-4" />
+                                                    <Button asChild variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                                                        <Link href={`/dashboard/addresses/edit/${address._id}`}><Edit className="h-4 w-4" /></Link>
                                                     </Button>
                                                 </div>
                                             </div>
                                         </Label>
                                     ))}
                                 </RadioGroup>
-                                <Button variant="outline" className="mt-4 w-full" onClick={handleAddNewAddress}>
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Add New Address
+                                <Button variant="outline" className="mt-4 w-full" asChild>
+                                    <Link href="/dashboard/addresses/new">
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add New Address
+                                    </Link>
                                 </Button>
                             </CardContent>
                         </Card>
@@ -239,15 +230,6 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </main>
-            <AddressFormDialog
-                isOpen={isAddressFormOpen}
-                setIsOpen={setIsAddressFormOpen}
-                userId={user._id}
-                existingAddress={editingAddress}
-                onSaveSuccess={() => {
-                    checkUser(); // Re-fetch user to get updated addresses
-                }}
-            />
         </>
     );
 }

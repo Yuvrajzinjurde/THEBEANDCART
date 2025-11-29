@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -9,22 +10,9 @@ import { MapPin, Edit, Trash2, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import type { IAddress } from "@/models/user.model";
-import { AddressFormDialog } from "@/components/address-form-dialog";
 
 export default function AddressesPage() {
   const { user, token, checkUser } = useAuth();
-  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<IAddress | null>(null);
-
-  const handleEditAddress = (address: IAddress) => {
-    setEditingAddress(address);
-    setIsAddressFormOpen(true);
-  };
-
-  const handleAddNewAddress = () => {
-    setEditingAddress(null);
-    setIsAddressFormOpen(true);
-  };
   
   const handleDeleteAddress = async (addressId: string) => {
     if (!user) return;
@@ -62,9 +50,11 @@ export default function AddressesPage() {
             <CardTitle className="flex items-center gap-2"><MapPin/> Saved Addresses</CardTitle>
             <CardDescription>Manage your shipping addresses for a faster checkout.</CardDescription>
           </div>
-           <Button variant="outline" onClick={handleAddNewAddress}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add New Address
-          </Button>
+           <Button asChild>
+                <Link href="/dashboard/addresses/new">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add New Address
+                </Link>
+           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {user?.addresses && user.addresses.length > 0 ? (
@@ -77,7 +67,9 @@ export default function AddressesPage() {
                     <p className="text-muted-foreground text-sm">Contact: {address.fullName}, {address.phone}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEditAddress(address)}><Edit className="h-4 w-4" /></Button>
+                    <Button asChild variant="ghost" size="icon">
+                      <Link href={`/dashboard/addresses/edit/${address._id}`}><Edit className="h-4 w-4" /></Link>
+                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
@@ -100,18 +92,13 @@ export default function AddressesPage() {
           ) : (
             <div className="text-center py-16 border-2 border-dashed rounded-lg">
                 <p className="text-muted-foreground">No saved addresses.</p>
-                 <Button variant="link" onClick={handleAddNewAddress}>Add your first address</Button>
+                 <Button asChild variant="link">
+                    <Link href="/dashboard/addresses/new">Add your first address</Link>
+                </Button>
             </div>
           )}
         </CardContent>
       </Card>
-      <AddressFormDialog
-        isOpen={isAddressFormOpen}
-        setIsOpen={setIsAddressFormOpen}
-        userId={user?._id || ''}
-        existingAddress={editingAddress}
-        onSaveSuccess={checkUser}
-      />
     </>
   );
 }
