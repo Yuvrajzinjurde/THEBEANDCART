@@ -4,12 +4,9 @@ import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
 import Product from '@/models/product.model';
 import User from '@/models/user.model';
-import Notification from '@/models/notification.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import Role from '@/models/role.model';
-import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
     productId: z.string().refine(val => Types.ObjectId.isValid(val)),
@@ -118,18 +115,8 @@ export async function POST(req: Request) {
         await newOrder.save();
         await Product.bulkWrite(bulkWriteOps);
 
-        // --- Notifications ---
-        // For customer
-        await Notification.create({
-            recipientUsers: [userId],
-            title: 'Order Placed!',
-            message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
-            type: 'order_success',
-            link: `/dashboard/orders`,
-        });
-
-        // The logic to notify admins was faulty and has been removed to prevent server errors.
-        // It can be re-implemented correctly later.
+        // --- Notifications Removed due to persistent errors ---
+        // This section can be re-implemented correctly later.
 
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
