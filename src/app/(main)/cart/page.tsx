@@ -244,17 +244,12 @@ export default function CartPage() {
   const { cart, setCart, setWishlist } = useUserStore();
   const { settings: cartSettings, fetchSettings: fetchCartSettings } = useCartSettingsStore();
   const [loading, setLoading] = useState(true);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
 
   useEffect(() => {
     fetchCartSettings();
   }, [fetchCartSettings]);
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
 
   useEffect(() => {
     // This page is now accessible to guests, so we don't redirect.
@@ -414,47 +409,42 @@ export default function CartPage() {
       return;
     }
 
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ amount: grandTotal }),
-      });
-      const { order } = await res.json();
-      
-      if (!order) {
-        throw new Error("Could not create payment order.");
-      }
+    setIsCheckingOut(true);
+    toast.info("Placing your order...");
 
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: order.amount,
-        currency: order.currency,
-        name: "The Brand Cart",
-        description: "Order Payment",
-        order_id: order.id,
-        handler: async function (response: any) {
-          toast.success("Payment Successful!");
-          router.push('/order-confirmation');
-        },
-        prefill: {
-          name: user.name,
-          email: (user as any).email,
-        },
-        theme: {
-          color: "#3399cc"
+    try {
+        const itemsToOrder = cart?.items?.map(item => ({
+            productId: (item.productId as IProduct)._id,
+            quantity: item.quantity,
+            price: (item.productId as IProduct).sellingPrice,
+            color: item.color,
+            size: item.size
+        }));
+
+        const response = await fetch('/api/orders/place', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ items: itemsToOrder, totalAmount: grandTotal }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Could not place order.');
         }
-      };
-      
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+
+        setCart(null); // Clear the cart on successful order
+        toast.success("Order placed successfully!");
+        router.push(`/dashboard/orders`);
 
     } catch (error: any) {
-      console.error("Checkout failed", error);
-      toast.error(error.message);
+        console.error("Checkout failed", error);
+        toast.error(error.message);
+    } finally {
+        setIsCheckingOut(false);
     }
   };
 
@@ -651,8 +641,9 @@ export default function CartPage() {
                                     <span>Grand Total</span>
                                     <span>₹{grandTotal.toLocaleString('en-IN')}</span>
                                 </div>
-                                <Button size="lg" className="w-full h-12 text-base mt-4" onClick={handleCheckout} disabled={hasOutOfStockItems}>
-                                    {hasOutOfStockItems ? 'Item unavailable' : 'Proceed to Checkout'}
+                                <Button size="lg" className="w-full h-12 text-base mt-4" onClick={handleCheckout} disabled={hasOutOfStockItems || isCheckingOut}>
+                                    {isCheckingOut ? <Loader className="mr-2"/> : null}
+                                    {hasOutOfStockItems ? 'Item unavailable' : (isCheckingOut ? 'Placing Order...' : 'Proceed to Checkout')}
                                 </Button>
                                 {hasOutOfStockItems && <p className="text-xs text-destructive text-center">Please remove unavailable items to proceed.</p>}
                             </CardContent>

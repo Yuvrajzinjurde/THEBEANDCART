@@ -1,6 +1,5 @@
 
 import { NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 
@@ -41,24 +40,23 @@ export async function POST(req: Request) {
 
     const { amount } = validation.data;
 
-    const instance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID!,
-      key_secret: process.env.RAZORPAY_KEY_SECRET!,
-    });
-
-    const options = {
-      amount: amount * 100, // amount in the smallest currency unit
-      currency: "INR",
-      receipt: `receipt_order_${new Date().getTime()}`,
+    // Simulate order creation for now
+    const simulatedOrder = {
+        id: `order_${new Date().getTime()}`,
+        entity: "order",
+        amount: amount * 100,
+        amount_paid: 0,
+        amount_due: amount * 100,
+        currency: "INR",
+        receipt: `receipt_order_${new Date().getTime()}`,
+        status: "created",
+        attempts: 0,
+        notes: [],
+        created_at: Math.floor(Date.now() / 1000)
     };
 
-    const order = await instance.orders.create(options);
 
-    if (!order) {
-      return NextResponse.json({ message: 'Failed to create Razorpay order' }, { status: 500 });
-    }
-
-    return NextResponse.json({ order }, { status: 200 });
+    return NextResponse.json({ order: simulatedOrder }, { status: 200 });
 
   } catch (error) {
     console.error('Checkout Error:', error);
