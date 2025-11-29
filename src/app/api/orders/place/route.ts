@@ -4,9 +4,12 @@ import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
 import Product from '@/models/product.model';
 import User from '@/models/user.model';
+import Notification from '@/models/notification.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import Role from '@/models/role.model';
+import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
     productId: z.string().refine(val => Types.ObjectId.isValid(val)),
@@ -115,13 +118,11 @@ export async function POST(req: Request) {
         await newOrder.save();
         await Product.bulkWrite(bulkWriteOps);
 
-        // --- Notifications Removed due to persistent errors ---
-        // This section can be re-implemented correctly later.
-
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Place Order Error:', error);
-        return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+        // Return the actual error message for better debugging on the client
+        return NextResponse.json({ message: `An internal server error occurred: ${error.message}` }, { status: 500 });
     }
 }
