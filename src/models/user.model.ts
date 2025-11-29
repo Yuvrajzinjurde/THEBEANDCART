@@ -19,6 +19,7 @@ export interface IAddress extends Document {
   zip: string;
   country: string;
   isDefault: boolean;
+  addressType: string;
 }
 
 export interface IUser extends Document {
@@ -59,6 +60,7 @@ const AddressSchema: Schema<IAddress> = new Schema({
   zip: { type: String, required: true },
   country: { type: String, required: true, default: 'India' },
   isDefault: { type: Boolean, default: false },
+  addressType: { type: String, required: true },
 }, { timestamps: true });
 
 

@@ -10,12 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff, Lock, MapPin } from "lucide-react";
+import { UploadCloud, X, Save, Edit, Twitter, Instagram, Facebook, Linkedin, Link as LinkIcon, AtSign, Phone, MessageSquare, ShieldCheck, AlertTriangle, Eye, EyeOff, Lock, MapPin, Trash2, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Loader } from "@/components/ui/loader";
 import { useForm, type FieldValues } from "react-hook-form";
-import type { IUser } from "@/models/user.model";
+import type { IUser, IAddress } from "@/models/user.model";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -23,6 +23,7 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AddressFormDialog } from "@/components/address-form-dialog";
 
 
 const ChangePasswordSchema = z.object({
@@ -156,6 +157,9 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
+  
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<IAddress | null>(null);
 
   // States for phone verification
   const [otpSent, setOtpSent] = useState(false);
@@ -179,13 +183,6 @@ export default function ProfilePage() {
           phone: '',
           isPhoneVerified: false,
           whatsapp: '',
-          address: {
-            street: '',
-            city: '',
-            state: '',
-            zip: '',
-            country: '',
-          },
           socials: {
               website: '',
               telegram: '',
@@ -235,13 +232,6 @@ export default function ProfilePage() {
             phone: u.phone || '',
             isPhoneVerified: u.isPhoneVerified || false,
             whatsapp: u.whatsapp || '',
-            address: {
-                street: u.address?.street || '',
-                city: u.address?.city || '',
-                state: u.address?.state || '',
-                zip: u.address?.zip || '',
-                country: u.address?.country || '',
-            },
             socials: {
                 website: u.socials?.website || '',
                 telegram: u.socials?.telegram || '',
@@ -306,13 +296,6 @@ export default function ProfilePage() {
             phone: u.phone || '',
             isPhoneVerified: u.isPhoneVerified || false,
             whatsapp: u.whatsapp || '',
-            address: {
-                street: u.address?.street || '',
-                city: u.address?.city || '',
-                state: u.address?.state || '',
-                zip: u.address?.zip || '',
-                country: u.address?.country || '',
-            },
             socials: {
                 website: u.socials?.website || '',
                 telegram: u.socials?.telegram || '',
@@ -466,9 +449,49 @@ export default function ProfilePage() {
 
     const toggleShowPassword = (field: keyof typeof showPasswords) => {
         setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
-    }
+    };
+    
+    const handleEditAddress = (address: IAddress) => {
+        setEditingAddress(address);
+        setIsAddressFormOpen(true);
+    };
+
+    const handleAddNewAddress = () => {
+        setEditingAddress(null);
+        setIsAddressFormOpen(true);
+    };
+    
+    const handleDeleteAddress = async (addressId: string) => {
+        if (!user) return;
+        
+        const updatedAddresses = user.addresses?.filter(addr => addr._id !== addressId);
+
+        try {
+            const response = await fetch(`/api/users/${user._id}/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ addresses: updatedAddresses }),
+            });
+
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.message || "Failed to delete address.");
+            }
+            
+            toast.success("Address removed successfully!");
+            await checkUser();
+
+        } catch (error: any) {
+            toast.error(error.message);
+        }
+    };
+
 
   return (
+    <>
     <div className="space-y-6">
         <Form {...profileForm}>
             <form>
@@ -684,19 +707,50 @@ export default function ProfilePage() {
                                               </div>
                                         </CardContent>
                                     </Card>
-                                    
-                                     <Card className="group-disabled:bg-muted/30">
+
+                                    <Card>
                                         <CardHeader>
-                                            <CardTitle className="flex items-center gap-2"><MapPin/> Shipping Address</CardTitle>
+                                            <CardTitle className="flex items-center gap-2"><MapPin/> Saved Addresses</CardTitle>
+                                             <CardDescription>Manage your shipping addresses for a faster checkout.</CardDescription>
                                         </CardHeader>
-                                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={profileForm.control} name="address.street" render={({ field }) => (<FormItem className="md:col-span-2"><FormLabel>Street Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                                            <FormField control={profileForm.control} name="address.city" render={({ field }) => (<FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                                            <FormField control={profileForm.control} name="address.state" render={({ field }) => (<FormItem><FormLabel>State / Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                                            <FormField control={profileForm.control} name="address.zip" render={({ field }) => (<FormItem><FormLabel>Zip / Postal Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
-                                            <FormField control={profileForm.control} name="address.country" render={({ field }) => (<FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
+                                        <CardContent className="space-y-4">
+                                            {user?.addresses && user.addresses.length > 0 ? (
+                                                user.addresses.map((address, index) => (
+                                                    <div key={address._id || index} className="border p-4 rounded-lg flex items-start justify-between">
+                                                        <div>
+                                                            <p className="font-semibold capitalize">{address.addressType}</p>
+                                                            <p className="text-muted-foreground text-sm">{address.street}, {address.city}, {address.state} - {address.zip}</p>
+                                                            <p className="text-muted-foreground text-sm">Contact: {address.fullName}, {address.phone}</p>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <Button variant="ghost" size="icon" onClick={() => handleEditAddress(address)}><Edit className="h-4 w-4" /></Button>
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                        <AlertDialogDescription>This action will permanently delete this address.</AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                        <AlertDialogAction onClick={() => handleDeleteAddress(address._id)}>Delete</AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground text-center py-4">No saved addresses.</p>
+                                            )}
+                                            <Button type="button" variant="outline" className="w-full" onClick={handleAddNewAddress}>
+                                                <PlusCircle className="mr-2 h-4 w-4" /> Add New Address
+                                            </Button>
                                         </CardContent>
                                     </Card>
+                                    
 
                                     <Card className="group-disabled:bg-muted/30">
                                         <CardHeader><CardTitle>Socials</CardTitle></CardHeader>
@@ -806,7 +860,15 @@ export default function ProfilePage() {
             </CardContent>
         </Card>
     </div>
+    <AddressFormDialog
+        isOpen={isAddressFormOpen}
+        setIsOpen={setIsAddressFormOpen}
+        userId={user?._id || ''}
+        existingAddress={editingAddress}
+        onSaveSuccess={() => {
+            checkUser();
+        }}
+    />
+    </>
   );
 }
-
-    

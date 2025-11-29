@@ -12,6 +12,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Loader } from './ui/loader';
 import { useAuth } from '@/hooks/use-auth';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import type { IAddress } from '@/models/user.model';
+import { cn } from '@/lib/utils';
 
 const addressFormSchema = z.object({
   _id: z.string().optional(),
@@ -22,6 +25,16 @@ const addressFormSchema = z.object({
   state: z.string().min(1, 'State is required'),
   zip: z.string().min(1, 'ZIP code is required'),
   country: z.string().min(1, 'Country is required'),
+  addressType: z.string().min(1, 'Address type is required'),
+  customAddressType: z.string().optional(),
+}).refine(data => {
+    if (data.addressType === 'Other') {
+        return !!data.customAddressType && data.customAddressType.length > 0;
+    }
+    return true;
+}, {
+    message: "Please specify your address type",
+    path: ['customAddressType'],
 });
 
 type AddressFormValues = z.infer<typeof addressFormSchema>;
@@ -30,7 +43,7 @@ interface AddressFormDialogProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   userId: string;
-  existingAddress?: any; // The address to edit
+  existingAddress?: IAddress | null;
   onSaveSuccess: () => void;
 }
 
@@ -42,13 +55,21 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
         resolver: zodResolver(addressFormSchema),
         defaultValues: {
             country: 'India',
+            addressType: 'Home',
         }
     });
+
+    const addressType = form.watch('addressType');
 
     useEffect(() => {
         if (isOpen) {
             if (existingAddress) {
-                form.reset(existingAddress);
+                const isCustom = !['Home', 'Office'].includes(existingAddress.addressType);
+                form.reset({
+                    ...existingAddress,
+                    addressType: isCustom ? 'Other' : existingAddress.addressType,
+                    customAddressType: isCustom ? existingAddress.addressType : '',
+                });
             } else {
                 form.reset({
                     fullName: '',
@@ -58,6 +79,8 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
                     state: '',
                     zip: '',
                     country: 'India',
+                    addressType: 'Home',
+                    customAddressType: '',
                 });
             }
         }
@@ -65,15 +88,26 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
 
     const onSubmit = async (data: AddressFormValues) => {
         setIsSubmitting(true);
+        const finalAddressType = data.addressType === 'Other' ? data.customAddressType : data.addressType;
+        
         try {
-            // Get current addresses and prepare the new list
             const currentAddresses = user?.addresses || [];
+
+            // Check for duplicate address types
+            if (currentAddresses.some(addr => addr.addressType === finalAddressType && addr._id !== data._id)) {
+                toast.error(`You already have an address saved as "${finalAddressType}".`);
+                setIsSubmitting(false);
+                return;
+            }
+
             let updatedAddresses;
+            const finalData = { ...data, addressType: finalAddressType };
+            delete (finalData as any).customAddressType;
 
             if (data._id) { // Editing existing address
-                updatedAddresses = currentAddresses.map(addr => addr._id === data._id ? data : addr);
+                updatedAddresses = currentAddresses.map(addr => addr._id === data._id ? finalData : addr);
             } else { // Adding new address
-                updatedAddresses = [...currentAddresses, data];
+                updatedAddresses = [...currentAddresses, finalData];
             }
             
             const response = await fetch(`/api/users/${userId}/profile`, {
@@ -123,6 +157,44 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
                             <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
                             <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)}/>
                         </div>
+
+                         <FormField control={form.control} name="addressType" render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel>Address Type</FormLabel>
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        className="flex gap-4 items-center"
+                                    >
+                                        <FormItem className="flex items-center space-x-2 space-y-0">
+                                            <FormControl><RadioGroupItem value="Home" /></FormControl>
+                                            <FormLabel className="font-normal">Home</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-2 space-y-0">
+                                            <FormControl><RadioGroupItem value="Office" /></FormControl>
+                                            <FormLabel className="font-normal">Office</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-2 space-y-0">
+                                            <FormControl><RadioGroupItem value="Other" /></FormControl>
+                                            <FormLabel className="font-normal">Other</FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+
+                        {addressType === 'Other' && (
+                             <FormField control={form.control} name="customAddressType" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Custom Address Type</FormLabel>
+                                    <FormControl><Input placeholder="e.g., Weekend Home" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                        )}
+
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={isSubmitting}>Cancel</Button>
                             <Button type="submit" disabled={isSubmitting}>
@@ -136,4 +208,3 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
         </Dialog>
     );
 }
-
