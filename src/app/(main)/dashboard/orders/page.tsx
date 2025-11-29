@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,7 +11,6 @@ import { Package, ShoppingBag, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import type { IOrder, IOrderProduct } from "@/models/order.model";
 import type { IProduct } from "@/models/product.model";
@@ -108,37 +108,35 @@ export default function OrdersPage() {
           <div className="space-y-6">
             {orders.map((order) => (
               <Card key={order._id as string} className="overflow-hidden">
-                <CardHeader className="bg-muted/50 p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <div className="grid gap-1 text-sm">
-                            <p className="font-semibold text-foreground">Order ID: #{order.brand.toUpperCase()}{(order._id as string).slice(-6)}</p>
-                            <p className="text-muted-foreground">Date: {format(new Date(order.createdAt), 'dd MMM, yyyy')}</p>
+                <Link href={`/dashboard/orders/${order._id}`}>
+                    <CardHeader className="bg-muted/50 p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div className="grid gap-1 text-sm">
+                                <p className="font-semibold text-foreground">Order ID: #{order.brand.toUpperCase()}{(order._id as string).slice(-6)}</p>
+                                <p className="text-muted-foreground">Date: {format(new Date(order.createdAt), 'dd MMM, yyyy')}</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                               <p className="text-sm font-semibold">Total: ₹{order.totalAmount.toLocaleString('en-IN')}</p>
+                               <Badge variant="secondary" className="capitalize">{order.status}</Badge>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                           <p className="text-sm font-semibold">Total: ₹{order.totalAmount.toLocaleString('en-IN')}</p>
-                           <Badge variant="secondary" className="capitalize">{order.status}</Badge>
+                    </CardHeader>
+                     <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex -space-x-4">
+                            {order.products.slice(0, 3).map(({ productId: product }, index) => (
+                                <div key={product._id as string} className="relative h-14 w-14 rounded-full border-2 border-background bg-muted overflow-hidden">
+                                     <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
+                                </div>
+                            ))}
+                            {order.products.length > 3 && (
+                                <div className="relative h-14 w-14 rounded-full border-2 border-background bg-muted flex items-center justify-center text-sm font-bold">
+                                    +{order.products.length - 3}
+                                </div>
+                            )}
                         </div>
-                    </div>
-                </CardHeader>
-                 <CardContent className="p-4 space-y-4">
-                    {order.products.map(({ productId: product, quantity }) => (
-                         <div key={product._id as string} className="flex items-center gap-4">
-                             <div className="w-16 h-16 rounded-md overflow-hidden border relative flex-shrink-0">
-                                <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
-                             </div>
-                             <div className="flex-grow">
-                                <p className="font-semibold">{product.name}</p>
-                                <p className="text-sm text-muted-foreground">Qty: {quantity}</p>
-                             </div>
-                              <p className="text-sm font-medium">₹{(product.sellingPrice * quantity).toLocaleString('en-IN')}</p>
-                         </div>
-                    ))}
-                </CardContent>
-                 <CardFooter className="bg-muted/50 p-4 flex justify-end">
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href="#">View Details <ArrowRight className="ml-2 h-4 w-4"/></Link>
-                    </Button>
-                </CardFooter>
+                        <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                    </CardContent>
+                </Link>
               </Card>
             ))}
           </div>
