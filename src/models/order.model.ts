@@ -1,5 +1,4 @@
 
-
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 export interface IOrderProduct {
@@ -16,11 +15,14 @@ export interface IOrder extends Document {
   status: 'pending' | 'shipped' | 'delivered' | 'cancelled' | 'on-hold' | 'ready-to-ship';
   brand: string;
   shippingAddress: {
+    fullName: string;
+    phone: string;
     street: string;
     city: string;
     state: string;
     zip: string;
     country: string;
+    addressType: string;
   };
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -45,11 +47,14 @@ const OrderSchema: Schema<IOrder> = new Schema({
   },
   brand: { type: String, required: true, index: true },
   shippingAddress: {
+    fullName: { type: String, required: true },
+    phone: { type: String, required: true },
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
     zip: { type: String, required: true },
     country: { type: String, required: true },
+    addressType: { type: String, required: true },
   },
 }, { timestamps: true });
 

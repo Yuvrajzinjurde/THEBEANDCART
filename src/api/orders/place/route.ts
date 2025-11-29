@@ -106,7 +106,7 @@ export async function POST(req: Request) {
              return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
         
-        const shippingAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).equals(shippingAddressId));
+        const shippingAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).toString() === shippingAddressId);
         if (!shippingAddress) {
             return NextResponse.json({ message: 'Shipping address not found.' }, { status: 404 });
         }

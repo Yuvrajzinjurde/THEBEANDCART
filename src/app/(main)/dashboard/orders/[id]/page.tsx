@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/use-auth';
-import type { IOrder, IOrderProduct, IAddress } from '@/models/order.model';
+import type { IOrder, IOrderProduct } from '@/models/order.model';
 import type { IProduct } from '@/models/product.model';
 import { Loader } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
@@ -32,9 +32,17 @@ interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
   productId: IProduct;
 }
 
+// The shipping address now includes fullName and phone, but they are optional on the base type
+// so we make them required for display here.
+interface PopulatedShippingAddress extends IOrder['shippingAddress'] {
+    fullName: string;
+    phone: string;
+    addressType: string;
+}
+
 interface PopulatedOrder extends Omit<IOrder, 'products' | 'shippingAddress'> {
   products: PopulatedOrderProduct[];
-  shippingAddress: IAddress;
+  shippingAddress: PopulatedShippingAddress;
 }
 
 const OrderDetailsSkeleton = () => (
@@ -205,7 +213,7 @@ export default function OrderDetailsPage() {
                         </CardHeader>
                         <CardContent className="divide-y">
                             {order.products.map(({ productId: product, quantity, price }) => (
-                                <div key={product._id} className="grid grid-cols-1 md:grid-cols-6 gap-4 py-4 first:pt-0">
+                                <div key={product._id as string} className="grid grid-cols-1 md:grid-cols-6 gap-4 py-4 first:pt-0">
                                     <Link href={`/${product.storefront}/products/${product._id}`} className="md:col-span-3 flex items-start gap-4 group">
                                         <div className="relative w-20 h-20 rounded-md overflow-hidden border flex-shrink-0">
                                             <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
@@ -252,7 +260,10 @@ export default function OrderDetailsPage() {
                             )}
                         </CardHeader>
                         <CardContent className="text-sm space-y-1">
-                            <p className="font-semibold">{order.shippingAddress.fullName}</p>
+                            <div className="flex justify-between items-start">
+                                <p className="font-semibold">{order.shippingAddress.fullName}</p>
+                                <Badge variant="outline" className="capitalize">{order.shippingAddress.addressType}</Badge>
+                            </div>
                             <p>{order.shippingAddress.street}</p>
                             <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}</p>
                             <p>{order.shippingAddress.country}</p>
@@ -272,11 +283,10 @@ export default function OrderDetailsPage() {
                 <AddressSelectionDialog
                     isOpen={isAddressModalOpen} 
                     setIsOpen={setIsAddressModalOpen} 
-                    orderId={order._id}
+                    orderId={order._id as string}
                     onSaveSuccess={handleAddressSaveSuccess}
                 />
             )}
         </div>
     );
 }
-
