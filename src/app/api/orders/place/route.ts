@@ -4,22 +4,30 @@ import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
 import Product from '@/models/product.model';
 import User from '@/models/user.model';
+import Notification from '@/models/notification.model';
+import Cart from '@/models/cart.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import Role from '@/models/role.model';
+import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
-    productId: z.string().refine(val => Types.ObjectId.isValid(val)),
+    productId: z.string().refine(val => Types.ObjectId.isValid(val), {
+        message: "Invalid product ID",
+    }),
     quantity: z.number().int().min(1),
     price: z.number().min(0),
-    color: z.string().optional(),
-    size: z.string().optional(),
+    color: z.string().optional().nullable(),
+    size: z.string().optional().nullable(),
 });
+
 
 const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
     subtotal: z.number().min(0),
     shippingAddressId: z.string().refine(val => Types.ObjectId.isValid(val)),
+    hasFreeGift: z.boolean().optional(),
 });
 
 interface DecodedToken {
@@ -54,17 +62,21 @@ export async function POST(req: Request) {
         const validation = PlaceOrderSchema.safeParse(body);
 
         if (!validation.success) {
-            return NextResponse.json({ message: 'Invalid order data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            const errorDetails = Object.entries(validation.error.flatten().fieldErrors)
+                .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)
+                .join('; ');
+            return NextResponse.json({ message: `Invalid order data: ${errorDetails}` }, { status: 400 });
         }
 
-        const { items, subtotal, shippingAddressId } = validation.data;
+        const { items, subtotal, shippingAddressId, hasFreeGift } = validation.data;
         
-        if (items.length === 0) {
+        if (items.length === 0 && !hasFreeGift) {
             return NextResponse.json({ message: 'Cannot place an empty order.' }, { status: 400 });
         }
 
         // --- Stock & Price Verification ---
         const productIds = items.map(item => new Types.ObjectId(item.productId));
+            
         const productsFromDB = await Product.find({ '_id': { $in: productIds } });
 
         let calculatedSubtotal = 0;
@@ -102,16 +114,29 @@ export async function POST(req: Request) {
              return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
         
-        const shippingAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).equals(shippingAddressId));
+        const shippingAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).toString() === shippingAddressId);
         if (!shippingAddress) {
             return NextResponse.json({ message: 'Shipping address not found.' }, { status: 404 });
         }
 
-
         // --- Create Order ---
+        const itemsForOrder = items.map(item => ({ ...item, productId: new Types.ObjectId(item.productId) }));
+
+        // Add the free gift if applicable
+        if (hasFreeGift) {
+            itemsForOrder.push({
+                productId: new Types.ObjectId('66a9354045a279093079919f'), // Static ID for the gift
+                quantity: 1,
+                price: 0,
+                color: undefined,
+                size: undefined
+            });
+        }
+
+
         const newOrder = new Order({
             userId,
-            products: items.map(item => ({...item, productId: new Types.ObjectId(item.productId)})),
+            products: itemsForOrder,
             totalAmount: calculatedSubtotal, // The server-verified subtotal becomes the order's total amount
             status: 'pending',
             brand: auth.brand,
@@ -119,8 +144,30 @@ export async function POST(req: Request) {
         });
         
         await newOrder.save();
-        await Product.bulkWrite(bulkWriteOps);
         
+        // Only perform stock updates for actual products
+        if (bulkWriteOps.length > 0) {
+            await Product.bulkWrite(bulkWriteOps);
+        }
+        
+        // Clear user's cart
+        await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
+
+        // --- Notification for customer ---
+        try {
+            await Notification.create({
+                recipientUsers: [userId],
+                title: 'Order Placed!',
+                message: `Your order #${newOrder.orderId} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
+                type: 'order_success',
+                link: `/dashboard/orders/${newOrder._id}`,
+            });
+        } catch (notificationError) {
+            // Log the error but don't fail the entire order process
+            console.error("Failed to create customer notification:", notificationError);
+        }
+        
+
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
     } catch (error: any) {

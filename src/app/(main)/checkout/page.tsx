@@ -23,7 +23,7 @@ import useCartSettingsStore from '@/stores/cart-settings-store';
 
 
 const freeGiftProduct: Partial<IProduct> = {
-    _id: 'free-gift-id',
+    _id: '66a9354045a279093079919f', // Use the static ID for the gift
     name: 'Surprise Gift',
     brand: 'From us, to you!',
     images: [], // No image needed as we'll use an icon
@@ -90,9 +90,9 @@ export default function CheckoutPage() {
     // Add the free gift to the display list if threshold is met
     const displayItems = useMemo(() => {
         const items = [...cartItems];
-        if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.product as IProduct)._id === 'free-gift-id')) {
+        if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.product as IProduct)._id === '66a9354045a279093079919f')) {
             items.push({
-                productId: 'free-gift-id' as any,
+                productId: '66a9354045a279093079919f' as any,
                 quantity: 1,
                 size: undefined,
                 color: undefined,
@@ -112,7 +112,6 @@ export default function CheckoutPage() {
         toast.info("Placing your order...");
         
         try {
-            // Filter out the free gift from the items to be validated for stock/price
             const itemsToOrder = cartItems.map(item => ({
                 productId: (item.product as IProduct)._id as string,
                 quantity: item.quantity,
@@ -122,7 +121,7 @@ export default function CheckoutPage() {
             }));
 
             // Determine if the free gift should be included
-            const hasFreeGift = !!displayItems.find(item => item.product._id === 'free-gift-id');
+            const hasFreeGift = cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold;
 
             const response = await fetch('/api/orders/place', {
                 method: 'POST',
@@ -134,20 +133,17 @@ export default function CheckoutPage() {
                     items: itemsToOrder,
                     subtotal: subtotal,
                     shippingAddressId: selectedAddressId,
-                    hasFreeGift: hasFreeGift, // Send the flag to the backend
+                    hasFreeGift: hasFreeGift,
                 }),
             });
 
             const result = await response.json();
 
              if (!response.ok) {
-                 if (result.errors) {
-                    const errorDetails = Object.entries(result.errors)
-                        .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)
-                        .join('; ');
-                    throw new Error(`Invalid order data: ${errorDetails}`);
+                 if (result.message) {
+                    throw new Error(result.message);
                 }
-                throw new Error(result.message || 'Could not place order.');
+                throw new Error('Could not place order.');
             }
             
             setCart(null); 
@@ -225,7 +221,7 @@ export default function CheckoutPage() {
                             <CardContent className="divide-y">
                                 {displayItems.map(item => (
                                     <div key={(item.product as IProduct)._id} className="flex items-center gap-4 py-4 first:pt-0">
-                                        {(item.product as IProduct)._id === 'free-gift-id' ? (
+                                        {(item.product as IProduct)._id === '66a9354045a279093079919f' ? (
                                             <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center">
                                                 <Gift className="w-8 h-8 text-primary"/>
                                             </div>
