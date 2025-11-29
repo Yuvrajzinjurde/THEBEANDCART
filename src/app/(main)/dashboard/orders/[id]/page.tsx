@@ -32,8 +32,16 @@ interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
   productId: IProduct;
 }
 
-// Define the shipping address type based on the IOrder interface
-type PopulatedShippingAddress = IOrder['shippingAddress'];
+type PopulatedShippingAddress = {
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    addressType: string;
+};
 
 interface PopulatedOrder extends Omit<IOrder, 'products' | 'shippingAddress'> {
   products: PopulatedOrderProduct[];
@@ -262,7 +270,7 @@ export default function OrderDetailsPage() {
                             <p>{order.shippingAddress.street}</p>
                             <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zip}</p>
                             <p>{order.shippingAddress.country}</p>
-                             <p>Phone: {order.shippingAddress.phone}</p>
+                            <p>Phone: {order.shippingAddress.phone}</p>
                         </CardContent>
                     </Card>
                     <Card>
