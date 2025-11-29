@@ -52,7 +52,7 @@ export async function PUT(
     }
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
-    const requestingUserId = decoded.sub; // Use 'sub' field for subject (user ID)
+    const requestingUserId = decoded.sub;
     
     await dbConnect();
     const { id } = params;
