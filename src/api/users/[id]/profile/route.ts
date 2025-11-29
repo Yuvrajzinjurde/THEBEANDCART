@@ -72,7 +72,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, validation.data, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(id, validation.data, { new: true, runValidators: true });
 
     if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
@@ -83,11 +83,15 @@ export async function PUT(
 
     return NextResponse.json({ message: 'Profile updated successfully', user: userObject }, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Failed to update user profile:', error);
+    // Return the actual error message for better debugging
+    if (error instanceof z.ZodError) {
+        return NextResponse.json({ message: 'Validation Error', errors: error.flatten() }, { status: 400 });
+    }
     if (error instanceof jwt.JsonWebTokenError) {
         return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
     }
-    console.error('Failed to update user profile:', error);
-    return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    return NextResponse.json({ message: error.message || 'An internal server error occurred' }, { status: 500 });
   }
 }

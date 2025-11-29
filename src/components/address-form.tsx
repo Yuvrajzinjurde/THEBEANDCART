@@ -123,12 +123,14 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
 
             const result = await response.json();
             if (!response.ok) {
+                // Throw the detailed error message from the server
                 throw new Error(result.message || "An internal server error occurred");
             }
             
             onSaveSuccess();
 
         } catch (error: any) {
+            // Display the specific error message in the toast
             toast.error(error.message);
         } finally {
             setIsSubmitting(false);
