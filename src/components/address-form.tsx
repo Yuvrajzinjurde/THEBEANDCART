@@ -109,7 +109,8 @@ export function AddressForm({ userId, existingAddress, onSaveSuccess, onCancel }
             if (data._id) { // Editing existing address
                 updatedAddresses = currentAddresses.map(addr => addr._id === data._id ? finalData : addr);
             } else { // Adding new address
-                updatedAddresses = [...currentAddresses, { ...finalData, _id: new Date().toISOString() }];
+                // Don't generate _id on the client. Let the database do it.
+                updatedAddresses = [...currentAddresses, finalData];
             }
             
             const response = await fetch(`/api/users/${userId}/profile`, {

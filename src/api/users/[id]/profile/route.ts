@@ -17,7 +17,7 @@ const addressSchema = z.object({
   country: z.string().min(1, 'Country is required'),
   isDefault: z.boolean().optional(),
   addressType: z.string().min(1, 'Address type is required'),
-}).catchall(z.any()); // Allow other fields to pass through without validation
+}).catchall(z.any());
 
 
 const profileUpdateSchema = z.object({
@@ -72,34 +72,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const updateData = validation.data;
-
-    // **DEFINITIVE FIX**: Sanitize the address objects before saving.
-    // This removes any extra fields like 'createdAt' or 'updatedAt' that Mongoose/Zod might pass along.
-    if (updateData.addresses) {
-        updateData.addresses = updateData.addresses.map(addr => {
-            const sanitizedAddr: any = {
-                _id: addr._id,
-                fullName: addr.fullName,
-                phone: addr.phone,
-                street: addr.street,
-                city: addr.city,
-                state: addr.state,
-                zip: addr.zip,
-                country: addr.country,
-                isDefault: addr.isDefault,
-                addressType: addr.addressType,
-            };
-             // Ensure _id is only included if it exists, to support both new and existing addresses
-            if (!addr._id) {
-                delete sanitizedAddr._id;
-            }
-            return sanitizedAddr;
-        });
-    }
-
-
-    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    const updatedUser = await User.findByIdAndUpdate(id, validation.data, { new: true, runValidators: true });
 
     if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
@@ -118,6 +91,7 @@ export async function PUT(
     if (error instanceof jwt.JsonWebTokenError) {
         return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
     }
+    // This is the crucial part: return the actual error message.
     return NextResponse.json({ message: error.message || 'An internal server error occurred' }, { status: 500 });
   }
 }
