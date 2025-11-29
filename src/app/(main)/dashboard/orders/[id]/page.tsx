@@ -29,7 +29,7 @@ import { AddressSelectionDialog } from '@/components/address-selection-dialog';
 
 
 interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
-  productId: IProduct;
+  productId: IProduct | null;
 }
 
 type PopulatedShippingAddress = {
@@ -62,6 +62,14 @@ const OrderDetailsSkeleton = () => (
         </div>
     </div>
 );
+
+const freeGiftProduct: Partial<IProduct> = {
+    _id: '66a9354045a279093079919f',
+    name: 'Surprise Gift',
+    storefront: '',
+    images: [],
+};
+
 
 export default function OrderDetailsPage() {
     const params = useParams();
@@ -215,8 +223,11 @@ export default function OrderDetailsPage() {
                             <CardTitle className="flex items-center gap-2"><Package /> Items in this order ({order.products.length})</CardTitle>
                         </CardHeader>
                         <CardContent className="divide-y">
-                            {order.products.map(({ productId: product, quantity, price }) => {
-                                const isGift = product && product._id.toString() === '66a9354045a279093079919f';
+                            {order.products.map((item) => {
+                                const product = item.productId || (item.productId === null && { ...freeGiftProduct });
+                                if (!product) return null; // Should not happen with the fallback, but for safety
+
+                                const isGift = product._id === '66a9354045a279093079919f';
                                 return (
                                 <div key={product?._id as string} className="grid grid-cols-1 md:grid-cols-6 gap-4 py-4 first:pt-0">
                                     <Link href={isGift ? '#' : `/${product.storefront}/products/${product._id}`} className="md:col-span-3 flex items-start gap-4 group">
@@ -231,12 +242,12 @@ export default function OrderDetailsPage() {
                                         </div>
                                         <div>
                                             <p className="font-semibold group-hover:text-primary transition-colors">{product.name}</p>
-                                            <p className="text-sm text-muted-foreground">Qty: {quantity}</p>
+                                            <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                                             {(product as any).color && <p className="text-sm text-muted-foreground">Color: {(product as any).color}</p>}
                                         </div>
                                     </Link>
                                     <div className="md:col-span-1 text-left md:text-right">
-                                        <p className="font-semibold">{isGift ? 'FREE' : `₹${(price * quantity).toLocaleString('en-IN')}`}</p>
+                                        <p className="font-semibold">{isGift ? 'FREE' : `₹${(item.price * item.quantity).toLocaleString('en-IN')}`}</p>
                                     </div>
                                     <div className="md:col-span-2 text-left">
                                         {order.status === 'delivered' ? (
