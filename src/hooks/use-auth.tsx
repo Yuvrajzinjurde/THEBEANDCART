@@ -79,7 +79,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   loading: true,
   login: (user, token) => {
     const enrichedUser = { ...user, sub: user._id };
-    Cookies.set('accessToken', token, { expires: 1 / 96, path: '/' }); 
+    Cookies.set('accessToken', token, { expires: 1/96, path: '/' }); 
     set({ user: enrichedUser, token, loading: false });
     if(token) fetchUserData(token);
   },
@@ -105,19 +105,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
     
     set({ loading: true });
     
-    const token = Cookies.get('accessToken');
-    if (!token) {
-        await get().logout();
-        set({ loading: false });
-        return;
-    }
-
+    // Check for refresh token in httpOnly cookie by calling the /me endpoint
     try {
-      const res = await fetch('/api/auth/me', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await fetch('/api/auth/me'); // This endpoint will handle token refresh if needed
+      
       if (res.ok) {
         const { user: userData, token: newToken } = await res.json();
         get().login(userData, newToken);
