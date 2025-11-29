@@ -112,7 +112,8 @@ export default function CheckoutPage() {
         toast.info("Placing your order...");
         
         try {
-            const itemsToOrder = displayItems.map(item => ({
+            // Filter out the free gift from the items to be validated for stock/price
+            const itemsToOrder = cartItems.map(item => ({
                 productId: (item.product as IProduct)._id as string,
                 quantity: item.quantity,
                 price: (item.product as IProduct).sellingPrice,
@@ -120,6 +121,8 @@ export default function CheckoutPage() {
                 size: item.size
             }));
 
+            // Determine if the free gift should be included
+            const hasFreeGift = !!displayItems.find(item => item.product._id === 'free-gift-id');
 
             const response = await fetch('/api/orders/place', {
                 method: 'POST',
@@ -130,13 +133,14 @@ export default function CheckoutPage() {
                 body: JSON.stringify({
                     items: itemsToOrder,
                     subtotal: subtotal,
-                    shippingAddressId: selectedAddressId
+                    shippingAddressId: selectedAddressId,
+                    hasFreeGift: hasFreeGift, // Send the flag to the backend
                 }),
             });
 
             const result = await response.json();
 
-            if (!response.ok) {
+             if (!response.ok) {
                  if (result.errors) {
                     const errorDetails = Object.entries(result.errors)
                         .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)

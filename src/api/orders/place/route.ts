@@ -13,7 +13,7 @@ import Role from '@/models/role.model';
 import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
-    productId: z.string().refine(val => val === 'free-gift-id' || Types.ObjectId.isValid(val), {
+    productId: z.string().refine(val => Types.ObjectId.isValid(val), {
         message: "Invalid product ID",
     }),
     quantity: z.number().int().min(1),
@@ -27,6 +27,7 @@ const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
     subtotal: z.number().min(0),
     shippingAddressId: z.string().refine(val => Types.ObjectId.isValid(val)),
+    hasFreeGift: z.boolean().optional(), // New field
 });
 
 interface DecodedToken {
@@ -65,16 +66,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Invalid order data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { items, subtotal, shippingAddressId } = validation.data;
+        const { items, subtotal, shippingAddressId, hasFreeGift } = validation.data;
         
-        if (items.length === 0) {
+        if (items.length === 0 && !hasFreeGift) {
             return NextResponse.json({ message: 'Cannot place an empty order.' }, { status: 400 });
         }
 
         // --- Stock & Price Verification ---
-        const productIds = items
-            .filter(item => item.productId !== 'free-gift-id') // Exclude free gift from DB query
-            .map(item => new Types.ObjectId(item.productId));
+        const productIds = items.map(item => new Types.ObjectId(item.productId));
             
         const productsFromDB = await Product.find({ '_id': { $in: productIds } });
 
@@ -82,9 +81,6 @@ export async function POST(req: Request) {
         const bulkWriteOps = [];
 
         for (const item of items) {
-            // Skip the free gift from verification logic
-            if (item.productId === 'free-gift-id') continue;
-
             const product = productsFromDB.find(p => p._id.toString() === item.productId);
             if (!product) {
                 return NextResponse.json({ message: `Product with ID ${item.productId} not found.` }, { status: 404 });
@@ -122,13 +118,19 @@ export async function POST(req: Request) {
         }
 
         // --- Create Order ---
-        const itemsForOrder = items.map(item => {
-            if (item.productId === 'free-gift-id') {
-                // Use a consistent, static ID for the free gift placeholder product
-                return { ...item, productId: new Types.ObjectId('66a9354045a279093079919f') }; 
-            }
-            return { ...item, productId: new Types.ObjectId(item.productId) }
-        });
+        const itemsForOrder = items.map(item => ({ ...item, productId: new Types.ObjectId(item.productId) }));
+
+        // Add the free gift if applicable
+        if (hasFreeGift) {
+            itemsForOrder.push({
+                productId: new Types.ObjectId('66a9354045a279093079919f'), // Static ID for the gift
+                quantity: 1,
+                price: 0,
+                color: undefined,
+                size: undefined
+            });
+        }
+
 
         const newOrder = new Order({
             userId,
