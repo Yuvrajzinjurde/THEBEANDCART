@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, ArrowLeft, Edit } from 'lucide-react';
+import { PlusCircle, ArrowLeft, Edit, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import type { IProduct } from '@/models/product.model';
 import type { ICartItem } from '@/models/cart.model';
@@ -20,7 +20,6 @@ import Image from 'next/image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import useCartSettingsStore from '@/stores/cart-settings-store';
-import { Gift } from 'lucide-react';
 
 
 const freeGiftProduct: Partial<IProduct> = {
@@ -138,6 +137,12 @@ export default function CheckoutPage() {
             const result = await response.json();
 
             if (!response.ok) {
+                 if (result.errors) {
+                    const errorDetails = Object.entries(result.errors)
+                        .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)
+                        .join('; ');
+                    throw new Error(`Invalid order data: ${errorDetails}`);
+                }
                 throw new Error(result.message || 'Could not place order.');
             }
             
