@@ -9,8 +9,6 @@ import Cart from '@/models/cart.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import Role from '@/models/role.model';
-import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
     productId: z.string().refine(val => Types.ObjectId.isValid(val), {
@@ -22,12 +20,11 @@ const OrderItemSchema = z.object({
     size: z.string().optional().nullable(),
 });
 
-
 const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
     subtotal: z.number().min(0),
     shippingAddressId: z.string().refine(val => Types.ObjectId.isValid(val)),
-    hasFreeGift: z.boolean().optional(),
+    isFreeGiftAdded: z.boolean().optional(),
 });
 
 interface DecodedToken {
@@ -68,9 +65,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: `Invalid order data: ${errorDetails}` }, { status: 400 });
         }
 
-        const { items, subtotal, shippingAddressId, hasFreeGift } = validation.data;
+        const { items, subtotal, shippingAddressId, isFreeGiftAdded } = validation.data;
         
-        if (items.length === 0 && !hasFreeGift) {
+        if (items.length === 0) {
             return NextResponse.json({ message: 'Cannot place an empty order.' }, { status: 400 });
         }
 
@@ -122,30 +119,18 @@ export async function POST(req: Request) {
         // --- Create Order ---
         const itemsForOrder = items.map(item => ({ ...item, productId: new Types.ObjectId(item.productId) }));
 
-        // Add the free gift if applicable
-        if (hasFreeGift) {
-            itemsForOrder.push({
-                productId: new Types.ObjectId('66a9354045a279093079919f'), // Static ID for the gift
-                quantity: 1,
-                price: 0,
-                color: undefined,
-                size: undefined
-            });
-        }
-
-
         const newOrder = new Order({
             userId,
             products: itemsForOrder,
-            totalAmount: calculatedSubtotal, // The server-verified subtotal becomes the order's total amount
+            totalAmount: calculatedSubtotal,
             status: 'pending',
             brand: auth.brand,
             shippingAddress: shippingAddress.toObject(),
+            isFreeGiftAdded: isFreeGiftAdded || false,
         });
         
         await newOrder.save();
         
-        // Only perform stock updates for actual products
         if (bulkWriteOps.length > 0) {
             await Product.bulkWrite(bulkWriteOps);
         }
@@ -163,11 +148,9 @@ export async function POST(req: Request) {
                 link: `/dashboard/orders/${newOrder._id}`,
             });
         } catch (notificationError) {
-            // Log the error but don't fail the entire order process
             console.error("Failed to create customer notification:", notificationError);
         }
         
-
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
     } catch (error: any) {

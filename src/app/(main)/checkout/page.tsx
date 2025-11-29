@@ -84,7 +84,6 @@ export default function CheckoutPage() {
         return { subtotal: sub, totalDiscount: discount, milestoneDiscount: milestoneDisc, shipping: ship, grandTotal: grand, cartItems: items };
     }, [cart, cartSettings]);
     
-    // Determine if the free gift should be included based on cart value
     const isFreeGiftIncluded = useMemo(() => {
         return cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold;
     }, [subtotal, cartSettings]);
@@ -135,7 +134,8 @@ export default function CheckoutPage() {
 
         } catch (error: any) {
             console.error("Checkout failed", error);
-            toast.error(error.message || 'Could not place order.');
+            const errorMessage = error.message || 'Could not place order.';
+            toast.error(errorMessage);
         } finally {
             setIsPlacingOrder(false);
         }
@@ -200,20 +200,8 @@ export default function CheckoutPage() {
                         </Card>
                         
                         <Card>
-                            <CardHeader><CardTitle>Order Items ({cartItems.length + (isFreeGiftIncluded ? 1 : 0)})</CardTitle></CardHeader>
+                            <CardHeader><CardTitle>Order Items ({cartItems.length})</CardTitle></CardHeader>
                             <CardContent className="divide-y">
-                                {isFreeGiftIncluded && (
-                                     <div className="flex items-center gap-4 py-4 first:pt-0">
-                                        <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center p-2">
-                                            <GiftBoxIcon />
-                                        </div>
-                                        <div className="flex-grow">
-                                            <p className="font-semibold">Surprise Gift</p>
-                                            <p className="text-sm text-muted-foreground">From us, to you!</p>
-                                        </div>
-                                        <p className="font-semibold text-green-600">FREE</p>
-                                    </div>
-                                )}
                                 {cartItems.map(item => (
                                     <div key={(item.product as IProduct)._id} className="flex items-center gap-4 py-4 first:pt-0">
                                         <Image src={item.product.images[0]} alt={item.product.name} width={64} height={64} className="rounded-md border object-cover" />
@@ -242,6 +230,20 @@ export default function CheckoutPage() {
                                 <div className="flex justify-between font-bold text-base"><span>Total Payable</span><span>₹{grandTotal.toLocaleString()}</span></div>
                             </CardContent>
                         </Card>
+
+                         {isFreeGiftIncluded && (
+                            <Card className="bg-green-50 border-green-200">
+                                <CardContent className="p-4 flex items-center gap-4">
+                                     <div className="w-12 h-12 rounded-md border bg-background flex items-center justify-center p-2 flex-shrink-0">
+                                        <GiftBoxIcon />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-green-800">Yay! You get a free gift!</h3>
+                                        <p className="text-xs text-green-700">A special surprise gift will be added to your order.</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
 
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
