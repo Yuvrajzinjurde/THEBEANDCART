@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from 'react';
@@ -336,6 +335,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     purchasePrice: (existingProduct as any).purchasePrice || 0,
     storefront: existingProduct.storefront,
     returnPeriod: existingProduct.returnPeriod || 10,
+    maxOrderQuantity: existingProduct.maxOrderQuantity || 1,
     variants: (existingProduct.variants || []).map(v => ({
       ...v,
       images: (v.images || []).map(img => ({ value: img })),
@@ -356,6 +356,7 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
     videos: [],
     keywords: [],
     returnPeriod: 10,
+    maxOrderQuantity: 1,
     variants: [],
     stock: 0,
   };
@@ -1003,6 +1004,16 @@ export function ProductForm({ mode, existingProduct }: ProductFormProps) {
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">days</span>
                                     </div>
                                     <FormDescription>Number of days customer has to return the product.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                             <FormField control={control} name="maxOrderQuantity" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Max Order Quantity</FormLabel>
+                                     <FormControl>
+                                        <Input type="number" placeholder="e.g., 10" {...field} />
+                                    </FormControl>
+                                    <FormDescription>Max quantity a user can buy at once.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )} />

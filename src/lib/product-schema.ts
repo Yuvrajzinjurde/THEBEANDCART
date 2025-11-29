@@ -33,6 +33,7 @@ const BaseProductFormSchema = z.object({
   keywords: z.array(z.string()).optional(),
   stock: z.coerce.number().min(0).optional(),
   returnPeriod: z.coerce.number().min(0).optional(),
+  maxOrderQuantity: z.coerce.number().min(1, "Max order quantity must be at least 1").optional().default(1),
   variants: z.array(ServerVariantSchema).optional(),
 });
 

@@ -1,3 +1,4 @@
+
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
 export interface IVariant extends Document {
@@ -27,6 +28,7 @@ export interface IProduct extends Document {
   clicks: number;
   keywords: string[];
   returnPeriod: number;
+  maxOrderQuantity: number;
   styleId?: string;
   sku?: string;
   variants: IVariant[];
@@ -63,6 +65,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
     clicks: { type: Number, default: 0 },
     keywords: { type: [String], default: [], index: true },
     returnPeriod: { type: Number, default: 10 },
+    maxOrderQuantity: { type: Number, default: 1 },
     styleId: { type: String, index: true },
     sku: { type: String, index: true, unique: true, sparse: true },
     variants: [VariantSchema],

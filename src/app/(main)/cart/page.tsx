@@ -19,6 +19,7 @@ import {
   ShoppingCart,
   Truck,
   Gift,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -102,6 +103,7 @@ const freeGiftProduct: IProduct = {
     clicks: 0,
     keywords: [],
     returnPeriod: 0,
+    maxOrderQuantity: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
 } as IProduct;
@@ -293,9 +295,25 @@ export default function CartPage() {
     }
     return items;
   }, [cart, subtotal, cartSettings]);
+  
+  const hasOutOfStockItems = useMemo(() => {
+    return cartItems.some(item => (item.product?.stock ?? 0) === 0);
+  }, [cartItems]);
 
-  const handleQuantityChange = async (productId: string, newQuantity: number, size?: string, color?: string) => {
+  const handleQuantityChange = async (productId: string, product: IProduct, newQuantity: number, size?: string, color?: string) => {
     if (newQuantity < 1) return;
+    
+    const maxQuantity = product.maxOrderQuantity || 1;
+    if (newQuantity > maxQuantity) {
+        toast.warning(`You can only add up to ${maxQuantity} units of this item.`);
+        return;
+    }
+    
+    if (newQuantity > (product.stock ?? 0)) {
+        toast.warning(`Only ${product.stock} items available.`);
+        return;
+    }
+
     if (!token) {
         toast.info("Please log in to update your cart.");
         router.push(`/login?redirect=${pathname}`);
@@ -357,6 +375,7 @@ export default function CartPage() {
       if (!wishlistRes.ok) throw new Error(wishlistResult.message);
       setWishlist(wishlistResult.wishlist);
       await handleRemoveItem(productId);
+      toast.success("Item moved to wishlist.");
 
     } catch (error: any) {
       toast.error(error.message);
@@ -508,8 +527,9 @@ export default function CartPage() {
                                     const isGift = item.product._id === 'free-gift-id';
                                     const hasDiscount = item.product.mrp && item.product.mrp > item.product.sellingPrice;
                                     const discountPercentage = hasDiscount ? Math.round(((item.product.mrp! - item.product.sellingPrice) / item.product.mrp!) * 100) : 0;
+                                    const isOutOfStock = !isGift && (item.product.stock ?? 0) === 0;
                                     return (
-                                    <div key={`${item.product._id}-${item.size}-${item.color}`} className="flex flex-row gap-4 py-6 first:pt-0">
+                                    <div key={`${item.product._id}-${item.size}-${item.color}`} className={cn("flex flex-row gap-4 py-6 first:pt-0", isOutOfStock && "opacity-60")}>
                                         <div className="flex flex-col items-center w-24 sm:w-28 flex-shrink-0">
                                             <div className="block flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28">
                                                 {isGift ? (
@@ -524,9 +544,9 @@ export default function CartPage() {
                                             </div>
                                             {!isGift && (
                                                 <div className="flex items-center gap-1 rounded-full border p-1 mt-2">
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.product, item.quantity - 1, item.size, item.color)}><Minus className="h-4 w-4" /></Button>
                                                     <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => handleQuantityChange(item.product._id as string, item.product, item.quantity + 1, item.size, item.color)}><Plus className="h-4 w-4" /></Button>
                                                 </div>
                                             )}
                                         </div>
@@ -539,6 +559,12 @@ export default function CartPage() {
                                                 <div className="flex items-start gap-2 p-2 rounded-md bg-green-50 text-green-700 border border-green-200 mt-1">
                                                     <Gift className="h-4 w-4 mt-0.5 shrink-0" />
                                                     <p className="text-xs font-medium">You'll find this surprise gift tucked inside one of your product boxes!</p>
+                                                </div>
+                                            )}
+                                             {isOutOfStock && (
+                                                <div className="flex items-center gap-2 text-red-600 font-semibold text-sm mt-1">
+                                                    <AlertTriangle className="h-4 w-4" />
+                                                    <span>Currently unavailable</span>
                                                 </div>
                                             )}
 
@@ -622,9 +648,10 @@ export default function CartPage() {
                                     <span>Grand Total</span>
                                     <span>₹{grandTotal.toLocaleString('en-IN')}</span>
                                 </div>
-                                <Button size="lg" className="w-full h-12 text-base mt-4" onClick={handleCheckout}>
-                                    Proceed to Checkout
+                                <Button size="lg" className="w-full h-12 text-base mt-4" onClick={handleCheckout} disabled={hasOutOfStockItems}>
+                                    {hasOutOfStockItems ? 'Item unavailable' : 'Proceed to Checkout'}
                                 </Button>
+                                {hasOutOfStockItems && <p className="text-xs text-destructive text-center">Please remove unavailable items to proceed.</p>}
                             </CardContent>
                         </Card>
                         <ExploreBrands />
