@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Minus, Plus, Info, ChevronUp, ChevronDown, ZoomIn, PlayCircle, ArrowLeft, ArrowRight, Tag, HelpCircle, ArrowRightIcon } from 'lucide-react';
 import type { IProduct, IVariant } from '@/models/product.model';
 import type { ICoupon } from '@/models/coupon.model';
 import type { IReview } from '@/models/review.model';
@@ -30,6 +30,7 @@ import type { ReviewStats } from '@/app/api/reviews/[productId]/stats/route';
 import Link from 'next/link';
 import { Loader } from './ui/loader';
 import RatingsAndReviews from './ratings-and-reviews';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 
 interface ProductDetailsProps {
   product: IProduct;
@@ -68,6 +69,7 @@ export default function ProductDetails({ product: initialProduct, storefront, re
   const { setCart, setWishlist } = useUserStore();
   
   const [quantity, setQuantity] = useState(1);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   
   const returnPolicySummary = `
     <ul>
@@ -251,6 +253,56 @@ useEffect(() => {
         toast.error(error.message);
     }
   };
+  
+  const handleBuyNow = async () => {
+    if (!user || !token) {
+        toast.info("Please log in to buy this item.");
+        router.push(`/login?redirect=${pathname}`);
+        return;
+    }
+    
+    if ((initialProduct.variants?.length || 0) > 0 && !selectedVariant) {
+        toast.warning("Please select a color and size to buy.");
+        return;
+    }
+    
+    setIsPlacingOrder(true);
+    toast.info("Placing your order...");
+    
+    try {
+      const items = [{ 
+          productId: initialProduct._id, 
+          quantity, 
+          size: selectedSize,
+          color: selectedColor 
+      }];
+
+      const response = await fetch('/api/orders/place', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ items, totalAmount: initialProduct.sellingPrice * quantity }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+          throw new Error(result.message);
+      }
+
+      toast.success("Order placed successfully! Redirecting...");
+      router.push('/dashboard/orders');
+
+    } catch (error: any) {
+        console.error("Order failed:", error);
+        toast.error(error.message || "Failed to place your order.");
+    } finally {
+        setIsPlacingOrder(false);
+    }
+  }
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
@@ -321,7 +373,26 @@ useEffect(() => {
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                     <Button size="lg" className="h-12 text-base" onClick={handleAddToCart}><ShoppingCart className="mr-2 h-5 w-5" /> Add to Cart</Button>
-                    <Button size="lg" variant="secondary" className="h-12 text-base">Buy Now</Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                             <Button size="lg" variant="secondary" className="h-12 text-base" disabled={isPlacingOrder}>
+                                {isPlacingOrder ? <Loader className="mr-2" /> : <ArrowRightIcon className="mr-2 h-5 w-5" />}
+                                Buy Now
+                             </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Confirm Your Order</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    You are about to purchase {quantity} x {initialProduct.name}. The total amount will be ₹{(initialProduct.sellingPrice * quantity).toLocaleString()}.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleBuyNow}>Confirm Order</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
         </div>
