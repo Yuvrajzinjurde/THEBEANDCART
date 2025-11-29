@@ -86,6 +86,21 @@ export default function CheckoutPage() {
 
         return { subtotal: sub, totalDiscount: discount, milestoneDiscount: milestoneDisc, shipping: ship, grandTotal: grand, cartItems: items };
     }, [cart, cartSettings]);
+    
+    // Add the free gift to the display list if threshold is met
+    const displayItems = useMemo(() => {
+        const items = [...cartItems];
+        if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.product as IProduct)._id === 'free-gift-id')) {
+            items.push({
+                productId: freeGiftProduct as any,
+                quantity: 1,
+                size: undefined,
+                color: undefined,
+                product: freeGiftProduct as IProduct
+            });
+        }
+        return items;
+    }, [cartItems, subtotal, cartSettings]);
 
     const handlePlaceOrder = async () => {
         if (!selectedAddressId) {
@@ -98,7 +113,7 @@ export default function CheckoutPage() {
         
         try {
             const itemsToOrder = displayItems.map(item => ({
-                productId: (item.product as IProduct)._id,
+                productId: (item.product as IProduct)._id as string,
                 quantity: item.quantity,
                 price: (item.product as IProduct).sellingPrice,
                 color: item.color,
@@ -136,21 +151,6 @@ export default function CheckoutPage() {
             setIsPlacingOrder(false);
         }
     };
-    
-    // Add the free gift to the display list if threshold is met
-    const displayItems = useMemo(() => {
-        const items = [...cartItems];
-        if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.productId as IProduct)._id === 'free-gift-id')) {
-            items.push({
-                productId: freeGiftProduct as any,
-                quantity: 1,
-                size: undefined,
-                color: undefined,
-                product: freeGiftProduct as IProduct
-            });
-        }
-        return items;
-    }, [cartItems, subtotal, cartSettings]);
 
 
     if (authLoading || !user || !cart) {
@@ -214,8 +214,8 @@ export default function CheckoutPage() {
                             <CardHeader><CardTitle>Order Items ({displayItems.length})</CardTitle></CardHeader>
                             <CardContent className="divide-y">
                                 {displayItems.map(item => (
-                                    <div key={(item.productId as IProduct)._id} className="flex items-center gap-4 py-4 first:pt-0">
-                                        {(item.productId as IProduct)._id === 'free-gift-id' ? (
+                                    <div key={(item.product as IProduct)._id} className="flex items-center gap-4 py-4 first:pt-0">
+                                        {(item.product as IProduct)._id === 'free-gift-id' ? (
                                             <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center">
                                                 <Gift className="w-8 h-8 text-primary"/>
                                             </div>
@@ -227,7 +227,7 @@ export default function CheckoutPage() {
                                             <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                                         </div>
                                         <p className="font-semibold">
-                                            {(item.productId as IProduct)._id === 'free-gift-id' ? 'FREE' : `₹${(item.product.sellingPrice * item.quantity).toLocaleString()}`}
+                                            {(item.product as IProduct)._id === 'free-gift-id' ? 'FREE' : `₹${(item.product.sellingPrice * item.quantity).toLocaleString()}`}
                                         </p>
                                     </div>
                                 ))}

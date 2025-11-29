@@ -13,12 +13,15 @@ import Role from '@/models/role.model';
 import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
-    productId: z.string(), // No validation here, handle 'free-gift-id'
+    productId: z.string().refine(val => val === 'free-gift-id' || Types.ObjectId.isValid(val), {
+        message: "Invalid product ID",
+    }),
     quantity: z.number().int().min(1),
     price: z.number().min(0),
     color: z.string().optional().nullable(),
     size: z.string().optional().nullable(),
 });
+
 
 const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
@@ -69,7 +72,7 @@ export async function POST(req: Request) {
 
         // --- Stock & Price Verification ---
         const productIds = items
-            .filter(item => item.productId !== 'free-gift-id' && Types.ObjectId.isValid(item.productId))
+            .filter(item => item.productId !== 'free-gift-id') // Exclude free gift from DB query
             .map(item => new Types.ObjectId(item.productId));
             
         const productsFromDB = await Product.find({ '_id': { $in: productIds } });
@@ -152,7 +155,7 @@ export async function POST(req: Request) {
                 title: 'Order Placed!',
                 message: `Your order #${newOrder.orderId} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
                 type: 'order_success',
-                link: `/dashboard/orders`,
+                link: `/dashboard/orders/${newOrder._id}`,
             });
         } catch (notificationError) {
             // Log the error but don't fail the entire order process
