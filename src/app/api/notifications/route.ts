@@ -7,7 +7,7 @@ import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
 }
 
 const getUserIdFromToken = (req: Request): string | null => {
@@ -17,7 +17,7 @@ const getUserIdFromToken = (req: Request): string | null => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-        return decoded.userId;
+        return decoded.sub;
     } catch (error) {
         return null;
     }

@@ -13,7 +13,7 @@ const CART_UPDATE_EVENT_KEY = 'cart-last-updated';
 
 export interface User {
   _id: string;
-  userId: string;
+  sub: string; // Ensure sub is part of the User interface for consistency
   roles: string[];
   name: string;
   brand?: string;
@@ -78,7 +78,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   loading: true,
   login: (user, token) => {
-    const enrichedUser = { ...user, userId: user._id };
+    const enrichedUser = { ...user, sub: user._id };
     Cookies.set('accessToken', token, { expires: 1 / 96, path: '/' }); 
     set({ user: enrichedUser, token, loading: false });
     if(token) fetchUserData(token);

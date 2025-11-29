@@ -69,7 +69,7 @@ export const useUnreadNotificationsCount = () => {
     const { user } = useAuth();
     const notifications = useUserStore(state => state.notifications);
     return Array.isArray(notifications) 
-        ? notifications.filter(n => !n.readBy.includes(user?._id as any)).length 
+        ? notifications.filter(n => !n.readBy.includes(user?.sub as any)).length 
         : 0;
 }
 

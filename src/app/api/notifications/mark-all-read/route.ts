@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/notification.model';
@@ -6,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
 }
 
 const getUserIdFromToken = (req: Request): string | null => {
@@ -16,7 +17,7 @@ const getUserIdFromToken = (req: Request): string | null => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
-        return decoded.userId;
+        return decoded.sub;
     } catch (error) {
         return null;
     }

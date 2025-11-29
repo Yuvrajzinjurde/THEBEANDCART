@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     }
     
     const accessToken = jwt.sign(
-      { roles: userRoles, name: user.firstName, brand: user.brand, userId: user._id.toString() },
+      { roles: userRoles, name: user.firstName, brand: user.brand },
       JWT_SECRET,
       { expiresIn: '15m', subject: user._id.toString() }
     );
@@ -87,8 +87,6 @@ export async function POST(req: Request) {
 
     const userResponseData = user.toObject();
     delete userResponseData.password;
-    
-    (userResponseData as any).userId = user._id.toString();
 
     const response = NextResponse.json({ 
         message: 'Login successful', 

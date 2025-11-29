@@ -105,7 +105,7 @@ export function NotificationsPopover() {
     const { notifications, markAllNotificationsAsRead, unreadNotificationsCount } = useUserStore(state => ({
         notifications: state.notifications,
         markAllNotificationsAsRead: state.markAllNotificationsAsRead,
-        unreadNotificationsCount: Array.isArray(state.notifications) ? state.notifications.filter(n => !n.readBy.includes(user?.userId as any)).length : 0,
+        unreadNotificationsCount: Array.isArray(state.notifications) ? state.notifications.filter(n => !n.readBy.includes(user?.sub as any)).length : 0,
     }));
     const [activeTab, setActiveTab] = useState('all');
     const [isOpen, setIsOpen] = useState(false);
@@ -116,7 +116,7 @@ export function NotificationsPopover() {
 
     const filteredNotifications = useMemo(() => {
         if (!user) return [];
-        if (activeTab === 'unread') return sortedNotifications.filter(n => !n.readBy.includes(user.userId as any));
+        if (activeTab === 'unread') return sortedNotifications.filter(n => !n.readBy.includes(user.sub as any));
         return sortedNotifications;
     }, [activeTab, sortedNotifications, user]);
   
@@ -176,7 +176,7 @@ export function NotificationsPopover() {
                 <ScrollArea className='h-[400px]'>
                     <div className="p-2 space-y-1">
                         {filteredNotifications.length > 0 ? (
-                            filteredNotifications.map(n => <NotificationItem key={n._id as string} notification={n} userId={user!.userId} closePopover={() => setIsOpen(false)} />)
+                            filteredNotifications.map(n => <NotificationItem key={n._id as string} notification={n} userId={user!.sub} closePopover={() => setIsOpen(false)} />)
                         ) : (
                             <div className="flex flex-col items-center justify-center text-center py-16 text-muted-foreground">
                                 <Bell className="w-12 h-12 mb-2" />

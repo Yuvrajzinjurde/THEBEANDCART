@@ -42,8 +42,6 @@ export async function GET(req: NextRequest) {
         const userRoles = user.roles.map((role: any) => role.name);
         const userData = { ...JSON.parse(JSON.stringify(user)), roles: userRoles };
         delete userData.password;
-        
-        (userData as any).userId = user._id.toString();
 
         return NextResponse.json({ user: userData, token: accessToken });
     }
@@ -65,7 +63,7 @@ export async function GET(req: NextRequest) {
         const userRoles = user.roles.map((role: any) => role.name);
 
         const newAccessToken = jwt.sign(
-            { roles: userRoles, name: user.firstName, brand: user.brand, userId: user._id.toString() },
+            { roles: userRoles, name: user.firstName, brand: user.brand },
             JWT_SECRET,
             { expiresIn: '15m', subject: user._id.toString() }
         );
@@ -80,8 +78,6 @@ export async function GET(req: NextRequest) {
         
          const userData = { ...JSON.parse(JSON.stringify(user)), roles: userRoles };
         delete userData.password;
-        
-        (userData as any).userId = user._id.toString();
 
         const response = NextResponse.json({ user: userData, token: newAccessToken });
         response.headers.set('Set-Cookie', accessTokenCookie);

@@ -11,7 +11,7 @@ import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 interface DecodedToken {
-  userId: string;
+  sub: string;
   name: string;
 }
 
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     if (!auth) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
-    const userId = new Types.ObjectId(auth.userId);
+    const userId = new Types.ObjectId(auth.sub);
     const userName = auth.name;
 
     const body = await req.json();
