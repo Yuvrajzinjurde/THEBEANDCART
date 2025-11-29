@@ -21,7 +21,7 @@ const OrderItemSchema = z.object({
 
 const PlaceOrderSchema = z.object({
     items: z.array(OrderItemSchema),
-    totalAmount: z.number().min(0),
+    subtotal: z.number().min(0),
 });
 
 interface DecodedToken {
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Invalid order data', errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { items, totalAmount } = validation.data;
+        const { items, subtotal } = validation.data;
         
         if (items.length === 0) {
             return NextResponse.json({ message: 'Cannot place an empty order.' }, { status: 400 });
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
         const productIds = items.map(item => new Types.ObjectId(item.productId));
         const productsFromDB = await Product.find({ '_id': { $in: productIds } });
 
-        let calculatedTotal = 0;
+        let calculatedSubtotal = 0;
         const bulkWriteOps = [];
 
         for (const item of items) {
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
                  return NextResponse.json({ message: `Price for ${product.name} has changed. Please refresh your cart.` }, { status: 409 });
             }
             
-            calculatedTotal += item.price * item.quantity;
+            calculatedSubtotal += item.price * item.quantity;
             
             bulkWriteOps.push({
                 updateOne: {
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
         }
         
         // Allow a small tolerance for floating point inaccuracies
-        if (Math.abs(calculatedTotal - totalAmount) > 0.01) {
+        if (Math.abs(calculatedSubtotal - subtotal) > 0.01) {
             return NextResponse.json({ message: `Total amount mismatch. Please try again.` }, { status: 409 });
         }
         
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
         const newOrder = new Order({
             userId,
             products: items.map(item => ({...item, productId: new Types.ObjectId(item.productId)})),
-            totalAmount: calculatedTotal,
+            totalAmount: calculatedSubtotal, // Use the server-calculated total
             status: 'pending',
             brand: auth.brand,
             shippingAddress: user.address,
@@ -129,7 +129,7 @@ export async function POST(req: Request) {
         notificationPayloads.push({
             recipientUsers: [userId],
             title: 'Order Placed!',
-            message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedTotal.toFixed(2)} has been placed successfully.`,
+            message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
             type: 'order_success',
             link: `/dashboard/orders`,
         });
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
             notificationPayloads.push({
                 recipientUsers: adminIds,
                 title: 'New Order Received',
-                message: `A new order #${(newOrder._id as string).slice(-6)} for ₹${calculatedTotal.toFixed(2)} has been placed.`,
+                message: `A new order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed.`,
                 type: 'new_order_admin',
                 link: `/admin/orders`,
             });

@@ -286,7 +286,7 @@ useEffect(() => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ items, subtotal: subtotal }),
+          body: JSON.stringify({ items, subtotal }),
       });
 
       const result = await response.json();
