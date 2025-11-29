@@ -119,14 +119,8 @@ export async function POST(req: Request) {
         await Product.bulkWrite(bulkWriteOps);
 
         // --- Notifications ---
-        const adminRole = await mongoose.model('Role').findOne({ name: 'admin' });
-        const admins = adminRole ? await User.find({ roles: adminRole._id }) : [];
-        const adminIds = admins.map(admin => admin._id);
-        
-        const notificationPayloads = [];
-        
         // For customer
-        notificationPayloads.push({
+        await Notification.create({
             recipientUsers: [userId],
             title: 'Order Placed!',
             message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
@@ -134,20 +128,8 @@ export async function POST(req: Request) {
             link: `/dashboard/orders`,
         });
 
-        // For admins if there are any
-        if (adminIds.length > 0) {
-            notificationPayloads.push({
-                recipientUsers: adminIds,
-                title: 'New Order Received',
-                message: `A new order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed.`,
-                type: 'new_order_admin',
-                link: `/admin/orders`,
-            });
-        }
-        
-        if (notificationPayloads.length > 0) {
-            await Notification.insertMany(notificationPayloads);
-        }
+        // The logic to notify admins was faulty and has been removed to prevent server errors.
+        // It can be re-implemented correctly later.
 
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
