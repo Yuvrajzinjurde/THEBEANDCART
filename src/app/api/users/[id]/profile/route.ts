@@ -17,7 +17,6 @@ const addressSchema = z.object({
   country: z.string().min(1, 'Country is required'),
   isDefault: z.boolean().optional(),
   addressType: z.string().min(1, 'Address type is required'),
-  // We don't need customAddressType on the server, it's handled on the client
 });
 
 
@@ -28,7 +27,7 @@ const profileUpdateSchema = z.object({
   displayName: z.string().optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   whatsapp: z.string().optional().or(z.literal('')),
-  addresses: z.array(addressSchema).optional(), // This is the crucial fix
+  addresses: z.array(addressSchema).optional(),
   socials: z.object({
     twitter: z.string().optional().or(z.literal('')),
     facebook: z.string().optional().or(z.literal('')),
@@ -53,7 +52,7 @@ export async function PUT(
     }
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
-    const requestingUserId = decoded.sub; // Use 'sub' field for subject (user ID)
+    const requestingUserId = decoded.sub;
     
     await dbConnect();
     const { id } = params;
@@ -73,7 +72,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, validation.data, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(id, validation.data, { new: true, runValidators: true });
 
     if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
@@ -84,11 +83,15 @@ export async function PUT(
 
     return NextResponse.json({ message: 'Profile updated successfully', user: userObject }, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Failed to update user profile:', error);
+    if (error instanceof z.ZodError) {
+        return NextResponse.json({ message: 'Validation Error', errors: error.flatten() }, { status: 400 });
+    }
     if (error instanceof jwt.JsonWebTokenError) {
         return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
     }
-    console.error('Failed to update user profile:', error);
-    return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    // This is the crucial part: return the actual error message.
+    return NextResponse.json({ message: error.message || 'An internal server error occurred' }, { status: 500 });
   }
 }
