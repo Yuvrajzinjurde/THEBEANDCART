@@ -104,7 +104,7 @@ export default function OrderDetailsPage() {
                     <BreadcrumbList>
                         <BreadcrumbItem><BreadcrumbLink href="/dashboard/orders">My Orders</BreadcrumbLink></BreadcrumbItem>
                         <BreadcrumbSeparator />
-                        <BreadcrumbItem><BreadcrumbPage>Order #{order._id.slice(-6)}</BreadcrumbPage></BreadcrumbItem>
+                        <BreadcrumbItem><BreadcrumbPage>Order #{order.orderId}</BreadcrumbPage></BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
             </div>
@@ -113,7 +113,7 @@ export default function OrderDetailsPage() {
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div>
-                            <CardTitle>Order #{order._id.slice(-6).toUpperCase()}</CardTitle>
+                            <CardTitle>Order #{order.orderId}</CardTitle>
                             <CardDescription>Placed on {format(new Date(order.createdAt), 'PPP')}</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
