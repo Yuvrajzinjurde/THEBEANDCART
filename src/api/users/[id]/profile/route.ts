@@ -72,7 +72,34 @@ export async function PUT(
       return NextResponse.json({ message: 'Invalid input', errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, validation.data, { new: true, runValidators: true });
+    const updateData = validation.data;
+
+    // **DEFINITIVE FIX**: Sanitize the address objects before saving.
+    // This removes any extra fields like 'createdAt' or 'updatedAt' that Mongoose/Zod might pass along.
+    if (updateData.addresses) {
+        updateData.addresses = updateData.addresses.map(addr => {
+            const sanitizedAddr: any = {
+                _id: addr._id,
+                fullName: addr.fullName,
+                phone: addr.phone,
+                street: addr.street,
+                city: addr.city,
+                state: addr.state,
+                zip: addr.zip,
+                country: addr.country,
+                isDefault: addr.isDefault,
+                addressType: addr.addressType,
+            };
+             // Ensure _id is only included if it exists, to support both new and existing addresses
+            if (!addr._id) {
+                delete sanitizedAddr._id;
+            }
+            return sanitizedAddr;
+        });
+    }
+
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 
     if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
