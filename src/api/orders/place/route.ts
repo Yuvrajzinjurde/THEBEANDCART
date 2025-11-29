@@ -1,11 +1,11 @@
 
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Order from '@/models/order.model';
-import Product from '@/models/product.model';
+import Product, { IProduct } from '@/models/product.model';
 import User from '@/models/user.model';
 import Notification from '@/models/notification.model';
+import Cart from '@/models/cart.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -13,11 +13,11 @@ import Role from '@/models/role.model';
 import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
-    productId: z.string().refine(val => Types.ObjectId.isValid(val)),
+    productId: z.string(), // No validation here, handle 'free-gift-id'
     quantity: z.number().int().min(1),
     price: z.number().min(0),
-    color: z.string().optional(),
-    size: z.string().optional(),
+    color: z.string().optional().nullable(),
+    size: z.string().optional().nullable(),
 });
 
 const PlaceOrderSchema = z.object({
@@ -68,13 +68,19 @@ export async function POST(req: Request) {
         }
 
         // --- Stock & Price Verification ---
-        const productIds = items.map(item => new Types.ObjectId(item.productId));
+        const productIds = items
+            .filter(item => item.productId !== 'free-gift-id' && Types.ObjectId.isValid(item.productId))
+            .map(item => new Types.ObjectId(item.productId));
+            
         const productsFromDB = await Product.find({ '_id': { $in: productIds } });
 
         let calculatedSubtotal = 0;
         const bulkWriteOps = [];
 
         for (const item of items) {
+            // Skip the free gift from verification logic
+            if (item.productId === 'free-gift-id') continue;
+
             const product = productsFromDB.find(p => p._id.toString() === item.productId);
             if (!product) {
                 return NextResponse.json({ message: `Product with ID ${item.productId} not found.` }, { status: 404 });
@@ -111,11 +117,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Shipping address not found.' }, { status: 404 });
         }
 
-
         // --- Create Order ---
+        const itemsForOrder = items.map(item => {
+            if (item.productId === 'free-gift-id') {
+                return { ...item, productId: new Types.ObjectId('66a9354045a279093079919f') }; // Use a static valid ObjectId for the gift
+            }
+            return { ...item, productId: new Types.ObjectId(item.productId) }
+        });
+
         const newOrder = new Order({
             userId,
-            products: items.map(item => ({...item, productId: new Types.ObjectId(item.productId)})),
+            products: itemsForOrder,
             totalAmount: calculatedSubtotal, // The server-verified subtotal becomes the order's total amount
             status: 'pending',
             brand: auth.brand,
@@ -123,7 +135,14 @@ export async function POST(req: Request) {
         });
         
         await newOrder.save();
-        await Product.bulkWrite(bulkWriteOps);
+        
+        // Only perform stock updates for actual products
+        if (bulkWriteOps.length > 0) {
+            await Product.bulkWrite(bulkWriteOps);
+        }
+        
+        // Clear user's cart
+        await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
 
         // --- Notification for customer ---
         try {

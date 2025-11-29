@@ -20,6 +20,22 @@ import Image from 'next/image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import useCartSettingsStore from '@/stores/cart-settings-store';
+import { Gift } from 'lucide-react';
+
+
+const freeGiftProduct: Partial<IProduct> = {
+    _id: 'free-gift-id',
+    name: 'Surprise Gift',
+    brand: 'From us, to you!',
+    images: [], // No image needed as we'll use an icon
+    sellingPrice: 0,
+    storefront: 'platform',
+    category: 'Gift',
+    description: 'A special something, from us to you!',
+    stock: 1,
+    rating: 5,
+};
+
 
 const SHIPPING_COST = 50;
 const EXTRA_DISCOUNT_PERCENTAGE = 0.10; // 10%
@@ -41,7 +57,7 @@ export default function CheckoutPage() {
     useEffect(() => {
         if (user?.addresses && user.addresses.length > 0) {
             const defaultAddress = user.addresses.find(a => a.isDefault) || user.addresses[0];
-            setSelectedAddressId(defaultAddress._id);
+            setSelectedAddressId(defaultAddress?._id);
         }
     }, [user?.addresses]);
 
@@ -81,13 +97,28 @@ export default function CheckoutPage() {
         toast.info("Placing your order...");
         
         try {
-            const itemsToOrder = cart?.items?.map(item => ({
-                productId: (item.productId as IProduct)._id,
-                quantity: item.quantity,
-                price: (item.productId as IProduct).sellingPrice,
-                color: item.color,
-                size: item.size
-            }));
+            const hasFreeGift = cartItems.some(item => (item.productId as IProduct)._id === 'free-gift-id');
+
+            const itemsToOrder = cart?.items
+              ?.filter(item => (item.productId as IProduct)?._id !== 'free-gift-id')
+              .map(item => ({
+                  productId: (item.productId as IProduct)._id,
+                  quantity: item.quantity,
+                  price: (item.productId as IProduct).sellingPrice,
+                  color: item.color,
+                  size: item.size
+              }));
+
+            if (hasFreeGift && freeGiftProduct._id) {
+                itemsToOrder?.push({
+                    productId: freeGiftProduct._id as string,
+                    quantity: 1,
+                    price: 0,
+                    color: undefined,
+                    size: undefined,
+                })
+            }
+
 
             const response = await fetch('/api/orders/place', {
                 method: 'POST',
@@ -107,10 +138,11 @@ export default function CheckoutPage() {
             if (!response.ok) {
                 throw new Error(result.message || 'Could not place order.');
             }
-
-            setCart(null);
+            
+            // The API now clears the cart, but we also clear it from client state immediately
+            setCart(null); 
             toast.success("Order placed successfully!");
-            router.push(`/dashboard/orders`);
+            router.push(`/dashboard/orders/${result.orderId}`);
 
         } catch (error: any) {
             console.error("Checkout failed", error);
@@ -120,6 +152,21 @@ export default function CheckoutPage() {
         }
     };
     
+    // Add the free gift to the display list if threshold is met
+    const displayItems = useMemo(() => {
+        const items = [...cartItems];
+        if (cartSettings.freeGiftThreshold && subtotal >= cartSettings.freeGiftThreshold && !items.some(item => (item.productId as IProduct)._id === 'free-gift-id')) {
+            items.push({
+                productId: freeGiftProduct as any,
+                quantity: 1,
+                size: undefined,
+                color: undefined,
+                product: freeGiftProduct as IProduct
+            });
+        }
+        return items;
+    }, [cartItems, subtotal, cartSettings]);
+
 
     if (authLoading || !user || !cart) {
         return <div className="flex h-screen w-full items-center justify-center"><Loader className="h-12 w-12"/></div>;
@@ -179,16 +226,24 @@ export default function CheckoutPage() {
                         </Card>
                         
                         <Card>
-                            <CardHeader><CardTitle>Order Items ({cartItems.length})</CardTitle></CardHeader>
+                            <CardHeader><CardTitle>Order Items ({displayItems.length})</CardTitle></CardHeader>
                             <CardContent className="divide-y">
-                                {cartItems.map(item => (
-                                    <div key={item.product._id} className="flex items-center gap-4 py-4 first:pt-0">
-                                        <Image src={item.product.images[0]} alt={item.product.name} width={64} height={64} className="rounded-md border object-cover" />
+                                {displayItems.map(item => (
+                                    <div key={(item.productId as IProduct)._id} className="flex items-center gap-4 py-4 first:pt-0">
+                                        {(item.productId as IProduct)._id === 'free-gift-id' ? (
+                                            <div className="w-16 h-16 rounded-md border bg-muted flex items-center justify-center">
+                                                <Gift className="w-8 h-8 text-primary"/>
+                                            </div>
+                                        ) : (
+                                            <Image src={item.product.images[0]} alt={item.product.name} width={64} height={64} className="rounded-md border object-cover" />
+                                        )}
                                         <div className="flex-grow">
                                             <p className="font-semibold">{item.product.name}</p>
                                             <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                                         </div>
-                                        <p className="font-semibold">₹{(item.product.sellingPrice * item.quantity).toLocaleString()}</p>
+                                        <p className="font-semibold">
+                                            {(item.productId as IProduct)._id === 'free-gift-id' ? 'FREE' : `₹${(item.product.sellingPrice * item.quantity).toLocaleString()}`}
+                                        </p>
                                     </div>
                                 ))}
                             </CardContent>

@@ -5,6 +5,8 @@ export interface IOrderProduct {
     productId: Types.ObjectId;
     quantity: number;
     price: number; // Price at the time of order
+    color?: string;
+    size?: string;
 }
 
 export interface IOrder extends Document {
@@ -32,6 +34,8 @@ const OrderProductSchema: Schema<IOrderProduct> = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true },
+  color: { type: String },
+  size: { type: String },
 }, { _id: false });
 
 const OrderSchema: Schema<IOrder> = new Schema({
@@ -64,7 +68,6 @@ OrderSchema.pre('save', async function(next) {
         // Generate a random 6-digit number
         const randomPart = Math.floor(100000 + Math.random() * 900000);
         this.orderId = `ORD-${randomPart}`;
-        // You could add a check here to ensure uniqueness, but for this scope, a random number is sufficient.
     }
     next();
 });

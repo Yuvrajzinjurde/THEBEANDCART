@@ -13,7 +13,7 @@ export interface IVariant extends Document {
 export interface IProduct extends Document {
   name: string;
   description: string;
-  mainImage: string;
+  mainImage?: string;
   mrp?: number;
   sellingPrice: number;
   purchasePrice?: number;
@@ -32,6 +32,8 @@ export interface IProduct extends Document {
   styleId?: string;
   sku?: string;
   variants: IVariant[];
+  size?: string; // For simple products
+  color?: string; // For simple products
 }
 
 const VariantSchema = new Schema<IVariant>(
@@ -50,7 +52,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
   {
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
-    mainImage: { type: String, required: true },
+    mainImage: { type: String },
     mrp: { type: Number, min: 0 },
     sellingPrice: { type: Number, required: true, min: 0 },
     purchasePrice: { type: Number, min: 0 },
@@ -69,6 +71,8 @@ const ProductSchema: Schema<IProduct> = new Schema(
     styleId: { type: String, index: true },
     sku: { type: String, index: true, unique: true, sparse: true },
     variants: [VariantSchema],
+    size: { type: String },
+    color: { type: String },
   },
   { timestamps: true }
 );
