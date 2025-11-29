@@ -115,7 +115,7 @@ export async function POST(req: Request) {
     }
 
     await cart.save();
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
 
     return NextResponse.json({ message: 'Hamper added to cart!', cart: populatedCart }, { status: 200 });

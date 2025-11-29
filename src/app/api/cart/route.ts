@@ -1,5 +1,4 @@
 
-
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
@@ -36,7 +35,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
 
-        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+        const cart = await Cart.findOne({ userId }).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
         if (!cart) {
             return NextResponse.json({ cart: { items: [], totalItems: 0 } }, { status: 200 });
         }
@@ -107,7 +106,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+    const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
     return NextResponse.json({ message: 'Cart updated successfully', cart: populatedCart }, { status: 200 });
   } catch (error) {
@@ -151,7 +150,7 @@ export async function DELETE(req: Request) {
         }
 
         await cart.save();
-        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size');
+        const populatedCart = await Cart.findById(cart._id).populate('items.productId', 'name images sellingPrice mrp stock storefront brand color size maxOrderQuantity');
 
         return NextResponse.json({ message: 'Product removed from cart', cart: populatedCart }, { status: 200 });
 

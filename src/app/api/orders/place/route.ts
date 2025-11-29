@@ -8,6 +8,8 @@ import Notification from '@/models/notification.model';
 import { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import Role from '@/models/role.model';
+import mongoose from 'mongoose';
 
 const OrderItemSchema = z.object({
     productId: z.string().refine(val => Types.ObjectId.isValid(val)),
@@ -23,7 +25,7 @@ const PlaceOrderSchema = z.object({
 });
 
 interface DecodedToken {
-  sub: string; // Use 'sub' for subject (user ID)
+  sub: string;
   brand: string;
 }
 
@@ -119,26 +121,30 @@ export async function POST(req: Request) {
         const adminRole = await mongoose.model('Role').findOne({ name: 'admin' });
         const admins = adminRole ? await User.find({ roles: adminRole._id }) : [];
         const adminIds = admins.map(admin => admin._id);
+        
+        const notificationPayloads = [];
+        
+        // For customer
+        notificationPayloads.push({
+            recipientUsers: [userId],
+            title: 'Order Placed!',
+            message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedTotal.toFixed(2)} has been placed successfully.`,
+            type: 'order_success',
+            link: `/dashboard/orders`,
+        });
 
-        await Notification.create([
-            // For customer
-            {
-                recipientUsers: [userId],
-                title: 'Order Placed!',
-                message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedTotal.toFixed(2)} has been placed successfully.`,
-                type: 'order_success',
-                link: `/dashboard/orders`,
-            },
-            // For admins
-            {
+        // For admins if there are any
+        if (adminIds.length > 0) {
+            notificationPayloads.push({
                 recipientUsers: adminIds,
                 title: 'New Order Received',
                 message: `A new order #${(newOrder._id as string).slice(-6)} for ₹${calculatedTotal.toFixed(2)} has been placed.`,
                 type: 'new_order_admin',
                 link: `/admin/orders`,
-            },
-        ]);
+            });
+        }
         
+        await Notification.insertMany(notificationPayloads);
 
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
