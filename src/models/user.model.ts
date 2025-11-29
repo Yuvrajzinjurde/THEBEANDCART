@@ -61,7 +61,7 @@ const AddressSchema: Schema<IAddress> = new Schema({
   country: { type: String, required: true, default: 'India' },
   isDefault: { type: Boolean, default: false },
   addressType: { type: String, required: true },
-}, { timestamps: true });
+});
 
 
 const UserSchema: Schema<IUser> = new Schema({
