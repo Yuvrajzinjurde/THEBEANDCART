@@ -130,7 +130,7 @@ export async function POST(req: Request) {
             await Notification.create({
                 recipientUsers: [userId],
                 title: 'Order Placed!',
-                message: `Your order #${(newOrder._id as string).slice(-6)} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
+                message: `Your order #${newOrder.orderId} for ₹${calculatedSubtotal.toFixed(2)} has been placed successfully.`,
                 type: 'order_success',
                 link: `/dashboard/orders`,
             });

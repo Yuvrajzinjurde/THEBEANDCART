@@ -107,12 +107,12 @@ export default function OrdersPage() {
         {orders.length > 0 ? (
           <div className="space-y-6">
             {orders.map((order) => (
-              <Card key={order._id as string} className="overflow-hidden">
-                <Link href={`/dashboard/orders/${order._id}`}>
-                    <CardHeader className="bg-muted/50 p-4">
+              <Link key={order._id as string} href={`/dashboard/orders/${order._id}`} className="block">
+                <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+                    <CardHeader className="bg-muted/30 p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div className="grid gap-1 text-sm">
-                                <p className="font-semibold text-foreground">Order ID: #{order.brand.toUpperCase()}{(order._id as string).slice(-6)}</p>
+                                <p className="font-semibold text-foreground">Order ID: #{order.orderId}</p>
                                 <p className="text-muted-foreground">Date: {format(new Date(order.createdAt), 'dd MMM, yyyy')}</p>
                             </div>
                             <div className="flex items-center gap-4">
@@ -123,7 +123,7 @@ export default function OrdersPage() {
                     </CardHeader>
                      <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex -space-x-4">
-                            {order.products.slice(0, 3).map(({ productId: product }, index) => (
+                            {order.products.slice(0, 3).map(({ productId: product }) => (
                                 <div key={product._id as string} className="relative h-14 w-14 rounded-full border-2 border-background bg-muted overflow-hidden">
                                      <Image src={product.images[0]} alt={product.name} fill className="object-cover" />
                                 </div>
@@ -136,8 +136,8 @@ export default function OrdersPage() {
                         </div>
                         <ArrowRight className="h-5 w-5 text-muted-foreground" />
                     </CardContent>
-                </Link>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (
