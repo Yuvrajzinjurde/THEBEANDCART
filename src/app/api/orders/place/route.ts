@@ -94,7 +94,8 @@ export async function POST(req: Request) {
             });
         }
         
-        if (Math.abs(calculatedTotal - totalAmount) > 0.01) { // Allow for small floating point differences
+        // Allow a small tolerance for floating point inaccuracies
+        if (Math.abs(calculatedTotal - totalAmount) > 0.01) {
             return NextResponse.json({ message: `Total amount mismatch. Please try again.` }, { status: 409 });
         }
         
@@ -144,7 +145,9 @@ export async function POST(req: Request) {
             });
         }
         
-        await Notification.insertMany(notificationPayloads);
+        if (notificationPayloads.length > 0) {
+            await Notification.insertMany(notificationPayloads);
+        }
 
         return NextResponse.json({ message: 'Order placed successfully', orderId: newOrder._id }, { status: 201 });
 
