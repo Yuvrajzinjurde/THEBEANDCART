@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import usePlatformSettingsStore from '@/stores/platform-settings-store';
-import { AddressFormDialog } from '@/components/address-form-dialog';
+import { AddressSelectionDialog } from '@/components/address-selection-dialog';
 
 
 interface PopulatedOrderProduct extends Omit<IOrderProduct, 'productId'> {
@@ -129,10 +129,10 @@ export default function OrderDetailsPage() {
     };
     
     const handleAddressSaveSuccess = () => {
-        toast.success("Address updated successfully!");
+        toast.success("Shipping address updated successfully!");
         setIsAddressModalOpen(false);
-        fetchOrderDetails(); // Re-fetch order to show updated address
-        checkUser(); // Re-fetch user to update address book in context
+        fetchOrderDetails(); 
+        checkUser(); 
     };
 
 
@@ -269,13 +269,14 @@ export default function OrderDetailsPage() {
                 </div>
             </div>
              {user && (
-                <AddressFormDialog 
+                <AddressSelectionDialog
                     isOpen={isAddressModalOpen} 
                     setIsOpen={setIsAddressModalOpen} 
-                    userId={user._id} 
+                    orderId={order._id}
                     onSaveSuccess={handleAddressSaveSuccess}
                 />
             )}
         </div>
     );
 }
+

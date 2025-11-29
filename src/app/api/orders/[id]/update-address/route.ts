@@ -67,7 +67,7 @@ export async function PATCH(
              return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
 
-        const newAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).equals(addressId));
+        const newAddress = user.addresses.find(addr => (addr._id as Types.ObjectId).toString() === addressId);
         if (!newAddress) {
             return NextResponse.json({ message: 'Selected address not found in your address book.' }, { status: 404 });
         }

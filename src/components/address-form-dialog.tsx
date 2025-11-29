@@ -107,7 +107,7 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
             if (data._id) { // Editing existing address
                 updatedAddresses = currentAddresses.map(addr => addr._id === data._id ? finalData : addr);
             } else { // Adding new address
-                updatedAddresses = [...currentAddresses, finalData];
+                 updatedAddresses = [...currentAddresses, finalData];
             }
             
             const response = await fetch(`/api/users/${userId}/profile`, {
@@ -208,3 +208,4 @@ export function AddressFormDialog({ isOpen, setIsOpen, userId, existingAddress, 
         </Dialog>
     );
 }
+
