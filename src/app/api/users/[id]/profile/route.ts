@@ -1,9 +1,25 @@
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/user.model';
 import { Types } from 'mongoose';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
+
+const addressSchema = z.object({
+  _id: z.string().optional(),
+  fullName: z.string().min(1, 'Full name is required'),
+  phone: z.string().min(1, 'Phone number is required'),
+  street: z.string().min(1, 'Street is required'),
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State is required'),
+  zip: z.string().min(1, 'ZIP code is required'),
+  country: z.string().min(1, 'Country is required'),
+  isDefault: z.boolean().optional(),
+  addressType: z.string().min(1, 'Address type is required'),
+  // We don't need customAddressType on the server, it's handled on the client
+});
+
 
 const profileUpdateSchema = z.object({
   firstName: z.string().min(1).optional(),
@@ -12,6 +28,7 @@ const profileUpdateSchema = z.object({
   displayName: z.string().optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   whatsapp: z.string().optional().or(z.literal('')),
+  addresses: z.array(addressSchema).optional(), // This is the crucial fix
   socials: z.object({
     twitter: z.string().optional().or(z.literal('')),
     facebook: z.string().optional().or(z.literal('')),
