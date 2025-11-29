@@ -54,7 +54,8 @@ export default function CheckoutPage() {
         }
     }, [authLoading, user, router]);
     
-    useEffect(() => {
+    useEffect(() =>
+        {
         if (user?.addresses && user.addresses.length > 0) {
             const defaultAddress = user.addresses.find(a => a.isDefault) || user.addresses[0];
             setSelectedAddressId(defaultAddress?._id);
@@ -241,7 +242,7 @@ export default function CheckoutPage() {
                             <CardContent className="space-y-4 text-sm">
                                 <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>₹{subtotal.toLocaleString()}</span></div>
                                 {totalDiscount > 0 && <div className="flex justify-between text-green-600 font-medium"><span>Product Savings</span><span>- ₹{totalDiscount.toLocaleString()}</span></div>}
-                                {milestoneDiscount > 0 && <div className="flex justify-between text-green-600 font-medium"><span>Milestone Discount</span><span>- ₹{milestoneDiscount.toLocaleString()}</span></div>}
+                                {milestoneDiscount > 0 && <div className="flex justify-between text-green-600 font-medium"><span>Milestone Discount</span><span>- ₹{milestoneDiscount.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span></div>}
                                 <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shipping === 0 ? <span className="font-medium text-green-600">FREE</span> : `₹${shipping.toLocaleString()}`}</span></div>
                                 <Separator />
                                 <div className="flex justify-between font-bold text-base"><span>Total Payable</span><span>₹{grandTotal.toLocaleString()}</span></div>
