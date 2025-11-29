@@ -97,27 +97,13 @@ export default function CheckoutPage() {
         toast.info("Placing your order...");
         
         try {
-            const hasFreeGift = cartItems.some(item => (item.productId as IProduct)._id === 'free-gift-id');
-
-            const itemsToOrder = cart?.items
-              ?.filter(item => (item.productId as IProduct)?._id !== 'free-gift-id')
-              .map(item => ({
-                  productId: (item.productId as IProduct)._id,
-                  quantity: item.quantity,
-                  price: (item.productId as IProduct).sellingPrice,
-                  color: item.color,
-                  size: item.size
-              }));
-
-            if (hasFreeGift && freeGiftProduct._id) {
-                itemsToOrder?.push({
-                    productId: freeGiftProduct._id as string,
-                    quantity: 1,
-                    price: 0,
-                    color: undefined,
-                    size: undefined,
-                })
-            }
+            const itemsToOrder = displayItems.map(item => ({
+                productId: (item.product as IProduct)._id,
+                quantity: item.quantity,
+                price: (item.product as IProduct).sellingPrice,
+                color: item.color,
+                size: item.size
+            }));
 
 
             const response = await fetch('/api/orders/place', {
@@ -139,7 +125,6 @@ export default function CheckoutPage() {
                 throw new Error(result.message || 'Could not place order.');
             }
             
-            // The API now clears the cart, but we also clear it from client state immediately
             setCart(null); 
             toast.success("Order placed successfully!");
             router.push(`/dashboard/orders/${result.orderId}`);

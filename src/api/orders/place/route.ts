@@ -120,7 +120,8 @@ export async function POST(req: Request) {
         // --- Create Order ---
         const itemsForOrder = items.map(item => {
             if (item.productId === 'free-gift-id') {
-                return { ...item, productId: new Types.ObjectId('66a9354045a279093079919f') }; // Use a static valid ObjectId for the gift
+                // Use a consistent, static ID for the free gift placeholder product
+                return { ...item, productId: new Types.ObjectId('66a9354045a279093079919f') }; 
             }
             return { ...item, productId: new Types.ObjectId(item.productId) }
         });
