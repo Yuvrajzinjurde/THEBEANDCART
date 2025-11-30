@@ -1,5 +1,5 @@
-
-'use server';
+// ❌ Remove this line
+// 'use server';
 
 /**
  * @fileOverview An AI agent that suggests a personalized message for a gift hamper.
@@ -13,8 +13,8 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const ProductInfoSchema = z.object({
-    name: z.string().describe('The name of the product.'),
-    description: z.string().describe('A brief description of the product.'),
+  name: z.string().describe('The name of the product.'),
+  description: z.string().describe('A brief description of the product.'),
 });
 
 export const SuggestHamperMessageInputSchema = z.object({
@@ -28,7 +28,9 @@ export const SuggestHamperMessageOutputSchema = z.object({
 });
 export type SuggestHamperMessageOutput = z.infer<typeof SuggestHamperMessageOutputSchema>;
 
-export async function suggestHamperMessage(input: SuggestHamperMessageInput): Promise<SuggestHamperMessageOutput> {
+export async function suggestHamperMessage(
+  input: SuggestHamperMessageInput
+): Promise<SuggestHamperMessageOutput> {
   return suggestHamperMessageFlow(input);
 }
 

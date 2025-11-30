@@ -85,7 +85,7 @@ export async function POST(req: Request) {
 
 // DELETE the active hamper
 export async function DELETE(req: Request) {
-    await dbConnect();
+    await                           ();
     try {
         const userId = getUserIdFromToken(req);
         if (!userId) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
