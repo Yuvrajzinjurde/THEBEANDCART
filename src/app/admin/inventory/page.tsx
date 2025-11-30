@@ -1,0 +1,486 @@
+
+
+"use client";
+
+import { useEffect, useState, useMemo, useRef } from 'react';
+import useBrandStore from '@/stores/brand-store';
+import { getProductsByBrand } from './actions';
+import type { IProduct } from '@/models/product.model';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
+import { Loader } from '@/components/ui/loader';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Info, Download, Upload, PlusCircle, ImageIcon, RefreshCw, Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import * as XLSX from 'xlsx';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+const LOW_STOCK_THRESHOLD = 10;
+
+const TableSkeleton = () => (
+    <div className="border rounded-md">
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    {[...Array(6)].map((_, i) => <TableHead key={i}><Skeleton className="h-5 w-20" /></TableHead>)}
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {[...Array(10)].map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-16 w-16 rounded-md" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-10" /></TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    </div>
+);
+
+
+export default function InventoryPage() {
+    const { selectedBrand } = useBrandStore();
+    const [allProducts, setAllProducts] = useState<IProduct[]>([]);
+    const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [isSeeding, setIsSeeding] = useState(false);
+    
+    const [activeTab, setActiveTab] = useState('all');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [sortOption, setSortOption] = useState('estimated-orders-desc');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isUpdating, setIsUpdating] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const router = useRouter();
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const fetchedProducts = await getProductsByBrand(selectedBrand);
+            setAllProducts(fetchedProducts);
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch products');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, [selectedBrand]);
+
+    const { stockCounts, uniqueCategories } = useMemo(() => {
+        const outOfStock = allProducts.filter(p => p.stock === 0).length;
+        const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length;
+        const categories = new Set(allProducts.flatMap(p => Array.isArray(p.category) ? p.category : [p.category]));
+        return {
+            stockCounts: {
+                all: allProducts.length,
+                outOfStock,
+                lowStock,
+            },
+            uniqueCategories: ['all', ...Array.from(categories)],
+        };
+    }, [allProducts]);
+
+    useEffect(() => {
+        let productsToDisplay = [...allProducts];
+
+        // Search filter
+        if (searchQuery) {
+            productsToDisplay = productsToDisplay.filter(p =>
+                p.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        // Tab filter
+        if (activeTab === 'out-of-stock') {
+            productsToDisplay = productsToDisplay.filter(p => p.stock === 0);
+        } else if (activeTab === 'low-stock') {
+            productsToDisplay = productsToDisplay.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+        }
+
+        // Category filter
+        if (categoryFilter !== 'all') {
+            productsToDisplay = productsToDisplay.filter(p => Array.isArray(p.category) ? p.category.includes(categoryFilter) : p.category === categoryFilter);
+        }
+
+        // Sorting
+        if (sortOption === 'stock-asc') {
+            productsToDisplay.sort((a, b) => a.stock - b.stock);
+        } else if (sortOption === 'estimated-orders-desc') {
+            // Placeholder: sort by highest stock as a proxy
+            productsToDisplay.sort((a, b) => b.stock - a.stock);
+        }
+        
+        setFilteredProducts(productsToDisplay);
+    }, [activeTab, categoryFilter, sortOption, searchQuery, allProducts]);
+
+    const handleSeedData = async () => {
+        setIsSeeding(true);
+        toast.info("Seeding database... This might take a moment.");
+        try {
+          const response = await fetch('/api/seed', { method: 'POST' });
+          const result = await response.json();
+          if (response.ok) {
+            toast.success(result.message);
+            await fetchProducts(); // Re-fetch products after seeding
+          } else {
+            // Use the detailed error message from the API response
+            throw new Error(result.error || result.message || 'An unknown error occurred during seeding.');
+          }
+        } catch (error: any) {
+          toast.error(error.message);
+          console.error("Seeding Error:", error);
+        } finally {
+          setIsSeeding(false);
+        }
+    };
+
+    const handleDownloadTemplate = () => {
+        const data = filteredProducts.map(p => ({
+            productId: p._id,
+            productName: p.name,
+            currentStock: p.stock,
+            newStock: '' // Leave empty for user to fill
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Stock Update');
+        XLSX.writeFile(workbook, 'stock_update_template.xlsx');
+        toast.success("Template downloaded!");
+    };
+    
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsUpdating(true);
+        toast.info("Processing file...");
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            try {
+                const data = new Uint8Array(e.target?.result as ArrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json<{ productId: string, newStock: number }>(worksheet);
+
+                const updates = json
+                    .filter(row => row.productId && typeof row.newStock === 'number' && row.newStock >= 0)
+                    .map(row => ({
+                        productId: row.productId,
+                        stock: row.newStock,
+                    }));
+                
+                if (updates.length === 0) {
+                    throw new Error("No valid data to update. Check your file format.");
+                }
+
+                const response = await fetch('/api/products/bulk-update-stock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ updates }),
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.message || "Failed to update stock.");
+                }
+
+                toast.success(`${result.updatedCount} products updated successfully!`);
+                fetchProducts(); // Refresh the product list
+            } catch (error: any) {
+                toast.error(error.message);
+                console.error(error);
+            } finally {
+                setIsUpdating(false);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = ''; // Reset file input
+                }
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+    
+    const handleRowClick = (productId: string) => {
+        router.push(`/admin/inventory/edit/${productId}`);
+    };
+
+
+    const renderTable = (products: IProduct[]) => (
+        <div className="overflow-x-auto">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[80px] sm:w-[100px]">
+                            <span className="sr-only">Image</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="hidden sm:table-cell">Price</TableHead>
+                        <TableHead className="hidden md:table-cell">Stock</TableHead>
+                        <TableHead className="hidden lg:table-cell">Rating</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {products.length > 0 ? (
+                        products.map((product) => (
+                            <TableRow 
+                                key={product._id as string} 
+                                onClick={() => handleRowClick(product._id as string)}
+                                className="cursor-pointer"
+                            >
+                                <TableCell>
+                                    {(product.mainImage || product.images?.[0]) ? (
+                                        <Image
+                                            alt={product.name}
+                                            className="aspect-square rounded-md object-cover"
+                                            height="64"
+                                            src={product.mainImage || product.images[0]}
+                                            width="64"
+                                        />
+                                    ) : (
+                                        <div className="flex aspect-square h-16 w-16 items-center justify-center rounded-md bg-muted">
+                                            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                        </div>
+                                    )}
+                                </TableCell>
+                                <TableCell className="font-medium">{product.name}</TableCell>
+                                <TableCell>
+                                    <Badge 
+                                        variant={product.stock > 0 ? "default" : "destructive"}
+                                        className={cn(
+                                            "whitespace-nowrap",
+                                            product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
+                                            product.stock > LOW_STOCK_THRESHOLD && "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                                        )}
+                                    >
+                                        {product.stock === 0 ? 'Out of Stock' : product.stock <= LOW_STOCK_THRESHOLD ? 'Low Stock' : 'In Stock'}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell">
+                                    {typeof product.sellingPrice === 'number' ? `₹${product.sellingPrice.toFixed(2)}` : 'N/A'}
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                                <TableCell className="hidden lg:table-cell">{product.rating}/5</TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell colSpan={6} className="h-24 text-center">
+                                No products to display in this category.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </div>
+    );
+
+    if (loading) {
+        return (
+            <Card>
+                <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <Skeleton className="h-7 w-32" />
+                        <Skeleton className="h-5 w-48 mt-2" />
+                    </div>
+                     <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                        <Skeleton className="h-10 w-full sm:w-32" />
+                        <Skeleton className="h-10 w-full sm:w-36" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <TableSkeleton />
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (error) {
+        return (
+            <Card>
+                <CardContent className="flex flex-col items-center justify-center text-center p-12 gap-4">
+                    <CardTitle className="text-destructive">An Error Occurred</CardTitle>
+                    <CardDescription>
+                        There was a problem fetching product data. Please try again later.
+                    </CardDescription>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    if (allProducts.length === 0 && !isSeeding) {
+        return (
+            <Card>
+                <CardContent className="flex flex-col items-center justify-center text-center p-12 gap-4">
+                    <CardTitle>No Products Found</CardTitle>
+                    <CardDescription>
+                        It looks like there are no products in the database.
+                        <br/>
+                        You can seed some initial data or add products manually.
+                    </CardDescription>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Button onClick={handleSeedData} disabled={isSeeding}>
+                            {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                            Seed Products
+                        </Button>
+                         <Button asChild>
+                            <Link href="/admin/inventory/new">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add Product
+                            </Link>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    return (
+        <Card>
+            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <CardTitle>Inventory</CardTitle>
+                    <CardDescription>
+                        Showing products for: <strong>{selectedBrand}</strong>
+                    </CardDescription>
+                </div>
+                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                     <Button asChild className="w-full sm:w-auto">
+                        <Link href="/admin/inventory/new">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Product
+                        </Link>
+                    </Button>
+                     <Button variant="secondary" onClick={handleSeedData} disabled={isSeeding} className="w-full sm:w-auto">
+                        {isSeeding ? <Loader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                        Seed Products
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
+                    <div className="relative w-full md:flex-grow md:max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by product name..." 
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                     <div className="flex items-center gap-2 w-full md:w-auto">
+                        <Button
+                            variant="outline"
+                            onClick={handleDownloadTemplate}
+                            disabled={isUpdating || filteredProducts.length === 0}
+                            className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700 w-1/2 md:w-auto"
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                        </Button>
+                        <Button asChild variant="outline" className="relative cursor-pointer bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700 w-1/2 md:w-auto">
+                            <div>
+                                <Upload className="mr-2 h-4 w-4" />
+                                <span>Bulk Update</span>
+                                <input 
+                                    type="file" 
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                                    accept=".xlsx, .xls, .csv"
+                                    onChange={handleFileUpload}
+                                    ref={fileInputRef}
+                                    disabled={isUpdating}
+                                />
+                            </div>
+                        </Button>
+                    </div>
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <div className="overflow-x-auto border-b">
+                        <TabsList className="bg-transparent p-0 border-none w-max">
+                            <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">All ({stockCounts.all})</TabsTrigger>
+                            <TabsTrigger value="out-of-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">Out of Stock ({stockCounts.outOfStock})</TabsTrigger>
+                            <TabsTrigger value="low-stock" className="data-[state=active]:shadow-none data-[state=active]:border-b-2 border-b-primary rounded-none">
+                                <div className="flex items-center gap-2">
+                                    <span>Low Stock ({stockCounts.lowStock})</span>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Products with less than or equal to {LOW_STOCK_THRESHOLD} items in stock.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row items-center gap-4 py-4 px-1">
+                         <div className="flex items-center gap-2 w-full md:w-auto">
+                            <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                <SelectTrigger className="w-full md:w-[180px]">
+                                    <SelectValue placeholder="Select Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {uniqueCategories.map(category => (
+                                        <SelectItem key={category} value={category} className="capitalize">{category}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                            <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+                             <Select value={sortOption} onValueChange={setSortOption}>
+                                <SelectTrigger className="w-full md:w-[220px]">
+                                    <SelectValue placeholder="Sort by" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="estimated-orders-desc">Highest Estimated Orders</SelectItem>
+                                    <SelectItem value="stock-asc">Lowest Stock</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <TabsContent value="all" className="mt-0">
+                        {renderTable(filteredProducts)}
+                    </TabsContent>
+                     <TabsContent value="out-of-stock" className="mt-0">
+                        {renderTable(filteredProducts)}
+                    </TabsContent>
+                     <TabsContent value="low-stock" className="mt-0">
+                        {renderTable(filteredProducts)}
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+        </Card>
+    );
+
+    
+}
